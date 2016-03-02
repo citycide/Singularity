@@ -8,7 +8,9 @@ body { padding-top: 70px; }
 .navbar {
     background-color: #13a89e !important;
 }
-
+.navbar-right {
+    margin-right: -20px;
+}
 .navbar-nav > li > a {
     color: mintcream !important;
     padding: 16px 8px 0px 8px !important;
