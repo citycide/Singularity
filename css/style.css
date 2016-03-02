@@ -1,0 +1,40 @@
+/*
+	*:focus {
+	outline: none;
+}*/
+
+body { padding-top: 70px; }
+
+.navbar {
+    background-color: #13a89e !important;
+}
+
+.navbar-nav > li > a {
+    color: mintcream !important;
+    padding: 16px 8px 0px 8px !important;
+    height: 50px !important;
+}
+.navbar-nav > li > a:hover {
+    color: #363636 !important;
+}
+.navbar-brand {
+    color: mintcream !important;
+    padding: 16px 10px 0px 10px !important;
+    height: 50px !important;
+}
+.navbar-brand:hover {
+    color: #363636 !important;
+}
+.navbar {
+    min-height: 50px !important;
+}
+.navbar-nav > .active > a,
+.navbar-nav > .active > a:hover,
+.navbar-nav > .active > a:focus {
+    color: #13a89e !important;
+    background-color: #363636 !important;
+}
+.scroll {
+    overflow: auto;
+    word-wrap: break-word;
+}

@@ -1,0 +1,19 @@
+{
+	"name": "Singularity",
+	"description": "Twitch overlay & alert system",
+	"version": "0.0.1",
+	"main": "index.html",
+	"dependencies": {
+		"express": "latest"
+	},
+	"window": {
+		"width": 1200,
+		"min_width": 1200,
+		"height": 800,
+		"title": "Singularity",
+		"toolbar": true,
+		"icon": "koala.png",
+		"frame": true
+	},
+	"user-agent": "%name nw.js"
+}
