@@ -1,15 +1,10 @@
-/*
-	*:focus {
-	outline: none;
-}*/
-
 body { padding-top: 70px; }
 
 .navbar {
     background-color: #13a89e !important;
 }
 .navbar-right {
-    margin-right: -20px !important;
+    margin-right: -40px !important;
 }
 .navbar-nav > li > a {
     color: mintcream !important;
