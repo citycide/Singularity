@@ -4,7 +4,7 @@ body { padding-top: 70px; }
     background-color: #13a89e !important;
 }
 .navbar-right {
-    margin-right: -40px !important;
+    margin-right: 0px !important;
 }
 .navbar-nav > li > a {
     color: mintcream !important;
