@@ -9,7 +9,7 @@ body { padding-top: 70px; }
     background-color: #13a89e !important;
 }
 .navbar-right {
-    margin-right: -20px;
+    margin-right: -20px !important;
 }
 .navbar-nav > li > a {
     color: mintcream !important;
