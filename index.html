@@ -44,14 +44,14 @@
                                     </div>
                                     <div id="collapseFollow" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-follow">
                                         <div class="panel-body">
-                                            <form class="form-inline">
+                                            <form class="form-inline onsubmit="return false;">
                                                 <div class="form-group">
                                                     <div class="input-field col s2">
                                                         <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" name="user" class="form-control" value="citycide">
+                                                        <input type="text" id="testFollowerUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
-                                                <button type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                <button id="btnTestFollower" type="submit" class="btn btn-raised btn-primary">TEST</button>
                                             </form>
                                         </div>
                                     </div>
@@ -67,20 +67,20 @@
                                     </div>
                                     <div id="collapseHost" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-host">
                                         <div class="panel-body">
-                                            <form class="form-inline">
+                                            <form class="form-inline onsubmit="return false;">
                                                 <div class="form-group">
                                                     <div class="input-field col s2">
                                                         <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" name="user" class="form-control" value="citycide">
+                                                        <input type="text" id="testHostUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <div class="input-field col s2">
                                                         <i class="fa fa-eye fa-fw prefix"></i>
-                                                        <input type="number" name="viewers" class="form-control" value="10">
+                                                        <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">
                                                     </div>
                                                 </div>
-                                                <button type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                <button id="btnTestHost" type="submit" class="btn btn-raised btn-primary">TEST</button>
                                             </form>
                                         </div>
                                     </div>
@@ -96,20 +96,20 @@
                                     </div>
                                     <div id="collapseSub" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-subscriber">
                                         <div class="panel-body">
-                                            <form class="form-inline">
+                                            <form class="form-inline onsubmit="return false;">
                                                 <div class="form-group">
                                                     <div class="input-field col s2">
                                                         <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" name="user" class="form-control" value="citycide">
+                                                        <input type="text" id="testSubrUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <div class="input-field col s2">
                                                         <i class="fa fa-calendar fa-fw prefix"></i>
-                                                        <input type="number" name="duration" class="form-control" placeholder="# Months">
+                                                        <input type="number" id="testSubMonths" name="duration" class="form-control" placeholder="# Months">
                                                     </div>
                                                 </div>
-                                                <button type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                <button id="btnTestSub" type="submit" class="btn btn-raised btn-primary">TEST</button>
                                             </form>
                                         </div>
                                     </div>
@@ -125,26 +125,26 @@
                                     </div>
                                     <div id="collapseDonation" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-donation">
                                         <div class="panel-body">
-                                            <form class="form-inline">
+                                            <form class="form-inline onsubmit="return false;">
                                                 <div class="form-group">
                                                     <div class="input-field col s2">
                                                         <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" name="user" class="form-control" value="citycide">
+                                                        <input type="text" id="testDonationUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <div class="input-field col s2">
                                                         <i class="fa fa-dollar fa-fw prefix"></i>
-                                                        <input type="number" name="amount" class="form-control" value="10">
+                                                        <input type="number" id="testDonationAmt" name="amount" class="form-control" value="10">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <div class="input-field col s4">
                                                         <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" name="message" class="form-control" placeholder="Message">
+                                                        <input type="text" id="testDonationMsg" name="message" class="form-control" placeholder="Message">
                                                     </div>
                                                 </div>
-                                                <button type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                <button id="btnTestDonation" type="submit" class="btn btn-raised btn-primary">TEST</button>
                                             </form>
                                         </div>
                                     </div>
