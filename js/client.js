@@ -1,8 +1,17 @@
 var gui = require('nw.gui');
+var socket = io();
+
+function sendFollowTest() {
+	$("#btnTestFollower").click(function() {
+		var user = $("#testFollowerUser").val();
+		socket.emit('newFollower', user);
+		return false;
+	});
+}
 
 $('a#openAlerts').click(function() {
 	openAlerts();
-})
+});
 
 function openAlerts() {
   var winAlerts = gui.Window.open('public/index.html', {
