@@ -3,12 +3,16 @@ var queue = [],
     animating = false,
     channel = 'citycide',
     pollInterval = 7000,
-    dev = true,
+    dev = false,
     devDirection = (dev) ? 'asc' : 'desc';
 
 var tl, stage, label, opts,
     circlebgs, cir1, cir2, cir3,
     msgbgs, msg1, msg2, msg3;
+    
+socket.on('newFollower', function(user){
+  newFollower(user);
+});
 
 function initFollowers(offset) {
     offset = offset || 0;
