@@ -4,7 +4,8 @@
 	"version": "0.0.1",
 	"main": "index.html",
 	"dependencies": {
-		"express": "latest"
+		"express": "latest",
+		"socket.io": "latest"
 	},
 	"window": {
 		"width": 1200,
@@ -12,7 +13,6 @@
 		"height": 620,
 		"title": "Singularity",
 		"toolbar": true,
-		"icon": "koala.png",
 		"frame": true
 	},
 	"user-agent": "%name nw.js"
