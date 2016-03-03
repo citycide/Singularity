@@ -9,7 +9,7 @@
 	"window": {
 		"width": 1200,
 		"min_width": 1200,
-		"height": 800,
+		"height": 620,
 		"title": "Singularity",
 		"toolbar": true,
 		"icon": "koala.png",

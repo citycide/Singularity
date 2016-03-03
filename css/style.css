@@ -1,4 +1,17 @@
-body { padding-top: 70px; }
+html, body { height: 100% !important; }
+
+body {
+    padding-top: 70px !important;
+}
+
+#fullwrapper {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+}
+#bodywrapper {
+    flex: 1;
+}
 
 .navbar {
     background-color: #13a89e !important;
@@ -31,7 +44,33 @@ body { padding-top: 70px; }
     color: #13a89e !important;
     background-color: #363636 !important;
 }
+.panel-default > .panel-heading-follow {
+    color: mintcream !important;
+    background-color: #0d47a1 !important;
+}
+.panel-default > .panel-heading-host {
+    color: mintcream !important;
+    background: #f57c00 !important;
+}
+.panel-default > .panel-heading-subscriber {
+    color: mintcream !important;
+    background: #388e3c !important;
+}
+.panel-default > .panel-heading-donation {
+    color: mintcream !important;
+    background: #ef5350 !important;
+}
 .scroll {
     overflow: auto;
     word-wrap: break-word;
+}
+#footer {
+    padding-top: 12px;
+    padding-left: 40px;
+    padding-right: 40px;
+    min-height: 53px;
+    background: #13a89e;
+}
+#footer p {
+    color: mintcream;
 }
