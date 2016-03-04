@@ -16,7 +16,7 @@ socket.on('newFollower', function(user){
   newFollower(user);
 });
 
-function initFollowers(offset) {
+var initFollowers = function (offset) {
     offset = offset || 0;
 
     $.getJSON('https://api.twitch.tv/kraken/channels/'+channel+'/follows?direction='+devDirection+'&limit=100&callback=?', function(data) {
@@ -32,7 +32,7 @@ function initFollowers(offset) {
                 followers[follower.user.name] = true;
             });
 
-            if (!dev) {
+            if (dev) {
                 initFollowers(offset + 100);
             } else {
                 setTimeout(function () {
@@ -45,9 +45,9 @@ function initFollowers(offset) {
             initFollowers(offset);
         }, pollInterval);
     });
-}
+};
 
-function pollFollowers() {
+var pollFollowers = function () {
     $.getJSON('https://api.twitch.tv/kraken/channels/'+channel+'/follows?direction=desc&limit=100&callback=?', function(data) {
         if (data.follows) {
             data.follows.forEach(function(follower) {
@@ -59,23 +59,23 @@ function pollFollowers() {
             });
         }
     });
-}
+};
 
-function checkQueue() {
+var checkQueue = function () {
     if(!queue.length || animating) return;
     newFollower(queue.shift());
-}
+};
 
 var timer = false;
-function newFollower(user) {
+var newFollower = function (user) {
     animating = true;
     showAlert(user);
-}
+};
 
 var containerEl = document.getElementById('container');
 var stageEl = document.createElement('canvas');
 
-function showAlert(user) {
+var showAlert = function (user) {
     // Create the canvas element that will become the render target.
     // EaselJS calls this a "stage".
     stageEl.id = 'notification';
@@ -389,6 +389,6 @@ function showAlert(user) {
 
     // Kill time between successive notifications
     tl.to({}, 1.5, {});
-}
+};
 
 initFollowers();
