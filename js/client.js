@@ -1,21 +1,11 @@
 var gui = require('nw.gui');
-var socket = require('socket.io');
-
-function sendFollowTest() {
-    $("#btnTestFollower").click(function() {
-        var user = $("#testFollowerUser").val();
-        socket.emit('newFollower', user);
-        console.log('Sent follower test with name: ' + user);
-        return false;
-    });
-}
 
 var winAlerts;
 $('a#openAlerts').click(function() {
     winAlerts = gui.Window.open('http://localhost:2882/', {
         position: 'center',
-        width: 1280,
-        height: 720
+        width: 850,
+        height: 275
     });
 
     winAlerts.on('closed', function() {

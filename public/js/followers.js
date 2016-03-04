@@ -13,7 +13,17 @@ var tl, stage, label, opts,
     msgbgs, msg1, msg2, msg3;
     
 socket.on('newFollower', function(user){
-  newFollower(user);
+    console.log('Received new follower test with name: ' + user);
+    $.getJSON(
+        'https://api.twitch.tv/kraken/users/'+user, {},
+        function (response) {
+            if (!("name" in response)) return;
+            // var getUserName = response.name;
+            queue.push(response);
+            checkQueue();
+        }
+    ).fail(function() {});
+    // queue.push(user);
 });
 
 var initFollowers = function (offset) {
@@ -23,6 +33,7 @@ var initFollowers = function (offset) {
         'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
         {
             "direction": devDirection,
+            "client_id" : 'dnxwuiqq88xp87w7uurtyqbipprxeng',
             "limit": 100
         },
         function(data) {
@@ -37,16 +48,14 @@ var initFollowers = function (offset) {
                 data.follows.forEach(function (follower) {
                     followers[follower.user.name] = true;
                 });
-            
-            /*
-            if (dev) {
-                initFollowers(offset + 100);
-            } else {
-                setTimeout(function () {
-                    pollFollowers();
-                }, pollInterval);
-            }
-            */
+
+                if (!dev) {
+                    initFollowers(offset + 100);
+                } else {
+                    setTimeout(function () {
+                        pollFollowers();
+                    }, pollInterval);
+                }
             }
         }).fail(function() {
             setTimeout(function () {
@@ -67,7 +76,7 @@ var pollFollowers = function () {
         function (response) {
             if (!("follows" in response)) return;
             for (var i = 0; i < response.follows.length; i++) {
-                var user = response.follows[i].user.display_name;
+                var user = response.follows[i].user.name;
                 // if user is a new follower
                 if (followers.indexOf(user) == -1) {
                     queue.push(user);

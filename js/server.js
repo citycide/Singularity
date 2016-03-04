@@ -12,10 +12,6 @@ io.on('connection', function(client) {
     console.log('Client connected...');
 
     /*
-    client.on('join', function(data) {
-        console.log(data);
-    });
-
     client.on('newfollow', function(data) {
         console.log(data);
         client.broadcast.emit('newfollow', data);
@@ -42,4 +38,11 @@ app.use(express.static('./public'));
 
 server.listen(port, function() {
     console.log('listening on *:' + port);
+});
+
+$("#btnTestFollower").click(function() {
+    var user = $("#testFollowerUser").val();
+    io.emit('newFollower', user);
+    console.log('Sent follower test with name: ' + user);
+    return false;
 });
