@@ -1,5 +1,5 @@
 var gui = require('nw.gui');
-var socket = io();
+var socket = require('socket.io');
 
 function sendFollowTest() {
     $("#btnTestFollower").click(function() {
@@ -12,19 +12,20 @@ function sendFollowTest() {
 
 var winAlerts;
 $('a#openAlerts').click(function() {
-    winAlerts = gui.Window.open('public/index.html', {
+    winAlerts = gui.Window.open('http://localhost:2882/', {
         position: 'center',
         width: 1280,
         height: 720
     });
-});
 
-winAlerts.on('closed', function() {
-  winAlerts = null;
-});
+    winAlerts.on('closed', function() {
+        winAlerts = null;
+    });
 
-gui.Window.get().on('close', function() {
-  this.hide();
-  if (winAlerts != null) winAlerts.close(true);
-  this.close(true);
+    gui.Window.get().on('close', function() {
+        this.hide();
+        if (winAlerts != null) winAlerts.close(true);
+        this.close(true);
+    });
+    return false;
 });

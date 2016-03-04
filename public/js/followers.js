@@ -1,7 +1,7 @@
 var socket = io();
 
 var queue = [],
-    followers = {},
+    followers = [],
     animating = false,
     channel = 'citycide',
     pollInterval = 7000,
@@ -20,7 +20,7 @@ var initFollowers = function (offset) {
     offset = offset || 0;
 
     $.getJSON(
-        'https://api.twitch.tv/kraken/channels/'+citycide+'/follows',
+        'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
         {
             "direction": devDirection,
             "limit": 100
@@ -57,11 +57,11 @@ var initFollowers = function (offset) {
 
 var pollFollowers = function () {
     $.getJSON(
-        'https://api.twitch.tv/kraken/channels/'+citycide+'/follows',
+        'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
         {
             "direction": devDirection,
             "limit": 100,
-            "client_id" : clientid,
+            "client_id" : 'dnxwuiqq88xp87w7uurtyqbipprxeng',
             "api_version" : 3
         },
         function (response) {
@@ -252,12 +252,13 @@ var showAlert = function (user) {
     });
 
     tl.timeScale(1);
-    $('#container').mouseenter(
+    var container = $('#container');
+    container.mouseenter(
       function setPlaySpeed() {
         tl.timeScale(0.05);
       }
     );
-    $('#container').mouseleave(
+    container.mouseleave(
       function setPlaySpeed() {
         tl.timeScale(1);
       }
