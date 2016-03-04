@@ -19,19 +19,26 @@ socket.on('newFollower', function(user){
 var initFollowers = function (offset) {
     offset = offset || 0;
 
-    $.getJSON('https://api.twitch.tv/kraken/channels/'+channel+'/follows?direction='+devDirection+'&limit=100&callback=?', function(data) {
-        if (data.follows.length === 0) {
-            // initial list is empty so poll for followers
-            setTimeout(function(){
-                pollFollowers();
-            }, pollInterval);
-        }
+    $.getJSON(
+        'https://api.twitch.tv/kraken/channels/'+citycide+'/follows',
+        {
+            "direction": devDirection,
+            "limit": 100"
+        },
+        function(data) {
+            if (data.follows.length === 0) {
+                // initial list is empty so poll for followers
+                setTimeout(function(){
+                    pollFollowers();
+                }, pollInterval);
+            }
 
-        if (data.follows && data.follows.length > 0) {
-            data.follows.forEach(function (follower) {
-                followers[follower.user.name] = true;
-            });
-
+            if (data.follows && data.follows.length > 0) {
+                data.follows.forEach(function (follower) {
+                    followers[follower.user.name] = true;
+                });
+            
+            /*
             if (dev) {
                 initFollowers(offset + 100);
             } else {
@@ -39,26 +46,36 @@ var initFollowers = function (offset) {
                     pollFollowers();
                 }, pollInterval);
             }
-        }
-    }).fail(function() {
-        setTimeout(function () {
-            initFollowers(offset);
-        }, pollInterval);
-    });
+            */
+            }
+        }).fail(function() {
+            setTimeout(function () {
+                initFollowers(offset);
+            }, pollInterval);
+        });
 };
 
 var pollFollowers = function () {
-    $.getJSON('https://api.twitch.tv/kraken/channels/'+channel+'/follows?direction=desc&limit=100&callback=?', function(data) {
-        if (data.follows) {
-            data.follows.forEach(function(follower) {
-                if (!followers[follower.user.name]) {
-                    followers[follower.user.name] = true;
-                    queue.push(follower.user);
+    $.getJSON(
+        'https://api.twitch.tv/kraken/channels/'+citycide+'/follows',
+        {
+            "direction": devDirection,
+            "limit": 100,
+            "client_id" : clientid,
+            "api_version" : 3
+        },
+        function (response) {
+            if (!("follows" in response)) return;
+            for (var i = 0; i < response.follows.length; i++) {
+                var user = response.follows[i].user.display_name;
+                // if user is a new follower
+                if (followers.indexOf(user) == -1) {
+                    queue.push(user);
                     checkQueue();
                 }
-            });
+            }
         }
-    });
+    ).fail(function() {});
 };
 
 var checkQueue = function () {
