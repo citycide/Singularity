@@ -10,7 +10,7 @@
 	"window": {
 		"width": 1200,
 		"min_width": 1200,
-		"height": 620,
+		"height": 626,
 		"title": "Singularity",
 		"toolbar": true,
 		"frame": true

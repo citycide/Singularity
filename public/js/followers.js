@@ -4,9 +4,7 @@ var queue = [],
     followers = [],
     animating = false,
     channel = 'citycide',
-    pollInterval = 7000,
-    dev = false,
-    devDirection = (dev) ? 'asc' : 'desc';
+    pollInterval = 7000;
 
 var tl, stage, label, opts,
     circlebgs, cir1, cir2, cir3,
@@ -18,7 +16,6 @@ socket.on('newFollower', function(user){
         'https://api.twitch.tv/kraken/users/'+user, {},
         function (response) {
             if (!("name" in response)) return;
-            // var getUserName = response.name;
             queue.push(response);
             checkQueue();
         }
@@ -32,7 +29,6 @@ var initFollowers = function (offset) {
     $.getJSON(
         'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
         {
-            "direction": devDirection,
             "client_id" : 'dnxwuiqq88xp87w7uurtyqbipprxeng',
             "limit": 100
         },
@@ -48,14 +44,6 @@ var initFollowers = function (offset) {
                 data.follows.forEach(function (follower) {
                     followers[follower.user.name] = true;
                 });
-
-                if (!dev) {
-                    initFollowers(offset + 100);
-                } else {
-                    setTimeout(function () {
-                        pollFollowers();
-                    }, pollInterval);
-                }
             }
         }).fail(function() {
             setTimeout(function () {
@@ -68,7 +56,6 @@ var pollFollowers = function () {
     $.getJSON(
         'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
         {
-            "direction": devDirection,
             "limit": 100,
             "client_id" : 'dnxwuiqq88xp87w7uurtyqbipprxeng',
             "api_version" : 3

@@ -1,21 +1,35 @@
-var gui = require('nw.gui');
+var mainwin,
+    gui;
 
-var winAlerts;
-$('a#openAlerts').click(function() {
-    winAlerts = gui.Window.open('http://localhost:2882/', {
-        position: 'center',
-        width: 850,
-        height: 275
-    });
+$(document).ready( function() {
+    gui = require('nw.gui');
 
-    winAlerts.on('closed', function() {
-        winAlerts = null;
-    });
-
-    gui.Window.get().on('close', function() {
+    mainwin = gui.Window.get();
+    mainwin.on("close", function() {
         this.hide();
-        if (winAlerts != null) winAlerts.close(true);
+        console.log("collapsing the singularity...");
         this.close(true);
     });
-    return false;
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    var btnOpenAlerts = $('a#openAlerts');
+    btnOpenAlerts.click(function () {
+        var winAlerts = gui.Window.open('http://localhost:2882/', {
+            position: 'center',
+            width: 850,
+            height: 275
+        });
+
+        winAlerts.on('closed', function () {
+            winAlerts = null;
+        });
+
+        gui.Window.get().on('close', function () {
+            this.hide();
+            if (winAlerts != null) winAlerts.close(true);
+            this.close(true);
+        });
+        return false;
+    });
 });

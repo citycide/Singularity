@@ -20,7 +20,7 @@
                     <li><a href="#tab-about" data-toggle="tab">ABOUT</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#" id="openAlerts"><i class="fa fa-clone"></i></a></li>
+                    <li><a href="#" id="openAlerts" data-toggle="tooltip" data-placement="bottom" title="LAUNCH ALERT WINDOW"><i class="fa fa-clone"></i></a></li>
                     <li><a href="#"><i class="fa fa-question-circle"></i></a></li>
                     <li><a href="#"><i class="fa fa-plus"></i></a></li>
 
@@ -31,13 +31,13 @@
         <div id="bodywrapper">
             <div class="tab-content" id="pageContent">
                 <div class="tab-pane active fade in" id="tab-dash">
-                    <div class="container" id="test-dash">
+                    <div class="container" id="dashboard">
                         <div class="col-md-8 col-md-offset-2">
-                            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                            <div class="panel-group" role="tablist" aria-multiselectable="true">
                                 <div class="panel panel-default">
                                     <div class="panel-heading panel-heading-follow" role="tab" id="heading-follow">
                                         <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFollow" aria-expanded="false" aria-controls="collapseFollow">
+                                            <a role="button" data-toggle="collapse" href="#collapseFollow" aria-expanded="false" aria-controls="collapseFollow">
                                                 FOLLOWER
                                             </a>
                                         </h4>
@@ -60,7 +60,7 @@
                                 <div class="panel panel-default">
                                     <div class="panel-heading panel-heading-host" role="tab" id="heading-host">
                                         <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseHost" aria-expanded="false" aria-controls="collapseHost">
+                                            <a role="button" data-toggle="collapse" href="#collapseHost" aria-expanded="false" aria-controls="collapseHost">
                                                 HOST
                                             </a>
                                         </h4>
@@ -89,7 +89,7 @@
                                 <div class="panel panel-default">
                                     <div class="panel-heading panel-heading-subscriber" role="tab" id="heading-subscriber">
                                         <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSub" aria-expanded="false" aria-controls="collapseSub">
+                                            <a role="button" data-toggle="collapse" href="#collapseSub" aria-expanded="false" aria-controls="collapseSub">
                                                 SUBSCRIBER
                                             </a>
                                         </h4>
@@ -100,7 +100,7 @@
                                                 <div class="form-group">
                                                     <div class="input-field col s2">
                                                         <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" id="testSubrUser" name="user" class="form-control" value="citycide">
+                                                        <input type="text" id="testSubUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
@@ -118,7 +118,7 @@
                                 <div class="panel panel-default">
                                     <div class="panel-heading panel-heading-donation" role="tab" id="heading-donation">
                                         <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseDonation" aria-expanded="false" aria-controls="collapseDonation">
+                                            <a role="button" data-toggle="collapse" href="#collapseDonation" aria-expanded="false" aria-controls="collapseDonation">
                                                 DONATION
                                             </a>
                                         </h4>
@@ -172,7 +172,7 @@
 
         <div id="footerwrapper">
             <div id="footer" class="col-md-12">
-                <p>Developed by citycide.</p>
+                <p>Developed by <a href="http://www.twitch.tv/citycide">citycide.</a></p>
             </div>
         </div>
     </div>

@@ -1,9 +1,10 @@
+@import url(https://fonts.googleapis.com/css?family=Abel);
+
 html, body { height: 100% !important; }
 
 body {
     padding-top: 70px !important;
 }
-
 #fullwrapper {
     display: flex;
     min-height: 100%;
@@ -12,24 +13,26 @@ body {
 #bodywrapper {
     flex: 1;
 }
-
 .navbar {
     background-color: #13a89e !important;
 }
 .navbar-right {
-    margin-right: 0 !important;
+    padding-right: 10px !important;
+    margin-right: -4px !important;
 }
 .navbar-nav > li > a {
+    font-size: medium;
     color: mintcream !important;
-    padding: 16px 8px 0 8px !important;
+    padding: 14px 8px 0 8px !important;
     height: 50px !important;
 }
 .navbar-nav > li > a:hover {
     color: #363636 !important;
 }
 .navbar-brand {
+    font-family: 'Abel', sans-serif !important;
     color: mintcream !important;
-    padding: 16px 10px 0 10px !important;
+    padding: 14px 10px 0 10px !important;
     height: 50px !important;
 }
 .navbar-brand:hover {
@@ -44,22 +47,29 @@ body {
     color: #13a89e !important;
     background-color: #363636 !important;
 }
-.panel-default > .panel-heading-follow {
+.panel-default > .panel-heading-follow,
+#btnTestFollower {
     color: mintcream !important;
     background-color: #0d47a1 !important;
 }
-.panel-default > .panel-heading-host {
+.panel-default > .panel-heading-host,
+#btnTestHost {
     color: mintcream !important;
     background: #f57c00 !important;
 }
-.panel-default > .panel-heading-subscriber {
+.panel-default > .panel-heading-subscriber,
+#btnTestSub {
     color: mintcream !important;
     background: #388e3c !important;
 }
-.panel-default > .panel-heading-donation {
+.panel-default > .panel-heading-donation,
+#btnTestDonation {
     color: mintcream !important;
     background: #ef5350 !important;
 }
+.tooltip.bottom .tooltip-inner {background-color: #363636;}
+.tooltip.bottom .tooltip-arrow {border-bottom-color: #363636 !important;}
+
 .scroll {
     overflow: auto;
     word-wrap: break-word;
@@ -72,5 +82,10 @@ body {
     background: #13a89e;
 }
 #footer p {
+    margin-top: 4px;
+    font-size: 16px;
     color: mintcream;
+}
+#footer a {
+    color: beige;
 }
