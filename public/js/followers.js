@@ -23,7 +23,7 @@ var initFollowers = function (offset) {
         'https://api.twitch.tv/kraken/channels/'+citycide+'/follows',
         {
             "direction": devDirection,
-            "limit": 100"
+            "limit": 100
         },
         function(data) {
             if (data.follows.length === 0) {
