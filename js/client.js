@@ -1,10 +1,7 @@
-var mainwin,
-    gui;
-
 $(document).ready( function() {
-    gui = require('nw.gui');
+    var gui = require('nw.gui');
 
-    mainwin = gui.Window.get();
+    var mainwin = gui.Window.get();
     mainwin.on("close", function() {
         this.hide();
         console.log("collapsing the singularity...");
@@ -32,4 +29,34 @@ $(document).ready( function() {
         });
         return false;
     });
+
+    var getStreamInfo = function () {
+        var channel = 'citycide';
+        $.getJSON(
+            'https://api.twitch.tv/kraken/channels/' + channel,
+            {
+                "client_id": 'dnxwuiqq88xp87w7uurtyqbipprxeng'
+            },
+            function (data) {
+                var game = data.game;
+                var status = data.status;
+                var gameSpan = $('#streamGame');
+                var statusSpan = $('#streamTitle');
+                if (game === null || game === undefined || game === "") {
+                    gameSpan.text('<< No game set on Twitch. >>');
+                } else {
+                    gameSpan.text(game);
+                }
+                if (status === null || status === undefined || status === "") {
+                    statusSpan.text('<< No status set on Twitch. >>');
+                } else {
+                    statusSpan.text(status);
+                }
+            }).fail(function () {
+            setTimeout(function () {
+                initFollowers(offset);
+            }, pollInterval);
+        });
+    };
+    getStreamInfo();
 });

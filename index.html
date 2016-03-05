@@ -31,172 +31,172 @@
         <div id="bodywrapper">
             <div class="tab-content" id="pageContent">
                 <div class="tab-pane active fade in" id="tab-dash">
-                    <div class="container" id="dashboard">
-                        <div class="col-md-8 col-md-offset-2">
-                            <div class="panel-group" role="tablist" aria-multiselectable="true">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="panel panel-default">
-                                    <div class="panel-heading panel-heading-follow" role="tab" id="heading-follow">
-                                        <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" href="#collapseFollow" aria-expanded="false" aria-controls="collapseFollow">
-                                                FOLLOWER
-                                            </a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseFollow" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-follow">
-                                        <div class="panel-body">
-                                            <form class="form-inline" onSubmit="return false;">
-                                                <div class="form-group">
-                                                    <div class="input-field col s2">
-                                                        <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" id="testFollowerUser" name="user" class="form-control" value="citycide">
-                                                    </div>
-                                                </div>
-                                                <button id="btnTestFollower" type="submit" class="btn btn-raised btn-primary">TEST</button>
-                                            </form>
-                                        </div>
-                                    </div>
+                                    <div class="panel-body panel-follower-badge"><i class="fa fa-twitch"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
                                 </div>
-
+                            </div>
+                            <div class="col-md-6">
                                 <div class="panel panel-default">
-                                    <div class="panel-heading panel-heading-host" role="tab" id="heading-host">
-                                        <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" href="#collapseHost" aria-expanded="false" aria-controls="collapseHost">
-                                                HOST
-                                            </a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseHost" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-host">
-                                        <div class="panel-body">
-                                            <form class="form-inline" onSubmit="return false;">
-                                                <div class="form-group">
-                                                    <div class="input-field col s2">
-                                                        <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" id="testHostUser" name="user" class="form-control" value="citycide">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div class="input-field col s2">
-                                                        <i class="fa fa-eye fa-fw prefix"></i>
-                                                        <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">
-                                                    </div>
-                                                </div>
-                                                <button id="btnTestHost" type="submit" class="btn btn-raised btn-primary">TEST</button>
-                                            </form>
-                                        </div>
-                                    </div>
+                                    <div class="panel-body panel-followers-badge"><i class="fa fa-twitter"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
                                 </div>
-
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="panel panel-default">
-                                    <div class="panel-heading panel-heading-subscriber" role="tab" id="heading-subscriber">
-                                        <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" href="#collapseSub" aria-expanded="false" aria-controls="collapseSub">
-                                                SUBSCRIBER
-                                            </a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseSub" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-subscriber">
-                                        <div class="panel-body">
-                                            <form class="form-inline" onSubmit="return false;">
-                                                <div class="form-group">
-                                                    <div class="input-field col s2">
-                                                        <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" id="testSubUser" name="user" class="form-control" value="citycide">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div class="input-field col s2">
-                                                        <i class="fa fa-calendar fa-fw prefix"></i>
-                                                        <input type="number" id="testSubMonths" name="duration" class="form-control" placeholder="# Months">
-                                                    </div>
-                                                </div>
-                                                <button id="btnTestSub" type="submit" class="btn btn-raised btn-primary">TEST</button>
-                                            </form>
-                                        </div>
-                                    </div>
+                                    <div class="panel-body panel-follower-badge"><i class="fa fa-youtube-play"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
                                 </div>
-
+                            </div>
+                            <div class="col-md-6">
                                 <div class="panel panel-default">
-                                    <div class="panel-heading panel-heading-donation" role="tab" id="heading-donation">
-                                        <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" href="#collapseDonation" aria-expanded="false" aria-controls="collapseDonation">
-                                                DONATION
-                                            </a>
-                                        </h4>
-                                    </div>
-                                    <div id="collapseDonation" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-donation">
-                                        <div class="panel-body">
-                                            <form class="form-inline" onSubmit="return false;">
-                                                <div class="form-group">
-                                                    <div class="input-field col s2">
-                                                        <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" id="testDonationUser" name="user" class="form-control" value="citycide">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div class="input-field col s2">
-                                                        <i class="fa fa-dollar fa-fw prefix"></i>
-                                                        <input type="number" id="testDonationAmt" name="amount" class="form-control" value="10">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div class="input-field col s4">
-                                                        <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" id="testDonationMsg" name="message" class="form-control" placeholder="Message">
-                                                    </div>
-                                                </div>
-                                                <button id="btnTestDonation" type="submit" class="btn btn-raised btn-primary">TEST</button>
-                                            </form>
-                                        </div>
-                                    </div>
+                                    <div class="panel-body panel-followers-badge"><i class="fa fa-thumbs-up"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-body panel-follower-badge"><i class="fa fa-tag"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span id="streamTitle"></span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-body panel-follower-badge"><i class="fa fa-gamepad"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span id="streamGame"></span></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-6" id="twitchChat">
+                        <iframe frameborder='0' id='chat_embed' src="http://www.twitch.tv/citycide/chat" height='500' width='100%' scrolling='yes'></iframe>
+                    </div>
                 </div>
                 <div class="tab-pane fade" id="tab-test">
                     <div class="container" id="testing">
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-6">
+                        <div class="container" id="dashboard">
+                            <div class="col-md-8 col-md-offset-2">
+                                <div class="panel-group" role="tablist" aria-multiselectable="true">
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-twitch"></i>&nbsp;&nbsp;188</div>
+                                        <div class="panel-heading panel-heading-follow" role="tab" id="heading-follow">
+                                            <h4 class="panel-title">
+                                                <a role="button" data-toggle="collapse" href="#collapseFollow" aria-expanded="false" aria-controls="collapseFollow">
+                                                    FOLLOWER
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapseFollow" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-follow">
+                                            <div class="panel-body">
+                                                <form class="form-inline" onSubmit="return false;">
+                                                    <div class="form-group">
+                                                        <div class="input-field col s2">
+                                                            <i class="fa fa-user fa-fw prefix"></i>
+                                                            <input type="text" id="testFollowerUser" name="user" class="form-control" value="citycide">
+                                                        </div>
+                                                    </div>
+                                                    <button id="btnTestFollower" type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
+
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-followers-badge"><i class="fa fa-twitter"></i>&nbsp;&nbsp;188</div>
+                                        <div class="panel-heading panel-heading-host" role="tab" id="heading-host">
+                                            <h4 class="panel-title">
+                                                <a role="button" data-toggle="collapse" href="#collapseHost" aria-expanded="false" aria-controls="collapseHost">
+                                                    HOST
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapseHost" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-host">
+                                            <div class="panel-body">
+                                                <form class="form-inline" onSubmit="return false;">
+                                                    <div class="form-group">
+                                                        <div class="input-field col s2">
+                                                            <i class="fa fa-user fa-fw prefix"></i>
+                                                            <input type="text" id="testHostUser" name="user" class="form-control" value="citycide">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="input-field col s2">
+                                                            <i class="fa fa-eye fa-fw prefix"></i>
+                                                            <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">
+                                                        </div>
+                                                    </div>
+                                                    <button id="btnTestHost" type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading panel-heading-subscriber" role="tab" id="heading-subscriber">
+                                            <h4 class="panel-title">
+                                                <a role="button" data-toggle="collapse" href="#collapseSub" aria-expanded="false" aria-controls="collapseSub">
+                                                    SUBSCRIBER
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapseSub" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-subscriber">
+                                            <div class="panel-body">
+                                                <form class="form-inline" onSubmit="return false;">
+                                                    <div class="form-group">
+                                                        <div class="input-field col s2">
+                                                            <i class="fa fa-user fa-fw prefix"></i>
+                                                            <input type="text" id="testSubUser" name="user" class="form-control" value="citycide">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="input-field col s2">
+                                                            <i class="fa fa-calendar fa-fw prefix"></i>
+                                                            <input type="number" id="testSubMonths" name="duration" class="form-control" placeholder="# Months">
+                                                        </div>
+                                                    </div>
+                                                    <button id="btnTestSub" type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading panel-heading-donation" role="tab" id="heading-donation">
+                                            <h4 class="panel-title">
+                                                <a role="button" data-toggle="collapse" href="#collapseDonation" aria-expanded="false" aria-controls="collapseDonation">
+                                                    DONATION
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapseDonation" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-donation">
+                                            <div class="panel-body">
+                                                <form class="form-inline" onSubmit="return false;">
+                                                    <div class="form-group">
+                                                        <div class="input-field col s2">
+                                                            <i class="fa fa-user fa-fw prefix"></i>
+                                                            <input type="text" id="testDonationUser" name="user" class="form-control" value="citycide">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="input-field col s2">
+                                                            <i class="fa fa-dollar fa-fw prefix"></i>
+                                                            <input type="number" id="testDonationAmt" name="amount" class="form-control" value="10">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="input-field col s4">
+                                                            <i class="fa fa-user fa-fw prefix"></i>
+                                                            <input type="text" id="testDonationMsg" name="message" class="form-control" placeholder="Message">
+                                                        </div>
+                                                    </div>
+                                                    <button id="btnTestDonation" type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-youtube-play"></i>&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-followers-badge"><i class="fa fa-thumbs-up"></i>&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-tag"></i>&nbsp;&nbsp;STREAM TITLE</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-gamepad"></i>&nbsp;&nbsp;CURRENT GAME</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6" id="twitchChat">
-                            <iframe frameborder='0' id='chat_embed' src="http://www.twitch.tv/citycide/chat" height='500' width='100%' scrolling='yes'></iframe>
                         </div>
                     </div>
                 </div>
