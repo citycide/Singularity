@@ -1,0 +1,9 @@
+body {
+	overflow: hidden;
+}
+#container {
+	display: inline-block;
+  margin-top: 5px;
+	width: 800px;
+	height: 200px;
+}
