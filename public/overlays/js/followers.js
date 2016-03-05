@@ -1,5 +1,3 @@
-var socket = io();
-
 var queue = [],
     followers = [],
     animating = false,

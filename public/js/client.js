@@ -1,6 +1,6 @@
 $(document).ready( function() {
     var socket = io.connect('http://localhost:2882');
-
+/*
     mainwin = gui.Window.get();
     mainwin.on("close", function() {
         this.hide();
@@ -29,8 +29,9 @@ $(document).ready( function() {
         });
         return false;
     });
-
+*/
     $("#btnTestFollower").click(function() {
+        console.log('happening');
         var user = $("#testFollowerUser").val();
         socket.emit('newFollower', user);
         console.log('TEST: Sent follower test with name: ' + user + '.');

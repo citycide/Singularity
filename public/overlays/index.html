@@ -5,7 +5,14 @@
       <meta charset="UTF-8">
       <title>Follower Alerts</title>
       <link rel="stylesheet" href="css/style.css">
+      <!-- socket.io -->
       <script src="/socket.io/socket.io.js"></script>
+      <script>
+          var socket = io.connect('http://localhost:2882');
+          socket.on('connect', function(data) {
+              console.log('Connected to server.');
+          });
+      </script>
   </head>
 
   <body>

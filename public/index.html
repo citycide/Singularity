@@ -5,7 +5,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="import" href="components.html" >
+    <!-- styling -->
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <link rel="stylesheet" type="text/css" href="css/themes/paper.bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://localhost:2882');
+        socket.on('connect', function(data) {
+            console.log('Connected to server.');
+        });
+    </script>
 </head>
 <body>
     <div id="fullwrapper">
@@ -32,6 +43,53 @@
             <div class="tab-content" id="pageContent">
                 <div class="tab-pane active fade in" id="tab-dash">
                     <div class="container" id="dashboard">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body panel-follower-badge"><i class="fa fa-twitch"></i>&nbsp;&nbsp;188</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body panel-followers-badge"><i class="fa fa-twitter"></i>&nbsp;&nbsp;188</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body panel-follower-badge"><i class="fa fa-youtube-play"></i>&nbsp;&nbsp;188</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body panel-followers-badge"><i class="fa fa-thumbs-up"></i>&nbsp;&nbsp;188</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body panel-follower-badge"><i class="fa fa-tag"></i>&nbsp;&nbsp;STREAM TITLE</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body panel-follower-badge"><i class="fa fa-gamepad"></i>&nbsp;&nbsp;CURRENT GAME</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="twitchChat">
+                            <iframe frameborder='0' id='chat_embed' src="http://www.twitch.tv/citycide/chat" height='500' width='100%' scrolling='yes'></iframe>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="tab-test">
+                    <div class="container" id="testing">
                         <div class="col-md-8 col-md-offset-2">
                             <div class="panel-group" role="tablist" aria-multiselectable="true">
                                 <div class="panel panel-default">
@@ -153,53 +211,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="tab-test">
-                    <div class="container" id="testing">
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-twitch"></i>&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-followers-badge"><i class="fa fa-twitter"></i>&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-youtube-play"></i>&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-followers-badge"><i class="fa fa-thumbs-up"></i>&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-tag"></i>&nbsp;&nbsp;STREAM TITLE</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-gamepad"></i>&nbsp;&nbsp;CURRENT GAME</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6" id="twitchChat">
-                            <iframe frameborder='0' id='chat_embed' src="http://www.twitch.tv/citycide/chat" height='500' width='100%' scrolling='yes'></iframe>
-                        </div>
-                    </div>
-                </div>
                 <div class="tab-pane fade" id="tab-about">
                     <div class="container" id="about">
                         <div class="panel panel-default">
@@ -218,5 +229,10 @@
             </div>
         </div>
     </div>
+
+    <!-- scripts -->
+    <script src="js/jquery-2.2.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/client.js"></script>
 </body>
 </html>
