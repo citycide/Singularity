@@ -9,14 +9,13 @@
     <link rel="stylesheet" type="text/css" href="css/style.css" />
     <link rel="stylesheet" type="text/css" href="css/themes/paper.bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+    <!-- scripts -->
+    <script src="js/jquery-2.2.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <!-- socket.io -->
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io.connect('http://localhost:2882');
-        socket.on('connect', function(data) {
-            console.log('Connected to server.');
-        });
-    </script>
+    <!-- client.js -->
+    <script src="js/client.js"></script>
 </head>
 <body>
     <div id="fullwrapper">
@@ -26,59 +25,61 @@
                     <span>SINGULARITY</span>
                 </span>
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="#tab-dash" data-toggle="tab">DASHBOARD</a></li>
-                    <li><a href="#tab-test" data-toggle="tab">TESTING</a></li>
+                    <li><a href="#tab-dash" data-toggle="tab">DASHBOARD</a></li>
+                    <li class="active"><a href="#tab-test" data-toggle="tab">TESTING</a></li>
                     <li><a href="#tab-about" data-toggle="tab">ABOUT</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="#" id="openAlerts" data-toggle="tooltip" data-placement="bottom" title="LAUNCH ALERT WINDOW"><i class="fa fa-clone"></i></a></li>
-                    <li><a href="#"><i class="fa fa-question-circle"></i></a></li>
-                    <li><a href="#"><i class="fa fa-plus"></i></a></li>
-
+                    <li><a href="#" id="openHelpModal" data-toggle="tooltip" data-placement="bottom" title="HELP"><i class="fa fa-question-circle"></i></a></li>
+                    <li><a href="#" id="winRefresh" data-toggle="tooltip" data-placement="bottom" title="REFRESH"><i class="fa fa-refresh"></i></a></li>
+                    <li><a href="#" id="winMinimize" data-toggle="tooltip" data-placement="bottom" title="MINIMIZE"><i class="fa fa-minus"></i></a></li>
+                    <li><a href="#" id="winMaximize" data-toggle="tooltip" data-placement="bottom" title="MAXIMIZE"><i class="fa fa-square-o"></i></a></li>
+                    <li><a href="#" id="winClose" data-toggle="tooltip" data-placement="bottom" title="CLOSE"><i class="fa fa-times"></i></a></li>
                 </ul>
             </div>
         </nav>
 
         <div id="bodywrapper">
             <div class="tab-content" id="pageContent">
-                <div class="tab-pane active fade in" id="tab-dash">
+                <div class="tab-pane fade" id="tab-dash">
                     <div class="container" id="dashboard">
                         <div class="col-md-6">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-twitch"></i>&nbsp;&nbsp;188</div>
+                                        <div class="panel-body panel-follower-badge"><i class="fa fa-twitch"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span id="badgeFollow"></span></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-followers-badge"><i class="fa fa-twitter"></i>&nbsp;&nbsp;188</div>
+                                        <div class="panel-body panel-twitter-badge"><i class="fa fa-twitter"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-youtube-play"></i>&nbsp;&nbsp;188</div>
+                                        <div class="panel-body panel-youtube-badge"><i class="fa fa-youtube-play"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-followers-badge"><i class="fa fa-thumbs-up"></i>&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-tag"></i>&nbsp;&nbsp;STREAM TITLE</div>
+                                        <div class="panel-body panel-wtf-badge"><i class="fa fa-thumbs-up"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-gamepad"></i>&nbsp;&nbsp;CURRENT GAME</div>
+                                        <div class="panel-body panel-stream-title"><i class="fa fa-tag"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span id="streamTitle"></span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body panel-stream-game"><i class="fa fa-gamepad"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span id="streamGame"></span></div>
                                     </div>
                                 </div>
                             </div>
@@ -88,7 +89,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="tab-test">
+                <div class="tab-pane active fade in" id="tab-test">
                     <div class="container" id="testing">
                         <div class="col-md-8 col-md-offset-2">
                             <div class="panel-group" role="tablist" aria-multiselectable="true">
@@ -229,10 +230,5 @@
             </div>
         </div>
     </div>
-
-    <!-- scripts -->
-    <script src="js/jquery-2.2.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/client.js"></script>
 </body>
 </html>

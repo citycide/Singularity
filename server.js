@@ -1,37 +1,24 @@
-var port = 2882;
-
-var app = require('express')();
+var express = require('express');
+var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
-server.listen(port, function() {
-    console.log('listening on *:' + port);
+var port = process.env.PORT || 2016;
+
+app.use(express.static(__dirname + "/public"));
+
+server.listen(port, function(){
+    console.log('SYS: listening on *:' + port);
 });
 
-app.use(express.static('./public'));
+io.on('connection', function(socket){
+    console.log('SYS: Client connected.');
 
-io.on('connection', function(client) {
+    socket.on('disconnect', function(){
+        console.log('SYS: Client disconnected');
+    });
 
-    console.log('Client connected...');
-
-    client.on('newFollower', function(data) {
-        console.log(data);
-        client.emit('newfollow', data);
-    });
-    client.on('newhoster', function(data) {
-        console.log(data);
-        client.emit('newhoster', data);
-    });
-    client.on('newdonation', function(data) {
-        console.log(data);
-        client.emit('newdonation', data);
-    });
-    client.on('newsubscriber', function(data) {
-        console.log(data);
-        client.emit('newsubscriber', data);
-    });
-    client.on('resubscriber', function(data) {
-        console.log(data);
-        client.emit('resubscriber', data);
+    socket.on('newFollower', function(data){
+        console.log('Received follower test.');
     });
 });

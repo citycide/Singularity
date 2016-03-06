@@ -14,6 +14,7 @@ body {
     flex: 1;
 }
 .navbar {
+    -webkit-app-region: drag;
     background-color: #13a89e !important;
 }
 .navbar-right {
@@ -21,6 +22,7 @@ body {
     margin-right: -4px !important;
 }
 .navbar-nav > li > a {
+    -webkit-app-region: no-drag;
     font-size: medium;
     color: mintcream !important;
     padding: 14px 8px 0 8px !important;
@@ -30,6 +32,7 @@ body {
     color: #363636 !important;
 }
 .navbar-brand {
+    -webkit-app-region: no-drag;
     font-family: 'Abel', sans-serif !important;
     color: mintcream !important;
     padding: 14px 10px 0 10px !important;
@@ -46,6 +49,9 @@ body {
 .navbar-nav > .active > a:focus {
     color: #13a89e !important;
     background-color: #363636 !important;
+}
+#winClose {
+    margin-top: -1.5px;
 }
 .panel-default > .panel-heading-follow,
 #btnTestFollower {

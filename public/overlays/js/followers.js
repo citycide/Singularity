@@ -1,3 +1,8 @@
+"use strict";
+
+var socket;
+socket = io.connect('http://localhost:2016');
+
 var queue = [],
     followers = [],
     animating = false,
@@ -10,16 +15,24 @@ var tl, stage, label, opts,
     
 socket.on('newFollower', function(user){
     console.log('Received new follower test with name: ' + user);
+    resolveUser(user);
+    // queue.push(user);
+});
+
+var resolveUser = function (user) {
     $.getJSON(
-        'https://api.twitch.tv/kraken/users/'+user, {},
+        'https://api.twitch.tv/kraken/users/' + user,
+        {
+            "client_id": 'dnxwuiqq88xp87w7uurtyqbipprxeng'
+        },
         function (response) {
             if (!("name" in response)) return;
             queue.push(response);
             checkQueue();
         }
-    ).fail(function() {});
-    // queue.push(user);
-});
+    ).fail(function () {
+    });
+};
 
 var initFollowers = function (offset) {
     offset = offset || 0;

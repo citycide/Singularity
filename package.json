@@ -3,17 +3,19 @@
   "description": "Twitch overlay & alert system",
   "version": "0.0.1",
   "main": "index.html",
-  "dependencies": {
-    "express": "latest",
-    "socket.io": "latest"
-  },
   "window": {
-    "width": 1200,
-    "min_width": 1200,
-    "height": 626,
     "title": "Singularity",
-    "toolbar": true,
-    "frame": true
+    "toolbar": false,
+    "frame": false,
+    "fullscreen": false,
+    "min_width": 1200,
+    "width": 1200,
+    "height": 685
   },
-  "user-agent": "%name nw.js"
+  "node-remote": "http://localhost",
+  "dependencies": {
+    "express": "4.x",
+    "nedb": "1.x",
+    "socket.io": "latest"
+  }
 }
