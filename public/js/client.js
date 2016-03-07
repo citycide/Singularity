@@ -1,7 +1,8 @@
 $(document).ready( function() {
     var gui = require('nw.gui');
     var win = gui.Window.get();
-    var socket;
+    var socket = io();
+    /*
     var location = window.location;
     console.log(location);
     if(location === "http://localhost:2016/") {
@@ -9,6 +10,7 @@ $(document).ready( function() {
     } else {
         socket = io.connect();
     }
+    */
 
     var log = function (msg, type) {
         if (type) {
@@ -25,7 +27,10 @@ $(document).ready( function() {
         }
     };
 
+    socket.emit('thisWorking', 'yes');
+
     $('[data-toggle="tooltip"]').tooltip();
+    $('[data-tooltip="tooltip"]').tooltip();
 
     var getStreamInfo = function () {
         var channel = 'citycide';

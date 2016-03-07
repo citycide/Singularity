@@ -31,7 +31,9 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="#" id="openAlerts" data-toggle="tooltip" data-placement="bottom" title="LAUNCH ALERT WINDOW"><i class="fa fa-clone"></i></a></li>
-                    <li><a href="#" id="openHelpModal" data-toggle="tooltip" data-placement="bottom" title="HELP"><i class="fa fa-question-circle"></i></a></li>
+                    <li data-toggle="modal" data-target="#helpModal">
+                        <a href="#" id="openHelpModal" data-toggle="tooltip" data-placement="bottom" title="HELP"><i class="fa fa-question-circle"></i></a>
+                    </li>
                     <li><a href="#" id="winRefresh" data-toggle="tooltip" data-placement="bottom" title="REFRESH"><i class="fa fa-refresh"></i></a></li>
                     <li><a href="#" id="winMinimize" data-toggle="tooltip" data-placement="bottom" title="MINIMIZE"><i class="fa fa-minus"></i></a></li>
                     <li><a href="#" id="winMaximize" data-toggle="tooltip" data-placement="bottom" title="MAXIMIZE"><i class="fa fa-square-o"></i></a></li>
@@ -229,6 +231,41 @@
                 <p>Developed by <a href="http://www.twitch.tv/citycide">citycide.</a></p>
             </div>
         </div>
+
+        <!-- Modal -->
+        <div id="helpModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">CROSSING THE EVENT HORIZON</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            <strong>SINGULARITY</strong> is named for its intent to be a self-contained dashboard, alerts, and overlay
+                            system for Twitch broadcasters.
+                        </p>
+                        <p>
+                            The <strong>DASHBOARD</strong> contains the typical information you see on Twitch's stock dashboard, but
+                            also adds useful information such as Twitter followers, YouTube subscribers, and more.
+                        </p>
+                        <p>
+                            You can use the <strong>TESTING</strong> page to send test alerts to your overlay.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
+
+    <!-- unused FAB -->
+    <!-- <button type="button" class="btn btn-circle"><i class="fa fa-twitch"></i></button> -->
+
 </body>
 </html>

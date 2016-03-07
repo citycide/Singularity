@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>singularity - Twitch Login</title>
+</head>
+<body>
+    <!-- Login box -->
+    <div class="wrapper">
+        <form class="form-signin" action="/index" method="POST">
+            <h2 class="form-signin-heading">Login to use SINGULARIY</h2>
+            <input type="text" class="form-control" name="username" placeholder="Name" required="" autofocus="" />
+
+            <input type="password" class="form-control" name="password" placeholder="Password" required=""/>
+            <div class="checkbox">
+                <label class="checkbox">
+                    <input type="checkbox" value="remember-me" id="rememberMe" name="rememberMe">Remember me
+                </label>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+
+            <button><img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" class="twitch-connect" href="#" /></button>
+        </form>
+    </div>
+</body>
+</html>
