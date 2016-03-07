@@ -1,27 +1,39 @@
+var config = require('./config');
+
 var express = require('express');
 var ejs = require('ejs');
 var passport = require("passport");
 var twitchStrategy = require("passport-twitch").Strategy;
+var nedb = require('nedb');
+var fs = require('fs');
+var path = require('path');
+
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+
+app.use(passport.initialize());
+app.use(express.static(__dirname + "/public"));
+app.set('views', __dirname + '/public');
+app.set('view engine', 'ejs');
 
 var home = require('./public/index');
 var login = require('./public/login');
 var overlay = require('./public/overlays/index');
 
-app.use(express.static(__dirname + "/public"));
-app.set('views', __dirname + '/public');
-app.set('view engine', 'ejs');
-
 app.use('/', home);
 app.use('/login', login);
 app.use('/overlays', overlay);
 
-var port = process.env.PORT || 2016;
+var db = {};
+db.users = new nedb({ filename: './db/users.db', autoload: true });
+// db.events = new nedb({ filename: path.join(gui.App.dataPath, 'events.db') });
 
-server.listen(port, function(){
-    console.log('SYS: listening on *:' + port);
+db.users.loadDatabase();
+// db.events.loadDatabase();
+
+server.listen(config.port, function(){
+    console.log('SYS: listening on *:' + config.port);
 });
 
 io.on('connection', function(socket){
@@ -37,14 +49,30 @@ io.on('connection', function(socket){
     });
 });
 
-app.use(passport.initialize());
+passport.use(new twitchStrategy({
+        clientID: config.clientID,
+        clientSecret: config.clientSecret,
+        callbackURL: "http://localhost:" + config.port + "/auth/twitch/callback",
+        scope: "user_read"
+    },
+    function(accessToken, refreshToken, profile, done) {
+        db.users.update({
+            twitchId: profile.id,
+            displayName: profile.displayName
+        }, { $inc: { score: 1 } },
+            { upsert: true },
+            function (err, user) {
+                return done(err, user);
+            });
+    }
+));
 
-passport.serializeUser(function (user, callback) {
-    callback(null, user);
+passport.serializeUser(function (user, done) {
+    done(null, user);
 });
 
-passport.deserializeUser(function (user, callback) {
-    callback(null, user);
+passport.deserializeUser(function (user, done) {
+    done(null, user);
 });
 
 function verifyAuthenticated(req, res, next) {
@@ -55,11 +83,31 @@ function verifyAuthenticated(req, res, next) {
     }
 }
 
+var fileObj, exists;
+function configExists () {
+    try {
+        fileObj = fs.statSync('./config.js');
+        exists = true;
+        // console.debug("File exists.");
+    }
+    catch (e) {
+        exists = false;
+        // console.debug("File does not exist.");
+    }
+}
+
 /*
 **  HOME PAGE
 */
 app.get('/', function (req, res) {
-    res.render('index');
+    configExists();
+    if (exists) {
+        res.render('index');
+        console.log('SYS: Directing to home page.');
+    } else {
+        res.render('setup');
+        console.log('SYS: Directing to setup page.');
+    }
     /*
     if (!req.isAuthenticated()) {
         res.redirect('login');
@@ -72,19 +120,36 @@ app.get('/', function (req, res) {
 });
 
 /*
-**  LOGIN
+**  ACCOUNTS / LOGIN / LOGOUT
 */
 app.get('/login', function (req, res) {
     res.render('login');
 });
 
-app.post('/login', passport.authenticate('local'), function (req, res) {
-    res.redirect('/');
-});
+app.get("/auth/twitch", passport.authenticate("twitch"));
+app.get("/auth/twitch/callback", passport.authenticate("twitch", {
+    successRedirect: "/",
+    failureRedirect: "/login"
+}));
 
 app.get('/logout', function (req, res) {
     req.logout();
     res.redirect('/');
+});
+
+/*
+**  OVERLAY
+*/
+app.get('/overlays', function (req, res) {
+    res.render('overlays');
+});
+
+
+/*
+**  APP SETUP PAGE
+*/
+app.get('/setup', function (req, res) {
+    res.render('setup');
 });
 
 module.exports = app;

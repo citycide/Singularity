@@ -2,15 +2,6 @@ $(document).ready( function() {
     var gui = require('nw.gui');
     var win = gui.Window.get();
     var socket = io();
-    /*
-    var location = window.location;
-    console.log(location);
-    if(location === "http://localhost:2016/") {
-        socket = io("http://localhost:2016");
-    } else {
-        socket = io.connect();
-    }
-    */
 
     var log = function (msg, type) {
         if (type) {
@@ -78,8 +69,8 @@ $(document).ready( function() {
         var winAlerts = gui.Window.open('http://localhost:2016/overlays', {
             position: 'center',
             focus: true,
-            width: 850,
-            height: 275
+            width: 780,
+            height: 250
         });
         winAlerts.on ('loaded', function(){
             log('SYS: Opened alerts window.');

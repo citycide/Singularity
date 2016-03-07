@@ -114,9 +114,9 @@ var showAlert = function (user) {
     var minRadius = midRadius - 5;
     var hCenter = stageEl.width / 2;
     var vCenter = stageEl.height / 2;
-    var SLANT = 40;
+    var SLANT = 100;
     var maxX = stageEl.width - SLANT;
-    var maxY = stageEl.height / 2.25;
+    var maxY = stageEl.height / 2.5;
     var vPos = Math.floor((200 - maxY) / 2);
 
     // Create the stage on the target canvas, and create a ticker that will render at 60 fps.
@@ -141,7 +141,8 @@ var showAlert = function (user) {
                 .beginFill(msgbg.color)
                 .moveTo(baseX, 0)
                 .lineTo(-baseX, 0)
-                .lineTo(-tipX, maxY / 2)
+                // .lineTo(-tipX, maxY / 2)
+                .lineTo(-tipX, 0)
                 .lineTo(-baseX, maxY)
                 .lineTo(baseX, maxY)
                 .closePath();
@@ -203,34 +204,34 @@ var showAlert = function (user) {
     // Create the three message boxes
     msg3 = new createjs.Shape();
     msg3.name = 'msg3';
-    msg3.x = hCenter + 30;
+    msg3.x = hCenter - 25;
     msg3.y = vPos;
-    msg3.maxWidth = 670;
+    msg3.maxWidth = 685;
     msg3.width = 0;
     msgContainer.addChild(msg3);
 
     msg2 = new createjs.Shape();
     msg2.name = 'msg2';
-    msg2.x = msg3.x - 10;
+    msg2.x = msg3.x - 8;
     msg2.y = vPos;
-    msg2.maxWidth = msg3.maxWidth - 5;
+    msg2.maxWidth = msg3.maxWidth - 4;
     msg2.width = 0;
     msgContainer.addChild(msg2);
 
     msg1 = new createjs.Shape();
     msg1.name = 'msg1';
-    msg1.x = msg2.x - 10;
+    msg1.x = msg2.x - 8;
     msg1.y = vPos;
-    msg1.maxWidth = msg2.maxWidth - 5;
+    msg1.maxWidth = msg2.maxWidth - 4;
     msg1.width = 0;
     msgContainer.addChild(msg1);
 
     // Create the text element
-    label = new createjs.Text(' ', '600 40px arial', '#F7F2E8');
-    label.x = hCenter + 25;
+    label = new createjs.Text(' ', '600 40px arial', 'mintcream');
+    label.x = hCenter - 20;
     label.showY = vCenter - 30;
     label.hideY = vCenter - 45;
-    label.y = vCenter - 45;
+    label.y = vCenter - 50;
     label.textAlign = 'center';
     label.mask = msg1;
     label.maxWidth = 600;
@@ -239,36 +240,36 @@ var showAlert = function (user) {
     // Bring bgContainer to the front
     stage.setChildIndex(bgContainer, stage.getNumChildren()-1);
 
-    // Put all the background elements into an array to make the tweens easier to write
+    // Place all the background elements into arrays to make staggered tweens easier
     circlebgs = [cir3, cir2, cir1];
     msgbgs = [msg3, msg2, msg1];
 
     // Load sounds
-    createjs.Sound.registerSound('snd/subscription.mp3', 'subscription');
-    createjs.Sound.registerSound('snd/tip.mp3', 'tip');
-    createjs.Sound.registerSound('snd/cut.mp3', 'cut');
-    createjs.Sound.registerSound('snd/out.mp3', 'out');
+    createjs.Sound.registerSound('snd/subscription.ogg', 'subscription');
+    // createjs.Sound.registerSound('snd/tip.ogg', 'tip');
+    createjs.Sound.registerSound('snd/short_whoosh2.wav', 'cut');
+    createjs.Sound.registerSound('snd/short_whoosh1.wav', 'out');
 
     // Create the timeline that will animate elements
     tl = new TimelineMax({
         autoRemoveChildren: true,
         onComplete: function () {
-                animating = false;
-                checkQueue();
+            animating = false;
+            checkQueue();
         }
     });
 
     tl.timeScale(1);
     var container = $('#container');
     container.mouseenter(
-      function setPlaySpeed() {
-        tl.timeScale(0.05);
-      }
+        function setPlaySpeed() {
+            tl.timeScale(0.05);
+        }
     );
     container.mouseleave(
-      function setPlaySpeed() {
-        tl.timeScale(1);
-      }
+        function setPlaySpeed() {
+            tl.timeScale(1);
+        }
     );
 
     // Set the variables
@@ -303,7 +304,7 @@ var showAlert = function (user) {
         }
         logo.image.src = (user.logo) ? user.logo : 'http://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_300x300.png';
         foremostBg.alpha = 0;
-        createjs.Sound.play('subscription').volume = 1;
+        createjs.Sound.play('subscription').volume = 0.65;
     }, null, null, 'npIn');
 
     circlebgs.forEach(function(circlebg) {
@@ -344,7 +345,9 @@ var showAlert = function (user) {
     // Hide first message
     tl.to(label, 0.6, {
         onStart: function() {
-            createjs.Sound.play('cut').volume = 1;
+            setTimeout(function (){
+                createjs.Sound.play('cut').volume = 0.6;
+            }, 300);
         },
         y: 300,
         ease: Elastic.easeIn.config(1, 1),
@@ -373,7 +376,7 @@ var showAlert = function (user) {
     tl.add('npOut', '+=4');
 
     tl.call(function() {
-        createjs.Sound.play('out').volume = 1;
+        createjs.Sound.play('out').volume = 0.6;
     }, null, null, 'npOut');
 
     reverseBgs.forEach(function(circlebg) {
@@ -395,7 +398,7 @@ var showAlert = function (user) {
     // Start hiding second message
     tl.to(label, 0.6, {
         onStart: function() {
-            createjs.Sound.play('cut').volume = 1;
+            // createjs.Sound.play('cut').volume = 1;
         },
         y: label.hideY,
         ease: Elastic.easeOut.config(1, 1),

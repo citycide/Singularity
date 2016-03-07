@@ -5,6 +5,7 @@
   "main": "index.html",
   "window": {
     "title": "Singularity",
+    "icon": "singularity_lg.png",
     "toolbar": false,
     "frame": false,
     "fullscreen": false,
