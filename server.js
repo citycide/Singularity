@@ -58,7 +58,8 @@ passport.use(new twitchStrategy({
     function(accessToken, refreshToken, profile, done) {
         db.users.update({
             twitchId: profile.id,
-            displayName: profile.displayName
+            displayName: profile.displayName,
+            logo: profile.logo
         }, { $inc: { score: 1 } },
             { upsert: true },
             function (err, user) {
@@ -102,21 +103,21 @@ function configExists () {
 app.get('/', function (req, res) {
     configExists();
     if (exists) {
+        /*
+        if (!req.isAuthenticated()) {
+            res.redirect('login');
+        } else {
+            res.render('index', {
+                user: req.user
+            });
+        }
+        */
         res.render('index');
         console.log('SYS: Directing to home page.');
     } else {
         res.render('setup');
         console.log('SYS: Directing to setup page.');
     }
-    /*
-    if (!req.isAuthenticated()) {
-        res.redirect('login');
-    } else {
-        res.render('index', {
-            user: req.user
-        });
-    }
-    */
 });
 
 /*
