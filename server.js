@@ -8,6 +8,7 @@ var io = require('socket.io')(server);
 
 var home = require('./public/index');
 var login = require('./public/login');
+var overlay = require('./public/overlays/index');
 
 app.use(express.static(__dirname + "/public"));
 app.set('views', __dirname + '/public');
@@ -15,6 +16,7 @@ app.set('view engine', 'ejs');
 
 app.use('/', home);
 app.use('/login', login);
+app.use('/overlays', overlay);
 
 var port = process.env.PORT || 2016;
 
@@ -30,7 +32,8 @@ io.on('connection', function(socket){
     });
 
     socket.on('newFollower', function(data){
-        console.log('Received follower test.');
+        io.emit('newFollower', data);
+        console.log('TEST: Received follower test. Forwarding...');
     });
 });
 

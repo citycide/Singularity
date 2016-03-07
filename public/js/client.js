@@ -27,8 +27,6 @@ $(document).ready( function() {
         }
     };
 
-    socket.emit('thisWorking', 'yes');
-
     $('[data-toggle="tooltip"]').tooltip();
     $('[data-tooltip="tooltip"]').tooltip();
 
