@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>singularity</title>
-  <style>
-    html {
-      background: linear-gradient(to bottom, #FFF 0%,#F9F9F9 100%);
-      min-height: 100%;
-    }
-  </style>
-  <script>
-    function bodyOnLoad(){
-      require('./server.js');
-      window.location.assign('http://localhost:2016/');
-    }
-  </script>
+    <title>singularity</title>
+    <style>
+        body {
+            background-color: #13a89e;
+            overflow: hidden;
+        }
+        .bg {
+            width:100%;
+            height:100%;
+            background:url(singularity_lg.png) center center no-repeat;
+        }
+    </style>
+    <script>
+        function bodyOnLoad(){
+          require('./server.js');
+          window.location.assign('http://localhost:2016/');
+        }
+    </script>
 </head>
 <body onload="bodyOnLoad()">
-<div class="loading"></div>
+    <div class="bg"></div>
 </body>
 </html>

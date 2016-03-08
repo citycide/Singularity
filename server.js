@@ -76,7 +76,7 @@ passport.use(new twitchStrategy({
                 function (err, user) {
                     return done(err, user);
                 });
-        }
+        });
     }
 ));
 
