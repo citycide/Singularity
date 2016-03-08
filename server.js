@@ -1,6 +1,9 @@
 var config = require('./config');
 
 var express = require('express');
+var session = require("express-session");
+var cookieParser = require("cookie-parser");
+var bodyParser = require("body-parser");
 var ejs = require('ejs');
 var passport = require("passport");
 var twitchStrategy = require("passport-twitch").Strategy;
@@ -12,6 +15,14 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(passport.session({
+	secret: config.session,
+	resave: false,
+	saveUninitialized: false
+}));
 app.use(passport.initialize());
 app.use(express.static(__dirname + "/public"));
 app.set('views', __dirname + '/public');
@@ -56,15 +67,16 @@ passport.use(new twitchStrategy({
         scope: "user_read"
     },
     function(accessToken, refreshToken, profile, done) {
-        db.users.update({
-            twitchId: profile.id,
-            displayName: profile.displayName,
-            logo: profile.logo
-        }, { $inc: { score: 1 } },
-            { upsert: true },
-            function (err, user) {
-                return done(err, user);
-            });
+        process.nextTick(function() {
+            db.users.update({
+                twitchId: profile.id,
+                displayName: profile.displayName,
+                logo: profile.logo
+            }, { upsert: true },
+                function (err, user) {
+                    return done(err, user);
+                });
+        }
     }
 ));
 
@@ -135,7 +147,7 @@ app.get("/auth/twitch/callback", passport.authenticate("twitch", {
 
 app.get('/logout', function (req, res) {
     req.logout();
-    res.redirect('/');
+    res.redirect('/login');
 });
 
 /*
@@ -152,5 +164,11 @@ app.get('/overlays', function (req, res) {
 app.get('/setup', function (req, res) {
     res.render('setup');
 });
+
+function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated())
+        return next();
+    res.redirect('/login');
+}
 
 module.exports = app;
