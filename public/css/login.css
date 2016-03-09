@@ -1,0 +1,17 @@
+@import url(https://fonts.googleapis.com/css?family=Abel);
+
+body {
+    background-color: #13a89e;
+}
+.navbar {
+    border: 0;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+body .middle {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    text-align: center;
+}

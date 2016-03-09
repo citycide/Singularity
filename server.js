@@ -1,19 +1,36 @@
 var config = require('./config');
 
+var https = require('https');
 var express = require('express');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var session = require('express-session');
+// var config = require('configstore');
 var ejs = require('ejs');
-var passport = require("passport");
-var twitchStrategy = require("passport-twitch").Strategy;
 var nedb = require('nedb');
 var fs = require('fs');
 var path = require('path');
+var passport = require('passport');
+var TwitchStrategy = require('passport-twitch').Strategy;
+
+/********************************** EXPRESS ***********************************/
 
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+var sessionConfig = {
+    secret: config.sessionSecret,
+    saveUninitialized: true,
+    cookie: {}
+};
+app.use(session(sessionConfig));
 app.use(passport.initialize());
-app.use(express.static(__dirname + "/public"));
+app.use(passport.session());
+app.use(express.static(__dirname + '/public'));
 app.set('views', __dirname + '/public');
 app.set('view engine', 'ejs');
 
@@ -25,16 +42,17 @@ app.use('/', home);
 app.use('/login', login);
 app.use('/overlays', overlay);
 
-var db = {};
-db.users = new nedb({ filename: './db/users.db', autoload: true });
-// db.events = new nedb({ filename: path.join(gui.App.dataPath, 'events.db') });
-
-db.users.loadDatabase();
-// db.events.loadDatabase();
-
 server.listen(config.port, function(){
     console.log('SYS: listening on *:' + config.port);
 });
+
+/********************************** DATABASE **********************************/
+
+// var db = {};
+// db.events = new nedb({ filename: path.join(gui.App.dataPath, 'events.db') });
+// db.events.loadDatabase();
+
+/*********************************** SOCKET ***********************************/
 
 io.on('connection', function(socket){
     console.log('SYS: Client connected.');
@@ -49,40 +67,43 @@ io.on('connection', function(socket){
     });
 });
 
-passport.use(new twitchStrategy({
-        clientID: config.clientID,
-        clientSecret: config.clientSecret,
-        callbackURL: "http://localhost:" + config.port + "/auth/twitch/callback",
-        scope: "user_read"
+/********************************** PASSPORT **********************************/
+
+passport.use(new TwitchStrategy(
+    {
+        clientID: config.client,
+        clientSecret: config.secret,
+        redirect_uri: 'http://localhost:'+config.port,
+        callbackURL: '/auth/callback',
+        scope: 'user_read'
     },
-    function(accessToken, refreshToken, profile, done) {
-        db.users.update({
-            twitchId: profile.id,
-            displayName: profile.displayName
-        }, { $inc: { score: 1 } },
-            { upsert: true },
-            function (err, user) {
-                return done(err, user);
-            });
+    function (accessToken, refreshToken, profile, done) {
+        if (err) return done(err);
+        return done(null, profile);
     }
 ));
 
-passport.serializeUser(function (user, done) {
-    done(null, user);
+passport.serializeUser(function serializeUserCallback(user, done) {
+    done(null, user)
 });
 
-passport.deserializeUser(function (user, done) {
-    done(null, user);
+passport.deserializeUser(function deserializeUserCallback(user, done) {
+    done(null, user)
 });
 
-function verifyAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        next();
+function isLoggedIn(req, res, next) {
+    if (!req.isAuthenticated()) {
+        console.log('SYS: User is authenticated.');
+        return next();
     } else {
-        res.redirect('login');
+        console.log('SYS: User needs to authenticate.');
+        res.redirect('/login');
     }
 }
 
+/*********************************** ROUTES ***********************************/
+
+// Check for the config file
 var fileObj, exists;
 function configExists () {
     try {
@@ -97,57 +118,53 @@ function configExists () {
 }
 
 /*
-**  HOME PAGE
-*/
-app.get('/', function (req, res) {
+ **  HOME PAGE
+ */
+app.get('/', isLoggedIn, function (req, res) {
     configExists();
     if (exists) {
         res.render('index');
         console.log('SYS: Directing to home page.');
     } else {
-        res.render('setup');
+        res.redirect('/setup');
         console.log('SYS: Directing to setup page.');
     }
-    /*
-    if (!req.isAuthenticated()) {
-        res.redirect('login');
-    } else {
-        res.render('index', {
-            user: req.user
-        });
-    }
-    */
 });
 
 /*
-**  ACCOUNTS / LOGIN / LOGOUT
-*/
+ **  ACCOUNTS / LOGIN / LOGOUT
+ */
 app.get('/login', function (req, res) {
     res.render('login');
 });
 
-app.get("/auth/twitch", passport.authenticate("twitch"));
-app.get("/auth/twitch/callback", passport.authenticate("twitch", {
-    successRedirect: "/",
-    failureRedirect: "/login"
-}));
+app.get('/auth', passport.authenticate("twitch"));
+app.get('/auth/callback',
+    passport.authenticate('twitch', {
+        successRedirect : 'http://localhost:'+config.port,
+        failureRedirect : '/login'
+    })
+);
 
 app.get('/logout', function (req, res) {
     req.logout();
-    res.redirect('/');
+    if (!req.isAuthenticated()) {
+        console.log('SYS: User has been logged out.');
+    }
+    res.redirect('/login');
 });
 
 /*
-**  OVERLAY
-*/
-app.get('/overlays', function (req, res) {
+ **  OVERLAY
+ */
+app.get('/overlays', isLoggedIn, function (req, res) {
     res.render('overlays');
 });
 
 
 /*
-**  APP SETUP PAGE
-*/
+ **  APP SETUP PAGE
+ */
 app.get('/setup', function (req, res) {
     res.render('setup');
 });
