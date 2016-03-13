@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>singularity</title>
+  <title>singularity - setup complete</title>
   <style>
     html {
       background-color: #13a89e;
@@ -9,10 +9,9 @@
     }
   </style>
   <script>
-      function bodyOnLoad(){
-          require('./server.js');
-          window.location.assign('http://localhost:2016');
-      }
+    function bodyOnLoad(){
+      window.location.assign('http://localhost:2016/setup#done');
+    }
   </script>
 </head>
 <body onload="bodyOnLoad()">

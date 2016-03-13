@@ -1,11 +1,11 @@
 {
   "name": "Singularity",
   "description": "Twitch overlay & alert system",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "index.html",
   "window": {
     "title": "Singularity",
-    "icon": "singularity_lg.png",
+    "icon": "./assets/singularity_lg.png",
     "toolbar": false,
     "frame": false,
     "fullscreen": false,
@@ -16,15 +16,14 @@
   "node-remote": "http://localhost",
   "dependencies": {
     "body-parser": "^1.15.0",
-    "configstore": "^2.0.0",
     "cookie-parser": "^1.4.1",
     "ejs": "^2.4.1",
     "express": "4.x",
     "express-session": "^1.13.0",
     "first-run": "^1.1.0",
     "nedb": "1.x",
-    "passport": "^0.3.2",
-    "passport-twitch": "^1.0.2",
-    "socket.io": "latest"
+    "simple-json-store": "0.0.1",
+    "socket.io": "latest",
+    "syc": "^2.0.5"
   }
 }

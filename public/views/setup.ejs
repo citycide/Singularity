@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>singularity - setup</title>
+    <!-- styling -->
+    <link rel="stylesheet" type="text/css" href="../css/themes/paper.bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../css/setup.css" />
+</head>
+<body>
+    <div id="fullwrapper">
+        <div class="loading"></div>
+
+        <nav role="navigation" class="navbar navbar-default navbar-fixed-top">
+            <div class="nav nav-wrapper">
+                <span class="navbar-brand">
+                    <span>SINGULARITY</span>
+                </span>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#" id="winRefresh" data-toggle="tooltip" data-placement="bottom" title="REFRESH"><i class="fa fa-refresh"></i></a></li>
+                    <li><a href="#" id="winMinimize" data-toggle="tooltip" data-placement="bottom" title="MINIMIZE"><i class="fa fa-minus"></i></a></li>
+                    <li><a href="#" id="winMaximize" data-toggle="tooltip" data-placement="bottom" title="MAXIMIZE"><i class="fa fa-square-o"></i></a></li>
+                    <li><a href="#" id="winClose" data-toggle="tooltip" data-placement="bottom" title="CLOSE"><i class="fa fa-times"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div id="bodywrapper">
+            <section>
+                <div class="container">
+                    <div class="row">
+                        <div class="board">
+                            <div class="board-inner">
+                                <ul class="nav nav-tabs" id="myTab">
+                                    <div class="liner"></div>
+                                        <li class="active">
+                                            <a href="#home" data-toggle="tab" title="WELCOME" class="tab-link">
+                                                <span class="round-tabs one">
+                                                    <i class="fa fa-home"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li class="disabled">
+                                            <a href="#changelog" data-toggle="tab" title="CHANGELOG" class="tab-link">
+                                                <span class="round-tabs two">
+                                                    <i class="fa fa-bullhorn"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li class="disabled">
+                                            <a href="#feedback" data-toggle="tab" title="FEEDBACK" class="tab-link">
+                                                <span class="round-tabs three">
+                                                    <i class="fa fa-comments"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li class="disabled">
+                                            <a href="#twitch" data-toggle="tab" title="CONNECT TO TWITCH" class="tab-link">
+                                                <span class="round-tabs four">
+                                                     <i class="fa fa-twitch"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li class="disabled">
+                                            <a href="#done" data-toggle="tab" title="DONE" class="tab-link">
+                                                <span class="round-tabs five">
+                                                     <i class="fa fa-check"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                </ul>
+                        </div>
+
+                        <div class="tab-content">
+                            <div class="tab-pane fade in active" id="home">
+
+                                <span class="singularity-logo">
+                                    <img src="../images/singularity_lg.png" width="128" height="128">
+                                </span>
+                                <h3 class="head text-center">WELCOME TO THE SINGULARITY</h3>
+                                <p class="narrow text-center">
+                                    Let's take care of a few things before we get started.
+                                </p>
+
+                                <form class="form-horizontal text-center" id="home_form" name="home_form" role="form">
+                                    <fieldset>
+                                        <button type="submit" href="#changelog" name="home_form" class="btn-submit btn btn-primary">START<i style="margin-left:10px;" class="fa fa-arrow-right"></i></button>
+                                    </fieldset>
+                                </form>
+
+                            </div>
+                            <div class="tab-pane fade" id="changelog">
+                                <h3 class="head text-center">CHANGELOG</h3>
+                                <p class="narrow text-center">
+                                    <ul class="narrow">
+                                        <li>This will eventually be a changelog for the app</li>
+                                        <li>I doubt I'll edit it every time I release a new version</li>
+                                        <li>It'll likely pull from somewhere rather than be standalone</li>
+                                        <li>Otherwise I'll forget.</li>
+                                    </ul>
+                                </p>
+
+                                <form class="form-horizontal text-center" id="changelog_form" name="changelog_form" role="form">
+                                    <fieldset>
+                                        <button type="submit" href="#feedback" name="changelog_form" class="btn-submit btn  btn-primary">NEXT<i style="margin-left:10px;" class="fa fa-arrow-right"></i></button>
+                                    </fieldset>
+                                </form>
+
+                            </div>
+                            <div class="tab-pane fade" id="feedback">
+                                <h3 class="head text-center">HOW'S MY CODING?</h3>
+                                <p class="narrow text-center">
+                                    Sure, sure, I made it with <i class="fa fa-heart"></i> and all, but how is it? Let me know!
+                                </p>
+
+                                <form class="form-horizontal text-center" id="feedback_form" name="feedback_form" role="form">
+                                    <fieldset>
+                                        <button type="submit" href="#twitch" name="feedback_form" class="btn-submit btn btn-primary">NEXT<i style="margin-left:10px;" class="fa fa-arrow-right"></i></button>
+                                    </fieldset>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="twitch">
+                                <h3 class="head text-center">CONNECT TO TWITCH</h3>
+                                <p class="narrow text-center">
+                                    In order to use <strong>SINGULARITY</strong>, we need you to authenticate with Twitch.
+                                    By clicking below you'll be directed to Twitch to sign in or authorize. Once complete,
+                                    Twitch will redirect you back here and we'll set everything up for you.
+                                </p>
+
+                                <form class="form-inline text-center" onsubmit="return false;">
+                                        <img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" class="twitch-connect" />
+                                </form>
+
+                                <form class="form-horizontal text-center" id="twitch_form" name="twitch_form" role="form">
+                                    <fieldset>
+                                        <button type="submit" href="#done" name="twitch_form" class="btn-submit btn btn-primary" style="visibility: hidden">NEXT<i style="margin-left:10px;" class="fa fa-arrow-right"></i></button>
+                                    </fieldset>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="done">
+                                <div class="text-center">
+                                    <i class="img-intro icon-checkmark-circle"></i>
+                                </div>
+                                <h3 class="head text-center">YOU'RE ALL SET,
+                                    <span id="authedUser">TWITCHER</span>
+                                </h3>
+                                <p class="narrow text-center">
+                                    Are you ready to cross the event horizon?
+                                </p>
+
+                                <form class="form-horizontal text-center" id="final_form" name="final_form" role="form">
+                                    <fieldset>
+                                        <button type="submit" href="" name="final_form" class="btn-submit btn-primary btn btn-xlg btn-setupComplete">LET'S GO!<i style="margin-left:10px;" class="fa fa-space-shuttle"></i></button>
+                                    </fieldset>
+                                </form>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="footerwrapper">
+        <div id="footer" class="col-md-12">
+            <p>Developed by <a href="https://www.twitch.tv/citycide">citycide.</a></p>
+        </div>
+    </div>
+
+</div>
+
+<!-- scripts -->
+    <script src="../js/jquery-2.2.1.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- more scripts -->
+    <script src="../js/setup.js"></script>
+    <script src="../js/nav.js"></script>
+    <script>
+        $('.twitch-connect').click(function (e) {
+            e.preventDefault();
+            window.location.href = 'https://api.twitch.tv/kraken/oauth2/authorize?response_type=token' +
+                                   '&client_id=41i6e4g7i1snv0lz0mbnpr75e1hyp9p' +
+                                   '&redirect_uri=http://localhost:2016/auth' +
+                                   '&scope=user_read+channel_read+channel_editor+channel_subscriptions+chat_login' +
+                                   '&force_verify=true';
+        });
+    </script>
+</body>
+</html>

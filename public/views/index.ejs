@@ -6,16 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- styling -->
-    <link rel="stylesheet" type="text/css" href="css/style.css" />
-    <link rel="stylesheet" type="text/css" href="css/themes/paper.bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
-    <!-- scripts -->
-    <script src="js/jquery-2.2.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <!-- socket.io -->
-    <script src="/socket.io/socket.io.js"></script>
-    <!-- client.js -->
-    <script src="js/client.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../css/themes/paper.bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
 </head>
 <body>
     <div id="fullwrapper">
@@ -25,8 +18,8 @@
                     <span>SINGULARITY</span>
                 </span>
                 <ul class="nav navbar-nav">
-                    <li><a href="#tab-dash" data-toggle="tab">DASHBOARD</a></li>
-                    <li class="active"><a href="#tab-test" data-toggle="tab">TESTING</a></li>
+                    <li class="active"><a href="#tab-dash" data-toggle="tab">DASHBOARD</a></li>
+                    <li><a href="#tab-test" data-toggle="tab">ALERT CONTROL</a></li>
                     <li><a href="#tab-about" data-toggle="tab">ABOUT</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -44,7 +37,7 @@
 
         <div id="bodywrapper">
             <div class="tab-content" id="pageContent">
-                <div class="tab-pane fade" id="tab-dash">
+                <div class="tab-pane active fade in" id="tab-dash">
                     <div class="container" id="dashboard">
                         <div class="col-md-6">
                             <div class="row">
@@ -91,7 +84,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane active fade in" id="tab-test">
+                <div class="tab-pane fade" id="tab-test">
                     <div class="container" id="testing">
                         <div class="col-md-8 col-md-offset-2">
                             <div class="panel-group" role="tablist" aria-multiselectable="true">
@@ -112,7 +105,7 @@
                                                         <input type="text" id="testFollowerUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
-                                                <button id="btnTestFollower" type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                <button id="btnTestFollower" type="submit" class="btn btn-raised btn-primary">SEND</button>
                                             </form>
                                         </div>
                                     </div>
@@ -141,7 +134,7 @@
                                                         <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">
                                                     </div>
                                                 </div>
-                                                <button id="btnTestHost" type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                <button id="btnTestHost" type="submit" class="btn btn-raised btn-primary">SEND</button>
                                             </form>
                                         </div>
                                     </div>
@@ -170,7 +163,7 @@
                                                         <input type="number" id="testSubMonths" name="duration" class="form-control" placeholder="# Months">
                                                     </div>
                                                 </div>
-                                                <button id="btnTestSub" type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                <button id="btnTestSub" type="submit" class="btn btn-raised btn-primary">SEND</button>
                                             </form>
                                         </div>
                                     </div>
@@ -205,7 +198,7 @@
                                                         <input type="text" id="testDonationMsg" name="message" class="form-control" placeholder="Message">
                                                     </div>
                                                 </div>
-                                                <button id="btnTestDonation" type="submit" class="btn btn-raised btn-primary">TEST</button>
+                                                <button id="btnTestDonation" type="submit" class="btn btn-raised btn-primary">SEND</button>
                                             </form>
                                         </div>
                                     </div>
@@ -228,7 +221,7 @@
 
         <div id="footerwrapper">
             <div id="footer" class="col-md-12">
-                <p>Developed by <a href="http://www.twitch.tv/citycide">citycide.</a></p>
+                <p>Developed by <a href="https://www.twitch.tv/citycide">citycide.</a></p>
             </div>
         </div>
 
@@ -266,6 +259,15 @@
 
     <!-- unused FAB -->
     <!-- <button type="button" class="btn btn-circle"><i class="fa fa-twitch"></i></button> -->
+
+    <!-- scripts -->
+    <script src="../js/jquery-2.2.1.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- others -->
+    <script src="../js/main.js"></script>
+    <script src="../js/nav.js"></script>
 
 </body>
 </html>

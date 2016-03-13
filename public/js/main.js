@@ -1,7 +1,23 @@
 $(document).ready( function() {
-    var gui = require('nw.gui');
-    var win = gui.Window.get();
     var socket = io();
+
+    var testFollowerUser = document.getElementById("testFollowerUser");
+    var testHostUser = document.getElementById("testHostUser");
+    var testSubUser = document.getElementById("testSubUser");
+    var testDonationUser = document.getElementById("testDonationUser");
+
+    var channel;
+    socket.emit('getUserInfo');
+    socket.on('setUserInfo', function (data) {
+        channel = data.user;
+        testFollowerUser.value = data.user;
+        testHostUser.value = data.user;
+        testSubUser.value = data.user;
+        testDonationUser.value = data.user;
+        document.getElementById('chat_embed').src = 'http://www.twitch.tv/' + data.user + '/chat';
+
+        getStreamInfo();
+    });
 
     var log = function (msg, type) {
         if (type) {
@@ -22,11 +38,10 @@ $(document).ready( function() {
     $('[data-tooltip="tooltip"]').tooltip();
 
     var getStreamInfo = function () {
-        var channel = 'citycide';
-        $.getJSON(
+            $.getJSON(
             'https://api.twitch.tv/kraken/channels/' + channel,
             {
-                "client_id": 'dnxwuiqq88xp87w7uurtyqbipprxeng'
+                "client_id": '41i6e4g7i1snv0lz0mbnpr75e1hyp9p'
             },
             function (data) {
                 var game = data.game;
@@ -57,61 +72,12 @@ $(document).ready( function() {
                     log('Status set to: ' + status, 'dash');
                 }
             }).fail(function () {
-            setTimeout(function () {
-                initFollowers(offset);
-            }, pollInterval);
-        });
+                setTimeout(function () {
+                    console.log('DASH: Failed to get stream info, trying again...');
+                    getStreamInfo();
+                }, 5000);
+            });
     };
-    getStreamInfo();
-
-    var btnOpenAlerts = $('a#openAlerts');
-    btnOpenAlerts.click(function() {
-        var winAlerts = gui.Window.open('http://localhost:2016/overlays', {
-            position: 'center',
-            focus: true,
-            width: 780,
-            height: 250
-        });
-        winAlerts.on ('loaded', function(){
-            log('SYS: Opened alerts window.');
-            // var document = winAlerts.window.document;
-        });
-        return false;
-    });
-
-    $("#winRefresh").click(function () {
-        win.reload();
-    });
-    $("#winMinimize").click(function () {
-        win.minimize();
-    });
-
-    var isMaximized = false;
-    win.on('maximize', function() {
-        isMaximized = true;
-        console.log('SYS: Window maximized. isMaximized set to ' + isMaximized);
-    });
-    win.on('unmaximize', function() {
-        isMaximized = false;
-        console.log('SYS: Window unmaximized. isMaximized set to ' + isMaximized);
-    }).on('restore', function() {
-        isMaximized = false;
-        console.log('SYS: Window unmaximized. isMaximized set to ' + isMaximized);
-    });
-
-    $("#winMaximize").click(function () {
-        isMaximized ? win.restore() : win.maximize();
-    });
-    $("#winClose").click(function () {
-        win.hide();
-        console.log('collapsing the singularity...');
-        win.close(true);
-        /*
-        setTimeout(function () {
-            win.close(true);
-        }, 5000);
-        */
-    });
 
     $("#btnTestFollower").click(function() {
         var user = $("#testFollowerUser").val();
