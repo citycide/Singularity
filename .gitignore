@@ -1,4 +1,16 @@
 .idea/
+
+db/
+
 nw/
+
+nw-sdk/
+
 node_modules/
+
+config/
 Singularity.lnk
+
+Singularity-Dev.lnk
+
+restructure.txt

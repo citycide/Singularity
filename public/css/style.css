@@ -1,9 +1,125 @@
+@import url(https://fonts.googleapis.com/css?family=Abel);
+
+html, body { height: 100% !important; }
+
 body {
-	overflow: hidden;
+    padding-top: 70px !important;
 }
-#container {
-	display: inline-block;
-  margin-top: 5px;
-	width: 800px;
-	height: 200px;
+#fullwrapper {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+}
+#bodywrapper {
+    flex: 1;
+}
+.navbar {
+    -webkit-app-region: drag;
+    background-color: #13a89e !important;
+}
+.navbar-right {
+    padding-right: 10px !important;
+    margin-right: -4px !important;
+}
+.navbar-nav > li > a {
+    -webkit-app-region: no-drag;
+    font-size: medium;
+    color: mintcream !important;
+    padding: 14px 8px 0 8px !important;
+    height: 50px !important;
+}
+.navbar-nav > li > a:hover {
+    color: #363636 !important;
+}
+.navbar-brand {
+    -webkit-app-region: no-drag;
+    font-family: 'Abel', sans-serif !important;
+    color: mintcream !important;
+    padding: 14px 10px 0 10px !important;
+    height: 50px !important;
+}
+.navbar-brand:hover {
+    color: #363636 !important;
+}
+.navbar {
+    min-height: 50px !important;
+}
+.navbar-nav > .active > a,
+.navbar-nav > .active > a:hover,
+.navbar-nav > .active > a:focus {
+    color: #13a89e !important;
+    background-color: #363636 !important;
+}
+#winClose {
+    margin-top: -1.5px;
+}
+.panel-default > .panel-heading-follow,
+#btnTestFollower {
+    color: mintcream !important;
+    background-color: #0d47a1 !important;
+}
+.panel-default > .panel-heading-host,
+#btnTestHost {
+    color: mintcream !important;
+    background: #f57c00 !important;
+}
+.panel-default > .panel-heading-subscriber,
+#btnTestSub {
+    color: mintcream !important;
+    background: #388e3c !important;
+}
+.panel-default > .panel-heading-donation,
+#btnTestDonation {
+    color: mintcream !important;
+    background: #ef5350 !important;
+}
+.tooltip.bottom .tooltip-inner {background-color: #363636;}
+.tooltip.bottom .tooltip-arrow {border-bottom-color: #363636 !important;}
+
+.btn.btn-circle {
+    font-size: 24px;
+    color: mintcream;
+    background-color: #6441A5;
+    position: absolute;
+    right: 10px;
+    bottom: 70px;
+    width: 65px;
+    height: 65px;
+    padding: 0;
+    border-radius: 50%;
+    -webkit-box-shadow: 0 1px 15px 0 rgba(0, 0, 0, 0.12), 0 3px 15px 0 rgba(0, 0, 0, 0.24);
+    -moz-box-shadow: 0 1px 15px 0 rgba(0, 0, 0, 0.12), 0 3px 15px 0 rgba(0, 0, 0, 0.24);
+    box-shadow: 0 1px 15px 0 rgba(0, 0, 0, 0.12), 0 3px 15px 0 rgba(0, 0, 0, 0.24);
+}
+.btn.btn-circle:hover {
+    color: mintcream;
+    -webkit-box-shadow: 0 1px 15px 0 rgba(0, 0, 0, 0.38), 0 3px 15px 0 rgba(0, 0, 0, 0.50);
+    -moz-box-shadow: 0 1px 15px 0 rgba(0, 0, 0, 0.38), 0 3px 15px 0 rgba(0, 0, 0, 0.50);
+    box-shadow: 0 1px 15px 0 rgba(0, 0, 0, 0.38), 0 3px 15px 0 rgba(0, 0, 0, 0.50);
+}
+.btn.btn-circle:focus,
+.btn.btn-circle:active,
+.btn.btn-circle.active,
+.btn.btn-circle:active:focus,
+.btn.btn-circle.active:focus {
+    outline: 0;
+}
+.scroll {
+    overflow: auto;
+    word-wrap: break-word;
+}
+#footer {
+    padding-top: 12px;
+    padding-left: 40px;
+    padding-right: 40px;
+    min-height: 53px;
+    background: #13a89e;
+}
+#footer p {
+    margin-top: 4px;
+    font-size: 16px;
+    color: mintcream;
+}
+#footer a {
+    color: beige;
 }

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>singularity - Twitch Login</title>
+    <!-- styling -->
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/themes/paper.bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/login.css" />
+    <!-- scripts -->
+    <script src="/js/jquery-2.2.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- client.js -->
+    <script src="/js/main.js"></script>
+    <script src="/js/login.js"></script>
+</head>
+<body>
+<div class = "top">
+    <nav role="navigation" class="navbar navbar-default navbar-fixed-top">
+        <div class="nav nav-wrapper">
+            <ul class="nav navbar-nav navbar-right">
+                <li data-toggle="modal" data-target="#helpModal">
+                    <a href="#" id="openHelpModal" data-toggle="tooltip" data-placement="bottom" title="HELP"><i class="fa fa-question-circle"></i></a>
+                </li>
+                <li><a href="#" id="winRefresh" data-toggle="tooltip" data-placement="bottom" title="REFRESH"><i class="fa fa-refresh"></i></a></li>
+                <li><a href="#" id="winMinimize" data-toggle="tooltip" data-placement="bottom" title="MINIMIZE"><i class="fa fa-minus"></i></a></li>
+                <li><a href="#" id="winMaximize" data-toggle="tooltip" data-placement="bottom" title="MAXIMIZE"><i class="fa fa-square-o"></i></a></li>
+                <li><a href="#" id="winClose" data-toggle="tooltip" data-placement="bottom" title="CLOSE"><i class="fa fa-times"></i></a></li>
+            </ul>
+        </div>
+    </nav>
+</div>
+<!-- Login box -->
+<div class = "middle">
+    <div class="twitch-button-container">
+        <img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" class="twitch-connect" href="#" />
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="helpModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">CROSSING THE EVENT HORIZON</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <strong>SINGULARITY</strong> is named for its intent to be a self-contained dashboard, alerts, and overlay
+                    system for Twitch broadcasters.
+                </p>
+                <p>
+                    The <strong>DASHBOARD</strong> contains the typical information you see on Twitch's stock dashboard, but
+                    also adds useful information such as Twitter followers, YouTube subscribers, and more.
+                </p>
+                <p>
+                    You can use the <strong>TESTING</strong> page to send test alerts to your overlay.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,19 +1,29 @@
 {
-	"name": "Singularity",
-	"description": "Twitch overlay & alert system",
-	"version": "0.0.1",
-	"main": "index.html",
-	"dependencies": {
-		"express": "latest",
-		"socket.io": "latest"
-	},
-	"window": {
-		"width": 1200,
-		"min_width": 1200,
-		"height": 685,
-		"title": "Singularity",
-		"toolbar": true,
-		"frame": true
-	},
-	"user-agent": "%name nw.js"
+  "name": "Singularity",
+  "description": "Twitch overlay & alert system",
+  "version": "0.0.2",
+  "main": "index.html",
+  "window": {
+    "title": "Singularity",
+    "icon": "./assets/singularity_lg.png",
+    "toolbar": false,
+    "frame": false,
+    "fullscreen": false,
+    "min_width": 1200,
+    "width": 1200,
+    "height": 685
+  },
+  "node-remote": "http://localhost",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "cookie-parser": "^1.4.1",
+    "ejs": "^2.4.1",
+    "express": "4.x",
+    "express-session": "^1.13.0",
+    "first-run": "^1.1.0",
+    "nedb": "1.x",
+    "simple-json-store": "0.0.1",
+    "socket.io": "latest",
+    "syc": "^2.0.5"
+  }
 }
