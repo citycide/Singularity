@@ -91,7 +91,10 @@ io.on('connection', function(socket){
     });
 
     socket.on('getUserInfo', function () {
-        socket.emit('setUserInfo', {user: config.get('currentUser')});
+        socket.emit('setUserInfo', {
+            user: config.get('currentUser'),
+            token: config.get('accessToken')
+        });
     });
 
     Syc.connect(socket);
@@ -121,7 +124,9 @@ app.get('/', function (req, res) {
 app.get('/dashboard', function (req, res) {
     if (config.get('setupComplete') === true) {
         if (config.get('isLoggedIn')) {
-            res.render('index');
+            res.render('index', {
+                user: config.get('currentUser')
+            });
             console.log('SYS: Directing to home page.');
         } else {
             res.redirect('/login');
@@ -142,8 +147,8 @@ app.get('/auth/callback', function (req, res) {
     if (req.query.token.length > 20) {
         config.set('accessToken', req.query.token);
         config.set('currentUser', req.query.user);
-        console.log(config.get('accessToken') + ' authed as ' + config.get('currentUser'));
         config.set('isLoggedIn', true);
+        console.log(config.get('accessToken') + ' authed as ' + config.get('currentUser'));
     }
 });
 app.get('/login', function (req, res) {
@@ -151,6 +156,8 @@ app.get('/login', function (req, res) {
 });
 app.get('/logout', function (req, res) {
     config.set('isLoggedIn', false);
+    config.del('currentUser');
+    config.del('accessToken');
     if (!config.get('isLoggedIn')) {
         console.log('SYS: User has been logged out.');
         res.redirect('/login');
@@ -162,7 +169,7 @@ app.get('/logout', function (req, res) {
  */
 app.get('/overlays', function (req, res) {
     if (config.get('isLoggedIn')) {
-        res.render('/follower');
+        res.render('overlays/follower');
     } else {
         console.log('SYS: User needs to authenticate.');
         res.redirect('/login');
@@ -176,6 +183,7 @@ app.get('/setup', function (req, res) {
     if (!config.get('setupComplete')) {
         res.render('setup');
     } else {
+        console.log('SYS: Setup already complete, directing to home page.');
         res.redirect('/')
     }
 });

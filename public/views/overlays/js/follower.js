@@ -1,12 +1,17 @@
 "use strict";
 
-var socket;
-socket = io.connect('http://localhost:2016');
+var socket = io();
+var channel, token;
+socket.emit('getUserInfo');
+socket.on('setUserInfo', function (data) {
+    channel = data.user;
+    token = data.token;
+    initFollowers();
+});
 
 var queue = [],
     followers = [],
     animating = false,
-    channel = 'citycide',
     pollInterval = 7000;
 
 var tl, stage, label, opts,
@@ -16,21 +21,22 @@ var tl, stage, label, opts,
 socket.on('newFollower', function(user){
     console.log('Received new follower test with name: ' + user);
     resolveUser(user);
-    // queue.push(user);
 });
 
 var resolveUser = function (user) {
     $.getJSON(
         'https://api.twitch.tv/kraken/users/' + user,
         {
-            "client_id": 'dnxwuiqq88xp87w7uurtyqbipprxeng'
+            "client_id": 'dnxwuiqq88xp87w7uurtyqbipprxeng',
+            "api_version": 3
         },
         function (response) {
-            if (!("name" in response)) return;
             queue.push(response);
             checkQueue();
         }
-    ).fail(function () {
+    ).error(function () {
+        queue.push( { display_name: user });
+        checkQueue();
     });
 };
 
@@ -100,8 +106,6 @@ var containerEl = document.getElementById('container');
 var stageEl = document.createElement('canvas');
 
 var showAlert = function (user) {
-    // Create the canvas element that will become the render target.
-    // EaselJS calls this a "stage".
     stageEl.id = 'notification';
     stageEl.width = 800;
     stageEl.height = 200;
@@ -119,7 +123,6 @@ var showAlert = function (user) {
     var maxY = stageEl.height / 2.5;
     var vPos = Math.floor((200 - maxY) / 2);
 
-    // Create the stage on the target canvas, and create a ticker that will render at 60 fps.
     stage = new createjs.Stage('notification');
     createjs.Ticker.addEventListener('tick', function(event) {
         if (event.paused) return;
@@ -245,10 +248,10 @@ var showAlert = function (user) {
     msgbgs = [msg3, msg2, msg1];
 
     // Load sounds
-    createjs.Sound.registerSound('snd/subscription.ogg', 'subscription');
-    // createjs.Sound.registerSound('snd/tip.ogg', 'tip');
-    createjs.Sound.registerSound('snd/short_whoosh2.wav', 'cut');
-    createjs.Sound.registerSound('snd/short_whoosh1.wav', 'out');
+    createjs.Sound.registerSound('/views/overlays/snd/subscription.ogg', 'subscription');
+    // createjs.Sound.registerSound('/views/overlays/snd/tip.ogg', 'tip');
+    createjs.Sound.registerSound('/views/overlays/snd/short_whoosh2.wav', 'cut');
+    createjs.Sound.registerSound('/views/overlays/snd/short_whoosh1.wav', 'out');
 
     // Create the timeline that will animate elements
     tl = new TimelineMax({
@@ -418,5 +421,3 @@ var showAlert = function (user) {
     // Kill time between successive notifications
     tl.to({}, 1.5, {});
 };
-
-initFollowers();

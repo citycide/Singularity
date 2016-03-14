@@ -9,6 +9,22 @@
     <link rel="stylesheet" type="text/css" href="../css/style.css" />
     <link rel="stylesheet" type="text/css" href="../css/themes/paper.bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <!-- betterttv -->
+    <script>
+        // @name            BetterTTV
+        // @namespace       BTTV
+        // @description     Enhances Twitch with new features, bug fixes, and reduced clutter.
+        // @copyright       NightDev
+
+        var betterttv_init = function ()
+        {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = "//cdn.betterttv.net/betterttv.js?"+Math.random();
+            var head = document.getElementsByTagName('head')[0];
+            if(head) head.appendChild(script);
+        };
+    </script>
 </head>
 <body>
     <div id="fullwrapper">
@@ -40,47 +56,104 @@
                 <div class="tab-pane active fade in" id="tab-dash">
                     <div class="container" id="dashboard">
                         <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-follower-badge"><i class="fa fa-twitch"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span id="badgeFollow"></span></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-twitter-badge"><i class="fa fa-twitter"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-youtube-badge"><i class="fa fa-youtube-play"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="panel panel-default">
-                                        <div class="panel-body panel-wtf-badge"><i class="fa fa-thumbs-up"></i>&nbsp;&nbsp;&nbsp;&nbsp;188</div>
-                                    </div>
-                                </div>
-                            </div>
+
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-stream-title"><i class="fa fa-tag"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span id="streamTitle"></span></div>
+                                        <div class="panel-body panel-stream-title">
+                                            <div class="row">
+                                                <div class="col-md-1"><i class="fa fa-tag"></i></div>
+                                                <div id="streamTitle" class="col-md-10" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT"></div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="panel panel-default">
-                                        <div class="panel-body panel-stream-game"><i class="fa fa-gamepad"></i>&nbsp;&nbsp;&nbsp;&nbsp;<span id="streamGame"></span></div>
+                                        <div class="panel-body panel-stream-game">
+                                            <div class="row">
+                                                <div class="col-md-1"><i class="fa fa-gamepad"></i></div>
+                                                <div id="streamGame" class="col-md-10" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="row">
+                                            <div class="panel-body panel-follower-badge">
+                                                <div class="col-md-1"><i class="fa fa-twitch"></i></div>
+                                                <div id="badgeFollow" class="col-md-10" data-toggle="tooltip" data-placement="right" title="FOLLOWERS"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading" id="recentEventsHeading">
+                                            <div class="row">
+                                                <div class="col-md-11">
+                                                    <span class="panel-title">
+                                                        RECENT EVENTS
+                                                    </span>
+                                                </div>
+                                                <div class="col-md-1" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                                    <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseRecentEvents" aria-expanded="false" aria-controls="collapseRecentEvents">
+                                                        <i class="fa fa-chevron-down"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="collapseRecentEvents" class="panel-collapse collapse in" role="tabpanel">
+                                            <div class="panel-body">
+                                                <iframe frameborder="0" id="recentEventsFrame" src="//www.twitchalerts.com/dashboard/recent-events" height="300" width="100%" scrolling="yes"></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <!-- <iframe src="//player.twitch.tv/?channel=citycide" height="400" width="100%" frameborder="0" scrolling="no" allowfullscreen=""></iframe> -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6" id="twitchChat">
-                            <iframe frameborder='0' id='chat_embed' src="http://www.twitch.tv/citycide/chat" height='500' width='100%' scrolling='yes'></iframe>
+                            <div class="panel panel-default">
+                                <div class="panel-heading" id="twitchChatHeading">
+                                    <div class="row">
+                                        <div class="col-md-11">
+                                            <span class="panel-title">
+                                                TWITCH CHAT
+                                            </span>
+                                        </div>
+                                        <div class="col-md-1" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                            <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseTwitchChat" aria-expanded="false" aria-controls="collapseTwitchChat">
+                                                <i class="fa fa-chevron-down"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="collapseTwitchChat" class="panel-collapse collapse in" role="tabpanel">
+                                    <div class="panel-body">
+                                        <iframe frameborder='0' id='chat_embed' src="//www.twitch.tv/citycide/chat" onload="betterttv_init()" height='675' width='100%' scrolling='yes'></iframe>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

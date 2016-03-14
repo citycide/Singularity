@@ -73,8 +73,35 @@ body {
     color: mintcream !important;
     background: #ef5350 !important;
 }
-.tooltip.bottom .tooltip-inner {background-color: #363636;}
+.tooltip .tooltip-inner {background-color: #363636;}
 .tooltip.bottom .tooltip-arrow {border-bottom-color: #363636 !important;}
+.tooltip.top .tooltip-arrow {border-top-color: #363636 !important;}
+.tooltip.right .tooltip-arrow {border-right-color: #363636 !important;}
+.tooltip.left .tooltip-arrow {border-left-color: #363636 !important;}
+
+#twitchChat {
+    height: 100%;
+}
+
+.btnCollapsePanel {
+    -webkit-transition-duration: 0.5s;
+    -moz-transition-duration: 0.5s;
+    -o-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transition-property: -webkit-transform;
+    -moz-transition-property: -moz-transform;
+    -o-transition-property: -o-transform;
+    transition-property: transform;
+}
+
+[contenteditable] {
+    white-space: normal;
+    padding: 3px 10px 3px 10px;
+}
+[contenteditable]:focus {
+    border-bottom: 1px #13a89e solid;
+    outline: none;
+}
 
 .btn.btn-circle {
     font-size: 24px;
