@@ -9,8 +9,7 @@ var http = require('http'),
     SimpleJsonStore = require('simple-json-store'),
     socketio = require('socket.io'),
     ejs = require('ejs'),
-    nedb = require('nedb'),
-    Syc = require('syc');
+    nedb = require('nedb');
 
 var config = new SimpleJsonStore('./config/config.json',
     {
@@ -93,11 +92,10 @@ io.on('connection', function(socket){
     socket.on('getUserInfo', function () {
         socket.emit('setUserInfo', {
             user: config.get('currentUser'),
-            token: config.get('accessToken')
+            token: config.get('accessToken'),
+            clientID: config.get('clientID')
         });
     });
-
-    Syc.connect(socket);
 });
 
 /*********************************** ROUTES ***********************************/
