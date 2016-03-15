@@ -74,8 +74,8 @@ io.on('connection', function(socket){
         console.log('SYS: Client disconnected');
     });
 
-    socket.on('newFollower', function(data){
-        io.emit('newFollower', data);
+    socket.on('testFollower', function(data){
+        io.emit('testFollower', data);
         console.log('TEST: Received follower test. Forwarding...');
     });
 
