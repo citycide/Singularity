@@ -1,33 +1,34 @@
 "use strict";
 
 var socket = io();
-var channel, token;
+var channel, token, clientID;
 socket.emit('getUserInfo');
 socket.on('setUserInfo', function (data) {
     channel = data.user;
     token = data.token;
+    clientID = data.clientID;
     initFollowers();
 });
 
 var queue = [],
     followers = [],
     animating = false,
-    pollInterval = 7000;
+    pollInterval = 10000;
 
 var tl, stage, label, opts,
     circlebgs, cir1, cir2, cir3,
     msgbgs, msg1, msg2, msg3;
     
-socket.on('newFollower', function(user){
+socket.on('testFollower', function(user){
     console.log('Received new follower test with name: ' + user);
     resolveUser(user);
 });
 
-var resolveUser = function (user) {
+function resolveUser(user) {
     $.getJSON(
         'https://api.twitch.tv/kraken/users/' + user,
         {
-            "client_id": 'dnxwuiqq88xp87w7uurtyqbipprxeng',
+            "client_id": clientID,
             "api_version": 3
         },
         function (response) {
@@ -40,50 +41,37 @@ var resolveUser = function (user) {
     });
 };
 
-var initFollowers = function (offset) {
-    offset = offset || 0;
-
+function initFollowers() {
     $.getJSON(
         'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
         {
-            "client_id" : 'dnxwuiqq88xp87w7uurtyqbipprxeng',
+            "client_id" : clientID,
             "limit": 100
         },
-        function(data) {
-            if (data.follows.length === 0) {
-                // initial list is empty so poll for followers
-                setTimeout(function(){
-                    pollFollowers();
-                }, pollInterval);
-            }
+        function(response) {
+            if (!("follows" in response)) { return; };
 
-            if (data.follows && data.follows.length > 0) {
-                data.follows.forEach(function (follower) {
-                    followers[follower.user.name] = true;
-                });
+            for (var i = 0; i < response.follows.length; i++) {
+                followers.push(response.follows[i].user.display_name)
             }
-        }).fail(function() {
-            setTimeout(function () {
-                initFollowers(offset);
-            }, pollInterval);
-        });
+        }
+    );
 };
 
-var pollFollowers = function () {
+function pollFollowers() {
     $.getJSON(
         'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
         {
             "limit": 100,
-            "client_id" : 'dnxwuiqq88xp87w7uurtyqbipprxeng',
+            "client_id" : clientID,
             "api_version" : 3
         },
         function (response) {
             if (!("follows" in response)) return;
             for (var i = 0; i < response.follows.length; i++) {
-                var user = response.follows[i].user.name;
-                // if user is a new follower
-                if (followers.indexOf(user) == -1) {
-                    queue.push(user);
+                var thisUser = response.follows[i].user.display_name;
+                if (followers.indexOf(thisUser) == -1) {
+                    queue.push(thisUser);
                     checkQueue();
                 }
             }
