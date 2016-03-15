@@ -152,7 +152,7 @@ $(document).ready( function() {
 
     $("#btnTestFollower").click(function() {
         var user = $("#testFollowerUser").val();
-        socket.emit('newFollower', user);
+        socket.emit('testFollower', user);
         log('Sent follower test with name: ' + user + '.', 'test');
         return false;
     });
@@ -160,7 +160,7 @@ $(document).ready( function() {
     $("#btnTestHost").click(function() {
         var user = $("#testHostUser").val();
         var viewers = parseInt($("#testHostViewers").val());
-        socket.emit('newHoster', [user, viewers]);
+        socket.emit('testHoster', [user, viewers]);
         log('Sent host test with: ' + user + ' for ' + viewers + ' viewers.', 'test');
         return false;
     });
@@ -169,10 +169,10 @@ $(document).ready( function() {
         var user = $("#testSubUser").val();
         var months = parseInt($("#testSubMonths").val());
         if (months === null || months === undefined || months === 0 || isNaN(months)) {
-            socket.emit('newSubscriber', user);
+            socket.emit('testSubscriber', user);
             log('Sent new subscriber test with name: ' + user + '.', 'test');
         } else {
-            socket.emit('newResub', [user, months]);
+            socket.emit('testResub', [user, months]);
             log('Sent resubscriber test with: ' + user + ' for ' + months + ' months.', 'test');
         }
         return false;
@@ -182,7 +182,7 @@ $(document).ready( function() {
         var user = $("#testDonationUser").val();
         var amount = parseInt($("#testDonationAmt").val());
         var message = $("#testDonationMsg").val();
-        socket.emit('newDonation', [user, amount, message]);
+        socket.emit('testDonation', [user, amount, message]);
         if (message === "" || message === null || message === undefined) {
             log('Sent new donation test from: ' + user + ' for ' + '$' + amount + '.', 'test');
         } else {
