@@ -1,25 +1,16 @@
 var http = require('http'),
-    https = require('https'),
-    fs = require('fs'),
-    path = require('path'),
     express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     session = require('express-session'),
-    SimpleJsonStore = require('simple-json-store'),
     socketio = require('socket.io'),
     ejs = require('ejs'),
-    nedb = require('nedb'),
-    Syc = require('syc');
+    moment = require('./public/js/moment.min');
 
-var config = new SimpleJsonStore('./config/config.json',
-    {
-        "setupComplete": false,
-        "port": 2016,
-        "clientID": "41i6e4g7i1snv0lz0mbnpr75e1hyp9p",
-        "sessionSecret": "9347asfg597y43wernhy59072rw345"
-    }
-);
+var twitchRequest = require('./app/twitch');
+var emitter = require('./app/emitter');
+var config = require('./app/configstore');
+var db = require('./app/db');
 
 /********************************** EXPRESS ***********************************/
 
@@ -60,12 +51,6 @@ server.listen(port, function(){
     console.log('SYS: listening on *:' + port);
 });
 
-/********************************** DATABASE **********************************/
-
-// var db = {};
-// db.events = new nedb({ filename: path.join(gui.App.dataPath, 'events.db') });
-// db.events.loadDatabase();
-
 /*********************************** SOCKET ***********************************/
 
 io.on('connection', function(socket){
@@ -75,29 +60,76 @@ io.on('connection', function(socket){
         console.log('SYS: Client disconnected');
     });
 
-    socket.on('newFollower', function(data){
-        io.emit('newFollower', data);
-        console.log('TEST: Received follower test. Forwarding...');
-    });
-
-    socket.on('setupComplete', function(){
-        config.set('setupComplete', true);
-    });
-
+    /*
     socket.on('twitchAuth', function(data){
         config.set('isLoggedIn', true);
         console.log('data');
         config.set('currentUser', data.user);
     });
+    */
+
+    socket.on('authCallback', function(data) {
+        if (data.token.length > 20) {
+            config.set('accessToken', data.token);
+            config.set('currentUser', data.user);
+            config.set('currentUserLogo', data.logo);
+            config.set('isLoggedIn', true);
+            console.log(config.get('accessToken') + ' authed as ' + config.get('currentUser'));
+        }
+    });
 
     socket.on('getUserInfo', function () {
         socket.emit('setUserInfo', {
             user: config.get('currentUser'),
-            token: config.get('accessToken')
+            logo: config.get('currentUserLogo'),
+            token: config.get('accessToken'),
+            clientID: config.get('clientID')
         });
     });
 
-    Syc.connect(socket);
+    socket.on('testFollower', function(user){
+        console.log('Received new follower test with name: ' + user);
+        emitter.emit('testFollower', user);
+    });
+
+    socket.on('testHoster', function(data){
+        console.log('Received new host test: ' + data.name + ' ' + data.viewers);
+        emitter.emit('testHoster', data.name);
+    });
+
+    socket.on('testSubscriber', function(user){
+        console.log('Received new subscriber test with name: ' + user);
+        emitter.emit('testSubscriber', user);
+    });
+
+    socket.on('testDonor', function(data){
+        console.log('Received new donation test: ' + data.name + ' ' + data.amount + ' ' + data.message);
+        emitter.emit('testDonor', data);
+    });
+
+    socket.on('alertComplete', function () {
+        emitter.emit('alertComplete');
+    });
+
+    socket.on('setupComplete', function(){
+        config.set('setupComplete', true);
+    });
+});
+
+emitter.on('followAlert', function (user) {
+    io.emit('followAlert', user);
+});
+
+emitter.on('hostAlert', function (user) {
+    io.emit('hostAlert', user);
+});
+
+emitter.on('subscriberAlert', function (user) {
+    io.emit('subscriberAlert', user);
+});
+
+emitter.on('donationAlert', function (user) {
+    io.emit('donationAlert', user);
 });
 
 /*********************************** ROUTES ***********************************/
@@ -109,7 +141,8 @@ app.get('/', function (req, res) {
     if (config.get('setupComplete') === true) {
         if (config.get('isLoggedIn')) {
             res.render('index', {
-                user: config.get('currentUser')
+                user: config.get('currentUser'),
+                clientID: config.get('clientID')
             });
             console.log('SYS: Directing to home page.');
         } else {
@@ -141,23 +174,30 @@ app.get('/dashboard', function (req, res) {
  **  ACCOUNTS / LOGIN / LOGOUT
  */
 app.get('/auth', function (req, res) {
-   res.render('auth');
+   res.render('auth', {
+       clientID: config.get('clientID'),
+       setupComplete: config.get('setupComplete')
+   });
 });
 app.get('/auth/callback', function (req, res) {
     if (req.query.token.length > 20) {
         config.set('accessToken', req.query.token);
         config.set('currentUser', req.query.user);
+        config.set('currentUserLogo', req.query.logo);
         config.set('isLoggedIn', true);
         console.log(config.get('accessToken') + ' authed as ' + config.get('currentUser'));
     }
 });
 app.get('/login', function (req, res) {
-    res.render('login');
+    res.render('login', {
+        clientID: config.get('clientID')
+    });
 });
 app.get('/logout', function (req, res) {
     config.set('isLoggedIn', false);
     config.del('currentUser');
     config.del('accessToken');
+    config.del('currentUserLogo');
     if (!config.get('isLoggedIn')) {
         console.log('SYS: User has been logged out.');
         res.redirect('/login');
@@ -181,11 +221,15 @@ app.get('/overlays', function (req, res) {
  */
 app.get('/setup', function (req, res) {
     if (!config.get('setupComplete')) {
-        res.render('setup');
+        res.render('setup', {
+            clientID: config.get('clientID')
+        });
     } else {
         console.log('SYS: Setup already complete, directing to home page.');
         res.redirect('/')
     }
 });
+
+// twitchRequest.pollFollowers();
 
 module.exports = app;

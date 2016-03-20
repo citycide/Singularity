@@ -15,3 +15,6 @@ body .middle {
     top: 50%;
     text-align: center;
 }
+.twitch-connect {
+    cursor: pointer;
+}

@@ -18,8 +18,34 @@ body {
     background-color: #13a89e !important;
 }
 .navbar-right {
+    -webkit-app-region: no-drag;
     padding-right: 10px !important;
     margin-right: -4px !important;
+}
+.navbar-right > .btn-group .dropdown-toggle {
+    color: mintcream;
+    font-size: medium;
+    padding: 10px 8px 0 8px !important;
+    cursor: pointer;
+    height: 50px !important;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+.navbar-right > .btn-group .dropdown-toggle:hover {
+    color: #363636;
+}
+.navbar-right > .btn-group.open .dropdown-toggle,
+.navbar-right > .btn-group.open .dropdown-toggle:hover,
+.navbar-right > .btn-group.open .dropdown-toggle:focus,
+.navbar-right > .btn-group.open .dropdown-toggle:active {
+    color: #13a89e;
+}
+.navbar-right > .btn-group:focus,
+.navbar-right > .btn-group:active,
+.navbar-right > .btn-group.open {
+    color: #13a89e;
+    background-color: #363636;
 }
 .navbar-nav > li > a {
     -webkit-app-region: no-drag;
@@ -29,6 +55,7 @@ body {
     height: 50px !important;
 }
 .navbar-nav > li > a:hover {
+    -webkit-app-region: no-drag;
     color: #363636 !important;
 }
 .navbar-brand {
@@ -43,6 +70,13 @@ body {
 }
 .navbar {
     min-height: 50px !important;
+}
+
+#profile-dropdown-logo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 10px;
 }
 .navbar-nav > .active > a,
 .navbar-nav > .active > a:hover,
@@ -81,6 +115,10 @@ body {
 
 #twitchChat {
     height: 100%;
+}
+
+.btnCollapse.pull-right {
+    padding-right: 14px;
 }
 
 .btnCollapsePanel {
@@ -149,4 +187,38 @@ body {
 }
 #footer a {
     color: beige;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-button {
+    width: 8px;
+    height: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: #737373;
+    border: none;
+    border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #808080;
+}
+::-webkit-scrollbar-thumb:active {
+    background: #666666;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+}
+::-webkit-scrollbar-track:hover {
+    background: transparent;
+}
+::-webkit-scrollbar-track:active {
+    background: transparent;
+}
+::-webkit-scrollbar-corner {
+    background: transparent;
 }

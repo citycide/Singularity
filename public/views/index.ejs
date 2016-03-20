@@ -9,22 +9,6 @@
     <link rel="stylesheet" type="text/css" href="../css/style.css" />
     <link rel="stylesheet" type="text/css" href="../css/themes/paper.bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
-    <!-- betterttv -->
-    <script>
-        // @name            BetterTTV
-        // @namespace       BTTV
-        // @description     Enhances Twitch with new features, bug fixes, and reduced clutter.
-        // @copyright       NightDev
-
-        var betterttv_init = function ()
-        {
-            var script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = "//cdn.betterttv.net/betterttv.js?"+Math.random();
-            var head = document.getElementsByTagName('head')[0];
-            if(head) head.appendChild(script);
-        };
-    </script>
 </head>
 <body>
     <div id="fullwrapper">
@@ -39,6 +23,16 @@
                     <li><a href="#tab-about" data-toggle="tab">ABOUT</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    <div class="btn-group pull-left">
+                        <div class="dropdown-toggle" data-toggle="dropdown" href="#"><%- user %>&nbsp;&nbsp;<span class="caret"></span></div>
+                        <ul class="dropdown-menu">
+                            <li><img id="profile-dropdown-logo" src="" width="150px" height="150px"></li>
+                            <li id="extTwitchChannel"><a href="#"><i class="fa fa-external-link"></i>&nbsp;&nbsp;Twitch Channel</a></li>
+                            <li id="extTwitchProfile"><a href="#"><i class="fa fa-external-link"></i>&nbsp;&nbsp;Twitch Profile</a></li>
+                            <li class="divider"></li>
+                            <li><a href="/logout"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;LOGOUT</a></li>
+                        </ul>
+                    </div>
                     <li><a href="#" id="openAlerts" data-toggle="tooltip" data-placement="bottom" title="LAUNCH ALERT WINDOW"><i class="fa fa-clone"></i></a></li>
                     <li data-toggle="modal" data-target="#helpModal">
                         <a href="#" id="openHelpModal" data-toggle="tooltip" data-placement="bottom" title="HELP"><i class="fa fa-question-circle"></i></a>
@@ -63,7 +57,7 @@
                                         <div class="panel-body panel-stream-title">
                                             <div class="row">
                                                 <div class="col-md-1"><i class="fa fa-tag"></i></div>
-                                                <div id="streamTitle" class="col-md-10" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT"></div>
+                                                <div id="streamTitle" class="col-md-10" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner"></i></div>
                                             </div>
                                         </div>
                                     </div>
@@ -76,7 +70,7 @@
                                         <div class="panel-body panel-stream-game">
                                             <div class="row">
                                                 <div class="col-md-1"><i class="fa fa-gamepad"></i></div>
-                                                <div id="streamGame" class="col-md-10" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT"></div>
+                                                <div id="streamGame" class="col-md-10" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner"></i></div>
                                             </div>
                                         </div>
                                     </div>
@@ -89,7 +83,7 @@
                                         <div class="row">
                                             <div class="panel-body panel-follower-badge">
                                                 <div class="col-md-1"><i class="fa fa-twitch"></i></div>
-                                                <div id="badgeFollow" class="col-md-10" data-toggle="tooltip" data-placement="right" title="FOLLOWERS"></div>
+                                                <div id="badgeFollow" class="col-md-10" data-toggle="tooltip" data-placement="right" title="FOLLOWERS">LOADING... <i class="fa fa-spin fa-spinner"></i></div>
                                             </div>
                                         </div>
                                     </div>
@@ -106,7 +100,7 @@
                                                         RECENT EVENTS
                                                     </span>
                                                 </div>
-                                                <div class="col-md-1" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                                <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
                                                     <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseRecentEvents" aria-expanded="false" aria-controls="collapseRecentEvents">
                                                         <i class="fa fa-chevron-down"></i>
                                                     </div>
@@ -125,8 +119,24 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="panel panel-default">
-                                        <div class="panel-body">
-                                            <!-- <iframe src="//player.twitch.tv/?channel=citycide" height="400" width="100%" frameborder="0" scrolling="no" allowfullscreen=""></iframe> -->
+                                        <div class="panel-heading" id="streamPreviewHeading">
+                                            <div class="row">
+                                                <div class="col-md-11">
+                                                    <span class="panel-title">
+                                                        STREAM PREVIEW
+                                                    </span>
+                                                </div>
+                                                <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                                    <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseTwitchPlayer" aria-expanded="false" aria-controls="collapseTwitchPlayer">
+                                                        <i class="fa fa-chevron-up"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="collapseTwitchPlayer" class="panel-collapse collapse" role="tabpanel">
+                                            <div class="panel-body">
+                                                <!-- <iframe src="//player.twitch.tv/?channel=citycide" height="400" width="100%" frameborder="0" scrolling="no" allowfullscreen=""></iframe> -->
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -141,7 +151,7 @@
                                                 TWITCH CHAT
                                             </span>
                                         </div>
-                                        <div class="col-md-1" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                        <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
                                             <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseTwitchChat" aria-expanded="false" aria-controls="collapseTwitchChat">
                                                 <i class="fa fa-chevron-down"></i>
                                             </div>
@@ -150,7 +160,7 @@
                                 </div>
                                 <div id="collapseTwitchChat" class="panel-collapse collapse in" role="tabpanel">
                                     <div class="panel-body">
-                                        <iframe frameborder='0' id='chat_embed' src="//www.twitch.tv/citycide/chat" onload="betterttv_init()" height='675' width='100%' scrolling='yes'></iframe>
+                                        <iframe frameborder='0' id='chat_embed' src="//www.twitch.tv/citycide/chat" height='675' width='100%' scrolling='yes' nwfaketop></iframe>
                                     </div>
                                 </div>
                             </div>
@@ -159,21 +169,29 @@
                 </div>
                 <div class="tab-pane fade" id="tab-test">
                     <div class="container" id="testing">
-                        <div class="col-md-8 col-md-offset-2">
+                        <div class="col-md-10 col-md-offset-1">
                             <div class="panel-group" role="tablist" aria-multiselectable="true">
+
                                 <div class="panel panel-default">
                                     <div class="panel-heading panel-heading-follow" role="tab" id="heading-follow">
-                                        <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" href="#collapseFollow" aria-expanded="false" aria-controls="collapseFollow">
-                                                FOLLOWER
-                                            </a>
-                                        </h4>
+                                        <div class="row">
+                                            <div class="col-md-11">
+                                                <span class="panel-title">
+                                                    FOLLOWER
+                                                </span>
+                                            </div>
+                                            <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                                <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseFollow" aria-expanded="false" aria-controls="collapseFollow">
+                                                    <i class="fa fa-chevron-down"></i>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div id="collapseFollow" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-follow">
                                         <div class="panel-body">
                                             <form class="form-inline" onSubmit="return false;">
                                                 <div class="form-group">
-                                                    <div class="input-field col s2">
+                                                    <div class="input-field">
                                                         <i class="fa fa-user fa-fw prefix"></i>
                                                         <input type="text" id="testFollowerUser" name="user" class="form-control" value="citycide">
                                                     </div>
@@ -186,23 +204,30 @@
 
                                 <div class="panel panel-default">
                                     <div class="panel-heading panel-heading-host" role="tab" id="heading-host">
-                                        <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" href="#collapseHost" aria-expanded="false" aria-controls="collapseHost">
-                                                HOST
-                                            </a>
-                                        </h4>
+                                        <div class="row">
+                                            <div class="col-md-11">
+                                                <span class="panel-title">
+                                                    HOST
+                                                </span>
+                                            </div>
+                                            <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                                <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseHost" aria-expanded="false" aria-controls="collapseHost">
+                                                    <i class="fa fa-chevron-down"></i>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div id="collapseHost" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-host">
                                         <div class="panel-body">
                                             <form class="form-inline" onSubmit="return false;">
                                                 <div class="form-group">
-                                                    <div class="input-field col s2">
+                                                    <div class="input-field">
                                                         <i class="fa fa-user fa-fw prefix"></i>
                                                         <input type="text" id="testHostUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <div class="input-field col s2">
+                                                    <div class="input-field">
                                                         <i class="fa fa-eye fa-fw prefix"></i>
                                                         <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">
                                                     </div>
@@ -215,23 +240,30 @@
 
                                 <div class="panel panel-default">
                                     <div class="panel-heading panel-heading-subscriber" role="tab" id="heading-subscriber">
-                                        <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" href="#collapseSub" aria-expanded="false" aria-controls="collapseSub">
-                                                SUBSCRIBER
-                                            </a>
-                                        </h4>
+                                        <div class="row">
+                                            <div class="col-md-11">
+                                                <span class="panel-title">
+                                                    SUBSCRIBER
+                                                </span>
+                                            </div>
+                                            <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                                <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseSub" aria-expanded="false" aria-controls="collapseSub">
+                                                    <i class="fa fa-chevron-down"></i>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div id="collapseSub" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-subscriber">
                                         <div class="panel-body">
                                             <form class="form-inline" onSubmit="return false;">
                                                 <div class="form-group">
-                                                    <div class="input-field col s2">
+                                                    <div class="input-field">
                                                         <i class="fa fa-user fa-fw prefix"></i>
                                                         <input type="text" id="testSubUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <div class="input-field col s2">
+                                                    <div class="input-field">
                                                         <i class="fa fa-calendar fa-fw prefix"></i>
                                                         <input type="number" id="testSubMonths" name="duration" class="form-control" placeholder="# Months">
                                                     </div>
@@ -244,29 +276,36 @@
 
                                 <div class="panel panel-default">
                                     <div class="panel-heading panel-heading-donation" role="tab" id="heading-donation">
-                                        <h4 class="panel-title">
-                                            <a role="button" data-toggle="collapse" href="#collapseDonation" aria-expanded="false" aria-controls="collapseDonation">
-                                                DONATION
-                                            </a>
-                                        </h4>
+                                        <div class="row">
+                                            <div class="col-md-11">
+                                                <span class="panel-title">
+                                                    DONATIONS
+                                                </span>
+                                            </div>
+                                            <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
+                                                <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseDonation" aria-expanded="false" aria-controls="collapseHost">
+                                                    <i class="fa fa-chevron-down"></i>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div id="collapseDonation" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-donation">
                                         <div class="panel-body">
                                             <form class="form-inline" onSubmit="return false;">
                                                 <div class="form-group">
-                                                    <div class="input-field col s2">
+                                                    <div class="input-field">
                                                         <i class="fa fa-user fa-fw prefix"></i>
                                                         <input type="text" id="testDonationUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <div class="input-field col s2">
+                                                    <div class="input-field">
                                                         <i class="fa fa-dollar fa-fw prefix"></i>
                                                         <input type="number" id="testDonationAmt" name="amount" class="form-control" value="10">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
-                                                    <div class="input-field col s4">
+                                                    <div class="input-field">
                                                         <i class="fa fa-user fa-fw prefix"></i>
                                                         <input type="text" id="testDonationMsg" name="message" class="form-control" placeholder="Message">
                                                     </div>
@@ -333,6 +372,8 @@
     <!-- unused FAB -->
     <!-- <button type="button" class="btn btn-circle"><i class="fa fa-twitch"></i></button> -->
 
+    <!-- ejs -->
+    <script>var clientID = '<%= clientID %>';</script>
     <!-- scripts -->
     <script src="../js/jquery-2.2.1.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>

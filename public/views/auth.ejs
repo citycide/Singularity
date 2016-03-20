@@ -1,22 +1,40 @@
 <html>
 <head>
     <script src="../js/jquery-2.2.1.min.js"></script>
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- ejs -->
+    <script>
+        var clientID = '<%= clientID %>';
+        var setupComplete = '<%= setupComplete %>'
+    </script>
     <script>
         $(document).ready(function() {
-            var username = '';
+            var socket = io();
+
+            var username = '', logo = '';
             var access_token = "oauth:" + document.location.hash.substring(14, 44);
 
-            var jqxhr = $.getJSON(
+            $.when($.getJSON(
                     'https://api.twitch.tv/kraken?oauth_token=' + access_token.slice(6) +
-                    '&client_id=' + '41i6e4g7i1snv0lz0mbnpr75e1hyp9p',
-                function (data) {
-                    console.log(data.token.user_name);
-                    username = data.token.user_name;
-                }).done(function() {
-                    console.log(access_token + '  /  ' + username);
-                    $.get("auth/callback", { "token": access_token, "user": username });
+                    '&client_id=' + clientID)
+            ).done(function(data) {
+                username = data.token.user_name;
+                $.when($.getJSON('https://api.twitch.tv/kraken/users/' + username)
+                ).done(function (res) {
+                    if (res.logo === null) {
+                        logo = 'http://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_300x300.png';
+                    } else {
+                        logo = res.logo;
+                    }
+                    socket.emit('authCallback', {
+                        token: access_token,
+                        user: username,
+                        logo: logo
+                    });
                     window.location.assign('http://localhost:2016/setup#done');
                 });
+            });
         });
     </script>
 </head>

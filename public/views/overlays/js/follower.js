@@ -1,106 +1,14 @@
 "use strict";
 
 var socket = io();
-var channel, token;
-socket.emit('getUserInfo');
-socket.on('setUserInfo', function (data) {
-    channel = data.user;
-    token = data.token;
-    initFollowers();
-});
 
-var queue = [],
-    followers = [],
-    animating = false,
-    pollInterval = 7000;
+socket.on('followAlert', function (user) {
+    showAlert(user);
+});
 
 var tl, stage, label, opts,
     circlebgs, cir1, cir2, cir3,
     msgbgs, msg1, msg2, msg3;
-    
-socket.on('newFollower', function(user){
-    console.log('Received new follower test with name: ' + user);
-    resolveUser(user);
-});
-
-var resolveUser = function (user) {
-    $.getJSON(
-        'https://api.twitch.tv/kraken/users/' + user,
-        {
-            "client_id": 'dnxwuiqq88xp87w7uurtyqbipprxeng',
-            "api_version": 3
-        },
-        function (response) {
-            queue.push(response);
-            checkQueue();
-        }
-    ).error(function () {
-        queue.push( { display_name: user });
-        checkQueue();
-    });
-};
-
-var initFollowers = function (offset) {
-    offset = offset || 0;
-
-    $.getJSON(
-        'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
-        {
-            "client_id" : 'dnxwuiqq88xp87w7uurtyqbipprxeng',
-            "limit": 100
-        },
-        function(data) {
-            if (data.follows.length === 0) {
-                // initial list is empty so poll for followers
-                setTimeout(function(){
-                    pollFollowers();
-                }, pollInterval);
-            }
-
-            if (data.follows && data.follows.length > 0) {
-                data.follows.forEach(function (follower) {
-                    followers[follower.user.name] = true;
-                });
-            }
-        }).fail(function() {
-            setTimeout(function () {
-                initFollowers(offset);
-            }, pollInterval);
-        });
-};
-
-var pollFollowers = function () {
-    $.getJSON(
-        'https://api.twitch.tv/kraken/channels/'+channel+'/follows',
-        {
-            "limit": 100,
-            "client_id" : 'dnxwuiqq88xp87w7uurtyqbipprxeng',
-            "api_version" : 3
-        },
-        function (response) {
-            if (!("follows" in response)) return;
-            for (var i = 0; i < response.follows.length; i++) {
-                var user = response.follows[i].user.name;
-                // if user is a new follower
-                if (followers.indexOf(user) == -1) {
-                    queue.push(user);
-                    checkQueue();
-                }
-            }
-        }
-    ).fail(function() {});
-};
-
-var checkQueue = function () {
-    if(!queue.length || animating) return;
-    newFollower(queue.shift());
-};
-
-var timer = false;
-var newFollower = function (user) {
-    animating = true;
-    showAlert(user);
-};
 
 var containerEl = document.getElementById('container');
 var stageEl = document.createElement('canvas');
@@ -209,7 +117,7 @@ var showAlert = function (user) {
     msg3.name = 'msg3';
     msg3.x = hCenter - 25;
     msg3.y = vPos;
-    msg3.maxWidth = 685;
+    msg3.maxWidth = 710;
     msg3.width = 0;
     msgContainer.addChild(msg3);
 
@@ -231,7 +139,7 @@ var showAlert = function (user) {
 
     // Create the text element
     label = new createjs.Text(' ', '600 40px arial', 'mintcream');
-    label.x = hCenter - 20;
+    label.x = hCenter;
     label.showY = vCenter - 30;
     label.hideY = vCenter - 45;
     label.y = vCenter - 50;
@@ -257,8 +165,9 @@ var showAlert = function (user) {
     tl = new TimelineMax({
         autoRemoveChildren: true,
         onComplete: function () {
-            animating = false;
-            checkQueue();
+            socket.emit('alertComplete');
+            // animating = false;
+            // checkQueue();
         }
     });
 
@@ -322,9 +231,14 @@ var showAlert = function (user) {
     });
 
     tl.to(bgContainer, 0.6, {
-        x: -300,
+        x: -290,
         ease: Elastic.easeOut.config(1, 1)
     }, '-=0.05');
+
+    tl.to(msgContainer, 0.6, {
+        x: 25,
+        ease: Elastic.easeOut.config(1, 1)
+    }, '-=0.6');
 
     msgbgs.forEach(function(msgbg) {
         tl.to(msgbg, 0.6, {
@@ -395,8 +309,8 @@ var showAlert = function (user) {
 
     tl.to(bgContainer, 0.6, {
         x: 0,
-        ease: Elastic.easeOut.config(1, 1)
-    }, '-=0.5');
+        ease: Power3.easeInOut
+    }, '-=0.860');
 
     // Start hiding second message
     tl.to(label, 0.6, {

@@ -1,6 +1,7 @@
 $(document).ready( function() {
-    var gui = require('nw.gui');
-    var win = gui.Window.get();
+    var win = nw.Window.get();
+
+    $('.dropdown-toggle').dropdown();
 
     var btnOpenAlerts = $('a#openAlerts');
     var btnWinRefresh = $("#winRefresh");
@@ -9,15 +10,14 @@ $(document).ready( function() {
     var btnWinClose = $("#winClose");
 
     btnOpenAlerts.click(function() {
-        var winAlerts = gui.Window.open('http://localhost:2016/overlays', {
+        var winAlerts = nw.Window.open('http://localhost:2016/overlays', {
             position: 'center',
             focus: true,
-            width: 780,
+            width: 810,
             height: 250
         });
-        winAlerts.on ('loaded', function(){
+        winAlerts.on('loaded', function(){
             log('SYS: Opened alerts window.');
-            // var document = winAlerts.window.document;
         });
         return false;
     });

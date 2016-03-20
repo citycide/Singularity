@@ -177,7 +177,7 @@
 
 </div>
 
-<!-- scripts -->
+    <!-- scripts -->
     <script src="../js/jquery-2.2.1.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
     <!-- socket.io -->
@@ -186,10 +186,11 @@
     <script src="../js/setup.js"></script>
     <script src="../js/nav.js"></script>
     <script>
+        var clientID = '<%= clientID %>';
         $('.twitch-connect').click(function (e) {
             e.preventDefault();
             window.location.href = 'https://api.twitch.tv/kraken/oauth2/authorize?response_type=token' +
-                                   '&client_id=41i6e4g7i1snv0lz0mbnpr75e1hyp9p' +
+                                   '&client_id=' + clientID +
                                    '&redirect_uri=http://localhost:2016/auth' +
                                    '&scope=user_read+channel_read+channel_editor+channel_subscriptions+chat_login' +
                                    '&force_verify=true';

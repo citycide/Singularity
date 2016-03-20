@@ -16,22 +16,26 @@ $(document).ready( function() {
         testSubUser.value = data.user;
         testDonationUser.value = data.user;
         document.getElementById('chat_embed').src = 'http://www.twitch.tv/' + data.user + '/chat';
+        document.getElementById('profile-dropdown-logo').src = data.logo;
 
-        getStreamInfo();
+        setTimeout(getStreamInfo, 1.5 * 1000);
     });
 
+    var dev = false;
     var log = function (msg, type) {
-        if (type) {
-            switch (type) {
-                case 'dash':
-                    console.log('DASH: ' + msg);
-                    break;
-                case 'test':
-                    console.log('TEST: ' + msg);
-                    break;
+        if (dev) {
+            if (type) {
+                switch (type) {
+                    case 'dash':
+                        console.log('DASH: ' + msg);
+                        break;
+                    case 'test':
+                        console.log('TEST: ' + msg);
+                        break;
+                }
+            } else {
+                console.log(msg);
             }
-        } else {
-            console.log(msg);
         }
     };
 
@@ -41,11 +45,11 @@ $(document).ready( function() {
     var statusSpan = $('#streamTitle');
     var followSpan = $('#badgeFollow');
 
-    var getStreamInfo = function () {
-            $.getJSON(
+    function getStreamInfo() {
+        $.getJSON(
             'https://api.twitch.tv/kraken/channels/' + channel,
             {
-                "client_id": '41i6e4g7i1snv0lz0mbnpr75e1hyp9p'
+                "client_id": clientID
             },
             function (data) {
                 var game = data.game;
@@ -73,8 +77,9 @@ $(document).ready( function() {
                     log('Status set to: ' + status, 'dash');
                 }
             });
-    };
-    setInterval(getStreamInfo(), 10000);
+    }
+
+    setInterval(getStreamInfo, 60 * 1000);
 
     var updateTitle = function (title) {
         $.get(
@@ -101,63 +106,95 @@ $(document).ready( function() {
     };
 
     var isEditingTitle = false;
+    var currentTitle;
     statusSpan.click(function () {
-        if(isEditingTitle==false) {
-            var currentTitle = $(this).text();
+        if (isEditingTitle == false) {
+            currentTitle = $(this).text();
             $(this).text(currentTitle)
-                .attr("contenteditable","true").focus();
+                .attr("contenteditable", "true").focus();
             isEditingTitle = true;
         }
-    }).blur(function(){
+    }).blur(function () {
         isEditingTitle = false;
         var newTitle = $(this).text();
         $(this).html(newTitle).removeAttr("contenteditable");
-        updateTitle(newTitle);
+        if (currentTitle != newTitle) {
+            updateTitle(newTitle);
+        }
+    }).keydown(function(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            $(this).removeAttr("contenteditable");
+            return false;
+        }
     });
 
     var isEditingGame = false;
+    var currentGame;
     gameSpan.click(function () {
-        if(isEditingGame==false) {
-            var currentGame = $(this).text();
+        if (isEditingGame == false) {
+            currentGame = $(this).text();
             $(this).text(currentGame)
-                .attr("contenteditable","true").focus();
+                .attr("contenteditable", "true").focus();
             isEditingGame = true;
         }
-    }).blur(function(){
+    }).blur(function () {
         isEditingGame = false;
         var newGame = $(this).text();
         $(this).html(newGame).removeAttr("contenteditable");
-        updateGame(newGame);
+        if (currentGame != newGame) {
+            updateGame(newGame);
+        }
+    }).keydown(function(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            $(this).removeAttr("contenteditable");
+            return false;
+        }
+    });
+
+    $('div[contenteditable]').keydown(function(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            $(this).removeAttr("contenteditable");
+            return false;
+        }
     });
 
     var btnCollapsePanel = $(".btnCollapsePanel");
-    btnCollapsePanel.click(function() {
+    btnCollapsePanel.click(function () {
         var parent = $(this).parent();
         if ($(this).css('transform') == 'none') {
-            $(this).css('transform','rotate(180deg)');
-            parent.attr('title','EXPAND')
+            $(this).css('transform', 'rotate(180deg)');
+            parent.attr('title', 'EXPAND')
                 .tooltip('fixTitle')
                 .data('bs.tooltip')
                 .$tip.find('.tooltip-inner')
                 .text('EXPAND');
+            parent.find("iframe", function () {
+                console.log('found');
+            });
         } else {
-            $(this).css('transform','');
-            parent.attr('title','COLLAPSE')
+            $(this).css('transform', '');
+            parent.attr('title', 'COLLAPSE')
                 .tooltip('fixTitle')
                 .data('bs.tooltip')
                 .$tip.find('.tooltip-inner')
                 .text('COLLAPSE');
+            parent.find("iframe", function () {
+                this.show();
+            });
         }
     });
 
-    $("#btnTestFollower").click(function() {
+    $("#btnTestFollower").click(function () {
         var user = $("#testFollowerUser").val();
-        socket.emit('newFollower', user);
+        socket.emit('testFollower', user);
         log('Sent follower test with name: ' + user + '.', 'test');
         return false;
     });
 
-    $("#btnTestHost").click(function() {
+    $("#btnTestHost").click(function () {
         var user = $("#testHostUser").val();
         var viewers = parseInt($("#testHostViewers").val());
         socket.emit('newHoster', [user, viewers]);
@@ -165,7 +202,7 @@ $(document).ready( function() {
         return false;
     });
 
-    $("#btnTestSub").click(function() {
+    $("#btnTestSub").click(function () {
         var user = $("#testSubUser").val();
         var months = parseInt($("#testSubMonths").val());
         if (months === null || months === undefined || months === 0 || isNaN(months)) {
@@ -178,7 +215,7 @@ $(document).ready( function() {
         return false;
     });
 
-    $("#btnTestDonation").click(function() {
+    $("#btnTestDonation").click(function () {
         var user = $("#testDonationUser").val();
         var amount = parseInt($("#testDonationAmt").val());
         var message = $("#testDonationMsg").val();
@@ -191,21 +228,39 @@ $(document).ready( function() {
         return false;
     });
 
-    document.addEventListener('dragover', function(e){
-        e.preventDefault();
-        e.stopPropagation();
-    }, false);
-    document.addEventListener('drop', function(e){
-        e.preventDefault();
-        e.stopPropagation();
-    }, false);
-
-    var tgt = document.getElementById('chat_embed');
-    tgt.addEventListener('load', function () {
-        var dom = tgt.contentDocument,
-            script = document.createElement('script');
-        script.innerHTML = "var betterttv_init = function (){var script = document.createElement('script'); script.type = 'text/javascript'; script.src = '//cdn.betterttv.net/betterttv.js?'+Math.random(); var head = document.getElementsByTagName('head')[0]; if(head) head.appendChild(script);}; betterttv_init();";
-        dom.body.appendChild(script);
+    $("#extTwitchChannel").click(function() {
+        openLink('https://www.twitch.tv/' + channel);
+        return false;
+    });
+    $("#extTwitchProfile").click(function() {
+        openLink('https://www.twitch.tv/' + channel + '/profile');
+        return false;
     });
 
+    document.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }, false);
+    document.addEventListener('drop', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }, false);
+
+    var win = nw.Window.get();
+    var chatFrame = document.getElementById('chat_embed');
+    var bttv =
+        "var betterttv_init = function (){" +
+        "var script = document.createElement('script');" +
+        "script.type = 'text/javascript';" +
+        "script.src = '//cdn.betterttv.net/betterttv.js?';" +
+        "var head = document.getElementsByTagName('head')[0];" +
+        "if(head) head.appendChild(script); };" +
+        "betterttv_init();";
+    chatFrame.onload = function () {
+        win.eval(chatFrame, bttv);
+    };
 });
+
+function openLink(url) {
+    nw.Shell.openExternal(url);
+}

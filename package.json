@@ -10,8 +10,8 @@
     "frame": false,
     "fullscreen": false,
     "min_width": 1200,
-    "width": 1200,
-    "height": 685
+    "width": 1400,
+    "height": 925
   },
   "node-remote": "http://localhost",
   "dependencies": {
@@ -22,8 +22,9 @@
     "express-session": "^1.13.0",
     "first-run": "^1.1.0",
     "nedb": "1.x",
+    "node-twitch-api": "^0.1.2",
+    "request": "^2.69.0",
     "simple-json-store": "0.0.1",
-    "socket.io": "latest",
-    "syc": "^2.0.5"
+    "socket.io": "latest"
   }
 }
