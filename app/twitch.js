@@ -50,7 +50,7 @@ function pollFollowers(pollInterval) {
                                 type: "follower"
                             };
                             if (followers.indexOf(thisUser.user.display_name) == -1) {
-                                followers.unshift(thisUser.user.display_name);
+                                followers.push(thisUser.user.display_name);
                             }
                             storeThisFollower = {
                                 twitch_id: thisUser.user._id,
@@ -77,8 +77,8 @@ function pollFollowers(pollInterval) {
                                 type: "follower"
                             };
                             if (followers.indexOf(thisUser.user.display_name) == -1) {
-                                followers.unshift(thisUser.user.display_name);
-                                queue.unshift(thisUser);
+                                followers.push(thisUser.user.display_name);
+                                queue.push(thisUser);
                                 storeNewFollower = {
                                     twitch_id: thisUser.user._id,
                                     timestamp: moment(thisUser.created_at),
@@ -92,125 +92,9 @@ function pollFollowers(pollInterval) {
                 }
             }
             setTimeout(pollFollowers, pollInterval);
-            /*
-            try {
-                body = JSON.parse(res);
-            } catch (error) {
-                console.log(error);
-                return;
-            }
-
-            var i, thisUser, storeThisFollower, storeNewFollower;
-            if (body.follows.length > 0) {
-                if (followers.length === 0) {
-                    for (i = 0; i < body.follows.length; i++) {
-                        thisUser = body.follows[i].user;
-                        if (followers.indexOf(thisUser.display_name) == -1) {
-                            followers.unshift(thisUser.display_name);
-                        }
-                        storeThisFollower = {
-                            twitch_id: thisUser._id,
-                            timestamp: moment(thisUser.created_at),
-                            name: thisUser.display_name
-                        };
-                        db.events.find({ "follows.twitch_id": { $exists: thisUser._id}}, function(err, docs) {
-                            if (err) {
-                                console.log('err');
-                                db.events.insert({follows: [storeNewFollower]})
-                            }
-                        });
-                    }
-                } else {
-                    for (i = 0; i < body.follows.length; i++) {
-                        thisUser = body.follows[i].user;
-                        if (followers.indexOf(thisUser.display_name) == -1) {
-                            followers.unshift(thisUser.display_name);
-                            queue.unshift({ user: [thisUser], type: "follower" });
-                            storeNewFollower = {
-                                twitch_id: thisUser._id,
-                                timestamp: moment(thisUser.created_at),
-                                name: thisUser.display_name
-                            };
-                            db.events.update({follows: [{twitch_id: thisUser._id}]}, {follows: [storeNewFollower]}, {upsert: true});
-                            checkQueue();
-                        }
-                    }
-                }
-            }
-            console.log(body);
-            setTimeout(pollFollowers, pollInterval);
-        }
-        */
         }
     );
 }
-
-/*
-function pollFollowers(pollInterval) {
-    if (!pollInterval) pollInterval = 15 * 1000;
-    request('https://api.twitch.tv/kraken/channels/' + config.get('currentUser') + '/follows?limit=50',
-        function (err, res, body) {
-            if (err) {
-                console.log(err);
-                setTimeout(pollFollowers, pollInterval);
-                return;
-            }
-            if (res.statusCode != 200) {
-                console.log('Unknown response code: ' + res.statusCode);
-                setTimeout(pollFollowers, pollInterval);
-                return;
-            }
-
-            try {
-                body = JSON.parse(body);
-            } catch (error) {
-                console.log(error);
-                return;
-            }
-
-            var i, thisUser, storeThisFollower, storeNewFollower;
-            if (body.follows.length > 0) {
-                if (followers.length === 0) {
-                    for (i = 0; i < body.follows.length; i++) {
-                        thisUser = body.follows[i].user;
-                        if (followers.indexOf(thisUser.display_name) == -1) {
-                            followers.unshift(thisUser.display_name);
-                        }
-                        storeThisFollower = {
-                            twitch_id: thisUser._id,
-                            timestamp: moment(thisUser.created_at),
-                            name: thisUser.display_name
-                        };
-                        db.events.find({ "follows.twitch_id": { $exists: thisUser._id}}, function(err, docs) {
-                            if (err) {
-                                console.log('err');
-                                db.events.insert({follows: [storeNewFollower]})
-                            }
-                        });
-                    }
-                } else {
-                    for (i = 0; i < body.follows.length; i++) {
-                        thisUser = body.follows[i].user;
-                        if (followers.indexOf(thisUser.display_name) == -1) {
-                            followers.unshift(thisUser.display_name);
-                            queue.unshift({ user: [thisUser], type: "follower" });
-                            storeNewFollower = {
-                                twitch_id: thisUser._id,
-                                timestamp: moment(thisUser.created_at),
-                                name: thisUser.display_name
-                            };
-                            db.events.update({follows: [{twitch_id: thisUser._id}]}, {follows: [storeNewFollower]}, {upsert: true});
-                            checkQueue();
-                        }
-                    }
-                }
-            }
-            console.log(body);
-            setTimeout(pollFollowers, pollInterval);
-        }
-    );
-}
- */
 
 function checkQueue() {
     if(!queue.length || animating) return;
@@ -239,7 +123,7 @@ function actOnQueue(data, type) {
 
 emitter.on('testFollower', function(user) {
     resolveUser(user, "follower", function(userObj) {
-        queue.unshift(userObj);
+        queue.push(userObj);
         checkQueue();
     });
 });
@@ -283,55 +167,4 @@ function resolveUser(username, type, callback) {
     );
 }
 
-/*
-function resolveUser(username, callback) {
-    request('https://api.twitch.tv/kraken/users/' + username,
-        function (err, res, body) {
-            var testUser;
-            if (err) {
-                console.log(err + ' :: while resolving ' + username);
-                testUser = {
-                    user: {
-                        display_name: username,
-                    },
-                    type: "follower"
-                };
-                callback(testUser);
-                return;
-            }
-            if (res.statusCode == 404) {
-                console.log('User \"' + username + '\" could not be resolved. Pushing as name only.');
-                testUser = {
-                    user: {
-                        display_name: username,
-                    },
-                    type: "follower"
-                };
-                callback(testUser);
-                return;
-            } else if (res.statusCode != 200) {
-                console.log('Unknown response code: ' + res.statusCode);
-                testUser = {
-                    user: {
-                        display_name: username,
-                    },
-                    type: "follower"
-                };
-                callback(testUser);
-                return;
-            }
-
-            try {
-                body = JSON.parse(body);
-                console.log(body);
-            } catch (error) {
-                console.log(error);
-                return;
-            }
-
-            callback(body, "follower");
-        }
-    );
-}
-*/
 module.exports.pollFollowers = pollFollowers;
