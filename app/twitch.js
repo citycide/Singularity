@@ -25,7 +25,7 @@ var twitch = new TwitchClient({
 
 function pollFollowers(pollInterval) {
     if (!pollInterval) pollInterval = 15 * 1000;
-    twitch.get('/channels/:channel/follows', {channel: config.get('currentUser'), limit: 50},
+    twitch.get('/channels/:channel/follows', {channel: config.get('currentUser'), limit: 50, timestampnow: new Date().getTime()},
         function(err, res) {
             if (err) {
                 console.log(err);
