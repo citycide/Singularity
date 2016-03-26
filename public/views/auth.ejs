@@ -12,7 +12,7 @@
         $(document).ready(function() {
             var socket = io();
 
-            var username = '', logo = '';
+            var username = '', logo = '', id;
             var access_token = "oauth:" + document.location.hash.substring(14, 44);
 
             $.when($.getJSON(
@@ -27,10 +27,12 @@
                     } else {
                         logo = res.logo;
                     }
+                    id = res._id;
                     socket.emit('authCallback', {
                         token: access_token,
                         user: username,
-                        logo: logo
+                        logo: logo,
+                        id: id
                     });
                     window.location.assign('http://localhost:2016/setup#done');
                 });

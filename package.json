@@ -10,22 +10,20 @@
     "toolbar": false,
     "frame": false,
     "fullscreen": false,
-    "min_width": 1200,
-    "width": 1400,
+    "min_width": 1150,
+    "width": 1300,
     "height": 925
   },
   "node-remote": "http://localhost",
   "dependencies": {
+    "express": "4.x",
+    "tmi.js": "0.0.28",
+    "socket.io": "latest",
+    "ejs": "^2.4.1",
+    "nedb": "1.x",
     "body-parser": "^1.15.0",
     "cookie-parser": "^1.4.1",
-    "ejs": "^2.4.1",
-    "express": "4.x",
     "express-session": "^1.13.0",
-    "first-run": "^1.1.0",
-    "nedb": "1.x",
-    "node-twitch-api": "^0.1.2",
-    "request": "^2.69.0",
-    "simple-json-store": "0.0.1",
-    "socket.io": "latest"
+    "simple-json-store": "0.0.1"
   }
 }

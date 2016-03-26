@@ -7,9 +7,10 @@ var http = require('http'),
     ejs = require('ejs'),
     moment = require('./public/js/moment.min');
 
-var twitchRequest = require('./app/twitch');
+var twitch = require('./app/twitch');
 var emitter = require('./app/emitter');
 var config = require('./app/configstore');
+var log = require('./app/logger');
 var db = require('./app/db');
 
 /********************************** EXPRESS ***********************************/
@@ -48,62 +49,55 @@ app.use('/auth', auth);
 app.use('/overlays', follower);
 
 server.listen(port, function(){
-    console.log('SYS: listening on *:' + port);
+    log.sys('listening on *:' + port);
 });
 
 /*********************************** SOCKET ***********************************/
 
 io.on('connection', function(socket){
-    console.log('SYS: Client connected.');
+    log.sys('Client connected.');
 
     socket.on('disconnect', function(){
-        console.log('SYS: Client disconnected');
+        log.sys('Client disconnected');
     });
-
-    /*
-    socket.on('twitchAuth', function(data){
-        config.set('isLoggedIn', true);
-        console.log('data');
-        config.set('currentUser', data.user);
-    });
-    */
 
     socket.on('authCallback', function(data) {
         if (data.token.length > 20) {
             config.set('accessToken', data.token);
-            config.set('currentUser', data.user);
-            config.set('currentUserLogo', data.logo);
+            config.set('channel', data.user);
+            config.set('channelAvatar', data.logo);
+            config.set('channelID', data.id);
             config.set('isLoggedIn', true);
-            console.log(config.get('accessToken') + ' authed as ' + config.get('currentUser'));
+            log.auth(config.get('accessToken') + ' authed as ' + config.get('channel'));
         }
     });
 
     socket.on('getUserInfo', function () {
         socket.emit('setUserInfo', {
-            user: config.get('currentUser'),
-            logo: config.get('currentUserLogo'),
+            user: config.get('channel'),
+            logo: config.get('channelAvatar'),
             token: config.get('accessToken'),
             clientID: config.get('clientID')
         });
     });
 
     socket.on('testFollower', function(user){
-        console.log('Received new follower test with name: ' + user);
+        log.alert('Received new follower test with name: ' + user);
         emitter.emit('testFollower', user);
     });
 
     socket.on('testHoster', function(data){
-        console.log('Received new host test: ' + data.name + ' ' + data.viewers);
+        log.alert('Received new host test: ' + data.name + ' ' + data.viewers);
         emitter.emit('testHoster', data.name);
     });
 
     socket.on('testSubscriber', function(user){
-        console.log('Received new subscriber test with name: ' + user);
+        log.alert('Received new subscriber test with name: ' + user);
         emitter.emit('testSubscriber', user);
     });
 
     socket.on('testDonor', function(data){
-        console.log('Received new donation test: ' + data.name + ' ' + data.amount + ' ' + data.message);
+        log.alert('Received new donation test: ' + data.name + ' ' + data.amount + ' ' + data.message);
         emitter.emit('testDonor', data);
     });
 
@@ -141,33 +135,33 @@ app.get('/', function (req, res) {
     if (config.get('setupComplete') === true) {
         if (config.get('isLoggedIn')) {
             res.render('index', {
-                user: config.get('currentUser'),
+                user: config.get('channel'),
                 clientID: config.get('clientID')
             });
-            console.log('SYS: Directing to home page.');
+            log.sys('Directing to home page.');
         } else {
             res.redirect('/login');
-            console.log('SYS: Directing to login page.');
+            log.sys('Directing to login page.');
         }
     } else {
         res.redirect('/setup');
-        console.log('SYS: Directing to setup page.');
+        log.sys('Directing to setup page.');
     }
 });
 app.get('/dashboard', function (req, res) {
     if (config.get('setupComplete') === true) {
         if (config.get('isLoggedIn')) {
             res.render('index', {
-                user: config.get('currentUser')
+                user: config.get('channel')
             });
-            console.log('SYS: Directing to home page.');
+            log.sys('Directing to home page.');
         } else {
             res.redirect('/login');
-            console.log('SYS: Directing to login page.');
+            log.sys('Directing to login page.');
         }
     } else {
         res.redirect('/setup');
-        console.log('SYS: Directing to setup page.');
+        log.sys('Directing to setup page.');
     }
 });
 /*
@@ -179,15 +173,6 @@ app.get('/auth', function (req, res) {
        setupComplete: config.get('setupComplete')
    });
 });
-app.get('/auth/callback', function (req, res) {
-    if (req.query.token.length > 20) {
-        config.set('accessToken', req.query.token);
-        config.set('currentUser', req.query.user);
-        config.set('currentUserLogo', req.query.logo);
-        config.set('isLoggedIn', true);
-        console.log(config.get('accessToken') + ' authed as ' + config.get('currentUser'));
-    }
-});
 app.get('/login', function (req, res) {
     res.render('login', {
         clientID: config.get('clientID')
@@ -195,11 +180,12 @@ app.get('/login', function (req, res) {
 });
 app.get('/logout', function (req, res) {
     config.set('isLoggedIn', false);
-    config.del('currentUser');
     config.del('accessToken');
-    config.del('currentUserLogo');
+    config.del('channel');
+    config.del('channelAvatar');
+    config.del('channelID');
     if (!config.get('isLoggedIn')) {
-        console.log('SYS: User has been logged out.');
+        log.sys('User has been logged out.');
         res.redirect('/login');
     }
 });
@@ -211,7 +197,7 @@ app.get('/overlays', function (req, res) {
     if (config.get('isLoggedIn')) {
         res.render('overlays/follower');
     } else {
-        console.log('SYS: User needs to authenticate.');
+        log.sys('User needs to authenticate.');
         res.redirect('/login');
     }
 });
@@ -225,11 +211,11 @@ app.get('/setup', function (req, res) {
             clientID: config.get('clientID')
         });
     } else {
-        console.log('SYS: Setup already complete, directing to home page.');
+        log.sys('Setup already complete, directing to home page.');
         res.redirect('/')
     }
 });
 
-// twitchRequest.pollFollowers();
+twitch.initAPI();
 
 module.exports = app;

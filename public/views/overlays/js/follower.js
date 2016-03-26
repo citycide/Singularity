@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var socket = io();
 
@@ -333,5 +333,5 @@ var showAlert = function (user) {
     });
 
     // Kill time between successive notifications
-    tl.to({}, 1.5, {});
+    tl.to({}, 2.5, {});
 };
