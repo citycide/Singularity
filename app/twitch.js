@@ -137,7 +137,6 @@ function pollFollowers(pollInterval) {
                 }
             }
         }
-        checkQueue();
         setTimeout(pollFollowers, pollInterval);
     });
 }
@@ -164,8 +163,9 @@ client.on('hosted', function (channel, username, viewers) {
                 type: "host"
             };
         }
-        queue.push(thisHost);
-        checkQueue();
+        if (thisHost.user.viewers > 0) {
+            queue.push(thisHost);
+        }
     });
 });
 
@@ -190,7 +190,6 @@ client.on('subscription', function (channel, username) {
             };
         }
         queue.push(thisSub);
-        checkQueue();
     });
 });
 
@@ -217,14 +216,17 @@ client.on('subanniversary', function (channel, username, months) {
             };
         }
         queue.push(thisResub);
-        checkQueue();
     });
 });
 
 function checkQueue() {
-    if(!queue.length || animating) return;
+    if(!queue.length || animating) {
+        setTimeout(checkQueue, 5 * 1000);
+        return;
+    }
     var queueItem = queue.pop();
     actOnQueue(queueItem.user, queueItem.type);
+    setTimeout(checkQueue, 5 * 1000);
 }
 
 function actOnQueue(data, type) {
@@ -246,9 +248,9 @@ function actOnQueue(data, type) {
     }
 }
 
-emitter.on('testFollower', function(user) {
+emitter.on('testFollower', function(username) {
     var thisTest;
-    resolveUser(user, function(userObj) {
+    resolveUser(username, function(userObj) {
         if (userObj.resolved) {
             thisTest = {
                 user: {
@@ -271,13 +273,39 @@ emitter.on('testFollower', function(user) {
     });
 });
 
+emitter.on('testHost', function (hostObj) {
+    var thisTest;
+    resolveUser(hostObj.user.display_name, function(userObj) {
+        if (userObj.resolved) {
+            thisTest = {
+                user: {
+                    _id: userObj.user._id,
+                    display_name: userObj.user.display_name,
+                    logo: userObj.user.logo,
+                    viewers: hostObj.viewers
+                },
+                type: "host"
+            };
+        } else {
+            thisTest = {
+                user: {
+                    display_name: userObj.user.display_name
+                },
+                type: "host"
+            };
+        }
+        queue.push(thisTest);
+        checkQueue();
+    });
+});
+
 function resolveUser(username, callback) {
     client.api({
         url: '/users/' + username,
         method: 'GET',
         headers: {
             'Accept': "application/vnd.twitchtv.v3+json",
-            'Authorization': 'OAuth ' + channel.token.slice(6),
+            // 'Authorization': 'OAuth ' + channel.token.slice(6),
             'Client-ID': clientID
         }
     }, function(err, res, body) {
@@ -311,7 +339,6 @@ function resolveUser(username, callback) {
                 },
                 resolved: true
             };
-            // log.msg(body);
             callback(resolvedUser);
         }
     });

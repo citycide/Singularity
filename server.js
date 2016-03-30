@@ -37,16 +37,21 @@ app.set('view engine', 'ejs');
 var home = require('./public/views/index');
 var login = require('./public/views/login');
 var setup = require('./public/views/setup');
-// var overlay = require('./public/views/overlays/index');
-var follower = require('./public/views/overlays/follower');
 var auth = require('./public/views/auth');
+var overlay = require('./public/views/overlays/overlay');
+var followers = require('./public/views/overlays/followers');
+var hosts = require('./public/views/overlays/hosts');
+var slider = require('./public/views/overlays/slider');
 
 app.use('/', home);
 app.use('/dashboard', home);
 app.use('/login', login);
 app.use('/setup', setup);
 app.use('/auth', auth);
-app.use('/overlays', follower);
+app.use('/overlay', overlay);
+app.use('/followers', followers);
+app.use('/hosts', hosts);
+app.use('/slider', slider);
 
 server.listen(port, function(){
     log.sys('listening on *:' + port);
@@ -86,9 +91,9 @@ io.on('connection', function(socket){
         emitter.emit('testFollower', user);
     });
 
-    socket.on('testHoster', function(data){
-        log.alert('Received new host test: ' + data.name + ' ' + data.viewers);
-        emitter.emit('testHoster', data.name);
+    socket.on('testHost', function(data){
+        log.alert('Received new host test: ' + data.user.display_name + ' for ' + data.viewers + ' viewers');
+        emitter.emit('testHost', data);
     });
 
     socket.on('testSubscriber', function(user){
@@ -193,13 +198,22 @@ app.get('/logout', function (req, res) {
 /*
  **  OVERLAY
  */
-app.get('/overlays', function (req, res) {
+app.get('/overlay', function (req, res) {
     if (config.get('isLoggedIn')) {
-        res.render('overlays/follower');
+        res.render('overlays/overlay');
     } else {
         log.sys('User needs to authenticate.');
         res.redirect('/login');
     }
+});
+app.get('/slider', function (req, res) {
+    res.render('overlays/slider');
+});
+app.get('/followers', function (req, res) {
+    res.render('overlays/followers');
+});
+app.get('/hosts', function (req, res) {
+   res.render('overlays/hosts');
 });
 
 /*
@@ -216,6 +230,6 @@ app.get('/setup', function (req, res) {
     }
 });
 
-twitch.initAPI();
+// twitch.initAPI();
 
 module.exports = app;
