@@ -56,8 +56,8 @@
                                     <div class="panel panel-default">
                                         <div class="panel-body panel-stream-title">
                                             <div class="row">
-                                                <div class="col-md-1"><i class="fa fa-tag"></i></div>
-                                                <div id="streamTitle" class="col-md-10" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner"></i></div>
+                                                <div class="col-md-1"><i class="fa fa-tag fa-2x fa-body"></i></div>
+                                                <div id="streamTitle" class="col-md-10 font-med" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner fa-body"></i></div>
                                             </div>
                                         </div>
                                     </div>
@@ -69,14 +69,15 @@
                                     <div class="panel panel-default">
                                         <div class="panel-body panel-stream-game">
                                             <div class="row">
-                                                <div class="col-md-1"><i class="fa fa-gamepad"></i></div>
-                                                <div id="streamGame" class="col-md-10" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner"></i></div>
+                                                <div class="col-md-1" style="margin-top: -2px;"><i class="fa fa-gamepad fa-2x fa-body"></i></div>
+                                                <div id="streamGame" class="col-md-10 font-med" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner fa-body"></i></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
+                            <!--
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="panel panel-default">
@@ -89,6 +90,42 @@
                                     </div>
                                 </div>
                             </div>
+                            -->
+
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12">
+                                    <div class="panel panel-red">
+                                        <div class="panel-heading">
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3 pull-left panel-icon">
+                                                    <i class="fa fa-twitch fa-5x fa-body"></i>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 text-center panel-badge">
+                                                    <div id="badgeWhatev" class="font-huge text-dkgray"> 150 </div>
+                                                    <div class="panel-badge-label text-dkgray">WHATEVER</div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 text-center panel-badge">
+                                                    <div id="badgeSubs" class="font-huge text-dkgray"> 150 </div>
+                                                    <div class="panel-badge-label text-dkgray">SUBSCRIBERS</div>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3 text-center panel-badge">
+                                                    <div id="badgeFollow" class="font-huge text-dkgray"> <i class="fa fa-spin fa-spinner fa-body"></i> </div>
+                                                    <div class="panel-badge-label text-dkgray">FOLLOWERS</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--
+                                        <a href="#">
+                                            <div class="panel-footer">
+                                                <span class="pull-left">View Details</span>
+                                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                        </a>
+                                        -->
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-12">
@@ -96,13 +133,12 @@
                                         <div class="panel-heading" id="recentEventsHeading">
                                             <div class="row">
                                                 <div class="col-md-11">
-                                                    <span class="panel-title">
-                                                        RECENT EVENTS
-                                                    </span>
+                                                    <span class="panel-title title-bold">RECENT</span>
+                                                    <span class="panel-title">EVENTS</span>
                                                 </div>
                                                 <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
                                                     <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseRecentEvents" aria-expanded="false" aria-controls="collapseRecentEvents">
-                                                        <i class="fa fa-chevron-down"></i>
+                                                        <i class="fa fa-chevron-down fa-body"></i>
                                                     </div>
                                                 </div>
                                             </div>
@@ -122,9 +158,8 @@
                                         <div class="panel-heading" id="streamPreviewHeading">
                                             <div class="row">
                                                 <div class="col-md-11">
-                                                    <span class="panel-title">
-                                                        STREAM PREVIEW
-                                                    </span>
+                                                    <span class="panel-title title-bold">STREAM</span>
+                                                    <span class="panel-title">PREVIEW</span>
                                                 </div>
                                                 <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
                                                     <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseTwitchPlayer" aria-expanded="false" aria-controls="collapseTwitchPlayer">
@@ -135,7 +170,7 @@
                                         </div>
                                         <div id="collapseTwitchPlayer" class="panel-collapse collapse" role="tabpanel">
                                             <div class="panel-body">
-                                                <!-- <iframe src="//player.twitch.tv/?channel=citycide" height="400" width="100%" frameborder="0" scrolling="no" allowfullscreen=""></iframe> -->
+                                                <iframe src="//player.twitch.tv/?channel=citycide" height="400" width="100%" frameborder="0" scrolling="no" allowfullscreen=""></iframe>
                                             </div>
                                         </div>
                                     </div>
@@ -147,9 +182,8 @@
                                 <div class="panel-heading" id="twitchChatHeading">
                                     <div class="row">
                                         <div class="col-md-11">
-                                            <span class="panel-title">
-                                                TWITCH CHAT
-                                            </span>
+                                            <span class="panel-title title-bold">TWITCH</span>
+                                            <span class="panel-title">CHAT</span>
                                         </div>
                                         <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
                                             <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseTwitchChat" aria-expanded="false" aria-controls="collapseTwitchChat">

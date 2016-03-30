@@ -116,6 +116,9 @@ body {
 #twitchChat {
     height: 100%;
 }
+i.fa-body {
+    color: #363636;
+}
 
 .btnCollapse.pull-right {
     padding-right: 14px;
@@ -139,6 +142,28 @@ body {
 [contenteditable]:focus {
     border-bottom: 1px #13a89e solid;
     outline: none;
+}
+
+.font-med {
+    color: #363636;
+    font-size: 14px;
+}
+.font-huge {
+    font-size: 52px;
+    line-height: 48px;
+}
+.text-dkgray {
+    color: #363636;
+}
+.panel-icon {
+    margin-top: 6px;
+    line-height: 50px;
+}
+.panel-badge {
+    margin-top: 2px;
+}
+.title-bold {
+    font-weight: 600;
 }
 
 .btn.btn-circle {
