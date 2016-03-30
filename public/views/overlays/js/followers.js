@@ -190,13 +190,13 @@ var showAlert = function (user) {
 
     // Define constants
     var DELAY_INCREMENT = 0.09;
-    var SUB_COLORS = [
+    var bgColors = [
         '#13a89e',
         '#363636',
         '#13a89e'
     ];
     opts = opts || {};
-    opts.colors = opts.colors || SUB_COLORS;
+    opts.colors = opts.colors || bgColors;
 
     // Prepare the elements for staggering animations
     var reverseBgs = window.circlebgs.slice(0).reverse();
@@ -280,11 +280,7 @@ var showAlert = function (user) {
             // createjs.Sound.play('cut').volume = 1;
         },
         y: label.showY + 7,
-        ease: Elastic.easeOut.config(1, 1),
-        onComplete: function () {
-            // label.font = SECOND_MSG_FONT;
-            label.text = secondMsg;
-        }
+        ease: Elastic.easeOut.config(1, 1)
     }, '+=0');
 
     // Animate out
@@ -318,11 +314,7 @@ var showAlert = function (user) {
             // createjs.Sound.play('cut').volume = 1;
         },
         y: label.hideY,
-        ease: Elastic.easeOut.config(1, 1),
-        onComplete: function () {
-            // label.font = SECOND_MSG_FONT;
-            label.text = secondMsg;
-        }
+        ease: Elastic.easeOut.config(1, 1)
     }, '-=0.63');
 
     msgbgs.forEach(function(msgbg) {
@@ -332,6 +324,5 @@ var showAlert = function (user) {
         }, '-=1.074');
     });
 
-    // Kill time between successive notifications
     tl.to({}, 2.5, {});
 };
