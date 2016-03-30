@@ -78,7 +78,6 @@ $(document).ready( function() {
                 }
             });
     }
-
     setInterval(getStreamInfo, 60 * 1000);
 
     var updateTitle = function (title) {
@@ -197,7 +196,13 @@ $(document).ready( function() {
     $("#btnTestHost").click(function () {
         var user = $("#testHostUser").val();
         var viewers = parseInt($("#testHostViewers").val());
-        socket.emit('testHoster', [user, viewers]);
+        var testHost = {
+            user: {
+                display_name: user
+            },
+            viewers: viewers
+        };
+        socket.emit('testHost', testHost);
         log('Sent host test with: ' + user + ' for ' + viewers + ' viewers.', 'test');
         return false;
     });
@@ -245,6 +250,25 @@ $(document).ready( function() {
         e.preventDefault();
         e.stopPropagation();
     }, false);
+
+    nw.Window.get().on('new-win-policy', function(frame, url, policy) {
+        if (url.indexOf('bttvSettings') !== -1) {
+            policy.setNewWindowManifest({
+                'frame': true,
+                'title': 'BetterTTV Settings',
+                'min_width': 810,
+                'width': 810,
+                'height': 548
+            });
+        } else {
+            policy.setNewWindowManifest({
+                'frame': true,
+                'min_width': 600,
+                'width': 800,
+                'height': 600
+            });
+        }
+    });
 
     var win = nw.Window.get();
     var chatFrame = document.getElementById('chat_embed');
