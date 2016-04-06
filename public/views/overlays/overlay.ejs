@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <head>
+        <meta charset="UTF-8">
+        <title>singularity overlay</title>
+        <link rel="stylesheet" href="/views/overlays/css/overlay.css">
+        <!-- socket.io -->
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+</head>
+    <body>
+        <div id="overlayWrapper">
+            <div id="followerAlertArea">
+                <iframe src="/followers" frameborder="0" scrolling="no" width="800" height="200"></iframe>
+            </div>
+            <div id="hostAlertArea">
+                <iframe src="/hosts" frameborder="0" scrolling="no" width="800" height="200"></iframe>
+            </div>
+            <div id="tipAlertArea">
+                <iframe src="/tips" frameborder="0" scrolling="no" width="1000" height="200"></iframe>
+            </div>
+            <div id="nowPlayingArea">
+                <iframe src="/music" frameborder="0" scrolling="no" width="1000" height="200"></iframe>
+            </div>
+
+            <div id="bottomBar">
+                <div class="logoContainer">
+                    <img id="logoDiamondBottom" src="/views/overlays/images/overlay/DIAMOND_BOTTOM.png" width="174px" height="109px"/>
+                </div>
+                <div class="leftPanelContainer">
+                    <div id="lastFollowerBottom">citycide</div>
+                    <img id="leftPanelBottom" src="/views/overlays/images/overlay/LEFT_BOTTOM.png"/>
+                </div>
+                <div class="rightPanelContainer">
+                    <img id="rightPanelBottom" src="/views/overlays/images/overlay/RIGHT_BOTTOM.png"/>
+                </div>
+            </div>
+        </div>
+        <script>
+            var socket = io();
+
+            socket.on('lastFollower', function() {
+                // do stuff
+            });
+        </script>
+    </body>
+</html>

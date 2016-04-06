@@ -11,4 +11,5 @@ databaseUsage.txt
 Singularity-Dev.lnk
 restructure.txt
 public/js/vendor/betterttv.user.js
-public/views/overlays/
+public/views/overlays/images
+public/views/overlays/fonts
