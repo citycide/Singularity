@@ -10,11 +10,11 @@ $(document).ready( function() {
     var btnWinClose = $("#winClose");
 
     btnOpenAlerts.click(function() {
-        var winAlerts = nw.Window.open('http://localhost:2016/overlays', {
+        var winAlerts = nw.Window.open('http://localhost:2016/overlay', {
             position: 'center',
             focus: true,
-            width: 810,
-            height: 250
+            width: 1280,
+            height: 720
         });
         winAlerts.on('loaded', function(){
             log('SYS: Opened alerts window.');

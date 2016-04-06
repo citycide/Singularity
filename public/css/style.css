@@ -4,6 +4,7 @@ html, body { height: 100% !important; }
 
 body {
     padding-top: 70px !important;
+    background-color: #ddd !important;
 }
 #fullwrapper {
     display: flex;
@@ -71,6 +72,13 @@ body {
 .navbar {
     min-height: 50px !important;
 }
+.navbar-toggle {
+    -webkit-app-region: no-drag;
+    color: mintcream !important;
+    font-size: 22px;
+    padding: initial;
+    margin: -4px 0 -5px 0 !important;
+}
 
 #profile-dropdown-logo {
     display: block;
@@ -87,25 +95,119 @@ body {
 #winClose {
     margin-top: -1.5px;
 }
-.panel-default > .panel-heading-follow,
-#btnTestFollower {
-    color: mintcream !important;
-    background-color: #0d47a1 !important;
+.tab-pane {
+    height: initial !important;
 }
-.panel-default > .panel-heading-host,
-#btnTestHost {
-    color: mintcream !important;
-    background: #f57c00 !important;
+
+/* custom tabs */
+#testing h3 {
+    margin-top: 0;
 }
-.panel-default > .panel-heading-subscriber,
-#btnTestSub {
-    color: mintcream !important;
-    background: #388e3c !important;
+#testing .badge {
+    background-color: #777;
 }
-.panel-default > .panel-heading-donation,
-#btnTestDonation {
-    color: mintcream !important;
-    background: #ef5350 !important;
+
+#testing .tabs-left {
+}
+
+#testing .nav-tabs {
+    float: left;
+    border-bottom: 0;
+    font-size: 24px;
+}
+#testing .nav-tabs li {
+    float: none;
+    margin: 0;
+}
+#testing .nav-tabs li a {
+    margin-right: 0;
+    border: 0;
+    background-color: #363636;
+}
+#testing .nav-tabs li a:hover {
+    background-color: #fff;
+}
+#testing .nav-tabs .fa {
+    color: #fff;
+}
+#testing .nav-tabs .active .fa {
+    color: #363636;
+}
+#testing .nav-tabs>li>a,
+#testing .nav-tabs>li>a:focus {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+#testing .nav-tabs>li.active>a,
+#testing .nav-tabs>li.active>a:focus {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+#testing .nav-tabs > li.active > a,
+#testing .nav-tabs > li.active > a:hover,
+#testing .nav-tabs > li.active > a:focus {
+    background-color: #fff;
+    border: 0;
+}
+#testing .nav-tabs > li > a:hover,
+#testing .nav-tabs > li > a:focus:hover {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    background-color: #484848;
+}
+#testing .nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus:hover {
+    background-color: #fff;
+}
+#testing .tab-content {
+    margin-left: 45px;
+}
+#testing .tab-content .tab-pane {
+    display: none;
+    background-color: #fff;
+    padding: 1.6rem;
+    overflow-y: auto;
+    min-height: 320px;
+}
+#testing .tab-content .tab-pane .fa {
+    color: #363636;
+}
+#testing .tab-content .active {
+    display: block;
+}
+#testing .list-group {
+    width: 100%;
+}
+#testing .list-group .list-group-item {
+    height: 50px;
+}
+#testing .list-group .list-group-item h4,
+#testing .list-group .list-group-item span {
+    line-height: 11px;
+}
+/* end custom tabs */
+
+.tab-content {
+    margin-left: 45px;
+}
+.tab-content .tab-pane {
+    display: none;
+    background-color: #ddd;
+    padding: 1.6rem;
+    overflow-y: auto;
+}
+.tab-content .active {
+    display: block;
+}
+
+.list-group {
+    width: 100%;
+}
+.list-group .list-group-item {
+    height: 50px;
+}
+.list-group .list-group-item h4, .list-group .list-group-item span {
+    line-height: 11px;
 }
 .tooltip .tooltip-inner {background-color: #363636;}
 .tooltip.bottom .tooltip-arrow {border-bottom-color: #363636 !important;}
@@ -118,6 +220,20 @@ body {
 }
 i.fa-body {
     color: #363636;
+}
+.panel, .panel-default {
+    background-color: #fff !important;
+    border-radius: 0 !important;
+}
+.panel-badge-container {
+    padding-top: 18px !important;
+}
+.panel-badge-container .panel-icon {
+    margin-right: 20px !important;
+}
+#badgeFollow i {
+    font-size: 22px;
+    line-height: 48px;
 }
 
 .btnCollapse.pull-right {
@@ -199,10 +315,11 @@ i.fa-body {
     word-wrap: break-word;
 }
 #footer {
+    bottom: 0;
     padding-top: 12px;
     padding-left: 40px;
     padding-right: 40px;
-    min-height: 53px;
+    min-height: 50px;
     background: #13a89e;
 }
 #footer p {
@@ -211,7 +328,7 @@ i.fa-body {
     color: mintcream;
 }
 #footer a {
-    color: beige;
+    color: floralwhite;
 }
 
 ::-webkit-scrollbar {

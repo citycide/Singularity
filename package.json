@@ -1,29 +1,30 @@
 {
   "name": "Singularity",
   "description": "Twitch overlay & alert system",
-  "version": "0.2",
+  "version": "0.2.0",
   "main": "index.html",
-  "inject_js_end": "./public/js/betterttv.user.js",
+  "inject_js_end": "./public/js/vendor/betterttv.user.js",
   "window": {
     "title": "Singularity",
     "icon": "./assets/singularity_lg.png",
     "toolbar": false,
     "frame": false,
     "fullscreen": false,
-    "min_width": 1150,
-    "width": 1300,
-    "height": 925
+    "min_width": 1030,
+    "width": 1030,
+    "height": 815,
+    "min_height": 52
   },
   "node-remote": "http://localhost",
   "dependencies": {
-    "express": "4.x",
-    "tmi.js": "0.0.28",
-    "socket.io": "latest",
-    "ejs": "^2.4.1",
-    "nedb": "1.x",
     "body-parser": "^1.15.0",
     "cookie-parser": "^1.4.1",
+    "ejs": "^2.4.1",
+    "express": "4.x",
     "express-session": "^1.13.0",
-    "simple-json-store": "0.0.1"
+    "nedb": "1.x",
+    "simple-json-store": "0.0.1",
+    "socket.io": "latest",
+    "tmi.js": "0.0.28"
   }
 }

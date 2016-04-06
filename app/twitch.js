@@ -3,11 +3,12 @@
 
 var request = require('request');
 var irc = require('tmi.js');
+var fs = require('fs');
 var emitter = require('./emitter');
 var log = require('./logger');
 var config = require('./configstore');
 var db = require('./db');
-var moment = require('../public/js/moment.min');
+var moment = require('../public/js/vendor/moment.min.js');
 
 var channel = {
     name: config.get('channel'),
@@ -47,8 +48,8 @@ function initAPI(pollInterval) {
     if (!pollInterval) pollInterval = 30 * 1000;
     setTimeout(function() {
         pollFollowers(pollInterval);
-        // pollDonations(pollInterval);
     }, 5000);
+    setTimeout(checkQueue, 10000);
 }
 
 function pollFollowers(pollInterval) {
@@ -102,14 +103,10 @@ function pollFollowers(pollInterval) {
                         storeThisFollower = {
                             twitch_id: thisUser.user._id,
                             timestamp: moment(thisUser.created_at),
-                            name: thisUser.user.display_name
+                            name: thisUser.user.display_name,
+                            eventType: 'follower'
                         };
-                        db.events.find({"follows.twitch_id": {$exists: thisUser.user._id}}, function (err, docs) {
-                            if (err) {
-                                log.debug(err);
-                                db.events.insert({follows: [storeNewFollower]})
-                            }
-                        });
+                        // db.events.update({follows: [{twitch_id: thisUser.user._id}]}, {follows: [storeThisFollower]}, {upsert: true});
                     }
                 } else {
                     for (i = 0; i < body.follows.length; i++) {
@@ -119,10 +116,12 @@ function pollFollowers(pollInterval) {
                                 display_name: body.follows[i].user.display_name,
                                 logo: body.follows[i].user.logo,
                                 created_at: body.follows[i].created_at,
-                                notifications: body.follows[i].notifications
+                                notifications: body.follows[i].notifications,
+                                eventType: 'follower'
                             },
                             type: "follower"
                         };
+                        // writeFollower(thisUser.display_name);
                         if (followers.indexOf(thisUser.user.display_name) == -1) {
                             followers.push(thisUser.user.display_name);
                             queue.push(thisUser);
@@ -131,7 +130,7 @@ function pollFollowers(pollInterval) {
                                 timestamp: moment(thisUser.created_at),
                                 name: thisUser.user.display_name
                             };
-                            db.events.update({follows: [{twitch_id: thisUser.user._id}]}, {follows: [storeNewFollower]}, {upsert: true});
+                            // db.events.update({follows: [{twitch_id: thisUser.user._id}]}, {follows: [storeNewFollower]}, {upsert: true});
                         }
                     }
                 }
@@ -140,6 +139,25 @@ function pollFollowers(pollInterval) {
         setTimeout(pollFollowers, pollInterval);
     });
 }
+
+/** DOESN'T WORK
+ * Should write the latest follower to a text file but fails if the file doesn't exist...
+function writeFollower(followerName) {
+    var followerFile = __dirname + '/../outputs/latestfollower.txt';
+    fs.statSync(followerFile, function(err, stats) {
+        if (err && err.errno === 34) {
+            fs.writeFile(followerFile, ' ', function (err) {
+                if (err) return console.log(err);
+            });
+        }
+        if (followerName !== fs.readFileSync(followerFile)) {
+            fs.writeFile(followerFile, followerName, function (err) {
+                if (err) return console.log(err);
+            });
+        }
+    });
+}
+*/
 
 client.on('hosted', function (channel, username, viewers) {
     var thisHost;
@@ -242,8 +260,8 @@ function actOnQueue(data, type) {
         case "subscriber":
             emitter.emit('subscriberAlert', data);
             break;
-        case "donor":
-            emitter.emit('donationAlert', data);
+        case "tip":
+            emitter.emit('tipAlert', data);
             break;
     }
 }
@@ -299,6 +317,10 @@ emitter.on('testHost', function (hostObj) {
     });
 });
 
+emitter.on('tipeeeEvent', function (data) {
+    queue.push(data);
+});
+
 function resolveUser(username, callback) {
     client.api({
         url: '/users/' + username,
@@ -346,3 +368,4 @@ function resolveUser(username, callback) {
 
 module.exports.initAPI = initAPI;
 module.exports.pollFollowers = pollFollowers;
+module.exports.checkQueue = checkQueue;

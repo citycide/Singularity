@@ -1,3 +1,8 @@
+@font-face {
+    font-family: 'UniversLtCon';
+    src: url('/views/overlays/fonts/UniversLTStd-LightCn.otf');
+}
+
 body {
 	overflow: hidden !important;
     margin: 0;
@@ -8,11 +13,6 @@ body {
 	display: inline-block;
 	width: 800px;
 	height: 200px;
-}
-#centerFinder {
-    width: 400px;
-    height: 2px;
-    background-color: red;
 }
 
 ::-webkit-scrollbar {

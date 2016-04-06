@@ -138,7 +138,7 @@ var showAlert = function (user) {
     msgContainer.addChild(msg1);
 
     // Create the text element
-    label = new createjs.Text(' ', '600 40px arial', 'mintcream');
+    label = new createjs.Text(' ', '600 40px UniversLtCon', 'floralwhite');
     label.x = hCenter;
     label.showY = vCenter - 30;
     label.hideY = vCenter - 45;

@@ -1,12 +1,21 @@
-$(document).ready( function() {
-    var socket = io();
+var socket = io();
+var dev = false;
 
+$(document).ready( function() {
     var testFollowerUser = document.getElementById("testFollowerUser");
     var testHostUser = document.getElementById("testHostUser");
     var testSubUser = document.getElementById("testSubUser");
-    var testDonationUser = document.getElementById("testDonationUser");
+    var testTipUser = document.getElementById("testTipUser");
+    setTimeout(getStreamInfo, 1.5 * 1000);
 
-    var channel, token;
+    testFollowerUser.value = channel;
+    testHostUser.value = channel;
+    testSubUser.value = channel;
+    testTipUser.value = channel;
+    document.getElementById('chat_embed').src = 'http://www.twitch.tv/' + channel + '/chat';
+    document.getElementById('profile-dropdown-logo').src = channelAvatar;
+
+    /*
     socket.emit('getUserInfo');
     socket.on('setUserInfo', function (data) {
         channel = data.user;
@@ -14,37 +23,16 @@ $(document).ready( function() {
         testFollowerUser.value = data.user;
         testHostUser.value = data.user;
         testSubUser.value = data.user;
-        testDonationUser.value = data.user;
+        testTipUser.value = data.user;
         document.getElementById('chat_embed').src = 'http://www.twitch.tv/' + data.user + '/chat';
         document.getElementById('profile-dropdown-logo').src = data.logo;
 
-        setTimeout(getStreamInfo, 1.5 * 1000);
+
     });
-
-    var dev = false;
-    var log = function (msg, type) {
-        if (dev) {
-            if (type) {
-                switch (type) {
-                    case 'dash':
-                        console.log('DASH: ' + msg);
-                        break;
-                    case 'test':
-                        console.log('TEST: ' + msg);
-                        break;
-                }
-            } else {
-                console.log(msg);
-            }
-        }
-    };
-
-    $('[data-toggle="tooltip"]').tooltip();
-    $('[data-tooltip="tooltip"]').tooltip();
+    */
     var gameSpan = $('#streamGame');
     var statusSpan = $('#streamTitle');
-    var followSpan = $('#badgeFollow');
-
+    var followDiv = $('#badgeFollow');
     function getStreamInfo() {
         $.getJSON(
             'https://api.twitch.tv/kraken/channels/' + channel,
@@ -56,10 +44,10 @@ $(document).ready( function() {
                 var status = data.status;
                 var followers = parseInt(data.followers);
                 if (followers === null || followers === undefined || followers === "" || isNaN(followers)) {
-                    followSpan.text('???');
+                    followDiv.text('???').addClass('font-huge');
                     log('Could not get follower count.', 'dash');
                 } else {
-                    followSpan.text(followers);
+                    followDiv.text(followers).addClass('font-huge');
                     log('Retrieved follower count. (' + followers + ')', 'dash');
                 }
                 if (game === null || game === undefined || game === "") {
@@ -80,29 +68,18 @@ $(document).ready( function() {
     }
     setInterval(getStreamInfo, 60 * 1000);
 
-    var updateTitle = function (title) {
-        $.get(
-            'https://api.twitch.tv/kraken/channels/' + channel,
-            {
-                "channel[status]": title,
-                "_method": "put",
-                "oauth_token": token.slice(6)
-            }
-        );
-        log('Updated stream title to: ' + title, 'dash');
-    };
+    document.getElementById('currentSongTitle').innerText = currentSong;
+    socket.on('newSong', function (data) {
+        currentSong = data;
+        document.getElementById('currentSongTitle').innerText = data;
+    });
 
-    var updateGame = function (game) {
-        $.get(
-            'https://api.twitch.tv/kraken/channels/' + channel,
-            {
-                "channel[game]": game,
-                "_method": "put",
-                "oauth_token": token.slice(6)
-            }
-        );
-        log('Updated current game to: ' + game, 'dash');
-    };
+    $('[data-toggle="popover"]').popover({
+        trigger: 'hover',
+        container: 'body'
+    });
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-tooltip="tooltip"]').tooltip();
 
     var isEditingTitle = false;
     var currentTitle;
@@ -170,9 +147,6 @@ $(document).ready( function() {
                 .data('bs.tooltip')
                 .$tip.find('.tooltip-inner')
                 .text('EXPAND');
-            parent.find("iframe", function () {
-                console.log('found');
-            });
         } else {
             $(this).css('transform', '');
             parent.attr('title', 'COLLAPSE')
@@ -180,9 +154,28 @@ $(document).ready( function() {
                 .data('bs.tooltip')
                 .$tip.find('.tooltip-inner')
                 .text('COLLAPSE');
-            parent.find("iframe", function () {
-                this.show();
-            });
+        }
+    });
+    var streamEmbed = document.getElementById("streamEmbed");
+    var btnCollapseStreamEmbed = $(".btnCollapseStreamEmbed");
+    btnCollapseStreamEmbed.click(function () {
+        var parent = $(this).parent();
+        if ($(this).css('transform') == 'none') {
+            $(this).css('transform', 'rotate(180deg)');
+            parent.attr('title', 'EXPAND')
+                .tooltip('fixTitle')
+                .data('bs.tooltip')
+                .$tip.find('.tooltip-inner')
+                .text('EXPAND');
+            streamEmbed.src = '//player.twitch.tv/?channel=' + channel;
+        } else {
+            $(this).css('transform', '');
+            parent.attr('title', 'COLLAPSE')
+                .tooltip('fixTitle')
+                .data('bs.tooltip')
+                .$tip.find('.tooltip-inner')
+                .text('COLLAPSE');
+            streamEmbed.src = '';
         }
     });
 
@@ -220,16 +213,38 @@ $(document).ready( function() {
         return false;
     });
 
-    $("#btnTestDonation").click(function () {
-        var user = $("#testDonationUser").val();
-        var amount = parseInt($("#testDonationAmt").val());
-        var message = $("#testDonationMsg").val();
-        socket.emit('testDonation', [user, amount, message]);
+    $("#btnTestTip").click(function () {
+        var user = $("#testTipUser").val();
+        var amount = parseInt($("#testTipAmt").val());
+        var formattedAmount = '$' + amount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
+        var message = $("#testTipMsg").val();
+        var testTip = {
+            user: {
+                name: user
+            },
+            amount: formattedAmount,
+            message: message
+        };
+        socket.emit('testTip', testTip);
         if (message === "" || message === null || message === undefined) {
-            log('Sent new donation test from: ' + user + ' for ' + '$' + amount + '.', 'test');
+            log('Sent new tip test from: ' + user + ' for ' + '$' + amount + '.', 'test');
         } else {
-            log('Sent new donation test from: ' + user + ' for ' + '$' + amount + ', and message ' + message, 'test');
+            log('Sent new tip test from: ' + user + ' for ' + '$' + amount + ', and message ' + message, 'test');
         }
+        return false;
+    });
+
+    $("#btnTestMusic").click(function () {
+        var song = $("#testSongTitle").val();
+        socket.emit('testMusic', song);
+        log('Sent now playing with title: ' + song + '.', 'test');
+        return false;
+    });
+
+    $("#btnSendCurrentSong").click(function () {
+        var song = currentSong;
+        socket.emit('testMusic', song);
+        log('Sent now playing with title: ' + song + '.', 'test');
         return false;
     });
 
@@ -288,3 +303,60 @@ $(document).ready( function() {
 function openLink(url) {
     nw.Shell.openExternal(url);
 }
+
+function updateTitle(title) {
+    $.get(
+        'https://api.twitch.tv/kraken/channels/' + channel,
+        {
+            "channel[status]": title,
+            "_method": "put",
+            "oauth_token": token.slice(6)
+        }
+    );
+    log('Updated stream title to: ' + title, 'dash');
+}
+
+function updateGame(game) {
+    $.get(
+        'https://api.twitch.tv/kraken/channels/' + channel,
+        {
+            "channel[game]": game,
+            "_method": "put",
+            "oauth_token": token.slice(6)
+        }
+    );
+    log('Updated current game to: ' + game, 'dash');
+}
+
+function log(msg, type) {
+    if (dev) {
+        if (type) {
+            switch (type) {
+                case 'dash':
+                    console.log('DASH: ' + msg);
+                    break;
+                case 'test':
+                    console.log('TEST: ' + msg);
+                    break;
+            }
+        } else {
+            console.log(msg);
+        }
+    }
+}
+
+var tabsFn = (function() {
+    function init() {
+        setHeight();
+    }
+
+    function setHeight() {
+        var $tabPane = $('.tab-pane'),
+            tabsHeight = $('.nav-tabs').height();
+
+        $tabPane.css({
+            height: tabsHeight
+        });
+    }
+    $(init);
+})();

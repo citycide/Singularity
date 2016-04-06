@@ -5,9 +5,11 @@ var http = require('http'),
     session = require('express-session'),
     socketio = require('socket.io'),
     ejs = require('ejs'),
-    moment = require('./public/js/moment.min');
+    moment = require('./public/js/vendor/moment.min.js');
 
 var twitch = require('./app/twitch');
+var tipeee = require('./app/tipeee');
+var musicWatcher = require('./app/nowPlaying');
 var emitter = require('./app/emitter');
 var config = require('./app/configstore');
 var log = require('./app/logger');
@@ -41,7 +43,9 @@ var auth = require('./public/views/auth');
 var overlay = require('./public/views/overlays/overlay');
 var followers = require('./public/views/overlays/followers');
 var hosts = require('./public/views/overlays/hosts');
+var tips = require('./public/views/overlays/tips');
 var slider = require('./public/views/overlays/slider');
+var nowPlaying = require('./public/views/overlays/nowPlaying');
 
 app.use('/', home);
 app.use('/dashboard', home);
@@ -51,7 +55,9 @@ app.use('/auth', auth);
 app.use('/overlay', overlay);
 app.use('/followers', followers);
 app.use('/hosts', hosts);
+app.use('/tips', tips);
 app.use('/slider', slider);
+app.use('/music', nowPlaying);
 
 server.listen(port, function(){
     log.sys('listening on *:' + port);
@@ -63,7 +69,7 @@ io.on('connection', function(socket){
     log.sys('Client connected.');
 
     socket.on('disconnect', function(){
-        log.sys('Client disconnected');
+        log.sys('Client disconnected.');
     });
 
     socket.on('authCallback', function(data) {
@@ -75,6 +81,10 @@ io.on('connection', function(socket){
             config.set('isLoggedIn', true);
             log.auth(config.get('accessToken') + ' authed as ' + config.get('channel'));
         }
+    });
+
+    socket.on('setupComplete', function(){
+        config.set('setupComplete', true);
     });
 
     socket.on('getUserInfo', function () {
@@ -101,34 +111,47 @@ io.on('connection', function(socket){
         emitter.emit('testSubscriber', user);
     });
 
-    socket.on('testDonor', function(data){
-        log.alert('Received new donation test: ' + data.name + ' ' + data.amount + ' ' + data.message);
-        emitter.emit('testDonor', data);
+    socket.on('testTip', function(data){
+        log.alert('Received new tip test: ' + data.user.name + ' ' + data.amount + ' ' + data.message);
+        io.emit('tipAlert', data);
+    });
+
+    socket.on('testMusic', function(data){
+        log.alert('Received new music test: ' + data);
+        io.emit('newTestSong', data);
+    });
+
+    socket.on('getCurrentSong', function() {
+        io.emit('setCurrentSong', musicWatcher.song);
     });
 
     socket.on('alertComplete', function () {
         emitter.emit('alertComplete');
     });
-
-    socket.on('setupComplete', function(){
-        config.set('setupComplete', true);
-    });
 });
 
-emitter.on('followAlert', function (user) {
-    io.emit('followAlert', user);
+emitter.on('followAlert', function (data) {
+    io.emit('followAlert', data);
 });
 
-emitter.on('hostAlert', function (user) {
-    io.emit('hostAlert', user);
+emitter.on('hostAlert', function (data) {
+    io.emit('hostAlert', data);
 });
 
-emitter.on('subscriberAlert', function (user) {
-    io.emit('subscriberAlert', user);
+emitter.on('subscriberAlert', function (data) {
+    io.emit('subscriberAlert', data);
 });
 
-emitter.on('donationAlert', function (user) {
-    io.emit('donationAlert', user);
+emitter.on('tipAlert', function (data) {
+    io.emit('tipAlert', data);
+});
+
+emitter.on('initSong', function (data) {
+    io.emit('initSong', data);
+});
+
+emitter.on('newSong', function (data) {
+    io.emit('newSong', data);
 });
 
 /*********************************** ROUTES ***********************************/
@@ -140,8 +163,11 @@ app.get('/', function (req, res) {
     if (config.get('setupComplete') === true) {
         if (config.get('isLoggedIn')) {
             res.render('index', {
-                user: config.get('channel'),
-                clientID: config.get('clientID')
+                channel: config.get('channel'),
+                channelAvatar: config.get('channelAvatar'),
+                token: config.get('accessToken'),
+                clientID: config.get('clientID'),
+                currentSong: musicWatcher.song
             });
             log.sys('Directing to home page.');
         } else {
@@ -215,6 +241,12 @@ app.get('/followers', function (req, res) {
 app.get('/hosts', function (req, res) {
    res.render('overlays/hosts');
 });
+app.get('/tips', function (req, res) {
+    res.render('overlays/tips');
+});
+app.get('/music', function (req, res) {
+    res.render('overlays/nowPlaying');
+});
 
 /*
  **  APP SETUP PAGE
@@ -230,6 +262,6 @@ app.get('/setup', function (req, res) {
     }
 });
 
-// twitch.initAPI();
+twitch.initAPI();
 
 module.exports = app;

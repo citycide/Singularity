@@ -14,40 +14,45 @@
     <div id="fullwrapper">
         <nav role="navigation" class="navbar navbar-default navbar-fixed-top">
             <div class="nav nav-wrapper">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <i class="fa fa-ellipsis-v"></i>
+                </button>
                 <span class="navbar-brand">
                     <span>SINGULARITY</span>
                 </span>
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#tab-dash" data-toggle="tab">DASHBOARD</a></li>
-                    <li><a href="#tab-test" data-toggle="tab">ALERT CONTROL</a></li>
-                    <li><a href="#tab-about" data-toggle="tab">ABOUT</a></li>
-                </ul>
-                <ul class="nav navbar-nav navbar-right">
-                    <div class="btn-group pull-left">
-                        <div class="dropdown-toggle" data-toggle="dropdown" href="#"><%- user %>&nbsp;&nbsp;<span class="caret"></span></div>
-                        <ul class="dropdown-menu">
-                            <li><img id="profile-dropdown-logo" src="" width="150px" height="150px"></li>
-                            <li id="extTwitchChannel"><a href="#"><i class="fa fa-external-link"></i>&nbsp;&nbsp;Twitch Channel</a></li>
-                            <li id="extTwitchProfile"><a href="#"><i class="fa fa-external-link"></i>&nbsp;&nbsp;Twitch Profile</a></li>
-                            <li class="divider"></li>
-                            <li><a href="/logout"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;LOGOUT</a></li>
-                        </ul>
-                    </div>
-                    <li><a href="#" id="openAlerts" data-toggle="tooltip" data-placement="bottom" title="LAUNCH ALERT WINDOW"><i class="fa fa-clone"></i></a></li>
-                    <li data-toggle="modal" data-target="#helpModal">
-                        <a href="#" id="openHelpModal" data-toggle="tooltip" data-placement="bottom" title="HELP"><i class="fa fa-question-circle"></i></a>
-                    </li>
-                    <li><a href="#" id="winRefresh" data-toggle="tooltip" data-placement="bottom" title="REFRESH"><i class="fa fa-refresh"></i></a></li>
-                    <li><a href="#" id="winMinimize" data-toggle="tooltip" data-placement="bottom" title="MINIMIZE"><i class="fa fa-minus"></i></a></li>
-                    <li><a href="#" id="winMaximize" data-toggle="tooltip" data-placement="bottom" title="MAXIMIZE"><i class="fa fa-square-o"></i></a></li>
-                    <li><a href="#" id="winClose" data-toggle="tooltip" data-placement="bottom" title="CLOSE"><i class="fa fa-times"></i></a></li>
-                </ul>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#tab-dash" data-toggle="tab">DASHBOARD</a></li>
+                        <li><a href="#tab-test" data-toggle="tab">OVERLAY CONTROL</a></li>
+                        <li><a href="#tab-about" data-toggle="tab">ABOUT</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <div class="btn-group pull-left">
+                            <div class="dropdown-toggle" data-toggle="dropdown" href="#"><%- channel %>&nbsp;&nbsp;<span class="caret"></span></div>
+                            <ul class="dropdown-menu">
+                                <li><img id="profile-dropdown-logo" src="" width="150px" height="150px"></li>
+                                <li id="extTwitchChannel"><a href="#"><i class="fa fa-external-link"></i>&nbsp;&nbsp;Twitch Channel</a></li>
+                                <li id="extTwitchProfile"><a href="#"><i class="fa fa-external-link"></i>&nbsp;&nbsp;Twitch Profile</a></li>
+                                <li class="divider"></li>
+                                <li><a href="/logout"><i class="fa fa-sign-out"></i>&nbsp;&nbsp;LOGOUT</a></li>
+                            </ul>
+                        </div>
+                        <li><a href="#" id="openAlerts" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="LAUNCH ALERT WINDOW"><i class="fa fa-clone"></i></a></li>
+                        <li data-toggle="modal" data-target="#helpModal">
+                            <a href="#" id="openHelpModal" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="HELP"><i class="fa fa-question-circle"></i></a>
+                        </li>
+                        <li><a href="#" id="winRefresh" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="REFRESH"><i class="fa fa-refresh"></i></a></li>
+                        <li><a href="#" id="winMinimize" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MINIMIZE"><i class="fa fa-minus"></i></a></li>
+                        <li><a href="#" id="winMaximize" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MAXIMIZE"><i class="fa fa-square-o"></i></a></li>
+                        <li><a href="#" id="winClose" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="CLOSE"><i class="fa fa-times"></i></a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
         <div id="bodywrapper">
             <div class="tab-content" id="pageContent">
-                <div class="tab-pane active fade in" id="tab-dash">
+                <div class="tab-pane fade in active" id="tab-dash">
                     <div class="container" id="dashboard">
                         <div class="col-md-6">
 
@@ -57,7 +62,7 @@
                                         <div class="panel-body panel-stream-title">
                                             <div class="row">
                                                 <div class="col-md-1"><i class="fa fa-tag fa-2x fa-body"></i></div>
-                                                <div id="streamTitle" class="col-md-10 font-med" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner fa-body"></i></div>
+                                                <div id="streamTitle" class="col-md-10 font-med" data-toggle="tooltip" data-placement="bottom" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner fa-body"></i></div>
                                             </div>
                                         </div>
                                     </div>
@@ -70,7 +75,7 @@
                                         <div class="panel-body panel-stream-game">
                                             <div class="row">
                                                 <div class="col-md-1" style="margin-top: -2px;"><i class="fa fa-gamepad fa-2x fa-body"></i></div>
-                                                <div id="streamGame" class="col-md-10 font-med" data-toggle="tooltip" data-placement="top" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner fa-body"></i></div>
+                                                <div id="streamGame" class="col-md-10 font-med" data-toggle="tooltip" data-placement="bottom" title="CLICK TO EDIT">LOADING... <i class="fa fa-spin fa-spinner fa-body"></i></div>
                                             </div>
                                         </div>
                                     </div>
@@ -94,10 +99,10 @@
 
                             <div class="row">
                                 <div class="col-lg-12 col-md-12">
-                                    <div class="panel panel-red">
-                                        <div class="panel-heading">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading panel-badge-container">
                                             <div class="row">
-                                                <div class="col-lg-3 col-md-3 pull-left panel-icon">
+                                                <div class="col-lg-2 col-md-2 pull-left panel-icon">
                                                     <i class="fa fa-twitch fa-5x fa-body"></i>
                                                 </div>
                                                 <div class="col-lg-3 col-md-3 text-center panel-badge">
@@ -109,8 +114,8 @@
                                                     <div class="panel-badge-label text-dkgray">SUBSCRIBERS</div>
                                                 </div>
                                                 <div class="col-lg-3 col-md-3 text-center panel-badge">
-                                                    <div id="badgeFollow" class="font-huge text-dkgray"> <i class="fa fa-spin fa-spinner fa-body"></i> </div>
-                                                    <div class="panel-badge-label text-dkgray">FOLLOWERS</div>
+                                                    <div id="badgeFollow" class="text-dkgray"> <i class="fa fa-spin fa-spinner fa-body fa-badge"></i> </div>
+                                                    <div class="panel-badge-label text-dkgray">FOLLOWERS&nbsp</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -162,7 +167,7 @@
                                                     <span class="panel-title">PREVIEW</span>
                                                 </div>
                                                 <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
-                                                    <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseTwitchPlayer" aria-expanded="false" aria-controls="collapseTwitchPlayer">
+                                                    <div class="btnCollapseStreamEmbed" role="button" data-toggle="collapse" href="#collapseTwitchPlayer" aria-expanded="false" aria-controls="collapseTwitchPlayer">
                                                         <i class="fa fa-chevron-up"></i>
                                                     </div>
                                                 </div>
@@ -170,7 +175,7 @@
                                         </div>
                                         <div id="collapseTwitchPlayer" class="panel-collapse collapse" role="tabpanel">
                                             <div class="panel-body">
-                                                <iframe src="//player.twitch.tv/?channel=citycide" height="400" width="100%" frameborder="0" scrolling="no" allowfullscreen=""></iframe>
+                                                <iframe src="" id="streamEmbed" height="400" width="100%" frameborder="0" scrolling="no" allowfullscreen=""></iframe>
                                             </div>
                                         </div>
                                     </div>
@@ -194,7 +199,7 @@
                                 </div>
                                 <div id="collapseTwitchChat" class="panel-collapse collapse in" role="tabpanel">
                                     <div class="panel-body">
-                                        <iframe frameborder='0' id='chat_embed' src='//www.twitch.tv/citycide/chat' height='675' width='100%' scrolling='yes' nwfaketop></iframe>
+                                        <iframe frameborder='0' id='chat_embed' src="//www.twitch.tv/' + '<%- channel %>' + '/chat" height='675' width='100%' scrolling='yes' nwfaketop></iframe>
                                     </div>
                                 </div>
                             </div>
@@ -203,6 +208,164 @@
                 </div>
                 <div class="tab-pane fade" id="tab-test">
                     <div class="container" id="testing">
+
+                        <div class="row">
+                            <div class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1">
+                                <div class="tabs-left">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active" data-toggle="tooltip" data-trigger="hover" data-placement="left" title="FOLLOWER">
+                                            <a href="#tabFollower" data-toggle="tab"><span class="fa fa-heart fa-fw"></span></a>
+                                        </li>
+                                        <li data-toggle="tooltip" data-trigger="hover" data-placement="left" title="HOST">
+                                            <a href="#tabHost" data-toggle="tab"><span class="fa fa-users fa-fw"></span></a>
+                                        </li>
+                                        <li data-toggle="tooltip" data-trigger="hover" data-placement="left" title="SUBSCRIBER">
+                                            <a href="#tabSub" data-toggle="tab"><span class="fa fa-star fa-fw"></span></a>
+                                        </li>
+                                        <li data-toggle="tooltip" data-trigger="hover" data-placement="left" title="TIP">
+                                            <a href="#tabTip" data-toggle="tab"><span class="fa fa-usd fa-fw"></span></a>
+                                        </li>
+                                        <li data-toggle="tooltip" data-trigger="hover" data-placement="left" title="NOW PLAYING">
+                                            <a href="#tabMusic" data-toggle="tab"><span class="fa fa-headphones fa-fw"></span></a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div class="tab-pane active fade in" id="tabFollower">
+                                            <h3>FOLLOWER</h3>
+                                            <form class="form-horizontal" onSubmit="return false;">
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-6 col-sm-10">
+                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
+                                                        <input type="text" id="testFollowerUser" name="user" class="form-control" value="citycide">
+                                                        <div class="input-group-addon">
+                                                            <a tabindex="0" data-toggle="popover" title="Username" data-content="Singularity will attempt to find an actual user by this name to pull the user's picture. You can still send names that aren't real users - in this case, Twitch's default profile picture will be used.">
+                                                                <i class="fa fa-question-circle fa-fw"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="pull-right">
+                                                    <button id="btnTestFollower" type="submit" class="btn btn-info">SEND</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="tab-pane fade" id="tabHost">
+                                            <h3>HOST</h3>
+                                            <form class="form-horizontal" onSubmit="return false;">
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-6">
+                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
+                                                        <input type="text" id="testHostUser" name="user" class="form-control" value="citycide">
+                                                        <div class="input-group-addon">
+                                                            <a tabindex="0" data-toggle="popover" title="Username" data-content="Singularity will attempt to find an actual user by this name to pull the user's picture. You can still send names that aren't real users - in this case, Twitch's default profile picture will be used.">
+                                                                <i class="fa fa-question-circle fa-fw"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-6">
+                                                        <div class="input-group-addon"><i class="fa fa-eye fa-fw"></i></div>
+                                                        <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">
+                                                    </div>
+                                                </div>
+                                                <div class="pull-right">
+                                                    <button id="btnTestHost" type="submit" class="btn btn-info">SEND</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="tab-pane fade" id="tabSub">
+                                            <h3>SUBSCRIBER</h3>
+                                            <form class="form-horizontal" onSubmit="return false;">
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-6">
+                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
+                                                        <input type="text" id="testSubUser" name="user" class="form-control" value="citycide">
+                                                        <div class="input-group-addon">
+                                                            <a tabindex="0" data-toggle="popover" title="Username" data-content="Singularity will attempt to find an actual user by this name to pull the user's picture. You can still send names that aren't real users - in this case, Twitch's default profile picture will be used.">
+                                                                <i class="fa fa-question-circle fa-fw"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-6">
+                                                        <div class="input-group-addon"><i class="fa fa-calendar fa-fw"></i></div>
+                                                        <input type="number" id="testSubMonths" name="duration" class="form-control" placeholder="# Months">
+                                                        <div class="input-group-addon">
+                                                            <a tabindex="0" data-toggle="popover" title="Resubscriber" data-content="The months field can be left blank to represent a new subscriber, otherwise it is considered a resub.">
+                                                                <i class="fa fa-question-circle fa-fw"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="pull-right">
+                                                    <button id="btnTestSub" type="submit" class="btn btn-info">SEND</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="tab-pane fade" id="tabTip">
+                                            <h3>TIP</h3>
+                                            <form class="form-horizontal" onSubmit="return false;">
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-6">
+                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
+                                                        <input type="text" id="testTipUser" name="user" class="form-control" value="citycide">
+                                                        <div class="input-group-addon">
+                                                            <a tabindex="0" data-toggle="popover" title="Username" data-content="Singularity will attempt to find an actual user by this name to pull the user's picture. You can still send names that aren't real users - in this case, Twitch's default profile picture will be used.">
+                                                                <i class="fa fa-question-circle fa-fw"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-6">
+                                                        <div class="input-group-addon"><i class="fa fa-dollar fa-fw"></i></div>
+                                                        <input type="number" id="testTipAmt" name="amount" class="form-control" value="10">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-11">
+                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
+                                                        <input type="text" id="testTipMsg" name="message" class="form-control" placeholder="Message">
+                                                    </div>
+                                                </div>
+                                                <div class="pull-right">
+                                                    <button id="btnTestTip" type="submit" class="btn btn-info">SEND</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="tab-pane fade" id="tabMusic">
+                                            <div class="row">
+                                                <div class="col-md-8 pull-left">
+                                                    <h3>NOW PLAYING</h3>
+                                                </div>
+                                                <div class="col-md-4 pull-right">
+                                                    <button id="btnSendCurrentSong" type="submit" class="btn btn-info pull-right">RESEND CURRENT SONG</button>
+                                                </div>
+                                            </div>
+                                            <div class="well">
+                                                <div><h6><i class="fa fa-music"></i>&nbsp;&nbsp;CURRENT SONG</h6></div>
+                                                <div id="currentSongTitle">Nothing currently playing.</div>
+                                            </div>
+                                            <form class="form-horizontal" onSubmit="return false;">
+                                                <div class="form-group">
+                                                    <div class="input-group col-md-8">
+                                                        <div class="input-group-addon"><i class="fa fa-play fa-fw"></i></div>
+                                                        <input type="text" id="testSongTitle" name="user" class="form-control" value="Never Gonna Give You Up - Rick Astley">
+                                                    </div>
+                                                </div>
+                                                <div class="pull-right">
+                                                    <button id="btnTestMusic" type="submit" class="btn btn-info">SEND</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--
                         <div class="col-md-10 col-md-offset-1">
                             <div class="panel-group" role="tablist" aria-multiselectable="true">
 
@@ -309,48 +472,49 @@
                                 </div>
 
                                 <div class="panel panel-default">
-                                    <div class="panel-heading panel-heading-donation" role="tab" id="heading-donation">
+                                    <div class="panel-heading panel-heading-tip" role="tab" id="heading-tip">
                                         <div class="row">
                                             <div class="col-md-11">
                                                 <span class="panel-title">
-                                                    DONATIONS
+                                                    TIPS
                                                 </span>
                                             </div>
                                             <div class="btnCollapse pull-right" data-toggle="tooltip" data-placement="left" title="COLLAPSE">
-                                                <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseDonation" aria-expanded="false" aria-controls="collapseHost">
+                                                <div class="btnCollapsePanel" role="button" data-toggle="collapse" href="#collapseTip" aria-expanded="false" aria-controls="collapseHost">
                                                     <i class="fa fa-chevron-down"></i>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="collapseDonation" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-donation">
+                                    <div id="collapseTip" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-tip">
                                         <div class="panel-body">
                                             <form class="form-inline" onSubmit="return false;">
                                                 <div class="form-group">
                                                     <div class="input-field">
                                                         <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" id="testDonationUser" name="user" class="form-control" value="citycide">
+                                                        <input type="text" id="testTipUser" name="user" class="form-control" value="citycide">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <div class="input-field">
                                                         <i class="fa fa-dollar fa-fw prefix"></i>
-                                                        <input type="number" id="testDonationAmt" name="amount" class="form-control" value="10">
+                                                        <input type="number" id="testTipAmt" name="amount" class="form-control" value="10">
                                                     </div>
                                                 </div>
                                                 <div class="form-group">
                                                     <div class="input-field">
                                                         <i class="fa fa-user fa-fw prefix"></i>
-                                                        <input type="text" id="testDonationMsg" name="message" class="form-control" placeholder="Message">
+                                                        <input type="text" id="testTipMsg" name="message" class="form-control" placeholder="Message">
                                                     </div>
                                                 </div>
-                                                <button id="btnTestDonation" type="submit" class="btn btn-raised btn-primary">SEND</button>
+                                                <button id="btnTestTip" type="submit" class="btn btn-raised btn-primary">SEND</button>
                                             </form>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        -->
                     </div>
                 </div>
                 <div class="tab-pane fade" id="tab-about">
@@ -391,7 +555,7 @@
                             also adds useful information such as Twitter followers, YouTube subscribers, and more.
                         </p>
                         <p>
-                            You can use the <strong>TESTING</strong> page to send test alerts to your overlay.
+                            You can use the <strong>OVERLAY CONTROL</strong> page to send test alerts & updates to your overlay.
                         </p>
                     </div>
                     <div class="modal-footer">
@@ -407,10 +571,16 @@
     <!-- <button type="button" class="btn btn-circle"><i class="fa fa-twitch"></i></button> -->
 
     <!-- ejs -->
-    <script>var clientID = '<%= clientID %>';</script>
+    <script>
+        var channel = '<%= channel %>';
+        var token = '<%= token %>';
+        var channelAvatar = '<%= channelAvatar %>';
+        var clientID = '<%= clientID %>';
+        var currentSong = '<%= currentSong %>';
+    </script>
     <!-- scripts -->
-    <script src="../js/jquery-2.2.1.min.js"></script>
-    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/vendor/jquery-2.2.1.min.js"></script>
+    <script src="../js/vendor/bootstrap.min.js"></script>
     <!-- socket.io -->
     <script src="/socket.io/socket.io.js"></script>
     <!-- others -->
