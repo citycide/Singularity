@@ -1,12 +1,6 @@
 /*********************************** EMITTER ***********************************/
 
-var EventEmitter = require('events').EventEmitter;
-var emitter = new EventEmitter();
-
-// emitter.on('connection', function(listener) {
-//     emitter.on('followAlert', function (user) {
-//         emitter.emit('followAlert', user);
-//     });
-// });
+const EventEmitter = require('events').EventEmitter;
+const emitter = new EventEmitter();
 
 module.exports = emitter;

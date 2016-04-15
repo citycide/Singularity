@@ -13,3 +13,7 @@ restructure.txt
 public/js/vendor/betterttv.user.js
 public/views/overlays/images
 public/views/overlays/fonts
+public/img/thumbnails/
+public/img/screenshots/
+public/*-old
+*.DS_Store

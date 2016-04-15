@@ -1,30 +1,30 @@
 /*********************************** TWITCH ***********************************/
 'use strict';
 
-var request = require('request');
-var irc = require('tmi.js');
-var fs = require('fs');
-var emitter = require('./emitter');
-var log = require('./logger');
-var config = require('./configstore');
-var db = require('./db');
-var moment = require('../public/js/vendor/moment.min.js');
+const request = require('request'),
+      irc = require('tmi.js'),
+      fs = require('fs'),
+      emitter = require('./emitter'),
+      log = require('./logger'),
+      config = require('./configstore'),
+      db = require('./db'),
+      moment = require('../public/js/vendor/moment.min.js');
 
-var channel = {
+const channel = {
     name: config.get('channel'),
     id: config.get('channelID'),
     token: config.get('accessToken')
 };
-var clientID = config.get('clientID');
-var animating = false;
-var followers = [];
-var queue = [];
+const CLIENT_ID = config.get('clientID');
+let animating = false,
+    followers = [],
+    queue = [];
 
 emitter.on('alertComplete', function () {
     animating = false;
 });
 
-var options = {
+const OPTIONS = {
     options: {
         debug: false
     },
@@ -39,9 +39,10 @@ var options = {
     channels: [channel.name]
 };
 
-var client = new irc.client(options);
-var baseURL = 'https://api.twitch.tv/kraken';
-var channelEP = '/channels/' + channel.name + '/';
+const client = new irc.client(OPTIONS);
+      client.connect();
+const BASE_URL = 'https://api.twitch.tv/kraken';
+const CHANNEL_EP = `/channels/${channel.name}/`;
 
 function initAPI(pollInterval) {
     log.msg('Initializing Twitch API requests');
@@ -54,14 +55,14 @@ function initAPI(pollInterval) {
 
 function pollFollowers(pollInterval) {
     if (!pollInterval) pollInterval = 30 * 1000;
-    log.msg('Hitting follower endpoint for ' + channel.name + '...');
+    log.msg(`Hitting follower endpoint for ${channel.name}...`);
     client.api({
-        url: baseURL + channelEP + 'follows' + '?limit=100&timestamp=' + new Date().getTime(),
+        url: `${BASE_URL}${CHANNEL_EP}follows?limit=100&timestamp=` + new Date().getTime(),
         method: 'GET',
         headers: {
             'Accept': "application/vnd.twitchtv.v3+json",
             // 'Authorization': 'OAuth ' + channel.token.slice(6),
-            'Client-ID': clientID
+            'Client-ID': CLIENT_ID
         }
     }, function (err, res, body) {
         if (err) {
@@ -70,7 +71,7 @@ function pollFollowers(pollInterval) {
             return;
         }
         if (res.statusCode != 200) {
-            log.debug('Unknown response code: ' + res.statusCode);
+            log.debug(`Unknown response code: ${res.statusCode}`);
             setTimeout(pollFollowers, pollInterval);
             return;
         }
@@ -82,7 +83,7 @@ function pollFollowers(pollInterval) {
             return;
         }
 
-        var i, thisUser, storeThisFollower, storeNewFollower;
+        var i, thisUser, s, n;
         if (body) {
             if (body.follows.length > 0) {
                 if (followers.length === 0) {
@@ -95,18 +96,19 @@ function pollFollowers(pollInterval) {
                                 created_at: body.follows[i].created_at,
                                 notifications: body.follows[i].notifications
                             },
-                            type: "follower"
+                            type: 'follower'
                         };
                         if (followers.indexOf(thisUser.user.display_name) == -1) {
                             followers.push(thisUser.user.display_name);
                         }
-                        storeThisFollower = {
-                            twitch_id: thisUser.user._id,
-                            timestamp: moment(thisUser.created_at),
+                        s = {
+                            id: thisUser.user._id,
                             name: thisUser.user.display_name,
-                            eventType: 'follower'
+                            ts: moment(thisUser.user.created_at, moment.ISO_8601).valueOf(),
+                            ev: 'follower',
+                            ntf: thisUser.user.notifications
                         };
-                        // db.events.update({follows: [{twitch_id: thisUser.user._id}]}, {follows: [storeThisFollower]}, {upsert: true});
+                        db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
                     }
                 } else {
                     for (i = 0; i < body.follows.length; i++) {
@@ -116,21 +118,22 @@ function pollFollowers(pollInterval) {
                                 display_name: body.follows[i].user.display_name,
                                 logo: body.follows[i].user.logo,
                                 created_at: body.follows[i].created_at,
-                                notifications: body.follows[i].notifications,
-                                eventType: 'follower'
+                                notifications: body.follows[i].notifications
                             },
-                            type: "follower"
+                            type: 'follower'
                         };
                         // writeFollower(thisUser.display_name);
                         if (followers.indexOf(thisUser.user.display_name) == -1) {
                             followers.push(thisUser.user.display_name);
                             queue.push(thisUser);
-                            storeNewFollower = {
-                                twitch_id: thisUser.user._id,
-                                timestamp: moment(thisUser.created_at),
-                                name: thisUser.user.display_name
+                            n = {
+                                id: thisUser.user._id,
+                                name: thisUser.user.display_name,
+                                ts: moment(thisUser.created_at).valueOf(),
+                                ev: 'follower',
+                                ntf: thisUser.user.notifications
                             };
-                            // db.events.update({follows: [{twitch_id: thisUser.user._id}]}, {follows: [storeNewFollower]}, {upsert: true});
+                            db.dbFollowersAdd(n.id, n.name, n.ts, n.ntf.toString());
                         }
                     }
                 }
@@ -160,7 +163,7 @@ function writeFollower(followerName) {
 */
 
 client.on('hosted', function (channel, username, viewers) {
-    var thisHost;
+    let thisHost;
     resolveUser(username, function(userObj) {
         if (userObj.resolved) {
             thisHost = {
@@ -170,25 +173,27 @@ client.on('hosted', function (channel, username, viewers) {
                     logo: userObj.user.logo,
                     viewers: viewers
                 },
-                type: "host"
+                type: 'host'
             };
+            db.dbHostsAdd(thisHost.user._id, thisHost.user.display_name, moment().valueOf, thisHost.user.viewers);
         } else {
             thisHost = {
                 user: {
                     display_name: userObj.user.display_name,
                     viewers: viewers
                 },
-                type: "host"
+                type: 'host'
             };
+            db.dbHostsAdd(null, thisHost.user.display_name, moment().valueOf, thisHost.user.viewers);
         }
-        if (thisHost.user.viewers > 0) {
+        // if (thisHost.user.viewers > 0) {
             queue.push(thisHost);
-        }
+        // }
     });
 });
 
 client.on('subscription', function (channel, username) {
-    var thisSub;
+    let thisSub;
     resolveUser(username, function(userObj) {
         if (userObj.resolved) {
             thisSub = {
@@ -197,22 +202,24 @@ client.on('subscription', function (channel, username) {
                     display_name: userObj.user.display_name,
                     logo: userObj.user.logo
                 },
-                type: "subscriber"
+                type: 'subscriber'
             };
+            db.dbSubscribersAdd(thisSub.user._id, thisSub.user.display_name, moment().valueOf, null);
         } else {
             thisSub = {
                 user: {
                     display_name: userObj.user.display_name
                 },
-                type: "subscriber"
+                type: 'subscriber'
             };
+            db.dbSubscribersAdd(null, thisSub.user.display_name, moment().valueOf, null);
         }
         queue.push(thisSub);
     });
 });
 
 client.on('subanniversary', function (channel, username, months) {
-    var thisResub;
+    let thisResub;
     resolveUser(username, function(userObj) {
         if (userObj.resolved) {
             thisResub = {
@@ -222,16 +229,18 @@ client.on('subanniversary', function (channel, username, months) {
                     logo: userObj.user.logo,
                     months: months
                 },
-                type: "subscriber"
+                type: 'subscriber'
             };
+            db.dbSubscribersAdd(thisSub.user._id, thisSub.user.display_name, moment().valueOf, thisResub.user.months);
         } else {
             thisResub = {
                 user: {
                     display_name: userObj.user.display_name,
                     months: months
                 },
-                type: "subscriber"
+                type: 'subscriber'
             };
+            db.dbSubscribersAdd(null, thisSub.user.display_name, moment().valueOf, thisResub.user.months);
         }
         queue.push(thisResub);
     });
@@ -242,7 +251,7 @@ function checkQueue() {
         setTimeout(checkQueue, 5 * 1000);
         return;
     }
-    var queueItem = queue.pop();
+    let queueItem = queue.pop();
     actOnQueue(queueItem.user, queueItem.type);
     setTimeout(checkQueue, 5 * 1000);
 }
@@ -251,23 +260,23 @@ function actOnQueue(data, type) {
     log.alert('Pushing queue item...');
     animating = true;
     switch (type) {
-        case "follower":
+        case 'follower':
             emitter.emit('followAlert', data);
             break;
-        case "host":
+        case 'host':
             emitter.emit('hostAlert', data);
             break;
-        case "subscriber":
+        case 'subscriber':
             emitter.emit('subscriberAlert', data);
             break;
-        case "tip":
+        case 'tip':
             emitter.emit('tipAlert', data);
             break;
     }
 }
 
 emitter.on('testFollower', function(username) {
-    var thisTest;
+    let thisTest;
     resolveUser(username, function(userObj) {
         if (userObj.resolved) {
             thisTest = {
@@ -276,14 +285,14 @@ emitter.on('testFollower', function(username) {
                     display_name: userObj.user.display_name,
                     logo: userObj.user.logo
                 },
-                type: "follower"
+                type: 'follower'
             };
         } else {
             thisTest = {
                 user: {
                     display_name: userObj.user.display_name
                 },
-                type: "follower"
+                type: 'follower'
             };
         }
         queue.push(thisTest);
@@ -291,8 +300,8 @@ emitter.on('testFollower', function(username) {
     });
 });
 
-emitter.on('testHost', function (hostObj) {
-    var thisTest;
+emitter.on('testHost', function(hostObj) {
+    let thisTest;
     resolveUser(hostObj.user.display_name, function(userObj) {
         if (userObj.resolved) {
             thisTest = {
@@ -302,19 +311,32 @@ emitter.on('testHost', function (hostObj) {
                     logo: userObj.user.logo,
                     viewers: hostObj.viewers
                 },
-                type: "host"
+                type: 'host'
             };
         } else {
             thisTest = {
                 user: {
                     display_name: userObj.user.display_name
                 },
-                type: "host"
+                type: 'host'
             };
         }
         queue.push(thisTest);
         checkQueue();
     });
+});
+
+emitter.on('testTip', function(data) {
+    let thisTest = {
+        user: {
+            name: data.user.name,
+            amount: data.amount,
+            message: data.message
+        },
+        type: 'tip'
+    };
+    queue.push(thisTest);
+    checkQueue();
 });
 
 emitter.on('tipeeeEvent', function (data) {
@@ -323,12 +345,12 @@ emitter.on('tipeeeEvent', function (data) {
 
 function resolveUser(username, callback) {
     client.api({
-        url: '/users/' + username,
+        url: `/users/${username}`,
         method: 'GET',
         headers: {
             'Accept': "application/vnd.twitchtv.v3+json",
             // 'Authorization': 'OAuth ' + channel.token.slice(6),
-            'Client-ID': clientID
+            'Client-ID': CLIENT_ID
         }
     }, function(err, res, body) {
         if (err) {
@@ -345,7 +367,7 @@ function resolveUser(username, callback) {
 
         if (body) {
             if (body.error) {
-                var unresolvedUser = {
+                let unresolvedUser = {
                     user: {
                         display_name: username
                     }
@@ -353,7 +375,7 @@ function resolveUser(username, callback) {
                 callback(unresolvedUser);
                 return;
             }
-            var resolvedUser = {
+            let resolvedUser = {
                 user: {
                     _id: body._id,
                     display_name: body.display_name,
