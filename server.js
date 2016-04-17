@@ -5,7 +5,7 @@ const http = require('http'),
       session = require('express-session'),
       socketio = require('socket.io'),
       ejs = require('ejs'),
-      moment = require('./public/js/vendor/moment.min.js');
+      moment = require('moment');
 
 const musicWatcher = require('./app/nowPlaying'),
       emitter = require('./app/emitter'),

@@ -1,16 +1,15 @@
 /*********************************** TWITCH ***********************************/
 'use strict';
 
-const request = require('request'),
-      irc = require('tmi.js'),
-      fs = require('fs'),
+const irc = require('tmi.js'),
+      fs = require('fs-jetpack'),
+      moment = require('moment'),
       emitter = require('./emitter'),
       log = require('./logger'),
       config = require('./configstore'),
-      db = require('./db'),
-      moment = require('../public/js/vendor/moment.min.js');
+      db = require('./db');
 
-const channel = {
+const CHANNEL = {
     name: config.get('channel'),
     id: config.get('channelID'),
     token: config.get('accessToken')
@@ -29,20 +28,24 @@ const OPTIONS = {
         debug: false
     },
     connection: {
-        random: 'chat',
-        reconnect: true
+        reconnect: true,
+        random: 'chat'
     },
     identity: {
-        username: channel.name,
-        password: channel.token
+        username: CHANNEL.name,
+        password: CHANNEL.token
     },
-    channels: [channel.name]
+    channels: [CHANNEL.name]
 };
 
 const client = new irc.client(OPTIONS);
       client.connect();
+client.on("connected", function (address, port) {
+    console.log(`Connected to Twitch chat at ${address}:${port}`)
+});
+
 const BASE_URL = 'https://api.twitch.tv/kraken';
-const CHANNEL_EP = `/channels/${channel.name}/`;
+const CHANNEL_EP = `/channels/${CHANNEL.name}/`;
 
 function initAPI(pollInterval) {
     log.msg('Initializing Twitch API requests');
@@ -55,13 +58,13 @@ function initAPI(pollInterval) {
 
 function pollFollowers(pollInterval) {
     if (!pollInterval) pollInterval = 30 * 1000;
-    log.msg(`Hitting follower endpoint for ${channel.name}...`);
+    log.msg(`Hitting follower endpoint for ${CHANNEL.name}...`);
     client.api({
         url: `${BASE_URL}${CHANNEL_EP}follows?limit=100&timestamp=` + new Date().getTime(),
         method: 'GET',
         headers: {
             'Accept': "application/vnd.twitchtv.v3+json",
-            // 'Authorization': 'OAuth ' + channel.token.slice(6),
+            // 'Authorization': 'OAuth ' + CHANNEL.token.slice(6),
             'Client-ID': CLIENT_ID
         }
     }, function (err, res, body) {
@@ -83,59 +86,39 @@ function pollFollowers(pollInterval) {
             return;
         }
 
-        var i, thisUser, s, n;
         if (body) {
             if (body.follows.length > 0) {
                 if (followers.length === 0) {
-                    for (i = 0; i < body.follows.length; i++) {
-                        thisUser = {
-                            user: {
-                                _id: body.follows[i].user._id,
-                                display_name: body.follows[i].user.display_name,
-                                logo: body.follows[i].user.logo,
-                                created_at: body.follows[i].created_at,
-                                notifications: body.follows[i].notifications
-                            },
-                            type: 'follower'
-                        };
-                        if (followers.indexOf(thisUser.user.display_name) == -1) {
-                            followers.push(thisUser.user.display_name);
+                    body.follows.reverse().map((follower) => {
+                        if (followers.indexOf(follower.user.display_name) == -1) {
+                            followers.push(follower.user.display_name);
                         }
-                        s = {
-                            id: thisUser.user._id,
-                            name: thisUser.user.display_name,
-                            ts: moment(thisUser.user.created_at, moment.ISO_8601).valueOf(),
+                        let s = {
+                            id: follower.user._id,
+                            name: follower.user.display_name,
+                            ts: moment(follower.created_at, moment.ISO_8601).valueOf(),
                             ev: 'follower',
-                            ntf: thisUser.user.notifications
+                            ntf: follower.notifications
                         };
                         db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
-                    }
+                    });
+                    writeFollower(followers[followers.length-1]);
                 } else {
-                    for (i = 0; i < body.follows.length; i++) {
-                        thisUser = {
-                            user: {
-                                _id: body.follows[i].user._id,
-                                display_name: body.follows[i].user.display_name,
-                                logo: body.follows[i].user.logo,
-                                created_at: body.follows[i].created_at,
-                                notifications: body.follows[i].notifications
-                            },
-                            type: 'follower'
-                        };
-                        // writeFollower(thisUser.display_name);
-                        if (followers.indexOf(thisUser.user.display_name) == -1) {
-                            followers.push(thisUser.user.display_name);
-                            queue.push(thisUser);
-                            n = {
-                                id: thisUser.user._id,
-                                name: thisUser.user.display_name,
-                                ts: moment(thisUser.created_at).valueOf(),
+                    body.follows.reverse().map((follower) => {
+                        if (followers.indexOf(follower.user.display_name) == -1) {
+                            followers.push(follower.user.display_name);
+                            queue.push(follower);
+                            let s = {
+                                id: follower.user._id,
+                                name: follower.user.display_name,
+                                ts: moment(follower.created_at).valueOf(),
                                 ev: 'follower',
-                                ntf: thisUser.user.notifications
+                                ntf: follower.notifications
                             };
-                            db.dbFollowersAdd(n.id, n.name, n.ts, n.ntf.toString());
+                            db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
+                            writeFollower(s.name);
                         }
-                    }
+                    });
                 }
             }
         }
@@ -143,24 +126,15 @@ function pollFollowers(pollInterval) {
     });
 }
 
-/** DOESN'T WORK
- * Should write the latest follower to a text file but fails if the file doesn't exist...
 function writeFollower(followerName) {
-    var followerFile = __dirname + '/../outputs/latestfollower.txt';
-    fs.statSync(followerFile, function(err, stats) {
-        if (err && err.errno === 34) {
-            fs.writeFile(followerFile, ' ', function (err) {
-                if (err) return console.log(err);
-            });
-        }
-        if (followerName !== fs.readFileSync(followerFile)) {
-            fs.writeFile(followerFile, followerName, function (err) {
-                if (err) return console.log(err);
-            });
-        }
-    });
+    let followerFile = __dirname + '/../outputs/latestfollower.txt';
+    console.log(followerName);
+    if (fs.read(followerFile) !== followerName) {
+        fs.file(followerFile, {
+            content: followerName
+        });
+    }
 }
-*/
 
 client.on('hosted', function (channel, username, viewers) {
     let thisHost;
@@ -231,7 +205,7 @@ client.on('subanniversary', function (channel, username, months) {
                 },
                 type: 'subscriber'
             };
-            db.dbSubscribersAdd(thisSub.user._id, thisSub.user.display_name, moment().valueOf, thisResub.user.months);
+            db.dbSubscribersAdd(thisResub.user._id, thisResub.user.display_name, moment().valueOf, thisResub.user.months);
         } else {
             thisResub = {
                 user: {
@@ -240,7 +214,7 @@ client.on('subanniversary', function (channel, username, months) {
                 },
                 type: 'subscriber'
             };
-            db.dbSubscribersAdd(null, thisSub.user.display_name, moment().valueOf, thisResub.user.months);
+            db.dbSubscribersAdd(null, thisReub.user.display_name, moment().valueOf, thisResub.user.months);
         }
         queue.push(thisResub);
     });
