@@ -1,6 +1,7 @@
 /********************************** DATABASE **********************************/
 const dbstore = require('./stores.js'),
       path = require('path'),
+      log = require('./logger.js'),
       moment = require('../public/js/vendor/moment.min.js');
 
 const db = dbstore(path.resolve(__dirname, '..', 'db', 'singularity.db'));
@@ -36,7 +37,7 @@ db.run('CREATE TABLE IF NOT EXISTS tips (username TEXT, timestamp TEXT, evtype T
  */
 module.exports.dbFollowersAdd = function(id, username, timestamp, notifications) {
     if (!id || !username) {
-        console.log('Failed to add or update follower. ID & username are required.');
+        log.err('Failed to add or update follower. ID & username are required.');
         return;
     }
     db.run('INSERT OR REPLACE INTO followers (twitchid, username, timestamp, evtype, notifications)' +
@@ -51,7 +52,7 @@ module.exports.dbFollowersAdd = function(id, username, timestamp, notifications)
 module.exports.dbSubscribersAdd = function(id, username, timestamp, months) {
     let evtype = 'subscriber';
     if (!id || !username) {
-        console.log('Failed to add or update subscriber. ID & username are required.');
+        log.err('Failed to add or update subscriber. ID & username are required.');
         return;
     }
     if (months && months > 0) evtype = 'resub';
@@ -66,7 +67,7 @@ module.exports.dbSubscribersAdd = function(id, username, timestamp, months) {
  */
 module.exports.dbHostsAdd = function(id, username, timestamp, viewers) {
     if (!username || !viewers) {
-        console.log('Failed to add host. Username & viewers are required.');
+        log.err('Failed to add host. Username & viewers are required.');
         return;
     }
     db.run(`INSERT INTO hosts VALUES ("${id}", "${username}", "${timestamp}", "host", "${viewers}");`);
@@ -79,7 +80,7 @@ module.exports.dbHostsAdd = function(id, username, timestamp, viewers) {
  */
 module.exports.dbTipsAdd = function(username, timestamp, amount, message) {
     if (!username || !amount) {
-        console.log('Failed to add tip. Name & amount are required.');
+        log.err('Failed to add tip. Name & amount are required.');
         return;
     }
     db.run(`INSERT INTO tips VALUES ("${username}", "${timestamp}", "tip", "${amount}", "${message}");`);

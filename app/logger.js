@@ -1,6 +1,4 @@
 /*********************************** LOGGER ***********************************/
-'use strict';
-
 const config = require('./configstore');
 const DEV_MODE = config.get('devMode');
 
@@ -34,6 +32,11 @@ function sys(msg) {
         console.log(`SYS: ${msg}`);
     }
 }
+function err(msg) {
+    if (DEV_MODE) {
+        console.log(`ERROR: ${msg}`);
+    }
+}
 
 /**
  *  EXPORT FUNCTIONS
@@ -44,3 +47,4 @@ module.exports.alert = alert;
 module.exports.debug = debug;
 module.exports.auth = auth;
 module.exports.sys = sys;
+module.exports.err = err;

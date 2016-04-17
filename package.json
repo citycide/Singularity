@@ -1,7 +1,7 @@
 {
   "name": "Singularity",
   "description": "Twitch overlay & alert system",
-  "version": "0.3.0",
+  "version": "0.5.5",
   "main": "http://localhost:2881",
   "bg-script": "./server.js",
   "inject_js_end": "./public/js/vendor/betterttv.user.js",

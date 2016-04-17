@@ -41,7 +41,7 @@ const OPTIONS = {
 const client = new irc.client(OPTIONS);
       client.connect();
 client.on("connected", function (address, port) {
-    console.log(`Connected to Twitch chat at ${address}:${port}`)
+    log.msg(`Connected to Twitch chat at ${address}:${port}`)
 });
 
 const BASE_URL = 'https://api.twitch.tv/kraken';
@@ -128,7 +128,6 @@ function pollFollowers(pollInterval) {
 
 function writeFollower(followerName) {
     let followerFile = __dirname + '/../outputs/latestfollower.txt';
-    console.log(followerName);
     if (fs.read(followerFile) !== followerName) {
         fs.file(followerFile, {
             content: followerName
