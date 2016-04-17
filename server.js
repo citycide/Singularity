@@ -16,6 +16,7 @@ const musicWatcher = require('./app/nowPlaying'),
 let twitch, tipeee;
 if (config.get('channel') && config.get('isLoggedIn')) {
     twitch = require('./app/twitch');
+    twitch.initAPI();
 }
 if (config.get('tipeeeActive') && config.get('channel') && config.get('isLoggedIn')) {
     tipeee = require('./app/tipeee');
@@ -43,8 +44,8 @@ app.set('views', __dirname + '/public/views');
 app.set('view engine', 'ejs');
 
 const home = require('./public/views/index');
-const login = require('./public/views-old/login');
-const setup = require('./public/views-old/setup');
+const login = require('./public/views/login');
+const setup = require('./public/views/setup');
 const auth = require('./public/views/auth');
 const overlay = require('./public/views/overlays/overlay');
 const followers = require('./public/views/overlays/followers');
@@ -234,15 +235,12 @@ app.get('/login', function(req, res) {
     });
 });
 app.get('/logout', function(req, res) {
-    config.set('isLoggedIn', false);
-    config.del('accessToken');
-    config.del('channel');
-    config.del('channelAvatar');
-    config.del('channelID');
-    if (!config.get('isLoggedIn')) {
-        log.sys('User has been logged out.');
-        res.redirect('/login');
-    }
+    userLogout(function(status) {
+        if (!status) {
+            log.sys('User has been logged out.');
+            res.redirect('/login');
+        }
+    });
 });
 
 /*
@@ -288,12 +286,19 @@ app.get('/setup', function(req, res) {
 });
 
 app.get('*', function(req, res){
-    // use res.render to send the user to a custom 404 page
+    // TODO: use res.render to send the user to a custom 404 page
     res.send('Page not found.', 404);
 });
 
-if (config.get('channel') && config.get('isLoggedIn')) {
-    twitch.initAPI();
+function userLogout(callback) {
+    config.set('isLoggedIn', false);
+    config.set('tipeeeActive', false);
+    config.del('accessToken');
+    config.del('channel');
+    config.del('channelAvatar');
+    config.del('channelID');
+    config.del('tipeeeAccessToken');
+    callback(false);
 }
 
 module.exports = app;
