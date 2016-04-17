@@ -449,7 +449,18 @@ li.now-playing-header {
     #control .card .card-body {
         padding: 25px 25px 65px 25px;
     }
-
+#settings .tipeee-image {
+    margin: 30px 0; }
+    #settings .tipeee-img-responsive {
+        padding-top: 25px;
+        display: inline; }
+    @media (max-width: 877px) {
+        #settings .tipeee-img-responsive {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+    }
 #btnOpenOverlay {
   cursor: pointer;
 }

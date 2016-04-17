@@ -162,12 +162,12 @@
                                         <span class="icon fa fa-clone"></span><span class="title">Launch Overlay</span>
                                     </a>
                                 </li>
-                                <!-- Dropdown-->
+                                <!-- Dropdown
                                 <li class="panel panel-default dropdown">
                                     <a data-toggle="collapse" href="#dropdown-icon">
                                         <span class="icon fa fa-archive"></span><span class="title">Icons</span>
                                     </a>
-                                    <!-- Dropdown level 1 -->
+                                    <!-- Dropdown level 1
                                     <div id="dropdown-icon" class="panel-collapse collapse">
                                         <div class="panel-body">
                                             <ul class="nav navbar-nav">
@@ -177,6 +177,7 @@
                                         </div>
                                     </div>
                                 </li>
+                                -->
                                 <li>
                                     <a href="#settings">
                                         <span class="icon fa fa-cog"></span><span class="title">Settings</span>
@@ -665,11 +666,14 @@
                                                                 </ul>
                                                                 <div class="tab-content">
                                                                     <div role="tabpanel" class="tab-pane fade active in" id="step1">
-                                                                        <p class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
+                                                                        <p class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1 tipeee-header">
                                                                             <strong>singularity</strong> supports tip alerts through TipeeeStream. To activate this feature, you'll need to get
                                                                             your API key. Due to a limitation of TipeeeStream's API, we can't do this automatically, so please click the link below
                                                                             to open TipeeeStream's dashboard in a new window where you can copy the API key. Then come back here to submit it.
                                                                         </p>
+                                                                        <div class="tipeee-image text-center">
+                                                                            <img src="/images/tipeee-setup.png" class="tipeee-img-responsive">
+                                                                        </div>
                                                                         <div class="text-center">
                                                                             <button href="" id="extTipeeeKey" class="btn btn-primary btn-tipeeeStart waves-effect waves-light">
                                                                                 GO TO TIPEEESTREAM&nbsp;&nbsp;<i class="fa fa-external-link"></i>
@@ -702,8 +706,6 @@
                                                         <% } else { %>
                                                             <div id="deact-modal-container">
                                                                 <p>TipeeeStream has already been enabled. If you want to disable it, click the button below.</p>
-
-                                                                <modal :show.sync="showModal"></modal>
                                                                 <button type="button" class="btn btn-warning waves-effect waves-light disabled">DEACTIVATE</button>
                                                                 <p>( deactivation coming soon )</p>
                                                             </div>
