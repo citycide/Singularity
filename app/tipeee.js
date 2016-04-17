@@ -1,24 +1,23 @@
-var socketio = require('socket.io-client');
-var db = require('./db');
-var log = require('./logger');
-var emitter = require('./emitter');
-var config = require('./configstore');
-var moment = require('../public/js/vendor/moment.min.js');
+/******************************** TIPEEESTREAM ********************************/
+const socketio = require('socket.io-client'),
+      db = require('./db'),
+      log = require('./logger'),
+      emitter = require('./emitter'),
+      config = require('./configstore'),
+      moment = require('../public/js/vendor/moment.min.js');
 
-var tipeee = socketio.connect('https://sso.tipeeestream.com:4242');
+const tipeee = socketio.connect('https://sso.tipeeestream.com:4242');
 
-config.set('tipeeeAccessToken', 'cfc17e8d5ad60713160b0a320f7a7ee726b158db');
-
-var key = config.get('tipeeeAccessToken');
+const KEY = config.get('tipeeeAccessToken');
 tipeee.on('connect', function(){
     log.msg('Connected to tipeeestream');
 });
 
-tipeee.emit('join-room', { room: key, username: 'citycide' });
+tipeee.emit('join-room', { room: KEY, username: 'citycide' });
 
 tipeee.on('new-event', function(data) {
     if (data.event.type !== 'donation') return;
-    var thisEvent = {
+    let thisEvent = {
         user: {
             name: data.event.parameters.username,
             amount: data.event.formattedAmount,

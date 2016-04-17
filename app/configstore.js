@@ -1,7 +1,7 @@
 /*********************************** CONFIG ***********************************/
-SimpleJsonStore = require('simple-json-store');
+const SimpleJsonStore = require('simple-json-store');
 
-var config = new SimpleJsonStore('./config/config.json',
+const config = new SimpleJsonStore('./config/config.json',
     {
         "port": 2016,
         "devMode": true,

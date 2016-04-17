@@ -1,15 +1,18 @@
 
+*.DS_Store
 .idea/
 db/
 nw/
-nw-sdk/
-/PepperFlash
 node_modules/
 config/
-Singularity.lnk
-databaseUsage.txt
 Singularity-Dev.lnk
-restructure.txt
 public/js/vendor/betterttv.user.js
 public/views/overlays/images
 public/views/overlays/fonts
+public/views/ui-kits/
+public/views/table/
+public/views/pages/
+public/views/icons/
+public/views/form/
+public/views/components/
+outputs/
