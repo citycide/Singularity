@@ -1,64 +1,62 @@
-@import url(http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700);
-@import url(https://fonts.googleapis.com/css?family=Abel);
+/* @import url(http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700);
+@import url(https://fonts.googleapis.com/css?family=Abel); */
 
-.board{
+body {
+    background-color: #033d69; }
+#bodywrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); }
+.board {
     width: 75%;
-    margin: 0 auto;
+    margin: 0 auto 0 auto;
     height: 520px;
     background: #fff;
-    -webkit-box-shadow: 0 0 21px 0 rgba(0,0,0,0.23);
-    -moz-box-shadow: 0 0 21px 0 rgba(0,0,0,0.23);
-    box-shadow: 0 0 21px 0 rgba(0,0,0,0.23);
-}
+    -webkit-box-shadow: 0 0 21px 0 rgba(0,0,0,0.5);
+    -moz-box-shadow: 0 0 21px 0 rgba(0,0,0,0.5);
+    box-shadow: 0 0 21px 0 rgba(0,0,0,0.5); }
 .board .nav-tabs {
     position: relative;
-    margin: 40px auto 0 auto;
-    box-sizing: border-box;
+    margin: 0 auto 0 auto;
+    box-sizing: border-box; }
 
-}
-
-.board > div.board-inner{
-    background-color: #fafafa;
-}
+.board > div.board-inner {
+    background-color: #ededed;
+    border-bottom: 1px solid #363636; }
 
 .singularity-logo {
-    margin-left: 375px;
-    margin-right: auto;
+    margin: 10px auto 35px;
     width: 128px;
-    height: 128px;
-}
+    height: 128px; }
 
 h3 {
-    font-size: 28px !important;
-}
+    font-size: 28px !important; }
 
-p.narrow{
+p.narrow {
     font-size: 16px;
     width: 60%;
-    margin: 0 auto 50px auto;
-}
+    margin: 0 auto 50px auto; }
 
-.liner{
+.liner {
     height: 2px;
-    background: #ddd;
+    background: #363636;
     position: absolute;
     width: 80%;
     margin: 0 auto;
     left: 0;
     right: 0;
     top: 50%;
-    z-index: 1;
-}
+    z-index: 1; }
 
 .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
     color: #555555;
     cursor: default;
-    /* background-color: #ffffff; */
+    background-color: #ededed;
     border: 0;
-    border-bottom-color: transparent;
-}
+    border-bottom-color: transparent; }
 
-span.round-tabs{
+span.round-tabs {
     width: 70px;
     height: 70px;
     line-height: 70px;
@@ -68,59 +66,55 @@ span.round-tabs{
     z-index: 2;
     position: absolute;
     text-align: center;
-    font-size: 25px;
-}
+    font-size: 25px; }
 
 span.round-tabs.one{
-    color: rgb(34, 194, 34);
-    border: 2px solid rgb(34, 194, 34);
-}
+    color: #363636;
+    border: 2px solid #363636; }
 
 li.active span.round-tabs.one{
     background: #fff !important;
-    border: 2px solid #363636;
-    color: rgb(34, 194, 34);
-}
+    border: 2px solid #22C222;
+    color: #22C222; }
 
 span.round-tabs.two{
-    color: #febe29;border: 2px solid #febe29;
-}
+    color: #363636;
+    border: 2px solid #363636; }
 
 li.active span.round-tabs.two{
     background: #fff !important;
-    border: 2px solid #363636;
-    color: #febe29;
-}
+    border: 2px solid #febe29;
+    color: #febe29; }
 
 span.round-tabs.three{
-    color: #3e5e9a;border: 2px solid #3e5e9a;
-}
+    color: #363636;
+    border: 2px solid #363636; }
 
 li.active span.round-tabs.three{
     background: #fff !important;
-    border: 2px solid #363636;
+    border: 2px solid #3e5e9a;
     color: #3e5e9a;
 }
 
 span.round-tabs.four{
-    color: #6441A5;
-    border: 2px solid #6441A5;
+    color: #363636;
+    border: 2px solid #363636;
 }
 
 li.active span.round-tabs.four{
     background: #fff !important;
-    border: 2px solid #363636;
+    border: 2px solid #6441A5;
     color: #6441A5;
 }
 
 span.round-tabs.five{
-    color: #5cb85c;
-    border: 2px solid #5cb85c;
+    color: #363636;
+    border: 2px solid #363636;
 }
 
 li.active span.round-tabs.five{
     background: #fff !important;
-    border: 2px solid #363636;
+    border: 2px solid #5cb85c;
     color: #5cb85c;
 }
 
@@ -149,24 +143,23 @@ li:after {
     content: " ";
     position: absolute;
     left: 45%;
-    opacity:0;
+    opacity: 0;
     margin: 0 auto;
     bottom: 0;
     border: 5px solid transparent;
-    border-bottom-color: #ddd;
+    border-bottom-color: #363636;
     transition:0.1s ease-in-out;
-
 }
 li.active:after {
     content: " ";
     position: absolute;
     left: 45%;
-    opacity:1;
+    opacity: 1;
     margin: 0 auto;
     bottom: 0;
     border: 10px solid transparent;
-    border-bottom-color: #ddd;
-
+    border-bottom-color: #363636;
+    transition:0.1s ease-in-out;
 }
 .nav-tabs > li a, .nav-tabs > li a:active, .nav-tabs > li a:focus {
     width: 70px;
@@ -176,28 +169,115 @@ li.active:after {
     padding: 0;
 }
 
-.nav-tabs > li a:hover{
+.nav-tabs > li a:hover {
     background: transparent;
 }
 
-.tab-content{
+.tab-content {
 }
-.tab-pane{
+.tab-pane {
     position: relative;
     padding-top: 50px;
 }
-.tab-content .head{
-    font-family: 'Roboto Condensed', sans-serif;
+.tab-content .head {
     font-size: 25px;
     text-transform: uppercase;
     padding-bottom: 10px;
 }
 
-@media( max-width : 585px ){
+a.tab-link {
+    background-color: black; }
+.btn-startSetup {
+    margin-top: -10px;
+}
+.btn-changelogComplete {
+    margin-top: 12px; }
+.btn-feedbackComplete {
+    margin-top: 100px; }
+.twitch-connect {
+    margin-top: 70px; }
+.twitch-connect:hover {
+    cursor: pointer; }
+.shuttle-header {
+    font-size: 84px; }
+#authedUser {
+    text-transform: uppercase; }
+.btn-xlg {
+    padding: 22px 30px;
+    font-size: 28px;
+    line-height: normal; }
 
+/* Custom Bootstrap buttons */
+.btn.btn-default:hover {
+    background-color: #EAEAEA; }
+.btn.btn-primary:hover {
+    background-color: #03aff9; }
+.btn.btn-success:hover {
+    background-color: #1ad0b0; }
+.btn.btn-warning:hover {
+    background-color: #ff9d0a; }
+.btn.btn-info:hover {
+    background-color: #9575CD; }
+.btn.btn-danger:hover {
+    background-color: #EF5350; }
+.btn.btn-link:hover {
+    color: #03aff9; }
+.btn.btn-primary, .btn.btn-primary:focus {
+    background-color: #039BE5;
+    color: #FFF;
+    border-radius: 2px;
+    border-color: #039BE5; }
+.btn.btn-success, .btn.btn-success:focus {
+    background-color: #1ABC9C;
+    color: #FFF;
+    border-radius: 2px;
+    border-color: #1ABC9C; }
+.btn.btn-warning, .btn.btn-warning:focus {
+    background-color: #FF8900;
+    color: #FFF;
+    border-radius: 2px;
+    border-color: #FF8900; }
+.btn.btn-info, .btn.btn-info:focus {
+    background-color: #7E57C2;
+    color: #FFF;
+    border-radius: 2px;
+    border-color: #7E57C2; }
+.btn.btn-danger, .btn.btn-danger:focus {
+    background-color: #F44336;
+    color: #FFF;
+    border-radius: 2px;
+    border-color: #F44336; }
+.btn.btn-link, .btn.btn-link:focus {
+    border-radius: 2px;
+    color: #353d47; }
+
+/* GitHub Gist formatting for the changelog */
+code {
+    color: #000;
+    background-color: #fff;
+    border: none; }
+code .gist .gist-file {
+    margin-bottom: 2em;
+    border: none; }
+code .gist .gist-file article {
+    padding: 6px 4em 6px 4em; }
+code .gist .gist-file .gist-data {
+    border: none; }
+code .gist .gist-file .gist-meta {
+    display: none; }
+code li:after {
+    display: none;
+}
+
+@media(max-width: 768px) {
+    #bodywrapper {
+        width: 100%;
+    }
     .board {
         width: 90%;
-        height:auto !important;
+        height: 90%;
+        max-height: 100% !important;
+        overflow: scroll !important;
     }
     span.round-tabs {
         font-size:16px;
@@ -213,22 +293,38 @@ li.active:after {
         height: 50px;
         line-height:50px;
     }
-
-    li.active:after {
-        content: " ";
+    li:after {
         position: absolute;
-        left: 35%;
     }
 }
 
-.twitch-connect:hover {
-    cursor: pointer;
-}
-a.tab-link {
-    background-color: black;
-}
-.btn-xlg {
-    padding: 22px 30px;
-    font-size: 28px;
-    line-height: normal;
+@media(max-width: 585px) {
+    #bodywrapper {
+        width: 100%;
+    }
+    .board {
+        width: 90%;
+        height: 90%;
+        max-height: 100% !important;
+        overflow: scroll !important;
+    }
+    span.round-tabs {
+        font-size:16px;
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+    }
+    .tab-content .head{
+        font-size:20px;
+    }
+    .nav-tabs > li a {
+        width: 50px;
+        height: 50px;
+        line-height:50px;
+    }
+    li.active:after {
+        content: " ";
+        position: absolute;
+        left: 41%;
+    }
 }

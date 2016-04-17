@@ -3,7 +3,6 @@
 var socket = io();
 
 socket.on('tipAlert', function (data) {
-    console.log(data);
     showAlert(data);
 });
 
@@ -150,7 +149,7 @@ function showAlert(user) {
     );
 
     // Set the variables
-    var firstMsg = user.user.name;
+    var firstMsg = user.name;
     var secondMsg = user.amount;
 
     // Define constants

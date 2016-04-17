@@ -1,6 +1,6 @@
 <html>
 <head>
-    <script src="../js/vendor/jquery-2.2.1.min.js"></script>
+    <script src="../js/vendor/jquery.min.js"></script>
     <!-- socket.io -->
     <script src="/socket.io/socket.io.js"></script>
     <!-- ejs -->
@@ -13,7 +13,7 @@
             var socket = io();
 
             var username = '', logo = '', id;
-            var access_token = "oauth:" + document.location.hash.substring(14, 44);
+            var access_token = "oauth:" + window.location.hash.substring(14, 44);
 
             $.when($.getJSON(
                     'https://api.twitch.tv/kraken?oauth_token=' + access_token.slice(6) +
@@ -34,7 +34,12 @@
                         logo: logo,
                         id: id
                     });
-                    window.location.assign('http://localhost:2016/setup#done');
+                    if (setupComplete) {
+                        console.log(window.location.origin + '/setup#done');
+                        window.location.assign(window.location.origin + '/setup#done');
+                    } else {
+                        window.location.assign(window.location.origin);
+                    }
                 });
             });
         });
