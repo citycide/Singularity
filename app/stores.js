@@ -1,8 +1,8 @@
 /********************************** DATABASE **********************************/
 const fs = require('fs'),
       sql = require('sql.js'),
-      emitter = require('./emitter'),
-      moment = require('../public/js/vendor/moment.min.js');
+      moment = require('moment'),
+      emitter = require('./emitter');
 
 function dbstore(fileName) {
     if (!fileName) return null;
@@ -37,6 +37,16 @@ function dbstore(fileName) {
             db.run(query);
             store.write();
             return true;
+        } catch(err) {
+            console.log(err);
+            return false;
+        }
+    };
+
+    store.get = function(query) {
+        try {
+            let response = db.exec(query);
+            return response;
         } catch(err) {
             console.log(err);
             return false;
@@ -89,3 +99,8 @@ function dbstore(fileName) {
 }
 
 module.exports = dbstore;
+module.exports.bot = {
+    get: function(query) {
+        // die bot
+    }
+};

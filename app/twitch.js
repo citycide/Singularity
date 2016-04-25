@@ -19,6 +19,36 @@ let animating = false,
     followers = [],
     queue = [];
 
+/*
+const cooldown = require('./cooldown/index');
+
+let test = cooldown({
+    cmd: 'rekt',  // name of command to put on cooldown
+    time: 10,     // time in seconds until command can be used again
+    user: 'test'  // user-specific cooldown, or global if omitted
+}, function() {
+    console.log('This is a test. The command should only be able to be used every 5 seconds.');
+});
+
+test({cmd: 'rip', time: 10, user: 'fiftyffive'});
+
+setTimeout(test({cmd: 'rip', time: 10, user: 'fiftyffive'}), 5 * 1000);
+
+setTimeout(test({cmd: 'rip', time: 10, user: 'fiftyffive'}), 15 * 1000);
+
+test.on('cooldown.calledOnCooldown', function(func, args) {
+    console.log('Command called while on cooldown.');
+});
+
+test.on('cooldown.start', function() {
+    console.log('Cooldown started.');
+});
+
+test.on('cooldown.end', function() {
+    console.log('Cooldown is over.');
+});
+*/
+
 emitter.on('alertComplete', function () {
     animating = false;
 });
@@ -29,7 +59,7 @@ const OPTIONS = {
     },
     connection: {
         reconnect: true,
-        random: 'chat'
+        cluster: 'aws'
     },
     identity: {
         username: CHANNEL.name,
@@ -40,15 +70,15 @@ const OPTIONS = {
 
 const client = new irc.client(OPTIONS);
       client.connect();
-client.on("connected", function (address, port) {
-    log.msg(`Connected to Twitch chat at ${address}:${port}`)
+client.on("connected", (address, port) => {
+    log.info(`Connected to Twitch chat at ${address}:${port}`)
 });
 
 const BASE_URL = 'https://api.twitch.tv/kraken';
 const CHANNEL_EP = `/channels/${CHANNEL.name}/`;
 
 function initAPI(pollInterval) {
-    log.msg('Initializing Twitch API requests');
+    log.info('Initializing Twitch API requests');
     if (!pollInterval) pollInterval = 30 * 1000;
     setTimeout(function() {
         pollFollowers(pollInterval);
@@ -58,7 +88,7 @@ function initAPI(pollInterval) {
 
 function pollFollowers(pollInterval) {
     if (!pollInterval) pollInterval = 30 * 1000;
-    log.msg(`Hitting follower endpoint for ${CHANNEL.name}...`);
+    log.info(`Hitting follower endpoint for ${CHANNEL.name}...`);
     client.api({
         url: `${BASE_URL}${CHANNEL_EP}follows?limit=100&timestamp=` + new Date().getTime(),
         method: 'GET',
@@ -67,7 +97,7 @@ function pollFollowers(pollInterval) {
             // 'Authorization': 'OAuth ' + CHANNEL.token.slice(6),
             'Client-ID': CLIENT_ID
         }
-    }, function (err, res, body) {
+    }, (err, res, body) => {
         if (err) {
             log.debug(err);
             setTimeout(pollFollowers, pollInterval);
@@ -135,9 +165,9 @@ function writeFollower(followerName) {
     }
 }
 
-client.on('hosted', function (channel, username, viewers) {
+client.on('hosted', (channel, username, viewers) => {
     let thisHost;
-    resolveUser(username, function(userObj) {
+    resolveUser(username, (userObj) => {
         if (userObj.resolved) {
             thisHost = {
                 user: {
@@ -165,9 +195,9 @@ client.on('hosted', function (channel, username, viewers) {
     });
 });
 
-client.on('subscription', function (channel, username) {
+client.on('subscription', (channel, username) => {
     let thisSub;
-    resolveUser(username, function(userObj) {
+    resolveUser(username, (userObj) => {
         if (userObj.resolved) {
             thisSub = {
                 user: {
@@ -191,9 +221,9 @@ client.on('subscription', function (channel, username) {
     });
 });
 
-client.on('subanniversary', function (channel, username, months) {
+client.on('subanniversary', (channel, username, months) => {
     let thisResub;
-    resolveUser(username, function(userObj) {
+    resolveUser(username, (userObj) => {
         if (userObj.resolved) {
             thisResub = {
                 user: {
@@ -248,9 +278,9 @@ function actOnQueue(data, type) {
     }
 }
 
-emitter.on('testFollower', function(username) {
+emitter.on('testFollower', (username) => {
     let thisTest;
-    resolveUser(username, function(userObj) {
+    resolveUser(username, (userObj) => {
         if (userObj.resolved) {
             thisTest = {
                 user: {
@@ -273,9 +303,9 @@ emitter.on('testFollower', function(username) {
     });
 });
 
-emitter.on('testHost', function(hostObj) {
+emitter.on('testHost', (hostObj) => {
     let thisTest;
-    resolveUser(hostObj.user.display_name, function(userObj) {
+    resolveUser(hostObj.user.display_name, (userObj) => {
         if (userObj.resolved) {
             thisTest = {
                 user: {
@@ -299,7 +329,7 @@ emitter.on('testHost', function(hostObj) {
     });
 });
 
-emitter.on('testTip', function(data) {
+emitter.on('testTip', (data) => {
     let thisTest = {
         user: {
             name: data.user.name,
@@ -312,7 +342,7 @@ emitter.on('testTip', function(data) {
     checkQueue();
 });
 
-emitter.on('tipeeeEvent', function (data) {
+emitter.on('tipeeeEvent', (data) => {
     queue.push(data);
 });
 
@@ -325,7 +355,7 @@ function resolveUser(username, callback) {
             // 'Authorization': 'OAuth ' + channel.token.slice(6),
             'Client-ID': CLIENT_ID
         }
-    }, function(err, res, body) {
+    }, (err, res, body) => {
         if (err) {
             log.debug(err);
             return;

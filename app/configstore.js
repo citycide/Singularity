@@ -3,7 +3,7 @@ const SimpleJsonStore = require('simple-json-store');
 
 const config = new SimpleJsonStore('./config/config.json',
     {
-        "port": 2016,
+        "port": 2881,
         "devMode": true,
         "setupComplete": false,
         "sessionSecret": "9347asfg597y43wernhy59072rw345",

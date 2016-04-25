@@ -10,7 +10,7 @@ const tipeee = socketio.connect('https://sso.tipeeestream.com:4242');
 
 const KEY = config.get('tipeeeAccessToken');
 tipeee.on('connect', function(){
-    log.msg('Connected to tipeeestream');
+    log.info('Connected to tipeeestream');
 });
 
 tipeee.emit('join-room', { room: KEY, username: 'citycide' });
