@@ -1,0 +1,194 @@
+* { box-sizing: initial; }
+body {
+    background-color: #363636 !important;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    margin: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+}
+#chat-container {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    max-height: 100%;
+    padding: 0.5em;
+}
+#chat_box {
+    background-color: #161616;
+    border: 1px solid #606060;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    overflow: auto;
+    color: #D3D3D3;
+    border-radius: 0;
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 85%;
+}
+
+#chat_box.dark {
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+}
+
+#chat_box.light {
+    background: rgba(255,255,255,0.3);
+    color: #000;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.tag {
+    display: inline-block;
+    text-indent: 21px;
+    background-position: 0 center;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+    height: 18px;
+    min-width: 18px;
+    width: expression(document.body.clientWidth < $width ? "18px":"auto");
+    padding: 0;
+    margin: 0 5px 0 5px;
+    text-indent: -9999px;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    overflow: hidden;
+}
+
+.turbo {
+    background-color: #6441a5;
+    background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_turbo.svg);
+    background-size: 100%;
+}
+
+.mod {
+    background-color: #34ae0a;
+    background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_mod.svg);
+    background-size: 100%;
+}
+
+.broadcaster {
+    background-color: #e71818;
+    background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_broadcaster.svg);
+    background-size: 100%;
+}
+
+.staff {
+    background-color: #200f33;
+    background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_staff.svg);
+    background-size: 100%;
+}
+
+.admin {
+    background-color: #faaf19;
+    background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_admin.svg);
+    background-size: 100%;
+}
+
+.global_mod {
+    background-color: #0C6F20;
+    background-image: url(//www-cdn.jtvnw.net/images/xarth/badge_globalmod.svg);
+    background-size: 100%;
+}
+
+.chat_line {
+    margin: 0;
+    padding: 0.5em;
+    line-height: 1.5em;
+    background-color: #181818;
+    border-bottom: 1px solid black;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+}
+.chat_line:nth-child(odd) {
+    background-color: #101010;
+}
+
+.chat_line .message {
+    /*word-break: break-all;*/
+    word-wrap: break-word;
+}
+
+.chat_line .time_stamp {
+    color: #B3B3B3;
+    font-size: 11px;
+    padding-right: 3px;
+}
+
+div.chat_line[data-type*="system"] {
+    text-align: center;
+    font-size: 12px;
+}
+div.chat_line[data-type*="whisper"] {
+    background-color: #2C144C;
+}
+div.chat_line[data-type*="whisper"] i {
+    vertical-align: middle;
+    margin-top: 2px;
+}
+
+.emoticon {
+    margin-bottom: 0;
+    max-height: 2em;
+    vertical-align: middle;
+}
+#spacer {
+    min-height: 0.5em;
+}
+#bottom {
+    min-height: 0.5em;
+}
+#msg-box {
+    display: flex;
+    flex: 1 1 10%;
+    width: 100%;
+    min-height: 50px;
+    padding-bottom: 0.5em;
+}
+#msg-box .chat-input {
+    padding: 0.5em 1.5em 0.5em 0.5em;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    width: 100%;
+    color: white;
+    background-color: #161616;
+    border: 1px solid #606060;
+    resize: none;
+}
+#msg-controls {
+    display: flex;
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+#msg-controls i {
+    color: #B3B3B3;
+    font-size: 18px;
+}
+#msg-controls .controls-left {
+    margin: 2px 1px 4px 0;
+}
+#msg-controls .controls-left .dropup {
+    position: absolute;
+}
+#msg-controls .controls-left .dropup ul i {
+    font-size: 12px;
+    color: black;
+}
+#msg-controls .controls-right {
+    text-align: right;
+    position: relative;
+    margin: 2px 1px 4px auto;
+}
+#msg-controls button {
+    position: relative;
+    margin: 2px 1px 4px auto;
+}
