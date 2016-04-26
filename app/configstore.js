@@ -1,4 +1,6 @@
 /*********************************** CONFIG ***********************************/
+'use strict';
+
 const SimpleJsonStore = require('simple-json-store');
 
 const config = new SimpleJsonStore('./config/config.json',

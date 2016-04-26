@@ -1,4 +1,5 @@
 /*********************************** ROUTES ***********************************/
+'use strict';
 
 const express = require('express'),
       config = require('./configstore'),

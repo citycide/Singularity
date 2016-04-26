@@ -1,4 +1,6 @@
 /********************************** DATABASE **********************************/
+'use strict';
+
 const dbstore = require('./stores.js'),
       path = require('path'),
       log = require('./logger.js'),

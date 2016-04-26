@@ -2,29 +2,18 @@
   "name": "Singularity",
   "description": "Twitch overlay & alert system",
   "version": "0.5.5",
-  "main": "http://localhost:2881",
-  "bg-script": "./server.js",
-  "inject_js_end": "./public/js/vendor/betterttv.user.js",
-  "window": {
-    "title": "Singularity",
-    "icon": "./assets/singularity_lg.png",
-    "toolbar": false,
-    "frame": false,
-    "fullscreen": false,
-    "width": 1315,
-    "height": 878,
-    "min_width": 390,
-    "min_height": 30
-  },
-  "node-remote": "http://localhost",
+  "main": "main.js",
   "scripts": {
     "windows": "nodemon -e js,ejs,css,html --exec \"cd ./nw && nw.exe ../\" --ignore node_modules/"
   },
+  "start": "electron .",
+  "server-port": 2881,
   "dependencies": {
     "body-parser": "^1.15.0",
     "chokidar": "^1.4.3",
     "cookie-parser": "^1.4.1",
     "ejs": "^2.4.1",
+    "electron-prebuilt-compile": "^0.37.7",
     "express": "4.x",
     "express-session": "^1.13.0",
     "fs-jetpack": "^0.8.0",
@@ -37,5 +26,10 @@
     "tmi.js": "latest",
     "winston": "^2.2.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "babel-preset-es2015": "^6.6.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-electron": "^0.1.2"
+  }
 }

@@ -1,4 +1,6 @@
 /******************************** TIPEEESTREAM ********************************/
+'use strict';
+
 const socketio = require('socket.io-client'),
       db = require('./db'),
       log = require('./logger'),

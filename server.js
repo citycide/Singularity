@@ -1,13 +1,15 @@
+'use strict';
+
 const http = require('http'),
-      path = require('path'),
-      express = require('express'),
-      chokidar = require('chokidar'),
-      socketio = require('socket.io'),
-      ejs = require('ejs');
+    path = require('path'),
+    express = require('express'),
+    chokidar = require('chokidar'),
+    socketio = require('socket.io'),
+    ejs = require('ejs');
 
 const emitter = require(__dirname + '/app/emitter'),
-      config = require(__dirname + '/app/configstore'),
-      log = require(__dirname + '/app/logger');
+    config = require(__dirname + '/app/configstore'),
+    log = require(__dirname + '/app/logger');
 
 let twitch, tipeee, bot;
 
@@ -19,11 +21,18 @@ const io = global.io = socketio(server);
 
 const ROUTES = require('./app/routes')(app);
 const SOCKETS = require('./app/sockets');
-const PORT = config.get('port');
+let PORT;
 
-server.listen(PORT, () => {
-    log.sys(`listening on *:${PORT}`);
-});
+const setPort = (_port, callback) => {
+    PORT = _port || 2881;
+    callback();
+};
+
+const start = () => {
+    server.listen(PORT, () => {
+        log.sys(`listening on *:${PORT}`);
+    });
+};
 
 setTimeout(() => {
     if (config.get('channel') && config.get('isLoggedIn')) {
@@ -51,3 +60,8 @@ watcher.on('change', (_path, stats) => {
     let _module = '.' + path.sep + path.relative(__dirname, _path);
     delete require.cache[_path];
 });
+
+// export the server object for electron
+module.exports = server;
+module.exports.start = start();
+module.exports.setPort = setPort();

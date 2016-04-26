@@ -1,4 +1,6 @@
 /*********************************** LOGGER ***********************************/
+'use strict';
+
 const config = require('./configstore');
 
 function log(msg) {

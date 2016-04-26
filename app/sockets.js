@@ -1,4 +1,5 @@
 /*********************************** SOCKET ***********************************/
+'use strict';
 
 const io = global.io;
 const log = require('./logger');

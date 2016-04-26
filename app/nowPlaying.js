@@ -1,4 +1,6 @@
 /************************************ MUSIC ***********************************/
+'use strict';
+
 const f = require('fs'),
       fs = require('fs-jetpack'),
       config = require('./configstore'),
