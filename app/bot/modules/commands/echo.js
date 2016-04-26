@@ -1,7 +1,6 @@
 const emitter = require(rootDir + '/app/emitter');
 
 emitter.on('botReady', function() {
-    console.log(global.$.db);
     emitter.emit('commandRegistry', {
         name: ['echo'],
         module: './modules/commands/echo',
