@@ -134,6 +134,7 @@ $(function() {
     var followSpan = $('#follower-panel-label');
     var viewsSpan = $('#views-panel-label');
     function getStreamInfo() {
+        console.info('Checking stream info...');
         $.getJSON(
             'https://api.twitch.tv/kraken/channels/' + channel,
             {
@@ -176,7 +177,15 @@ $(function() {
             });
     }
     getStreamInfo();
-    setInterval(getStreamInfo, 60 * 1000);
+    var intervalID = null;
+    function streamInfoInterval(flag, time) {
+        if (flag) {
+            intervalID = setInterval(getStreamInfo, time);
+        } else {
+            clearInterval(intervalID);
+        }
+    }
+    streamInfoInterval(true, 60 * 1000);
 
     $('[data-toggle="popover"]').popover({
         trigger: 'hover',
@@ -198,12 +207,13 @@ $(function() {
     var isEditingTitle = false;
     var currentTitle;
     statusSpan.click(function () {
-        if (isEditingTitle == false) {
+        if (isEditingTitle === false) {
             currentTitle = $(this).text();
             $(this).text(currentTitle)
                 .attr("contenteditable", "true").focus();
             setEndOfContenteditable($(this).get(0));
             isEditingTitle = true;
+            streamInfoInterval(false);
         }
     }).blur(function () {
         isEditingTitle = false;
@@ -212,23 +222,24 @@ $(function() {
         if (currentTitle != newTitle) {
             updateTitle(newTitle);
         }
+        streamInfoInterval(true, 60 * 1000);
     }).keydown(function(e) {
         if (e.keyCode === 13) {
             e.preventDefault();
-            $(this).removeAttr("contenteditable");
-            return false;
+            $(this).blur();
         }
     });
 
     var isEditingGame = false;
     var currentGame;
     gameSpan.click(function () {
-        if (isEditingGame == false) {
+        if (isEditingGame === false) {
             currentGame = $(this).text();
             $(this).text(currentGame)
                 .attr("contenteditable", "true").focus();
             setEndOfContenteditable($(this).get(0));
             isEditingGame = true;
+            streamInfoInterval(false);
         }
     }).blur(function () {
         isEditingGame = false;
@@ -237,14 +248,14 @@ $(function() {
         if (currentGame != newGame) {
             updateGame(newGame);
         }
+        streamInfoInterval(true, 60 * 1000);
     }).keydown(function(e) {
         if (e.keyCode === 13) {
             e.preventDefault();
-            $(this).removeAttr("contenteditable");
-            return false;
+            $(this).blur();
         }
     });
-
+    /*
     $('div[contenteditable]').keydown(function(e) {
         if (e.keyCode === 13) {
             e.preventDefault();
@@ -252,7 +263,7 @@ $(function() {
             return false;
         }
     });
-
+    */
     $("#btnTestFollower").click(function () {
         var user = $("#testFollowerUser").val();
         socket.emit('testFollower', user);
@@ -359,14 +370,11 @@ $(function() {
     var btnOpenOverlay = $('a#btnOpenOverlay');
     if (isNwjs) {
         btnOpenOverlay.click(function() {
-            var winAlerts = nw.Window.open(window.location.host + '/overlay', {
+            var winAlerts = nw.Window.open(window.location.origin + '/overlay', {
                 position: 'center',
                 focus: true,
                 width: 1280,
                 height: 720
-            });
-            winAlerts.on('loaded', function(){
-                log('SYS: Opened alerts window.');
             });
             return false;
         });
@@ -401,7 +409,7 @@ $(function() {
             "if(head) head.appendChild(script); };" +
             "betterttv_init();";
         chatFrame.onload = function () {
-            win.eval(chatFrame, bttv);
+            // win.eval(chatFrame, bttv);
         };
     } else {
         btnOpenOverlay.click(function() {
