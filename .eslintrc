@@ -1,0 +1,12 @@
+{
+  "extends": "airbnb/base",
+  "globals": {
+    "Logger": true,
+    "Settings": true,
+    "Emitter": true,
+    "WindowManager": true,
+    "PlaybackAPI": true,
+    "GPM": true,
+    "$": true
+  }
+}

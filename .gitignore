@@ -1,10 +1,10 @@
-
 *.DS_Store
 .idea/
 db/
 nw/
 node_modules/
 config/
+build/
 Singularity-Dev.lnk
 public/js/vendor/betterttv.user.js
 public/views/overlays/images
