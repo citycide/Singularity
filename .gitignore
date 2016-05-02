@@ -16,3 +16,4 @@ src/public/views/icons/
 src/public/views/form/
 src/public/views/components/
 outputs/
+dbStructure.js

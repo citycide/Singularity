@@ -1,15 +1,14 @@
 'use strict';
 
-const http = require('http'),
-      path = require('path'),
-      express = require('express'),
-      chokidar = require('chokidar'),
-      socketio = require('socket.io'),
-      ejs = require('ejs');
+import http from 'http';
+import path from 'path';
+import express from 'express';
+import chokidar from 'chokidar';
+import socketio from 'socket.io';
+import ejs from 'ejs';
 
 const emitter = require(__dirname + '/app/emitter'),
       config = require(__dirname + '/app/configstore'),
-      log = require(__dirname + '/app/logger'),
       db = require(__dirname + '/app/db');
 
 let twitch, tipeee, bot;
@@ -55,7 +54,7 @@ const watcher = chokidar.watch('./app/*.js', {
 });
 
 watcher.on('change', (_path, stats) => {
-    log.debug('File updated.');
+    Logger.debug('File updated.');
     let _module = '.' + path.sep + path.relative(__dirname, _path);
     delete require.cache[_path];
 });

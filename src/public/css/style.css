@@ -2,6 +2,7 @@ html {
   height: 100%; }
 
 body {
+  overflow: hidden;
   padding-top: 0;
   height: 100%;
   position: relative;
@@ -55,6 +56,7 @@ a:hover {
 .text-indent {
   text-indent: 1em; }
 
+/*
 .window-border {
   z-index: 15000;
   position: fixed;
@@ -66,65 +68,93 @@ a:hover {
   display: flex;
   flex-direction: column;
 }
-body.loaded .window-border {
-  transition: border .3s ease;
-}
-.window-border .title-bar {
-  z-index: 16000;
+*/
+/*
+.window-frame {
+  pointer-events: none;
+  background-color: transparent;
+  z-index: 20000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: .4em solid #039BE5;
+  -webkit-app-region: drag; }
+  */
+.window-frame-left, .window-frame-right, .window-frame-bottom, .window-frame-top {
+  background-color: #039BE5;
+  position: fixed;
+  z-index: 20000;
+  -webkit-app-region: drag;
+  -webkit-user-select: none; }
+  .window-frame-left, .window-frame-right {
+    top: 0;
+    bottom: 0;
+    width: .4em; }
+    .window-frame-left {
+      left: 0; }
+    .window-frame-right {
+      right: 0; }
+  .window-frame-top, .window-frame-bottom {
+    left: 0;
+    right: 0;
+    height: .4em; }
+    .window-frame-top {
+      top: 0; }
+    .window-frame-bottom {
+      bottom: 0; }
+.window-content .title-bar {
+  z-index: 20000;
   top: 0;
   position: fixed;
   width: 100%;
   min-height: 30px;
   background: #039BE5;
-}
-body.loaded .window-border .title-bar {
-  transition: background .3s ease;
   -webkit-app-region: drag;
-}
-.window-border .title-bar .drag-handle {
+  -webkit-user-select: none; }
+body.loaded .window-content .title-bar {
+  transition: background .3s ease; }
+.window-content .title-bar .drag-handle {
   height: 100%;
   flex: 1;
-  -webkit-app-region: drag;
-}
-.window-border .title-bar .controls {
+  -webkit-app-region: drag; }
+.window-content .title-bar .controls {
   height: 30px;
   float: right;
-  padding-right: .2em;
+  padding-right: .4em;
   -webkit-user-select: none;
-  -webkit-app-region: no-drag;
-}
-.window-border .title-bar .controls .control {
+  -webkit-app-region: no-drag; }
+.window-content .title-bar .controls .control {
   height: 100%;
   padding: 7px 16px;
   transition: background .2s linear;
   background: rgba(255, 255, 255, 0);
   float: left;
   cursor: pointer; }
-.window-border .title-bar .controls .control i {
+.window-content .title-bar .controls .control i {
   height: 100%;
   color: floralwhite;
   /*-webkit-filter: invert(1);*/
   align-content: center;
   -webkit-user-drag: none; }
-.window-border .title-bar .controls #winMinimize {
+.window-content .title-bar .controls #winMinimize {
   padding-top: 10px; }
-.window-border .title-bar .controls #winClose {
+.window-content .title-bar .controls #winClose {
   padding-top: 6px; }
-.window-border .title-bar .controls .control:hover {
-  background: rgba(255, 255, 255, .3);
+.window-content .title-bar .controls .control:hover {
+  background: rgba(255, 255, 255, .3); }
+.window-content .drag-handle-large {
+  display: none; }
+.window-content .full-container {
+  padding: 0 .4em;
+  height: 100%; }
+.window-content .main-content-container {
+  padding-top: 40px;
 }
-.window-border .drag-handle-large {
-  display: none;
-}
-.window-border .full-container {
-  flex: 1;
-  /*background: #FAFAFA;*/
-  overflow: scroll;
-  position: relative;
-  margin-top: 30px;
-  padding-bottom: 30px; }
 /*
-.window-border .full-container .embedded-player {
+.window-content .full-container .embedded-player {
   height: calc(100vh - 2.4em);
   display: block;
   transition: opacity .4s linear;
@@ -132,10 +162,10 @@ body.loaded .window-border .title-bar {
   z-index: 2;
   outline: 0
 }
-[loading] .window-border .full-container .embedded-player {
+[loading] .window-content .full-container .embedded-player {
   opacity: 0
 }
-.window-border .full-container .embedded-player::shadow object {
+.window-content .full-container .embedded-player::shadow object {
   height: 100%;
   width: 100%;
   outline: 0
@@ -308,17 +338,17 @@ li.now-playing-header {
     line-height: 60px;
     padding: 0 20px 0 20px;
 }
-.full-container {
-  top: 30px;
-}
 .app-container {
-  min-height: 100%;
-  position: relative;
+  height: 100%;
+  min-width: calc(100% - .7em);
+  position: absolute;
+  overflow: scroll;
+  top: 30px;
   padding-bottom: 30px; }
   .app-container .app-footer {
     display: block;
     position: absolute;
-    bottom: 0;
+    padding-bottom: 3em;
     right: 0;
     left: 65px;
     -webkit-transition: all 0.25s;
@@ -615,15 +645,17 @@ li.now-playing-header {
     border-radius: 0; }
 
 /* OUTSIDE ELECTRON */
-body.no-electron .window-border {
+body.no-electron .window-frame {
+    transition: 1s all ease;
+    opacity: 0;
     border: none; }
 body.no-electron .navbar-fixed-top {
     width: 100%; }
 body.no-electron .title-bar {
     display: none; }
-body.no-electron .full-container,
+body.no-electron .app-container,
 body.no-electron .navbar > .container-fluid {
-    margin-top: 0; }
+    padding-top: 0; }
 body.no-electron .app-container .content-container .side-menu {
     height: 100%; }
 

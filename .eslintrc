@@ -3,6 +3,7 @@
   "globals": {
     "Logger": true,
     "Settings": true,
+    "Transit": true,
     "Emitter": true,
     "WindowManager": true,
     "PlaybackAPI": true,

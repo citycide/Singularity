@@ -1,12 +1,4 @@
-/********************* moduleHander.js *********************/
-/**
- * @description
- * This handles the reloading of modules when they're updated.
- * To do this, it watches the /modules directory and all its
- * subdirectories for changes to *.js files. If it detects a
- * change, it will delete the require.cache for that module.
- * This forces Node to reload the script.
- */
+/******************************* MODULE HANDLER *******************************/
 
 // use chokidar for this
 // http://stackoverflow.com/questions/1972242/auto-reload-of-files-in-node-js
@@ -51,7 +43,7 @@ module.exports = exports = {
             requireUncached(_module);
             return true;
         } catch (err) {
-            console.log(err);
+            Logger.error(err);
             return false;
         }
     }

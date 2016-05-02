@@ -1,9 +1,12 @@
 /*********************************** CONFIG ***********************************/
 'use strict';
 
-const SimpleJsonStore = require('simple-json-store');
+import SimpleJsonStore from 'simple-json-store';
+import jetpack from 'fs-jetpack';
+import path from 'path';
 
-const config = new SimpleJsonStore('./config/config.json',
+jetpack.dir(path.resolve(__dirname, '..', 'config'));
+const config = new SimpleJsonStore(path.resolve(__dirname, '..', 'config', 'config.json'),
     {
         "port": 2881,
         "devMode": true,

@@ -1,6 +1,8 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../css/loader.css" />
+    <!-- Electron jQuery fix -->
+    <script>window._module = window.module; window.module = undefined;</script>
     <script src="../js/vendor/jquery.min.js"></script>
     <!-- socket.io -->
     <script src="/socket.io/socket.io.js"></script>
@@ -44,6 +46,10 @@
                 });
             });
         });
+    </script>
+    <script>
+        window.module = window._module;
+        // document.body.classList.add(process.platform);
     </script>
 </head>
 <body>

@@ -1,6 +1,7 @@
-import {remote} from 'electron';
+import { shell, remote } from 'electron';
+import path from 'path';
 
-const webview = document.querySelector('webview');
+const webview = document.querySelector('webview #chat_embed');
 
 if (webview) {
     let once = true;
@@ -12,21 +13,19 @@ if (webview) {
         }
     });
 
-    const savePage = (param) => {
+/*    const savePage = (param) => {
         const url = param.url || param;
         if (!/https?:\/\/play\.google\.com\/music/g.test(url)) return;
         Emitter.fire('settings:set', {
             key: 'lastPage',
             value: url
         });
-    };
-    
-    webview.addEventListener('dom-ready', () => {
+    };*/
 
+    webview.addEventListener('dom-ready', () => {
         webview.openDevTools();
-        setTimeout(() => {
+        /*setTimeout(() => {
             document.body.removeAttribute('loading');
-            webview.focus();
             webview.addEventListener('did-navigate', savePage);
             webview.addEventListener('did-navigate-in-page', savePage);
 
@@ -37,6 +36,28 @@ if (webview) {
                 remote.getCurrentWindow().removeListener('focus', focusWebview);
             });
             remote.getCurrentWindow().on('focus', focusWebview);
-        }, 700);
+        }, 700);*/
+    });
+
+    webview.addEventListener('new-window', (e) => {
+        if (e.url.indexOf('bttvSettings') !== -1) {
+            console.log(e);
+            let bttvSettings = new remote.BrowserWindow({
+                title: 'BetterTTV Settings',
+                autoHideMenuBar: true,
+                width: 810,
+                height: 548,
+                show: false,
+                webPreferences: {
+                    nodeIntegration: true,
+                    preload: path.resolve(`${__dirname}/../../bttv/index.js`)
+                }
+            });
+            bttvSettings.loadURL(e.url);
+            bttvSettings.show();
+            bttvSettings.on('closed', () => {
+                bttvSettings = null;
+            });
+        }
     });
 }

@@ -26,7 +26,12 @@
 </head>
 
 <body class="flat-main">
-    <section class="window-border">
+    <div class="window-frame-left"></div>
+    <div class="window-frame-right"></div>
+    <div class="window-frame-top"></div>
+    <div class="window-frame-bottom"></div>
+
+    <section class="window-content">
         <header class="title-bar">
             <div class="drag-handle"></div>
             <div class="controls">
@@ -197,7 +202,7 @@
                         </nav>
                     </div>
                     <!-- Main Content -->
-                    <div class="container-fluid">
+                    <div class="container-fluid main-content-container">
                         <div class="side-body padding-top">
                             <div class="tab-content" id="pageContent">
                                 <div class="tab-pane fade in active" id="dashboard">
@@ -407,7 +412,7 @@
                                                     </div>
                                                     <div id="collapseChat" class="panel-collapse collapse in">
                                                         <div class="card-body no-padding no-margin-bottom">
-                                                            <script>var chatView = decodeURIComponent('<%= chatView %>'); console.log(chatView);</script>
+                                                            <script>var chatView = decodeURIComponent('<%= chatView %>');</script>
                                                             <webview id='chat_embed' src="//www.twitch.tv/<%- channel %>/chat" style="height: 675px; width: 100%;" preload="<%- decodeURIComponent(chatView) %>" plugins disablewebsecurity></webview>
                                                         </div>
                                                     </div>
@@ -765,9 +770,6 @@
     <script type="text/javascript" src="../js/vendor/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="../js/vendor/dataTables.bootstrap.min.js"></script>
     <script type="text/javascript" src="../js/vendor/select2.full.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/ace/ace.js"></script>
-    <script type="text/javascript" src="../js/vendor/ace/mode-html.js"></script>
-    <script type="text/javascript" src="../js/vendor/ace/theme-github.js"></script>
     <script type="text/javascript" src="../js/vendor/moment.min.js"></script>
     <script type="text/javascript" src="../js/vendor/waves.js"></script>
     <!-- js -->

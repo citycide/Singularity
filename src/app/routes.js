@@ -9,8 +9,7 @@ const express = require('express'),
       ejs = require('ejs'),
       session = require('express-session');
 
-const log = require('./logger'),
-      db = require('./db'),
+const db = require('./db'),
       musicWatcher = require('./nowPlaying');
 
 module.exports = (app) => {
@@ -70,14 +69,14 @@ module.exports = (app) => {
                     tipeeeEnabled: config.get('tipeeeActive'),
                     followerObj: db.dbGetFollows().object
                 });
-                log.sys('Directing to home page.');
+                Logger.trace('Directing to home page.');
             } else {
                 res.redirect('/login');
-                log.sys('Directing to login page.');
+                Logger.trace('Directing to login page.');
             }
         } else {
             res.redirect('/setup');
-            log.sys('Directing to setup page.');
+            Logger.trace('Directing to setup page.');
         }
     });
     app.get('/dashboard', (req, res) => {
@@ -92,14 +91,14 @@ module.exports = (app) => {
                     tipeeeEnabled: config.get('tipeeeActive'),
                     followerObj: db.dbGetFollows().object
                 });
-                log.sys('Directing to home page.');
+                Logger.trace('Directing to home page.');
             } else {
                 res.redirect('/login');
-                log.sys('Directing to login page.');
+                Logger.trace('Directing to login page.');
             }
         } else {
             res.redirect('/setup');
-            log.sys('Directing to setup page.');
+            Logger.trace('Directing to setup page.');
         }
     });
     /*
@@ -119,7 +118,7 @@ module.exports = (app) => {
     app.get('/logout', (req, res) => {
         userLogout((status) => {
             if (!status) {
-                log.auth('User has been logged out.');
+                Logger.trace('User has been logged out.');
                 res.redirect('/login');
             }
         });
@@ -132,7 +131,7 @@ module.exports = (app) => {
         if (config.get('isLoggedIn')) {
             res.render('overlays/overlay');
         } else {
-            log.auth('User needs to authenticate.');
+            Logger.trace('User needs to authenticate.');
             res.redirect('/login');
         }
     });
@@ -169,7 +168,7 @@ module.exports = (app) => {
                 clientID: config.get('clientID')
             });
         } else {
-            log.sys('Setup already complete, directing to home page.');
+            Logger.trace('Setup already complete, directing to home page.');
             res.redirect('/');
         }
     });
@@ -179,7 +178,7 @@ module.exports = (app) => {
         res.send('Page not found.', 404);
     });
 
-    function userLogout(callback) {
+    const userLogout = (callback) => {
         config.set('isLoggedIn', false);
         config.set('tipeeeActive', false);
         config.del('accessToken');
@@ -188,5 +187,5 @@ module.exports = (app) => {
         config.del('channelID');
         config.del('tipeeeAccessToken');
         callback(false);
-    }
+    };
 };

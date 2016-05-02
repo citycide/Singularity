@@ -1,7 +1,9 @@
 import { app, BrowserWindow, screen } from 'electron';
+import EventEmitter from 'events';
 import winston from 'winston';
 import { argv } from 'yargs';
 import path from 'path';
+import util from 'util';
 
 import configureApp from './app/main/configureApp';
 import generateBrowserConfig from './app/main/configureBrowser';
@@ -14,15 +16,15 @@ import I3IpcHelperClass from './app/main/utils/I3IpcHelper';
 
 import handleStartupEvent from './squirrel';
 
-const pjson = require('../package.json');
-const PORT = pjson['server-port'] || 2881;
+const pkg = require('../package.json');
+const PORT = pkg['server-port'] || 2881;
 /*
 process.on('uncaughtException', (err) => {
     console.error(err.stack);
 });
 */
 
-function onError(error) {
+const onError = (error) => {
     if (error.syscall !== 'listen') {
         throw error;
     }
@@ -39,7 +41,7 @@ function onError(error) {
         default:
             throw error;
     }
-}
+};
 
 (() => {
     if (handleStartupEvent()) {
@@ -48,9 +50,29 @@ function onError(error) {
 
     global.DEV_MODE = argv.development || argv.dev;
 
-    // Initialize the logger with some default logging levels.
+    // Initialize the logger with default log levels
     const defaultFileLogLevel = 'info';
-    const defaultConsoleLogLevel = global.DEV_MODE ? 'debug' : 'error';
+    const defaultConsoleLogLevel = global.DEV_MODE ? 'trace' : 'error';
+    const defaultLogLevels = {
+        levels: {
+            error: 0,
+            warn: 1,
+            info: 2,
+            sys: 2,
+            bot: 2,
+            debug: 3,
+            trace: 4
+        },
+        colors: {
+            error: 'red',
+            warn: 'yellow',
+            info: 'blue',
+            sys: 'blue',
+            bot: 'green',
+            debug: 'cyan',
+            trace: 'white'
+        }
+    };
     global.Logger = new (winston.Logger)({
         transports: [
             new (winston.transports.File)({
@@ -64,6 +86,8 @@ function onError(error) {
             })
         ]
     });
+    Logger.setLevels(defaultLogLevels.levels);
+    winston.addColors(defaultLogLevels.colors);
     Logger.info('Starting app...');
 
     const server = require('./server.js');
@@ -94,12 +118,15 @@ function onError(error) {
         return;
     }
 
+    // Spin up a global event emitter for core interaction
+    global.Transit = new EventEmitter();
+
     global.Emitter = new EmitterClass();
     global.WindowManager = new WindowManagerClass();
     global.Settings = new SettingsClass();
     global.PlaybackAPI = new PlaybackAPIClass();
 
-    // Replace the logger's levels with those from settings.
+    // Replace the log level with those from settings.
     Logger.transports.console.level = Settings.get('consoleLogLevel', defaultConsoleLogLevel);
     Logger.transports.file.level = Settings.get('fileLogLevel', defaultFileLogLevel);
 

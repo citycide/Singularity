@@ -1,15 +1,14 @@
-const emitter = require(rootDir + '/app/emitter');
-
-emitter.on('botReady', function() {
-    console.log(global.$.db);
-    emitter.emit('commandRegistry', {
-        name: ['echo'],
-        module: './modules/commands/echo',
-        cooldown: 30,
-        permLevel: 0
-    });
-});
-
-module.exports.echo = function(event) {
-    global.$.bot.say(global.$.channel.name, event.argString);
+module.exports.echo = (event) => {
+    core.say(event.argString);
 };
+
+Transit.on('bot:command:listen', () => {
+    Transit.emit('bot:command:register', [
+        {
+            name: 'echo',
+            handler: 'echo',
+            cooldown: 30,
+            permLevel: 0
+        }
+    ], './modules/commands/echo');
+});

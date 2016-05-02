@@ -1,35 +1,33 @@
 /*********************************** SOCKET ***********************************/
 'use strict';
 
-const io = global.io;
-const log = require('./logger');
 const emitter = require('./emitter');
 const config = require('./configstore');
 const db = require('./db');
 
-io.on('connection', function(socket){
-    log.info('Client connected.');
+io.on('connection', (socket) => {
+    Logger.debug('Client connected.');
 
-    socket.on('disconnect', function(){
-        log.info('Client disconnected.');
+    socket.on('disconnect', () => {
+        Logger.debug('Client disconnected.');
     });
 
-    socket.on('authCallback', function(data) {
+    socket.on('authCallback', (data) => {
         if (data.token.length > 20) {
             config.set('accessToken', data.token);
             config.set('channel', data.user);
             config.set('channelAvatar', data.logo);
             config.set('channelID', data.id);
             config.set('isLoggedIn', true);
-            log.auth(`${config.get('accessToken')} authed as ${config.get('channel')}`);
+            Logger.debug(`${config.get('accessToken')} authed as ${config.get('channel')}`);
         }
     });
 
-    socket.on('setupComplete', function(){
+    socket.on('setupComplete', () => {
         config.set('setupComplete', true);
     });
 
-    socket.on('getUserInfo', function() {
+    socket.on('getUserInfo', () => {
         socket.emit('setUserInfo', {
             user: config.get('channel'),
             logo: config.get('channelAvatar'),
@@ -38,71 +36,71 @@ io.on('connection', function(socket){
         });
     });
 
-    socket.on('testFollower', function(user){
-        log.alert(`Received new follower test with name: ${user}`);
+    socket.on('testFollower', (user) => {
+        Logger.debug(`Received new follower test with name: ${user}`);
         emitter.emit('testFollower', user);
     });
 
-    socket.on('testHost', function(data){
-        log.alert(`Received new host test: ${data.user.display_name} for ${data.viewers} viewers`);
+    socket.on('testHost', (data) => {
+        Logger.debug(`Received new host test: ${data.user.display_name} for ${data.viewers} viewers`);
         emitter.emit('testHost', data);
     });
 
-    socket.on('testSubscriber', function(user){
-        log.alert(`Received new subscriber test with name: ${user}`);
+    socket.on('testSubscriber', (user) => {
+        Logger.debug(`Received new subscriber test with name: ${user}`);
         emitter.emit('testSubscriber', user);
     });
 
-    socket.on('testTip', function(data){
-        log.alert(`Received new tip test: ${data.user.name} for ${data.amount} | ${data.message}`);
+    socket.on('testTip', (data) => {
+        Logger.debug(`Received new tip test: ${data.user.name} for ${data.amount} | ${data.message}`);
         emitter.emit('testTip', data);
     });
 
-    socket.on('testMusic', function(data){
-        log.alert(`Received new music test: ${data}`);
+    socket.on('testMusic', (data) => {
+        Logger.debug(`Received new music test: ${data}`);
         io.emit('newTestSong', data);
     });
 
-    socket.on('getCurrentSong', function() {
+    socket.on('getCurrentSong', () => {
         io.emit('setCurrentSong', musicWatcher.song);
     });
 
-    socket.on('alertComplete', function() {
+    socket.on('alertComplete', () => {
         emitter.emit('alertComplete');
     });
 
-    socket.on('getFollowers', function() {
+    socket.on('getFollowers', () => {
         io.emit('receiveFollowers', db.dbGetFollows().object);
     });
 
-    socket.on('activateTipeee', function(data) {
+    socket.on('activateTipeee', (data) => {
         config.set('tipeeeActive', true);
         config.set('tipeeeAccessToken', data);
     });
 });
 
-emitter.on('followAlert', function(data) {
+emitter.on('followAlert', (data) => {
     io.emit('followAlert', data);
     io.emit('addFollowEvent', db.makeFollowObj(data));
 });
 
-emitter.on('hostAlert', function(data) {
+emitter.on('hostAlert', (data) => {
     io.emit('hostAlert', data);
 });
 
-emitter.on('subscriberAlert', function(data) {
+emitter.on('subscriberAlert', (data) => {
     io.emit('subscriberAlert', data);
 });
 
-emitter.on('tipAlert', function(data) {
-    log.alert('Forwarding tip test');
+emitter.on('tipAlert', (data) => {
+    Logger.debug('Forwarding tip test');
     io.emit('tipAlert', data);
 });
 
-emitter.on('initSong', function(data) {
+emitter.on('initSong', (data) => {
     io.emit('initSong', data);
 });
 
-emitter.on('newSong', function(data) {
+emitter.on('newSong', (data) => {
     io.emit('newSong', data);
 });

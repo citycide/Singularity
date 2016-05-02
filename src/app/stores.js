@@ -1,23 +1,20 @@
 /********************************** DATABASE **********************************/
 'use strict';
 
-const fs = require('fs'),
-      jetpack = require('fs-jetpack'),
-      sql = require('sql.js'),
-      moment = require('moment'),
-      emitter = require('./emitter');
+import jetpack from 'fs-jetpack';
+import moment from 'moment';
+const sql = require('sql.js');
 
-function dbstore(fileName) {
+const dbstore = (fileName) => {
     if (!fileName) return null;
 
     let store = {};
     let db;
 
-    store.write = function() {
+    store.write = () => {
         try {
             let binArray = db.export();
             let fileBuffer = new Buffer(binArray);
-            // fs.writeFile(fileName, fileBuffer);
             jetpack.write(fileName, fileBuffer);
             return true;
         } catch(err) {
@@ -25,7 +22,7 @@ function dbstore(fileName) {
         }
     };
 
-    store.select = function(query) {
+    store.select = (query) => {
         try {
             let response = db.exec(query);
             return {array: response, object: makeObj(response), erbject: eventObj(response)};
@@ -35,7 +32,7 @@ function dbstore(fileName) {
         }
     };
 
-    store.run = function(query) {
+    store.run = (query) => {
         try {
             db.run(query);
             store.write();
@@ -46,7 +43,7 @@ function dbstore(fileName) {
         }
     };
 
-    store.get = function(query) {
+    store.get = (query) => {
         try {
             let response = db.exec(query);
             return response;
@@ -66,7 +63,7 @@ function dbstore(fileName) {
         store.write();
     }
 
-    function makeObj(dataset) {
+    const makeObj = (dataset) => {
         let output = { followers: [] };
         for (let j = 0; j < dataset.length; j++) {
             for (let i = 0; i < dataset[j].values.length; i++) {
@@ -79,9 +76,9 @@ function dbstore(fileName) {
             }
         }
         return output;
-    }
+    };
 
-    function eventObj(dataset) {
+    const eventObj = (dataset) => {
         let output = { events: [] };
         for (let j = 0; j < dataset.length; j++) {
             let thisEvent = {
@@ -91,20 +88,20 @@ function dbstore(fileName) {
             };
             output.events.push(thisEvent);
         }
-    }
+    };
 
-    store.newFollowerObj = function(follower) {
+    store.newFollowerObj = (follower) => {
         return {
             name: follower.display_name,
             time: moment(follower.created_at, 'x').fromNow()
         };
     };
     return store;
-}
+};
 
 module.exports = dbstore;
 module.exports.bot = {
-    get: function(query) {
+    get: (query) => {
         // die bot
     }
 };

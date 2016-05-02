@@ -1,7 +1,6 @@
+import moment from 'moment';
 const tmi = require('tmi.js');
 const config = require('../../app/configstore');
-const log = require('../../app/logger');
-const moment = require('moment');
 
 const OPTIONS = {
     options: {
@@ -22,41 +21,42 @@ const bot = new tmi.client(OPTIONS);
 
 bot.on('chat', (channel, user, message, self) => {
     if (self) return;
-    if (_.isCommand(message)) _.commandHandler(user, message);
-    _.messageHandler(user, message);
-    console.log(_.checkPermLevel(user['display-name']));
+    api.messageHandler(user, message);
+    if (api.isCommand(message)) api.commandHandler(user, message);
+    // Logger.bot(api.checkPermLevel(user['display-name']));
 });
 
-module.exports._ = exports._ = _ = {
-    isCommand: function(message) {
-        return (message.charAt(0) === global.$.command.prefix());
+let api = {
+    isCommand: (message) => {
+        return (message.charAt(0) === core.command.prefix());
     },
 
-    messageHandler: function(user, message) {
+    messageHandler: (user, message) => {
+        // api.checkPermLevel(user['display-name']);
         let _timestamp = moment().valueOf();
         let _mod = false;
         if (user['user-type'] === 'mod') _mod = true;
         let _user = {
             name: user['display-name'],
-            permLevel: _.getPermissions(user),
+            permLevel: api.getPermissions(user),
             mod: _mod,
-            following: global.$.isFollower(user['display-name']),
+            following: core.isFollower(user['display-name']),
             seen: _timestamp
         };
-        global.$.db.bot.addUser(_user);
+        core.db.bot.addUser(_user);
     },
 
-    commandHandler: function(user, message) {
+    commandHandler: (user, message) => {
         let _mod = false;
         if (user['user-type'] === 'mod') _mod = true;
-        global.$.runCommand({
+        core.runCommand({
             sender: user['display-name'],
             mod: _mod,
-            permLevel: _.checkPermLevel(user['display-name']),
+            permLevel: api.checkPermLevel(user['display-name']),
             raw: message,
-            command: _.getCommand(message),
-            args: _.getCommandArgs(message),
-            argString: _.getCommandArgString(message)
+            command: api.getCommand(message),
+            args: api.getCommandArgs(message),
+            argString: api.getCommandArgString(message)
         });
     },
 
@@ -66,7 +66,7 @@ module.exports._ = exports._ = _ = {
      * @param message
      * @returns {string}
      */
-    getCommand: function(message) {
+    getCommand: (message) => {
         return message.slice(1).split(' ', 1)[0];
     },
 
@@ -76,7 +76,7 @@ module.exports._ = exports._ = _ = {
      * @param message
      * @returns {Array.<T>}
      */
-    getCommandArgs: function(message) {
+    getCommandArgs: (message) => {
         return message.split(' ').slice(1);
     },
 
@@ -86,16 +86,15 @@ module.exports._ = exports._ = _ = {
      * @param message
      * @returns {string}
      */
-    getCommandArgString: function(message) {
+    getCommandArgString: (message) => {
         return message.split(' ').slice(1).join(' ');
     },
 
-    checkPermLevel: function(user) {
-        console.log(global.$.db.bot.getPermLevel(user));
-        return global.$.db.bot.getPermLevel(user);
+    checkPermLevel: (user) => {
+        return core.db.bot.getPermLevel(user);
     },
 
-    getPermissions: function(user) {
+    getPermissions: (user) => {
         /**
          * Viewer permission levels:
          *     7: 'viewer'
@@ -109,8 +108,8 @@ module.exports._ = exports._ = _ = {
          */
         let _permLevel = 7;
         if (user['user-type'] === 'mod') _permLevel = 1;
-        if (user['display-name'] === global.$.channel.name) _permLevel = 0;
-        if (user['display-name'] === global.$.channel.botName) _permLevel = 0;
+        if (user['display-name'] === core.channel.name) _permLevel = 0;
+        if (user['display-name'] === core.channel.botName) _permLevel = 0;
         return _permLevel;
     }
 };

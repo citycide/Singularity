@@ -1,22 +1,26 @@
 /****************************** COMMAND REGISTRY ******************************/
 
-const db = require('../../../../app/db'),
-      emitter = require('../../../../app/emitter'),
-      log = require('../../../../app/logger');
+const db = require('../../../../app/db');
 
 let commands = {};
 
-emitter.on('botReady', function() {
-    log.debug('Listening for commands.');
+Transit.on('bot:ready', () => {
+    Logger.bot('Listening for commands.');
+    Transit.emit('bot:command:listen');
 });
 
-emitter.on('commandRegistry', function(data) {
-    for (let cmd of data.name) {
-        commands[cmd] = {
-            name: cmd,
-            module: data.module
+Transit.on('bot:command:register', (data, module) => {
+    for (let cmd of data) {
+        let handler = (cmd.handler) ? (cmd.handler) : (cmd.name);
+        commands[cmd.name] = {
+            name: cmd.name,
+            handler: handler,
+            cooldown: cmd.cooldown,
+            permLevel: cmd.permLevel,
+            module: module
         };
-        db.bot.addCommand(cmd, data.cooldown, data.permLevel, false, data.module);
+        db.bot.addCommand(cmd.name, cmd.cooldown, cmd.permLevel, false, module);
+        Logger.trace(`Loaded command '${cmd.name}' from ${module}`);
     }
 });
 

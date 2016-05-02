@@ -1,34 +1,34 @@
 /************************************ MUSIC ***********************************/
 'use strict';
 
-const f = require('fs'),
-      fs = require('fs-jetpack'),
-      config = require('./configstore'),
+import fs from 'fs';
+import jetpack from 'fs-jetpack';
+const config = require('./configstore'),
       emitter = require('./emitter');
 
 let filePath = config.get('nowPlayingFile') || null;
 let sep = config.get('nowPlayingSep') || '             //             ';
 // const FILE_PATH = 'C:\\Users\\Bo\\Apps\\PhantomBotv2\\addons\\youtubePlayer\\currentsong.txt';
 
-global.io.on('setNowPlayingFile', (_path) => {
+io.on('setNowPlayingFile', (_path) => {
     config.set('nowPlayingFile', _path);
     filePath = config.get('nowPlayingFile');
 });
 
-global.io.on('setNowPlayingSep', (_sep) => {
+io.on('setNowPlayingSep', (_sep) => {
     config.set('nowPlayingSep', _sep);
     sep = config.get('nowPlayingSep');
 });
 
 let song;
 if (filePath !== null) {
-    let file = fs.read(filePath).toString().replace(sep, '');
+    let file = jetpack.read(filePath).toString().replace(sep, '');
 
     emitter.emit('initSong', file);
 
     song = file;
-    f.watchFile(filePath, () => {
-        file = fs.read(filePath).toString().replace(sep, '');
+    fs.watchFile(filePath, () => {
+        file = jetpack.read(filePath).toString().replace(sep, '');
         if (file != 'No song is currently playing.') {
             emitter.emit('newSong', file);
         }
@@ -36,9 +36,9 @@ if (filePath !== null) {
     });
 }
 
-function getCurrentSong() {
+const getCurrentSong = () => {
     if (song === null || song === ' ' || song === undefined) return 'No song is currently playing.';
     return song.trim();
-}
+};
 
 module.exports.getCurrentSong = getCurrentSong;

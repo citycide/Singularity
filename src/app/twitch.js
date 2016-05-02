@@ -1,11 +1,10 @@
 /*********************************** TWITCH ***********************************/
 'use strict';
 
+import fs from 'fs-jetpack';
+import moment from 'moment';
 const irc = require('tmi.js'),
-      fs = require('fs-jetpack'),
-      moment = require('moment'),
       emitter = require('./emitter'),
-      log = require('./logger'),
       config = require('./configstore'),
       db = require('./db');
 
@@ -49,7 +48,7 @@ test.on('cooldown.end', function() {
 });
 */
 
-emitter.on('alertComplete', function () {
+emitter.on('alertComplete', () => {
     animating = false;
 });
 
@@ -70,25 +69,25 @@ const OPTIONS = {
 
 const client = new irc.client(OPTIONS);
       client.connect();
-client.on("connected", (address, port) => {
+client.on('connected', (address, port) => {
     Logger.info(`Connected to Twitch chat at ${address}:${port}`)
 });
 
 const BASE_URL = 'https://api.twitch.tv/kraken';
 const CHANNEL_EP = `/channels/${CHANNEL.name}/`;
 
-function initAPI(pollInterval) {
+const initAPI = (pollInterval) => {
     Logger.info('Initializing Twitch API requests');
     if (!pollInterval) pollInterval = 30 * 1000;
-    setTimeout(function() {
+    setTimeout(() => {
         pollFollowers(pollInterval);
     }, 5000);
     setTimeout(checkQueue, 10000);
-}
+};
 
-function pollFollowers(pollInterval) {
+const pollFollowers = (pollInterval) => {
     if (!pollInterval) pollInterval = 30 * 1000;
-    Logger.info(`Hitting follower endpoint for ${CHANNEL.name}...`);
+    Logger.trace(`Hitting follower endpoint for ${CHANNEL.name}...`);
     client.api({
         url: `${BASE_URL}${CHANNEL_EP}follows?limit=100&timestamp=` + new Date().getTime(),
         method: 'GET',
@@ -99,12 +98,12 @@ function pollFollowers(pollInterval) {
         }
     }, (err, res, body) => {
         if (err) {
-            log.debug(err);
+            Logger.debug(err);
             setTimeout(pollFollowers, pollInterval);
             return;
         }
         if (res.statusCode != 200) {
-            log.debug(`Unknown response code: ${res.statusCode}`);
+            Logger.debug(`Unknown response code: ${res.statusCode}`);
             setTimeout(pollFollowers, pollInterval);
             return;
         }
@@ -112,7 +111,7 @@ function pollFollowers(pollInterval) {
         try {
             body = JSON.parse(body);
         } catch (error) {
-            log.debug(error);
+            Logger.debug(error);
             return;
         }
 
@@ -131,6 +130,7 @@ function pollFollowers(pollInterval) {
                             ntf: follower.notifications
                         };
                         db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
+                        // db._dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
                     });
                     writeFollower(followers[followers.length-1]);
                 } else {
@@ -141,11 +141,12 @@ function pollFollowers(pollInterval) {
                             let s = {
                                 id: follower.user._id,
                                 name: follower.user.display_name,
-                                ts: moment(follower.created_at).valueOf(),
+                                ts: moment(follower.created_at, moment.ISO_8601).valueOf(),
                                 ev: 'follower',
                                 ntf: follower.notifications
                             };
                             db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
+                            // db._dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
                             writeFollower(s.name);
                         }
                     });
@@ -154,16 +155,16 @@ function pollFollowers(pollInterval) {
         }
         setTimeout(pollFollowers, pollInterval);
     });
-}
+};
 
-function writeFollower(followerName) {
+const writeFollower = (followerName) => {
     let followerFile = __dirname + '/../outputs/latestfollower.txt';
     if (fs.read(followerFile) !== followerName) {
         fs.file(followerFile, {
             content: followerName
         });
     }
-}
+};
 
 client.on('hosted', (channel, username, viewers) => {
     let thisHost;
@@ -249,7 +250,7 @@ client.on('subanniversary', (channel, username, months) => {
     });
 });
 
-function checkQueue() {
+const checkQueue = () => {
     if(!queue.length || animating) {
         setTimeout(checkQueue, 5 * 1000);
         return;
@@ -257,10 +258,10 @@ function checkQueue() {
     let queueItem = queue.pop();
     actOnQueue(queueItem.user, queueItem.type);
     setTimeout(checkQueue, 5 * 1000);
-}
+};
 
-function actOnQueue(data, type) {
-    log.alert('Pushing queue item...');
+const actOnQueue = (data, type) => {
+    Logger.trace('Pushing queue item...');
     animating = true;
     switch (type) {
         case 'follower':
@@ -276,7 +277,7 @@ function actOnQueue(data, type) {
             emitter.emit('tipAlert', data);
             break;
     }
-}
+};
 
 emitter.on('testFollower', (username) => {
     let thisTest;
@@ -346,7 +347,7 @@ emitter.on('tipeeeEvent', (data) => {
     queue.push(data);
 });
 
-function resolveUser(username, callback) {
+const resolveUser = (username, callback) => {
     client.api({
         url: `/users/${username}`,
         method: 'GET',
@@ -357,14 +358,14 @@ function resolveUser(username, callback) {
         }
     }, (err, res, body) => {
         if (err) {
-            log.debug(err);
+            Logger.debug(err);
             return;
         }
 
         try {
             body = JSON.parse(body);
         } catch (error) {
-            log.debug(error);
+            Logger.debug(error);
             return;
         }
 
@@ -389,7 +390,7 @@ function resolveUser(username, callback) {
             callback(resolvedUser);
         }
     });
-}
+};
 
 module.exports.initAPI = initAPI;
 module.exports.pollFollowers = pollFollowers;
