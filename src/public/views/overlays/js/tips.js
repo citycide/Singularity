@@ -2,7 +2,7 @@
 
 var socket = io();
 
-socket.on('tipAlert', function (data) {
+socket.on('alert:tip', function (data) {
     showAlert(data);
 });
 

@@ -232,7 +232,7 @@ $(function() {
 
     $("#btnTestFollower").click(function () {
         var user = $("#testFollowerUser").val();
-        socket.emit('testFollower', user);
+        socket.emit('test:follower', user);
         // log('Sent follower test with name: ' + user + '.', 'test');
         return false;
     });
@@ -246,7 +246,7 @@ $(function() {
             },
             viewers: viewers
         };
-        socket.emit('testHost', testHost);
+        socket.emit('test:host', testHost);
         // log('Sent host test with: ' + user + ' for ' + viewers + ' viewers.', 'test');
         return false;
     });
@@ -255,10 +255,16 @@ $(function() {
         var user = $("#testSubUser").val();
         var months = parseInt($("#testSubMonths").val());
         if (months === null || months === undefined || months === 0 || isNaN(months)) {
-            socket.emit('testSubscriber', user);
+            socket.emit('test:subscriber', user);
             // log('Sent new subscriber test with name: ' + user + '.', 'test');
         } else {
-            socket.emit('testResub', [user, months]);
+            var testResub = {
+                user: {
+                    display_name: user
+                },
+                months: months
+            }
+            socket.emit('test:resub', testResub);
             // log('Sent resubscriber test with: ' + user + ' for ' + months + ' months.', 'test');
         }
         return false;
@@ -276,7 +282,7 @@ $(function() {
             amount: formattedAmount,
             message: message
         };
-        socket.emit('testTip', testTip);
+        socket.emit('test:tip', testTip);
         if (message === "" || message === null || message === undefined) {
             // log('Sent new tip test from: ' + user + ' for ' + '$' + amount + '.', 'test');
         } else {
@@ -287,14 +293,14 @@ $(function() {
 
     $("#btnTestMusic").click(function() {
         var song = $("#testSongTitle").val();
-        socket.emit('testMusic', song);
+        socket.emit('test:music', song);
         // log('Sent now playing with title: ' + song + '.', 'test');
         return false;
     });
 
     $("#btnSendCurrentSong").click(function() {
         var song = currentSong;
-        socket.emit('testMusic', song);
+        socket.emit('test:music', song);
         // log('Sent now playing with title: ' + song + '.', 'test');
         return false;
     });
@@ -307,11 +313,11 @@ $(function() {
     $("#btnTipeeeKey").click(function() {
         var keyInput = $("#tipeeeKeyInput");
         if (!keyInput.val() || keyInput.val().length < 30) return;
-        socket.emit('activateTipeee', keyInput.val());
+        socket.emit('tipeee:activate', keyInput.val());
         $('#step3-tab').trigger('click');
     });
     $("#btnTipeeeDeactivate").click(function() {
-        socket.emit('disableTipeee');
+        socket.emit('tipeee:deactivate');
         $('#tipeeeDeactModal').modal('hide');
     });
 
@@ -463,7 +469,8 @@ function updateGame(game) {
 
 function openLink(url) {
     if (isElectron) {
-        nw.Shell.openExternal(url);
+        const remote = require ('remote');
+        remote.shell.openExternal(url);
     } else {
         window.open(url);
     }

@@ -85,9 +85,10 @@ const initAPI = (pollInterval) => {
     setTimeout(checkQueue, 10000);
 };
 
+let once = false;
 const pollFollowers = (pollInterval) => {
     if (!pollInterval) pollInterval = 30 * 1000;
-    Logger.trace(`Hitting follower endpoint for ${CHANNEL.name}...`);
+    Logger.absurd(`Hitting follower endpoint for ${CHANNEL.name}...`);
     client.api({
         url: `${BASE_URL}${CHANNEL_EP}follows?limit=100&timestamp=` + new Date().getTime(),
         method: 'GET',
@@ -137,7 +138,17 @@ const pollFollowers = (pollInterval) => {
                     body.follows.reverse().map((follower) => {
                         if (followers.indexOf(follower.user.display_name) == -1) {
                             followers.push(follower.user.display_name);
-                            queue.push(follower);
+                            let queueFollower = {
+                                user: {
+                                    _id: follower.user._id,
+                                    display_name: follower.user.display_name,
+                                    logo: follower.user.logo,
+                                    created_at: follower.created_at,
+                                    notifications: follower.notifications
+                                },
+                                type: 'follower'
+                            };
+                            queue.push(queueFollower);
                             let s = {
                                 id: follower.user._id,
                                 name: follower.user.display_name,
@@ -265,17 +276,24 @@ const actOnQueue = (data, type) => {
     animating = true;
     switch (type) {
         case 'follower':
-            emitter.emit('followAlert', data);
+            Logger.trace('Queue item is a follower event.');
+            io.emit('alert:follow', data);
+            io.emit('addFollowEvent', db.makeFollowObj(data));
             break;
         case 'host':
-            emitter.emit('hostAlert', data);
+            Logger.trace('Queue item is a host event.');
+            io.emit('alert:host', data);
             break;
         case 'subscriber':
-            emitter.emit('subscriberAlert', data);
+            Logger.trace('Queue item is a subscriber event.');
+            io.emit('alert:subscriber', data);
             break;
         case 'tip':
-            emitter.emit('tipAlert', data);
+            Logger.trace('Queue item is a tip event.');
+            io.emit('alert:tip', data);
             break;
+        default:
+            Logger.debug(`ERR in actOnQueue:: Queue item is of unknown type '${type}'`);
     }
 };
 

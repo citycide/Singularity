@@ -2,7 +2,7 @@
 
 var socket = io();
 
-socket.on('followAlert', function (user) {
+socket.on('alert:follow', function (user) {
     showAlert(user);
 });
 

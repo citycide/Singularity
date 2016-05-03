@@ -39,6 +39,7 @@ module.exports = (app) => {
     const slider = require('../public/views/overlays/slider');
     const nowPlaying = require('../public/views/overlays/nowPlaying');
     const chat = require('../public/views/chat');
+    const shell = require('../public/views/shell');
 
     app.use('/', home);
     app.use('/dashboard', home);
@@ -52,6 +53,7 @@ module.exports = (app) => {
     app.use('/slider', slider);
     app.use('/music', nowPlaying);
     app.use('/chat', chat);
+    app.use('/shell', shell);
 
     /*
      **  HOME PAGE
@@ -155,6 +157,12 @@ module.exports = (app) => {
             channel: config.get('channel'),
             token: config.get('accessToken'),
             clientID: config.get('clientID')
+        });
+    });
+
+    app.get('/shell', (req, res) => {
+        res.render('shell', {
+            source: encodeURI('/overlay')
         });
     });
 

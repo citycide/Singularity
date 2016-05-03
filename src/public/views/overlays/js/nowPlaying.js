@@ -5,19 +5,17 @@ var currentSong;
 var animating = false;
 var queue = [];
 
-socket.on('newSong', function (data) {
+socket.on('music:update', function (data) {
     currentSong = data;
     queue.push(currentSong);
     console.log(queue[0]);
     checkQueue();
-    // showAlert(currentSong);
 });
 
-socket.on('newTestSong', function (data) {
+socket.on('music:test', function (data) {
     queue.push(data);
     console.log(queue[0]);
     checkQueue();
-    // showAlert(data);
 });
 
 var tl, stage, opts, songTitle, command,

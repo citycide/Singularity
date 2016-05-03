@@ -2,7 +2,7 @@
 
 var socket = io();
 
-socket.on('hostAlert', function (user) {
+socket.on('alert:host', function (user) {
     showAlert(user);
 });
 

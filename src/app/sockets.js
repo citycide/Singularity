@@ -36,29 +36,29 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on('testFollower', (user) => {
+    socket.on('test:follower', (user) => {
         Logger.debug(`Received new follower test with name: ${user}`);
         emitter.emit('testFollower', user);
     });
 
-    socket.on('testHost', (data) => {
+    socket.on('test:host', (data) => {
         Logger.debug(`Received new host test: ${data.user.display_name} for ${data.viewers} viewers`);
         emitter.emit('testHost', data);
     });
 
-    socket.on('testSubscriber', (user) => {
+    socket.on('test:subscriber', (user) => {
         Logger.debug(`Received new subscriber test with name: ${user}`);
         emitter.emit('testSubscriber', user);
     });
 
-    socket.on('testTip', (data) => {
+    socket.on('test:tip', (data) => {
         Logger.debug(`Received new tip test: ${data.user.name} for ${data.amount} | ${data.message}`);
         emitter.emit('testTip', data);
     });
 
-    socket.on('testMusic', (data) => {
+    socket.on('test:music', (data) => {
         Logger.debug(`Received new music test: ${data}`);
-        io.emit('newTestSong', data);
+        io.emit('music:test', data);
     });
 
     socket.on('getCurrentSong', () => {
@@ -73,12 +73,18 @@ io.on('connection', (socket) => {
         io.emit('receiveFollowers', db.dbGetFollows().object);
     });
 
-    socket.on('activateTipeee', (data) => {
+    socket.on('tipeee:activate', (data) => {
         config.set('tipeeeActive', true);
         config.set('tipeeeAccessToken', data);
     });
+
+    socket.on('tipeee:deactivate', () => {
+        config.set('tipeeeActive', false);
+        config.del('tipeeeAccessToken');
+    });
 });
 
+/*
 emitter.on('followAlert', (data) => {
     io.emit('followAlert', data);
     io.emit('addFollowEvent', db.makeFollowObj(data));
@@ -104,3 +110,4 @@ emitter.on('initSong', (data) => {
 emitter.on('newSong', (data) => {
     io.emit('newSong', data);
 });
+*/

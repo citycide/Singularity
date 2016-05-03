@@ -10,6 +10,7 @@ Transit.on('bot:ready', () => {
 });
 
 Transit.on('bot:command:register', (data, module) => {
+    Logger.debug(`Module loaded:: ${module}`);
     for (let cmd of data) {
         let handler = (cmd.handler) ? (cmd.handler) : (cmd.name);
         commands[cmd.name] = {

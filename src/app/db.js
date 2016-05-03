@@ -148,6 +148,10 @@ module.exports = {
     }
 };
 
+module.exports.makeFollowObj = (follower) => {
+    return db.newFollowerObj(follower);
+};
+
 /**
  * Collection of api methods related to the bot database
  * @export bot
@@ -352,7 +356,5 @@ module.exports.dbGetFollows = () => {
     return db.select(`SELECT * FROM followers WHERE timestamp > ${CUTOFF} ORDER BY timestamp DESC`);
 };
 
-module.exports.makeFollowObj = (follower) => {
-    return db.newFollowerObj(follower);
-};
+
 */

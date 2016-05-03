@@ -18,6 +18,7 @@ const dbstore = (fileName) => {
             jetpack.write(fileName, fileBuffer);
             return true;
         } catch(err) {
+            Logger.error(err);
             return false;
         }
     };
@@ -27,7 +28,7 @@ const dbstore = (fileName) => {
             let response = db.exec(query);
             return {array: response, object: makeObj(response), erbject: eventObj(response)};
         } catch(err) {
-            console.log(err);
+            Logger.error(err);
             return false;
         }
     };
@@ -37,8 +38,9 @@ const dbstore = (fileName) => {
             db.run(query);
             store.write();
             return true;
-        } catch(err) {
-            console.log(err);
+        } catch (err) {
+            if (err.message === 'UNIQUE constraint failed: commands.name') return Logger.absurd('ERR in addCommand:: Command already exists.');
+            Logger.error(err);
             return false;
         }
     };
@@ -47,8 +49,8 @@ const dbstore = (fileName) => {
         try {
             let response = db.exec(query);
             return response;
-        } catch(err) {
-            console.log(err);
+        } catch (err) {
+            Logger.error(err);
             return false;
         }
     };
@@ -58,7 +60,7 @@ const dbstore = (fileName) => {
         let file = jetpack.read(fileName, 'buffer');
         db = new sql.Database(file);
     } catch(err) {
-        console.log(err);
+        Logger.error(err);
         db = new sql.Database();
         store.write();
     }

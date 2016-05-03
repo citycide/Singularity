@@ -61,7 +61,8 @@ const onError = (error) => {
             sys: 2,
             bot: 2,
             debug: 3,
-            trace: 4
+            trace: 4,
+            absurd: 5
         },
         colors: {
             error: 'red',
@@ -70,7 +71,8 @@ const onError = (error) => {
             sys: 'blue',
             bot: 'green',
             debug: 'cyan',
-            trace: 'white'
+            trace: 'white',
+            absurd: 'grey'
         }
     };
     global.Logger = new (winston.Logger)({
