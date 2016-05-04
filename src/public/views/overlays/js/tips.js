@@ -6,6 +6,17 @@ socket.on('alert:tip', function (data) {
     showAlert(data);
 });
 
+/**
+ * @function Register & preload sounds
+ */
+(function() {
+    createjs.Sound.registerSound('/views/overlays/snd/subscription.ogg', 'tip');
+    // createjs.Sound.registerSound('/views/overlays/snd/tip.ogg', 'tip');
+    createjs.Sound.registerSound('/views/overlays/snd/short_whoosh2.wav', 'cut');
+    createjs.Sound.registerSound('/views/overlays/snd/short_whoosh1.wav', 'out');
+})();
+
+
 var tl, stage, opts, username, amount,
     bgs, bg1, bg2, bg3;
 

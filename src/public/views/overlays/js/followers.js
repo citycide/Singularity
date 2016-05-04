@@ -6,6 +6,16 @@ socket.on('alert:follow', function (user) {
     showAlert(user);
 });
 
+/**
+ * @function Register & preload sounds
+ */
+(function() {
+    createjs.Sound.registerSound('/views/overlays/snd/subscription.ogg', 'subscription');
+    // createjs.Sound.registerSound('/views/overlays/snd/tip.ogg', 'tip');
+    createjs.Sound.registerSound('/views/overlays/snd/short_whoosh2.wav', 'cut');
+    createjs.Sound.registerSound('/views/overlays/snd/short_whoosh1.wav', 'out');
+})();
+
 var tl, stage, label, opts,
     circlebgs, cir1, cir2, cir3,
     msgbgs, msg1, msg2, msg3;
@@ -20,14 +30,12 @@ var showAlert = function (user) {
     containerEl.appendChild(stageEl);
 
     // Define constants
-    var initRadius = 0;
     var maxRadius = 60;
     var midRadius = maxRadius - 5;
     var minRadius = midRadius - 5;
     var hCenter = stageEl.width / 2;
     var vCenter = stageEl.height / 2;
     var SLANT = 100;
-    var maxX = stageEl.width - SLANT;
     var maxY = stageEl.height / 2.5;
     var vPos = Math.floor((200 - maxY) / 2);
 
@@ -52,7 +60,6 @@ var showAlert = function (user) {
                 .beginFill(msgbg.color)
                 .moveTo(baseX, 0)
                 .lineTo(-baseX, 0)
-                // .lineTo(-tipX, maxY / 2)
                 .lineTo(-tipX, 0)
                 .lineTo(-baseX, maxY)
                 .lineTo(baseX, maxY)
@@ -155,12 +162,6 @@ var showAlert = function (user) {
     circlebgs = [cir3, cir2, cir1];
     msgbgs = [msg3, msg2, msg1];
 
-    // Load sounds
-    createjs.Sound.registerSound('/views/overlays/snd/subscription.ogg', 'subscription');
-    // createjs.Sound.registerSound('/views/overlays/snd/tip.ogg', 'tip');
-    createjs.Sound.registerSound('/views/overlays/snd/short_whoosh2.wav', 'cut');
-    createjs.Sound.registerSound('/views/overlays/snd/short_whoosh1.wav', 'out');
-
     // Create the timeline that will animate elements
     tl = new TimelineMax({
         autoRemoveChildren: true,
@@ -200,9 +201,7 @@ var showAlert = function (user) {
 
     // Prepare the elements for staggering animations
     var reverseBgs = window.circlebgs.slice(0).reverse();
-    var reverseMsg = window.msgbgs.slice(0).reverse();
     var foremostBg = window.circlebgs[2];
-    var foremostMsg = window.msgbgs[2];
     var delay = 0;
 
     // Animate in
@@ -251,7 +250,6 @@ var showAlert = function (user) {
     // Show first message
     tl.to(label, 0.6, {
         onStart: function () {
-            // label.font = FIRST_MSG_FONT;
             label.text = firstMsg;
         },
         y: label.showY + 7,
@@ -269,7 +267,6 @@ var showAlert = function (user) {
         y: 300,
         ease: Elastic.easeIn.config(1, 1),
         onComplete: function () {
-            // label.font = SECOND_MSG_FONT;
             label.text = secondMsg;
         }
     }, '+=0.875');

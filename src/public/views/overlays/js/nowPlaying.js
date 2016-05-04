@@ -134,7 +134,6 @@ function showAlert(song) {
     songTitle.mask = msg1;
     songTitle.maxLength = 359;
     songContainer.addChild(songTitle);
-    // console.log(songTitle.getBounds());
 
     // Create the timeline that will animate elements
     tl = new TimelineLite({
