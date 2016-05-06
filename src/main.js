@@ -1,4 +1,5 @@
 import { app, BrowserWindow, screen } from 'electron';
+import debugMenu from 'debug-menu';
 import EventEmitter from 'events';
 import winston from 'winston';
 import { argv } from 'yargs';
@@ -17,7 +18,7 @@ import I3IpcHelperClass from './app/main/utils/I3IpcHelper';
 import handleStartupEvent from './squirrel';
 
 const pkg = require('../package.json');
-const PORT = pkg['server-port'] || 2881;
+const PORT = pkg.port || 2881;
 /*
 process.on('uncaughtException', (err) => {
     console.error(err.stack);
@@ -123,6 +124,10 @@ const onError = (error) => {
     // Spin up a global event emitter for core interaction
     global.Transit = new EventEmitter();
 
+    // Make the port global so it's accessible from the remote
+    // @TODO do this better
+    global.ServerPort = PORT;
+
     global.Emitter = new EmitterClass();
     global.WindowManager = new WindowManagerClass();
     global.Settings = new SettingsClass();
@@ -141,7 +146,7 @@ const onError = (error) => {
     app.on('ready', () => {
         mainWindow = new BrowserWindow(generateBrowserConfig());
         global.mainWindowID = WindowManager.add(mainWindow, 'main');
-
+        
         const position = Settings.get('position');
         let inBounds = false;
         if (position) {

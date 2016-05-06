@@ -2,6 +2,7 @@
 'use strict';
 
 import fs from 'fs';
+import chokidar from 'chokidar';
 import jetpack from 'fs-jetpack';
 const config = require('./configstore'),
       emitter = require('./emitter');
@@ -27,7 +28,20 @@ if (filePath !== null) {
     io.emit('music:init', file);
 
     song = file;
+    /*
     fs.watchFile(filePath, () => {
+        file = jetpack.read(filePath).toString().replace(sep, '');
+        if (file != 'No song is currently playing.') {
+            io.emit('music:update', file);
+        }
+        song = file;
+    });
+    */
+    const watcher = chokidar.watch(filePath, {
+        persistent: true
+    });
+
+    watcher.on('change', (_path, stats) => {
         file = jetpack.read(filePath).toString().replace(sep, '');
         if (file != 'No song is currently playing.') {
             io.emit('music:update', file);

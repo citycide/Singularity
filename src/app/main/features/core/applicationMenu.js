@@ -1,5 +1,5 @@
-import {app, Menu, shell} from 'electron';
-import {showDesktopSettings} from './desktopSettings';
+import { app, Menu, shell } from 'electron';
+// import { showWinSettings } from './desktopSettings';
 
 const template = [
     {
@@ -49,32 +49,8 @@ const template = [
                 click: () => {
                     Emitter.sendToWindowsOfName('main', 'gotourl');
                 }
-            },
-            {
-                label: 'Show Lyrics (Beta)',
-                accelerator: 'CmdOrCtrl+Shift+L',
-                click: () => {
-                    Emitter.sendToWindowsOfName('main', 'lyrics:show');
-                }
             }
         ]
-    },
-    {
-        label: 'Playback',
-        submenu: [
-            {
-                label: 'Play / Pause',
-                click: () => Emitter.sendToGooglePlayMusic('playback:playPause')
-            },
-            {
-                label: 'Previous Track',
-                click: () => Emitter.sendToGooglePlayMusic('playback:previousTrack')
-            },
-            {
-                label: 'Next Track',
-                click: () => Emitter.sendToGooglePlayMusic('playback:nextTrack')
-            },
-        ],
     },
     {
         label: 'Window',
@@ -104,15 +80,15 @@ const template = [
             },
             {
                 label: 'Issues',
-                click: () => shell.openExternal('https://github.com/MarshallOfSound/Google-Play-Music-Desktop-Player-UNOFFICIAL-/issues')
+                click: () => shell.openExternal('https://github.com/citycide/singularity/issues')
             },
             {
                 label: 'Donate',
-                click: () => shell.openExternal('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=23CZGASL6XMLJ')
+                click: () => shell.openExternal('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BP83JQTLPGDHQ')
             },
             {
                 label: 'Learn More',
-                click: () => shell.openExternal('http://www.googleplaymusicdesktopplayer.com')
+                click: () => shell.openExternal('https://github.com/citycide/singularity')
             }
         ]
     }
@@ -120,17 +96,17 @@ const template = [
 
 if (process.platform === 'darwin') {
     template.unshift({
-        label: 'Google Play Music Desktop Player',
+        label: 'singularity',
         submenu: [
             {
-                label: 'About Google Play Music Desktop Player',
+                label: 'About singularity',
                 role: 'about'
-            },
+            },/*
             {
                 label: 'Preferences',
                 accelerator: 'Command+,',
-                click: () => showDesktopSettings()
-            },
+                click: () => showWinSettings()
+            },*/
             {
                 type: 'separator'
             },
@@ -159,7 +135,7 @@ if (process.platform === 'darwin') {
         ]
     });
     // Window menu.
-    template[4].submenu.push(
+    template[3].submenu.push(
         {
             type: 'separator'
         },
@@ -171,7 +147,7 @@ if (process.platform === 'darwin') {
 }
 
 if (global.DEV_MODE) {
-    template[4].submenu.push(
+    template[3].submenu.push(
         {
             type: 'separator'
         }, {

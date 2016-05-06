@@ -48,7 +48,11 @@ test.on('cooldown.end', function() {
 });
 */
 
-emitter.on('alertComplete', () => {
+/*io.on('alert:complete', () => {
+    animating = false;
+});*/
+
+Transit.on('alert:complete', () => {
     animating = false;
 });
 
@@ -190,7 +194,7 @@ client.on('hosted', (channel, username, viewers) => {
                 },
                 type: 'host'
             };
-            db.dbHostsAdd(thisHost.user._id, thisHost.user.display_name, moment().valueOf, thisHost.user.viewers);
+            db.dbHostsAdd(thisHost.user._id, thisHost.user.display_name, moment().valueOf(), thisHost.user.viewers);
         } else {
             thisHost = {
                 user: {
@@ -199,7 +203,7 @@ client.on('hosted', (channel, username, viewers) => {
                 },
                 type: 'host'
             };
-            db.dbHostsAdd(null, thisHost.user.display_name, moment().valueOf, thisHost.user.viewers);
+            db.dbHostsAdd(null, thisHost.user.display_name, moment().valueOf(), thisHost.user.viewers);
         }
         // if (thisHost.user.viewers > 0) {
             queue.push(thisHost);
@@ -219,7 +223,7 @@ client.on('subscription', (channel, username) => {
                 },
                 type: 'subscriber'
             };
-            db.dbSubscribersAdd(thisSub.user._id, thisSub.user.display_name, moment().valueOf, null);
+            db.dbSubscribersAdd(thisSub.user._id, thisSub.user.display_name, moment().valueOf(), null);
         } else {
             thisSub = {
                 user: {
@@ -227,7 +231,7 @@ client.on('subscription', (channel, username) => {
                 },
                 type: 'subscriber'
             };
-            db.dbSubscribersAdd(null, thisSub.user.display_name, moment().valueOf, null);
+            db.dbSubscribersAdd(null, thisSub.user.display_name, moment().valueOf(), null);
         }
         queue.push(thisSub);
     });
@@ -246,7 +250,7 @@ client.on('subanniversary', (channel, username, months) => {
                 },
                 type: 'subscriber'
             };
-            db.dbSubscribersAdd(thisResub.user._id, thisResub.user.display_name, moment().valueOf, thisResub.user.months);
+            db.dbSubscribersAdd(thisResub.user._id, thisResub.user.display_name, moment().valueOf(), thisResub.user.months);
         } else {
             thisResub = {
                 user: {
@@ -255,7 +259,7 @@ client.on('subanniversary', (channel, username, months) => {
                 },
                 type: 'subscriber'
             };
-            db.dbSubscribersAdd(null, thisReub.user.display_name, moment().valueOf, thisResub.user.months);
+            db.dbSubscribersAdd(null, thisReub.user.display_name, moment().valueOf(), thisResub.user.months);
         }
         queue.push(thisResub);
     });
@@ -278,7 +282,7 @@ const actOnQueue = (data, type) => {
         case 'follower':
             Logger.trace('Queue item is a follower event.');
             io.emit('alert:follow', data);
-            io.emit('addFollowEvent', db.makeFollowObj(data));
+            io.emit('alert:follow:event', db.makeFollowObj(data));
             break;
         case 'host':
             Logger.trace('Queue item is a host event.');
@@ -297,7 +301,7 @@ const actOnQueue = (data, type) => {
     }
 };
 
-emitter.on('testFollower', (username) => {
+Transit.on('test:follower', (username) => {
     let thisTest;
     resolveUser(username, (userObj) => {
         if (userObj.resolved) {
@@ -322,7 +326,7 @@ emitter.on('testFollower', (username) => {
     });
 });
 
-emitter.on('testHost', (hostObj) => {
+Transit.on('test:host', (hostObj) => {
     let thisTest;
     resolveUser(hostObj.user.display_name, (userObj) => {
         if (userObj.resolved) {
@@ -348,7 +352,7 @@ emitter.on('testHost', (hostObj) => {
     });
 });
 
-emitter.on('testTip', (data) => {
+Transit.on('test:tip', (data) => {
     let thisTest = {
         user: {
             name: data.user.name,
@@ -361,7 +365,7 @@ emitter.on('testTip', (data) => {
     checkQueue();
 });
 
-emitter.on('tipeeeEvent', (data) => {
+Transit.on('alert:tipeee:event', (data) => {
     queue.push(data);
 });
 

@@ -40,7 +40,7 @@ module.exports = (app) => {
     const nowPlaying = require('../public/views/overlays/nowPlaying');
     const chat = require('../public/views/chat');
     const shell = require('../public/views/shell');
-
+    
     app.use('/', home);
     app.use('/dashboard', home);
     app.use('/login', login);
@@ -162,7 +162,12 @@ module.exports = (app) => {
 
     app.get('/shell', (req, res) => {
         res.render('shell', {
-            source: encodeURI('/overlay')
+            /** 
+             * forwards the query passed to /shell
+             * this is used to dynamically change the src of the webview
+             * making /shell a universal window container
+             **/
+            source: encodeURI(`/${req.query.src}`)
         });
     });
 
