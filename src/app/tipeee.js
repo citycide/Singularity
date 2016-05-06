@@ -14,7 +14,7 @@ const tm = {
         tipeee = socket.connect('https://sso.tipeeestream.com:4242');
         key = config.get('tipeeeAccessToken');
 
-        connectHandler();
+        tm.connectHandler();
     },
     tipeeeDisconnect: () => {
         Logger.info('Disconnected from TipeeeStream.');
@@ -31,6 +31,28 @@ const tm = {
         config.set('tipeeeActive', false);
         config.del('tipeeeAccessToken');
         tm.tipeeeDisconnect();
+    },
+    connectHandler: () => {
+        tipeee.on('connect', () => {
+            Logger.info('Connected to tipeeestream');
+            tipeee.emit('join-room', { room: key, username: config.get('channel') });
+        });
+
+        tipeee.on('new-event', (data) => {
+            // We're only interested in events of type 'donation'
+            if (data.event.type !== 'donation') return;
+            let thisEvent = {
+                user: {
+                    name: data.event.parameters.username,
+                    amount: data.event.formattedAmount,
+                    message: data.event.parameters.formattedMessage,
+                    messageRaw: data.event.parameters.message,
+                    timestamp: moment(data.event.created_at).valueOf()
+                },
+                type: "tip"
+            };
+            Transit.emit('alert:tipeee:event', thisEvent);
+        });
     }
 };
 
@@ -40,28 +62,6 @@ if (config.get('tipeeeActive')) {
     }
 }
 
-const connectHandler = () => {
-    tipeee.on('connect', () => {
-        Logger.info('Connected to tipeeestream');
-        tipeee.emit('join-room', { room: key, username: config.get('channel') });
-    });
-
-    tipeee.on('new-event', (data) => {
-        // We're only interested in events of type 'donation'
-        if (data.event.type !== 'donation') return;
-        let thisEvent = {
-            user: {
-                name: data.event.parameters.username,
-                amount: data.event.formattedAmount,
-                message: data.event.parameters.formattedMessage,
-                messageRaw: data.event.parameters.message,
-                timestamp: moment(data.event.created_at).valueOf()
-            },
-            type: "tip"
-        };
-        Transit.emit('alert:tipeee:event', thisEvent);
-    });
-};
 
 Transit.on('tipeee:activate', (data) => {
     tm.tipeeeActivate(data);

@@ -193,8 +193,9 @@ module.exports.bot = {
         let status = false;
         try {
             status = botDB.get(`SELECT status FROM commands WHERE name='${cmd}'`)[0].values[0][0];
-            Logger.debug(status, !!status);
-            return !!status;
+            status = (status === 'true');
+            Logger.trace(`'${cmd}' is ${(status) ? 'enabled' : 'disabled'}.`);
+            return status;
         } catch (err) {
             Logger.error(err);
         }

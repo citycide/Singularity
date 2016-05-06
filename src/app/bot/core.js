@@ -56,7 +56,7 @@ let core = {
             return botStore.get(`SELECT permission FROM commands WHERE name="${cmd}"`) || 0;
         },
         isEnabled: (cmd) => {
-            return Logger.bot(db.bot.getStatus(cmd));
+            return db.bot.getStatus(cmd);
         },
         enableCommand: (cmd) => {
             if (!registry.hasOwnProperty(cmd)) {
