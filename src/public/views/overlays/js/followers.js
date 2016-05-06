@@ -166,7 +166,7 @@ var showAlert = function (user) {
     tl = new TimelineMax({
         autoRemoveChildren: true,
         onComplete: function () {
-            socket.emit('alertComplete');
+            socket.emit('alert:complete');
             // animating = false;
             // checkQueue();
         }

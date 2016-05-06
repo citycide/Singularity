@@ -12,7 +12,7 @@ $(document).ready(function () {
     if (locHash == '#done') {
         $('ul.nav li a[href="' + locHash + '"]').parent().removeClass('disabled');
         $('ul.nav li a[href="' + locHash + '"]').trigger('click');
-        socket.emit('setupComplete');
+        socket.emit('setup:complete');
     }
 
     $('.btn-submit').on('click', function (e) {

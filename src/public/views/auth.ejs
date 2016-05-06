@@ -31,7 +31,7 @@
                         logo = res.logo;
                     }
                     id = res._id;
-                    socket.emit('authCallback', {
+                    socket.emit('auth:callback', {
                         token: access_token,
                         user: username,
                         logo: logo,
