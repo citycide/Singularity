@@ -6,11 +6,14 @@ import { spawn, exec } from 'child_process';
 
 const paths = {
     internalScripts: ['src/**/*.js', '!src/public/js/vendor/**/*.js'],
-    vendorScripts: ['src/public/js/vendor/**/*'],
+    vendorScripts: ['src/public/js/vendor/**/*',
+                    'node_modules/keen-ui/dist/min/keen-ui.min.js'],
+    vendorStyles: ['node_modules/keen-ui/dist/min/keen-ui.min.css'],
     views: ['src/public/views/**/*.ejs'],
-    fonts: ['node_modules/font-awesome/fonts/*.{otf,eot,svg,ttf,woff,woff2}'],
+    fonts: ['node_modules/font-awesome/fonts/*.{otf,eot,svg,ttf,woff,woff2}',
+            'node_modules/material-design-icons-iconfont/dist/fonts/*.{otf,eot,svg,ttf,woff,woff2}'],
     images: ['src/public/images/**/*'],
-    vendorStyles: ['node_modules/font-awesome/css/*.min.css'],
+    fontStyles: ['node_modules/font-awesome/css/*.min.css'],
     styles: ['src/public/css/**/*'],
     assets: ['src/assets/**/*'],
     overlayEJS: ['src/public/views/overlays/*.ejs'],
@@ -68,8 +71,13 @@ gulp.task('internal-styles', ['clean-styles'], () => {
         .pipe(gulp.dest('./build/public/css'));
 });
 
-gulp.task('styles', ['internal-styles'], () => {
+gulp.task('vendor-styles', ['internal-styles'], () => {
     return gulp.src(paths.vendorStyles)
+        .pipe(gulp.dest('./build/public/css/vendor/'));
+});
+
+gulp.task('styles', ['vendor-styles'], () => {
+    return gulp.src(paths.fontStyles)
         .pipe(gulp.dest('./build/public/fonts/'));
 });
 

@@ -12,7 +12,7 @@ io.on('connection', (socket) => {
         Logger.debug('Client disconnected.');
     });
 
-    socket.on('authCallback', (data) => {
+    socket.on('auth:callback', (data) => {
         if (data.token.length > 20) {
             config.set('accessToken', data.token);
             config.set('channel', data.user);
@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('setupComplete', () => {
+    socket.on('setup:complete', () => {
         config.set('setupComplete', true);
     });
 
@@ -38,22 +38,22 @@ io.on('connection', (socket) => {
 
     socket.on('test:follower', (user) => {
         Logger.debug(`Received new follower test with name: ${user}`);
-        emitter.emit('testFollower', user);
+        Transit.emit('test:follower', user);
     });
 
     socket.on('test:host', (data) => {
         Logger.debug(`Received new host test: ${data.user.display_name} for ${data.viewers} viewers`);
-        emitter.emit('testHost', data);
+        Transit.emit('test:host', data);
     });
 
     socket.on('test:subscriber', (user) => {
         Logger.debug(`Received new subscriber test with name: ${user}`);
-        emitter.emit('testSubscriber', user);
+        Transit.emit('test:subscriber', user);
     });
 
     socket.on('test:tip', (data) => {
         Logger.debug(`Received new tip test: ${data.user.name} for ${data.amount} | ${data.message}`);
-        emitter.emit('testTip', data);
+        Transit.emit('test:tip', data);
     });
 
     socket.on('test:music', (data) => {
@@ -65,8 +65,8 @@ io.on('connection', (socket) => {
         io.emit('setCurrentSong', musicWatcher.song);
     });
 
-    socket.on('alertComplete', () => {
-        emitter.emit('alertComplete');
+    socket.on('alert:complete', () => {
+        Transit.emit('alert:complete');
     });
 
     socket.on('getFollowers', () => {
@@ -74,40 +74,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('tipeee:activate', (data) => {
-        config.set('tipeeeActive', true);
-        config.set('tipeeeAccessToken', data);
+        Transit.emit('tipeee:activate', data);
     });
-
+    
     socket.on('tipeee:deactivate', () => {
-        config.set('tipeeeActive', false);
-        config.del('tipeeeAccessToken');
+        Transit.emit('tipeee:deactivate');
     });
 });
-
-/*
-emitter.on('followAlert', (data) => {
-    io.emit('followAlert', data);
-    io.emit('addFollowEvent', db.makeFollowObj(data));
-});
-
-emitter.on('hostAlert', (data) => {
-    io.emit('hostAlert', data);
-});
-
-emitter.on('subscriberAlert', (data) => {
-    io.emit('subscriberAlert', data);
-});
-
-emitter.on('tipAlert', (data) => {
-    Logger.debug('Forwarding tip test');
-    io.emit('tipAlert', data);
-});
-
-emitter.on('initSong', (data) => {
-    io.emit('initSong', data);
-});
-
-emitter.on('newSong', (data) => {
-    io.emit('newSong', data);
-});
-*/

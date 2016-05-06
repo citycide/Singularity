@@ -38,23 +38,109 @@ $(function() {
     });
 });
 
-$(function() {
-    var followerModel = JSON.parse(followerObj);
+Vue.use(Keen);
 
-    var followerTable = new Vue({
-        el: '#followerTable',
-        data: followerModel,
-        methods: {}
-    });
+var followerModel = JSON.parse(followerObj);
+var nowPlaying = {
+    title: currentSong
+};
 
-    socket.on('addFollowEvent', function(data) {
-        followerModel.followers.unshift(
-            {
-                name: data.name,
-                time: 'just now'
+var app = new Vue({
+    el: 'body',
+    components: {},
+    methods: {
+        say: function(msg) {
+            alert(msg)
+        },
+        sendFollow: function() {
+            // alert(this.follow.name + ' followed.');
+            socket.emit('test:follower', this.follow.name);
+        },
+        sendHost: function() {
+            socket.emit('test:host', {
+                // alert(this.host.name + ' hosted for ' + this.host.viewers + ' viewers.');
+                user: {
+                    display_name: this.host.name
+                },
+                viewers: this.host.viewers
+            });
+        },
+        sendSubscribe: function() {
+            // alert(this.subscribe.name + ' has subbed for ' + this.subscribe.months + ' months.');
+
+            if (this.subscribe.months === null || this.subscribe.months === undefined || this.subscribe.months === 0 || isNaN(this.subscribe.months)) {
+                socket.emit('test:subscriber', this.subscribe.name);
+            } else {
+                socket.emit('test:resub', {
+                    user: {
+                        display_name: this.subscribe.name
+                    },
+                    months: this.subscribe.months
+                });
             }
-        );
-    });
+        },
+        sendTip: function() {
+            // alert(this.tip.name + ' tipped ' + this.tip.amount + ' and said ' + this.tip.message);
+            var formattedAmount = '$' + this.tip.amount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
+            socket.emit('test:tip', {
+                user: {
+                    name: this.tip.name
+                },
+                amount: formattedAmount,
+                message: this.tip.message
+            });
+        },
+        sendSong: function(current) {
+            var song = current ? this.currentSong : this.testSong;
+            socket.emit('test:music', song);
+        },
+        tipeeeDisable: function() {
+            socket.emit('tipeee:deactivate');
+            $('body').removeClass('loaded');
+            location.reload();
+        }
+    },
+    data: {
+        follow: {
+            name: channel
+        },
+        host: {
+            name: channel,
+            viewers: 10
+        },
+        subscribe: {
+            name: channel,
+            months: 10
+        },
+        tip: {
+            name: channel,
+            amount: 10,
+            message: ''
+        },
+        show: {
+            tipeeeDeactModal: false
+        },
+        testSong: 'Never Gonna Give You Up - Rick Astley',
+        nowPlaying: nowPlaying,
+        followTable: followerModel
+    }
+});
+
+socket.on('alert:follow:event', function(data) {
+    followerModel.followers.unshift(
+        {
+            name: data.name,
+            time: 'just now'
+        }
+    );
+});
+
+socket.on('music:update', function(data) {
+    nowPlaying.title = data;
+});
+
+socket.on('music:init', function(data) {
+    nowPlaying.title = data;
 });
 
 $(function() {
@@ -164,13 +250,10 @@ $(function() {
 
     document.getElementById('profile-dropdown-logo').src = channelAvatar;
 
+    /*
     document.getElementById('currentSongTitle').textContent = currentSong;
     document.getElementById('currentSongTitlePanel').textContent = currentSong;
-    socket.on('newSong', function (data) {
-        currentSong = data;
-        document.getElementById('currentSongTitle').textContent = data;
-        document.getElementById('currentSongTitlePanel').textContent = data;
-    });
+    */
 
     var isEditingTitle = false;
     var currentTitle;
@@ -230,27 +313,6 @@ $(function() {
         }
     });
 
-    $("#btnTestFollower").click(function () {
-        var user = $("#testFollowerUser").val();
-        socket.emit('test:follower', user);
-        // log('Sent follower test with name: ' + user + '.', 'test');
-        return false;
-    });
-
-    $("#btnTestHost").click(function () {
-        var user = $("#testHostUser").val();
-        var viewers = parseInt($("#testHostViewers").val());
-        var testHost = {
-            user: {
-                display_name: user
-            },
-            viewers: viewers
-        };
-        socket.emit('test:host', testHost);
-        // log('Sent host test with: ' + user + ' for ' + viewers + ' viewers.', 'test');
-        return false;
-    });
-
     $("#btnTestSub").click(function () {
         var user = $("#testSubUser").val();
         var months = parseInt($("#testSubMonths").val());
@@ -263,7 +325,7 @@ $(function() {
                     display_name: user
                 },
                 months: months
-            }
+            };
             socket.emit('test:resub', testResub);
             // log('Sent resubscriber test with: ' + user + ' for ' + months + ' months.', 'test');
         }
@@ -288,20 +350,6 @@ $(function() {
         } else {
             // log('Sent new tip test from: ' + user + ' for ' + '$' + amount + ', and message ' + message, 'test');
         }
-        return false;
-    });
-
-    $("#btnTestMusic").click(function() {
-        var song = $("#testSongTitle").val();
-        socket.emit('test:music', song);
-        // log('Sent now playing with title: ' + song + '.', 'test');
-        return false;
-    });
-
-    $("#btnSendCurrentSong").click(function() {
-        var song = currentSong;
-        socket.emit('test:music', song);
-        // log('Sent now playing with title: ' + song + '.', 'test');
         return false;
     });
 
@@ -341,6 +389,10 @@ $(function() {
 
     var btnOpenOverlay = $('a#btnOpenOverlay');
     if (isElectron) {
+        btnOpenOverlay.click(function(e) {
+            e.preventDefault();
+            Emitter.fire('window:overlay:open');
+        });
         /*
         btnOpenOverlay.click(function() {
             var winAlerts = nw.Window.open(window.location.host + '/overlay', {
@@ -373,47 +425,12 @@ $(function() {
                 });
             }
         });
-
-        var win = nw.Window.get();
-        */
-        var chatFrame = document.getElementById('chat_embed');
-        var bttv =
-            "var betterttv_init = function (){" +
-            "var script = document.createElement('script');" +
-            "script.type = 'text/javascript';" +
-            "script.src = '//cdn.betterttv.net/betterttv.js?';" +
-            "var head = document.getElementsByTagName('head')[0];" +
-            "if(head) head.appendChild(script); };" +
-            "betterttv_init();";
-        chatFrame.onload = function () {
-            win.eval(chatFrame, bttv);
-        };
+         */
     } else {
         btnOpenOverlay.click(function() {
             window.open('/overlay');
         });
     }
-});
-
-
-$(function() {
-  return $('select').select2();
-});
-
-$(function() {
-  return $('.toggle-checkbox').bootstrapSwitch({
-    size: "small"
-  });
-});
-
-$(function() {
-  return $('.match-height').matchHeight();
-});
-
-$(function() {
-  return $('.datatable').DataTable({
-    "dom": '<"top"fl<"clear">>rt<"bottom"ip<"clear">>'
-  });
 });
 
 $(function() {

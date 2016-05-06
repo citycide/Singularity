@@ -11,12 +11,8 @@
     <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../fonts/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="../css/vendor/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap-switch.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/checkbox3.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/jquery.dataTables.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/dataTables.bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/select2.min.css">
     <link rel="stylesheet" type="text/css" href="../css/vendor/waves.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vendor/keen-ui.min.css" />
     <!-- CSS App -->
     <link rel="stylesheet" type="text/css" href="../css/style.css">
     <link rel="stylesheet" type="text/css" href="../css/loader.css" />
@@ -42,10 +38,10 @@
                     <i class="fa fa-minus"></i>
                 </div>
                 <div id="winMaximize" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MAXIMIZE">
-                    <i class="fa fa-square-o"></i>
+                    <i class="material-icons">crop_square</i>
                 </div>
                 <div id="winClose" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="CLOSE">
-                    <i class="fa fa-times"></i>
+                    <i class="material-icons">close</i>
                 </div>
             </div>
         </header>
@@ -77,7 +73,7 @@
                                 </button>
                                 <li class="now-playing-header">
                                     <i class="fa fa-music"></i>&nbsp;&nbsp;
-                                    <span id="currentSongTitle"><%- currentSong %></span>
+                                    <span id="currentSongTitle">{{ nowPlaying.title }}</span>
                                     &nbsp;&nbsp;<i class="fa fa-music"></i>
                                 </li>
                                 <li class="dropdown">
@@ -167,7 +163,7 @@
                                     </li>
                                     <li>
                                         <a href="#control" data-toggle="tab">
-                                            <span class="icon fa fa-television"></span><span class="title">Overlay Control</span>
+                                            <span class="icon fa fa-sliders"></span><span class="title">Overlay Control</span>
                                         </a>
                                     </li>
                                     <li>
@@ -332,7 +328,7 @@
                                                                         </thead>
                                                                          -->
                                                                         <tbody>
-                                                                            <tr v-for="follower in followers" transition="stagger" stagger="100">
+                                                                            <tr v-for="follower in followTable.followers" transition="stagger" stagger="100">
                                                                                 <td class="col-lg-3 table-follower-time text-center">{{ follower.time }}</td>
                                                                                 <td class="col-lg-9 table-follower-name">{{ follower.name }}</td>
                                                                                 <!-- <td>{{ follower.notifications }}</td> -->
@@ -447,11 +443,10 @@
                                                             <form class="form-horizontal" onSubmit="return false;">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
-                                                                        <input type="text" id="testFollowerUser" name="user" class="form-control" value="<%= channel %>">
+                                                                        <ui-textbox name="follow-username" icon="person" type="text" v-bind:value.sync="follow.name" :max-length="32" validation-rules="required|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
-                                                                <button id="btnTestFollower" type="submit" class="btn btn-info pull-right waves-effect waves-light">SEND</button>
+                                                                <button @click.stop.prevent="sendFollow();" class="btn btn-info pull-right waves-effect waves-light">SEND</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -478,17 +473,19 @@
                                                             <form class="form-horizontal" onSubmit="return false;">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
-                                                                        <input type="text" id="testHostUser" name="user" class="form-control" value="<%= channel %>">
+                                                                        <!--<div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
+                                                                        <input type="text" id="testHostUser" name="user" class="form-control" value="<%= channel %>">-->
+                                                                        <ui-textbox name="host-username" icon="person" type="text" v-bind:value.sync="host.name" :max-length="32" validation-rules="required|numeric|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-eye fa-fw"></i></div>
-                                                                        <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">
+                                                                        <!--<div class="input-group-addon"><i class="fa fa-eye fa-fw"></i></div>
+                                                                        <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">-->
+                                                                        <ui-textbox name="host-viewers" icon="remove_red_eye" type="number" v-bind:value.sync="host.viewers" validation-rules="required|min:1" help-text="Enter the number of viewers"></ui-textbox>
                                                                     </div>
                                                                 </div>
-                                                                <button id="btnTestHost" type="submit" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
+                                                                <button @click.stop.prevent="sendHost();" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -517,17 +514,15 @@
                                                             <form class="form-horizontal" onSubmit="return false;">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
-                                                                        <input type="text" id="testSubUser" name="user" class="form-control" value="<%= channel %>">
+                                                                        <ui-textbox name="subscribe-username" icon="person" type="text" v-bind:value.sync="subscribe.name" :max-length="32" validation-rules="required|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-calendar fa-fw"></i></div>
-                                                                        <input type="number" id="testSubMonths" name="duration" class="form-control" placeholder="# Months">
+                                                                        <ui-textbox name="subscribe-months" icon="event_note" type="number" v-bind:value.sync="subscribe.months" validation-rules="required|min:1" help-text="Enter a number of months for a resub."></ui-textbox>
                                                                     </div>
                                                                 </div>
-                                                                <button id="btnTestSub" type="submit" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
+                                                                <button @click.stop.prevent="sendSubscribe();" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -554,23 +549,20 @@
                                                             <form class="form-horizontal" onSubmit="return false;">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
-                                                                        <input type="text" id="testTipUser" name="user" class="form-control" value="<%= channel %>">
+                                                                        <ui-textbox name="tip-username" icon="person" type="text" v-bind:value.sync="tip.name" :max-length="32" validation-rules="required|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-dollar fa-fw"></i></div>
-                                                                        <input type="number" id="testTipAmt" name="amount" class="form-control" value="10">
+                                                                        <ui-textbox name="tip-amount" icon="attach_money" type="number" v-bind:value.sync="tip.amount" validation-rules="required|min:1" help-text="Enter the amount"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
-                                                                        <input type="text" id="testTipMsg" name="message" class="form-control" placeholder="Message">
+                                                                        <ui-textbox name="tip-message" icon="message" type="text" v-bind:value.sync="tip.message" help-text="(Optional) Enter a message"></ui-textbox>
                                                                     </div>
                                                                 </div>
-                                                                <button id="btnTestTip" type="submit" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
+                                                                <button @click.stop.prevent="sendTip();" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -600,24 +592,23 @@
                                                                 <div class="col-lg-8">
                                                                     <div class="well">
                                                                         <div><h6><i class="fa fa-music"></i>&nbsp;&nbsp;CURRENT SONG</h6></div>
-                                                                        <div id="currentSongTitlePanel"><%- currentSong %></div>
+                                                                        <div id="currentSongTitlePanel">{{ nowPlaying.title }}</div>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-lg-4">
                                                                     <div class="pull-right">
-                                                                        <button id="btnSendCurrentSong" type="submit" class="btn btn-info pull-right waves-effect waves-light">RESEND CURRENT SONG</button>
+                                                                        <button @click.stop.prevent="sendSong(true);" class="btn btn-info pull-right waves-effect waves-light">RESEND CURRENT SONG</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                             <form class="form-horizontal" onSubmit="return false;">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <div class="input-group-addon"><i class="fa fa-play fa-fw"></i></div>
-                                                                        <input type="text" id="testSongTitle" name="user" class="form-control" value="Never Gonna Give You Up - Rick Astley">
+                                                                        <ui-textbox name="tip-message" icon="music_note" type="text" v-bind:value.sync="testSong" help-text="Enter song information"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="pull-right">
-                                                                    <button id="btnTestMusic" type="submit" class="btn btn-info waves-effect waves-light">SEND</button>
+                                                                    <button @click.stop.prevent="sendSong(false);" class="btn btn-info waves-effect waves-light">SEND</button>
                                                                 </div>
                                                             </form>
                                                         </div>
@@ -720,9 +711,12 @@
                                                             <% } else { %>
                                                                 <div id="deact-modal-container">
                                                                     <p>TipeeeStream has already been enabled. If you want to disable it, click the button below.</p>
-                                                                    <button type="button" class="btn btn-warning waves-effect waves-light disabled">DEACTIVATE</button>
-                                                                    <p>( deactivation coming soon )</p>
+                                                                    <button @click="show.tipeeeDeactModal = true" class="btn btn-warning waves-effect waves-light">DEACTIVATE</button>
                                                                 </div>
+
+                                                                <ui-confirm header="Deactivate TipeeeStream?" @confirmed="tipeeeDisable" @denied="denied" :show.sync="show.tipeeeDeactModal" close-on-confirm>
+                                                                    If you deactivate TipeeeStream, you'll need to go through the setup process again. Are you sure?
+                                                                </ui-confirm>
                                                             <% } %>
 
                                                         </div>
@@ -764,12 +758,8 @@
     <!-- js libs -->
     <script type="text/javascript" src="../js/vendor/jquery.min.js"></script>
     <script type="text/javascript" src="../js/vendor/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/vendor/keen-ui.min.js"></script>
     <script type="text/javascript" src="../js/vendor/Chart.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/bootstrap-switch.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/jquery.matchHeight-min.js"></script>
-    <script type="text/javascript" src="../js/vendor/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/dataTables.bootstrap.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/select2.full.min.js"></script>
     <script type="text/javascript" src="../js/vendor/moment.min.js"></script>
     <script type="text/javascript" src="../js/vendor/waves.js"></script>
     <!-- js -->
