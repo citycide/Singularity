@@ -37,7 +37,7 @@ setTimeout(() => {
         twitch = require(__dirname + '/app/twitch');
         twitch.initAPI();
     }
-    if (config.get('tipeeeActive') && config.get('channel') && config.get('isLoggedIn')) {
+    if (config.get('channel') && config.get('isLoggedIn')) {
         tipeee = require(__dirname + '/app/tipeee');
     }
     if (config.get('botEnabled') && config.get('isLoggedIn')) {

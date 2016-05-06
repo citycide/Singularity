@@ -364,10 +364,6 @@ $(function() {
         socket.emit('tipeee:activate', keyInput.val());
         $('#step3-tab').trigger('click');
     });
-    $("#btnTipeeeDeactivate").click(function() {
-        socket.emit('tipeee:deactivate');
-        $('#tipeeeDeactModal').modal('hide');
-    });
 
     $("#extTwitchChannel").click(function() {
         openLink('https://www.twitch.tv/' + channel);

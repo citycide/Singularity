@@ -2,7 +2,7 @@
 'use strict';
 
 import moment from 'moment';
-import socketio from 'socket.io-client';
+import * as socket from 'socket.io-client';
 const db = require('./db'),
       config = require('./configstore');
 
@@ -10,13 +10,16 @@ let tipeee = null;
 let key = null;
 const tm = {
     tipeeeConnect: () => {
-        tipeee = socketio.connect('https://sso.tipeeestream.com:4242');
+        Logger.debug('Connecting to TipeeeStream...');
+        tipeee = socket.connect('https://sso.tipeeestream.com:4242');
         key = config.get('tipeeeAccessToken');
+
+        connectHandler();
     },
     tipeeeDisconnect: () => {
         Logger.info('Disconnected from TipeeeStream.');
         // @TODO find out how to close the socket connection, this doesn't work
-        // socketio.close();
+        // socket.close();
         tipeee = null;
     },
     tipeeeActivate: (data) => {
@@ -25,7 +28,6 @@ const tm = {
         tm.tipeeeConnect();
     },
     tipeeeDeactivate: () => {
-        Logger.info('Disabling TipeeeStream...');
         config.set('tipeeeActive', false);
         config.del('tipeeeAccessToken');
         tm.tipeeeDisconnect();
@@ -36,7 +38,9 @@ if (config.get('tipeeeActive')) {
     if (config.get('tipeeeAccessToken')) {
         tm.tipeeeConnect();
     }
+}
 
+const connectHandler = () => {
     tipeee.on('connect', () => {
         Logger.info('Connected to tipeeestream');
         tipeee.emit('join-room', { room: key, username: config.get('channel') });
@@ -57,7 +61,7 @@ if (config.get('tipeeeActive')) {
         };
         Transit.emit('alert:tipeee:event', thisEvent);
     });
-}
+};
 
 Transit.on('tipeee:activate', (data) => {
     tm.tipeeeActivate(data);
