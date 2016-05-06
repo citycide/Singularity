@@ -1,7 +1,7 @@
 import {app, Menu, Tray, shell} from 'electron';
 import path from 'path';
 
-import {showDesktopSettings} from './desktopSettings';
+import { showWinOverlay } from './desktopSettings';
 
 let appIcon = null;
 const mainWindow = WindowManager.getAll('main')[0];
@@ -14,9 +14,9 @@ let audioDeviceMenu = [
 ];
 
 if (process.platform === 'darwin') {
-    appIcon = new Tray(path.resolve(`${__dirname}/../../../assets/img/macTemplate.png`));
+    appIcon = new Tray(path.resolve(`${__dirname}/../../../../assets/singularity_sm.png`));
 } else {
-    appIcon = new Tray(path.resolve(`${__dirname}/../../../assets/img/main.png`));
+    appIcon = new Tray(path.resolve(`${__dirname}/../../../../assets/singularity_sm.png`));
 }
 
 const setContextMenu = () => {
@@ -28,6 +28,7 @@ const setContextMenu = () => {
                 mainWindow.show();
             }
         },
+        /*
         { type: 'separator' },
         {
             label: 'Play / Pause',
@@ -55,6 +56,7 @@ const setContextMenu = () => {
             label: 'Audio Device',
             submenu: audioDeviceMenu
         },
+        */
         {
             label: 'Help',
             role: 'help',
@@ -67,21 +69,22 @@ const setContextMenu = () => {
                 },
                 {
                     label: 'Issues',
-                    click: () => shell.openExternal('https://github.com/MarshallOfSound/Google-Play-Music-Desktop-Player-UNOFFICIAL-/issues')
+                    click: () => shell.openExternal('https://github.com/citycide/singularity/issues')
                 },
                 {
                     label: 'Donate',
-                    click: () => shell.openExternal('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=23CZGASL6XMLJ')
+                    click: () => shell.openExternal('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BP83JQTLPGDHQ')
                 },
                 {
+                    // @TODO make a gh-pages presentation site for this
                     label: 'Learn More',
-                    click: () => shell.openExternal('http://www.googleplaymusicdesktopplayer.com')
+                    click: () => shell.openExternal('https://github.com/citycide/singularity')
                 }
             ]
         },
         {
-            label: 'Settings', click: () => {
-            showDesktopSettings();
+            label: 'Overlay Preview', click: () => {
+            showWinOverlay();
         }
         },
         { type: 'separator' },
@@ -120,7 +123,7 @@ function toggleMainWindow() {
     }
 }
 
-appIcon.setToolTip('Google Play Music');
+appIcon.setToolTip('singularity');
 
 switch (process.platform) {
     case 'darwin': // <- actually means OS-X

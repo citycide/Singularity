@@ -4,7 +4,7 @@ import './controlBar';
 import './customTheme';
 import './desktopSettings';
 import './errorHandler';
-// import './tray';
+import './tray';
 // import './lastFM';
 import './autoUpdater';
 import './websocketAPI';
