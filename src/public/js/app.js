@@ -1,11 +1,11 @@
 var socket = io();
 var dev = false;
 
-// $(window).load(function() {
+$(window).load(function() {
     setTimeout(function() {
         $('body').addClass('loaded');
-    }, 1000);
-// });
+    }, 200);
+});
 
 $(function() {
     $(".navbar-expand-toggle").click(function() {
@@ -44,6 +44,11 @@ var followerModel = JSON.parse(followerObj);
 var nowPlaying = {
     title: currentSong
 };
+var state = {
+    services: {
+        tipeee: tipeeeEnabled
+    }
+};
 
 var app = new Vue({
     el: 'body',
@@ -67,7 +72,6 @@ var app = new Vue({
         },
         sendSubscribe: function() {
             // alert(this.subscribe.name + ' has subbed for ' + this.subscribe.months + ' months.');
-
             if (this.subscribe.months === null || this.subscribe.months === undefined || this.subscribe.months === 0 || isNaN(this.subscribe.months)) {
                 socket.emit('test:subscriber', this.subscribe.name);
             } else {
@@ -94,10 +98,15 @@ var app = new Vue({
             var song = current ? this.currentSong : this.testSong;
             socket.emit('test:music', song);
         },
+        tipeeeEnable: function() {
+            // this.loaders.tipeee = true;
+            state.services.tipeee = true;
+            socket.emit('tipeee:activate');
+        },
         tipeeeDisable: function() {
+            // this.loaders.tipeee = true;
+            state.services.tipeee = false;
             socket.emit('tipeee:deactivate');
-            $('body').removeClass('loaded');
-            location.reload();
         }
     },
     data: {
@@ -120,6 +129,10 @@ var app = new Vue({
         show: {
             tipeeeDeactModal: false
         },
+        loaders: {
+            tipeee: false
+        },
+        state: state,
         testSong: 'Never Gonna Give You Up - Rick Astley',
         nowPlaying: nowPlaying,
         followTable: followerModel
@@ -127,12 +140,10 @@ var app = new Vue({
 });
 
 socket.on('alert:follow:event', function(data) {
-    followerModel.followers.unshift(
-        {
-            name: data.name,
-            time: 'just now'
-        }
-    );
+    followerModel.followers.unshift({
+        name: data.name,
+        time: 'just now'
+    });
 });
 
 socket.on('music:update', function(data) {
@@ -171,25 +182,6 @@ $(function() {
         return false;
     });
 });
-
-function openTabHash() {
-    var url = document.location.toString();
-    if (url.match('#')) {
-        var hash = url.split('#')[1];
-        $('.tabnav li a[href=#'+hash+']').tab('show') ;
-        if (!hash || hash !== dashboard) {
-            // hideStreamPreview();
-        }
-    }
-
-    $('.tabnav li a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        if(history.pushState) {
-            history.pushState(null, null, e.target.hash);
-        } else {
-            window.location.hash = e.target.hash;
-        }
-    });
-}
 
 $(function() {
     var gameSpan = $('#streamGame');
@@ -246,14 +238,8 @@ $(function() {
         container: 'body'
     });
     $('[data-toggle="tooltip"]').tooltip();
-    // $('[data-tooltip="tooltip"]').tooltip();
 
     document.getElementById('profile-dropdown-logo').src = channelAvatar;
-
-    /*
-    document.getElementById('currentSongTitle').textContent = currentSong;
-    document.getElementById('currentSongTitlePanel').textContent = currentSong;
-    */
 
     var isEditingTitle = false;
     var currentTitle;
@@ -313,56 +299,10 @@ $(function() {
         }
     });
 
-    $("#btnTestSub").click(function () {
-        var user = $("#testSubUser").val();
-        var months = parseInt($("#testSubMonths").val());
-        if (months === null || months === undefined || months === 0 || isNaN(months)) {
-            socket.emit('test:subscriber', user);
-            // log('Sent new subscriber test with name: ' + user + '.', 'test');
-        } else {
-            var testResub = {
-                user: {
-                    display_name: user
-                },
-                months: months
-            };
-            socket.emit('test:resub', testResub);
-            // log('Sent resubscriber test with: ' + user + ' for ' + months + ' months.', 'test');
-        }
-        return false;
-    });
-
-    $("#btnTestTip").click(function() {
-        var user = $("#testTipUser").val();
-        var amount = parseInt($("#testTipAmt").val());
-        var formattedAmount = '$' + amount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
-        var message = $("#testTipMsg").val();
-        var testTip = {
-            user: {
-                name: user
-            },
-            amount: formattedAmount,
-            message: message
-        };
-        socket.emit('test:tip', testTip);
-        if (message === "" || message === null || message === undefined) {
-            // log('Sent new tip test from: ' + user + ' for ' + '$' + amount + '.', 'test');
-        } else {
-            // log('Sent new tip test from: ' + user + ' for ' + '$' + amount + ', and message ' + message, 'test');
-        }
-        return false;
-    });
-
     $("#extTipeeeKey").click(function() {
         openLink('https://www.tipeeestream.com/dashboard/api-key');
         $('#step2-tab').trigger('click');
         return false;
-    });
-    $("#btnTipeeeKey").click(function() {
-        var keyInput = $("#tipeeeKeyInput");
-        if (!keyInput.val() || keyInput.val().length < 30) return;
-        socket.emit('tipeee:activate', keyInput.val());
-        $('#step3-tab').trigger('click');
     });
 
     $("#extTwitchChannel").click(function() {
@@ -487,4 +427,23 @@ function openLink(url) {
     } else {
         window.open(url);
     }
+}
+
+function openTabHash() {
+    var url = document.location.toString();
+    if (url.match('#')) {
+        var hash = url.split('#')[1];
+        $('.tabnav li a[href=#'+hash+']').tab('show') ;
+        if (!hash || hash !== dashboard) {
+            // hideStreamPreview();
+        }
+    }
+
+    $('.tabnav li a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        if(history.pushState) {
+            history.pushState(null, null, e.target.hash);
+        } else {
+            window.location.hash = e.target.hash;
+        }
+    });
 }

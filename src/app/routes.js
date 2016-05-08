@@ -17,7 +17,7 @@ module.exports = (app) => {
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
     const sessionConfig = {
-        secret: config.get('sessionSecret'),
+        secret: Settings.get('sessionSecret'),
         saveUninitialized: true,
         resave: true,
         cookie: {}
@@ -59,16 +59,16 @@ module.exports = (app) => {
      **  HOME PAGE
      */
     app.get('/', (req, res) => {
-        if (config.get('setupComplete') === true) {
-            if (config.get('isLoggedIn')) {
+        if (Settings.get('setupComplete') === true) {
+            if (Settings.get('isLoggedIn')) {
                 res.render('index', {
-                    channel: config.get('channel'),
-                    channelAvatar: config.get('channelAvatar'),
-                    token: config.get('accessToken'),
+                    channel: Settings.get('channel'),
+                    channelAvatar: Settings.get('channelAvatar'),
+                    token: Settings.get('accessToken'),
                     chatView: encodeURIComponent(path.resolve(`${__dirname}/../inject/bttv.js`)),
-                    clientID: config.get('clientID'),
+                    clientID: Settings.get('clientID'),
                     currentSong: musicWatcher.getCurrentSong(),
-                    tipeeeEnabled: config.get('tipeeeActive'),
+                    tipeeeEnabled: Settings.get('tipeeeActive'),
                     followerObj: db.dbGetFollows().object
                 });
                 Logger.trace('Directing to home page.');
@@ -82,15 +82,15 @@ module.exports = (app) => {
         }
     });
     app.get('/dashboard', (req, res) => {
-        if (config.get('setupComplete') === true) {
-            if (config.get('isLoggedIn')) {
+        if (Settings.get('setupComplete') === true) {
+            if (Settings.get('isLoggedIn')) {
                 res.render('index', {
-                    channel: config.get('channel'),
-                    channelAvatar: config.get('channelAvatar'),
-                    token: config.get('accessToken'),
-                    clientID: config.get('clientID'),
+                    channel: Settings.get('channel'),
+                    channelAvatar: Settings.get('channelAvatar'),
+                    token: Settings.get('accessToken'),
+                    clientID: Settings.get('clientID'),
                     currentSong: musicWatcher.getCurrentSong(),
-                    tipeeeEnabled: config.get('tipeeeActive'),
+                    tipeeeEnabled: Settings.get('tipeeeActive'),
                     followerObj: db.dbGetFollows().object
                 });
                 Logger.trace('Directing to home page.');
@@ -108,13 +108,13 @@ module.exports = (app) => {
      */
     app.get('/auth', (req, res) => {
         res.render('auth', {
-            clientID: config.get('clientID'),
-            setupComplete: config.get('setupComplete')
+            clientID: Settings.get('clientID'),
+            setupComplete: Settings.get('setupComplete')
         });
     });
     app.get('/login', (req, res) => {
         res.render('login', {
-            clientID: config.get('clientID')
+            clientID: Settings.get('clientID')
         });
     });
     app.get('/logout', (req, res) => {
@@ -130,7 +130,7 @@ module.exports = (app) => {
      **  OVERLAY
      */
     app.get('/overlay', (req, res) => {
-        if (config.get('isLoggedIn')) {
+        if (Settings.get('isLoggedIn')) {
             res.render('overlays/overlay');
         } else {
             Logger.trace('User needs to authenticate.');
@@ -154,9 +154,9 @@ module.exports = (app) => {
     });
     app.get('/chat', (req, res) => {
         res.render('chat', {
-            channel: config.get('channel'),
-            token: config.get('accessToken'),
-            clientID: config.get('clientID')
+            channel: Settings.get('channel'),
+            token: Settings.get('accessToken'),
+            clientID: Settings.get('clientID')
         });
     });
 
@@ -167,7 +167,7 @@ module.exports = (app) => {
              * this is used to dynamically change the src of the webview
              * making /shell a universal window container
              **/
-            source: encodeURI(`/${req.query.src}`)
+            source: encodeURI(`${req.query.src}`)
         });
     });
 
@@ -175,10 +175,10 @@ module.exports = (app) => {
      **  APP SETUP PAGE
      */
     app.get('/setup', (req, res) => {
-        if (!config.get('setupComplete')) {
+        if (!Settings.get('setupComplete')) {
             res.render('setup', {
-                channel: config.get('channel'),
-                clientID: config.get('clientID')
+                channel: Settings.get('channel'),
+                clientID: Settings.get('clientID')
             });
         } else {
             Logger.trace('Setup already complete, directing to home page.');
@@ -192,13 +192,13 @@ module.exports = (app) => {
     });
 
     const userLogout = (callback) => {
-        config.set('isLoggedIn', false);
-        config.set('tipeeeActive', false);
-        config.del('accessToken');
-        config.del('channel');
-        config.del('channelAvatar');
-        config.del('channelID');
-        config.del('tipeeeAccessToken');
+        Settings.set('isLoggedIn', false);
+        Settings.set('tipeeeActive', false);
+        Settings.del('accessToken');
+        Settings.del('channel');
+        Settings.del('channelAvatar');
+        Settings.del('channelID');
+        Settings.del('tipeeeAccessToken');
         callback(false);
     };
 };

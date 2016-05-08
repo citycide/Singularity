@@ -40,6 +40,7 @@ const dbstore = (fileName) => {
             return true;
         } catch (err) {
             if (err.message === 'UNIQUE constraint failed: commands.name') return Logger.absurd('ERR in addCommand:: Command already exists.');
+            if (err.message === 'UNIQUE constraint failed: settings.key') return Logger.absurd('ERR in addCommand:: Setting already exists.');
             Logger.error(err);
             return false;
         }

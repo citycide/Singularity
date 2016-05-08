@@ -5,15 +5,35 @@ const dbstore = require('./stores.js');
 import path from 'path';
 import jetpack from 'fs-jetpack';
 import moment from 'moment';
+import util from './main/utils/util';
+import { app } from 'electron';
 
 let db = null, botDB = null;
 
 /**
- * @function - Creates or accesses singularity.db
+ * @function
+ * @description Creates or accesses singularity.db
  */
 {
+    /**
+     * Store the database in the /build directory
+     * Probably best for development, so maybe make it based on dev mode?
+     * Possibly make it user-defined as well
+     */
     jetpack.dir(path.resolve(__dirname, '..', 'db'));
     db = dbstore(path.resolve(__dirname, '..', 'db', 'singularity.db'));
+
+    /**
+     * ... or in the app's directory in the user's home folder?
+    jetpack.dir(path.resolve(Settings.get('dataPath'), 'db'));
+    db = dbstore(path.resolve(Settings.get('dataPath'), 'db', 'singularity.db'));
+    */
+
+    /**
+     * ... or in the app's directory in the OS app folder?
+    jetpack.dir(path.resolve(app.getAppPath(), 'db'));
+    db = dbstore(path.resolve(app.getAppPath(), 'db', 'singularity.db'));
+    */
 }
 
 /**
@@ -44,12 +64,14 @@ db.run('CREATE TABLE IF NOT EXISTS tips (username TEXT, timestamp TEXT, evtype T
  * Collection of api methods for main database functions
  * @export default
  */
-module.exports = {
+let data = {
     /**
      * @function - Creates or accesses bot.db when bot is enabled
      */
-    initBotDB: () => {
+    initBotDB: (fn) => {
         botDB = dbstore(path.resolve(__dirname, '..', 'db', 'bot.db'));
+        if (!fn) return true;
+        fn();
     },
     addTable: (name, bot, ...args) => {
         let query = [];
@@ -58,7 +80,17 @@ module.exports = {
             if (typeof key !== null && typeof key === 'object' && unique === false) {
                 unique = true;
                 if (key.hasOwnProperty('unique')) {
-                    query.push(`${key.name} TEXT UNIQUE`);
+                    if (!key.hasOwnProperty('type')) {
+                        query.push(`${key.name} TEXT UNIQUE`);
+                    } else {
+                        query.push(`${key.name} ${key.type} UNIQUE`);
+                    }
+                } else {
+                    if (!key.hasOwnProperty('type')) {
+                        query.push(`${key.name} TEXT`);
+                    } else {
+                        query.push(`${key.name} ${key.type}`);
+                    }
                 }
             } else {
                 query.push(`${key} TEXT`);
@@ -145,18 +177,61 @@ module.exports = {
             return y-x;
         });
         return events;
+    },
+    makeFollowObj: (follower) => {
+        return db.newFollowerObj(follower);
     }
-};
-
-module.exports.makeFollowObj = (follower) => {
-    return db.newFollowerObj(follower);
 };
 
 /**
  * Collection of api methods related to the bot database
  * @export bot
  */
-module.exports.bot = {
+let bot = {
+    initSettings: () => {
+        bot.setting.confirm('prefix', '!');
+        bot.setting.confirm('defaultCooldown', '30');
+        bot.setting.confirm('whisperMode', 'false');
+    },
+
+    setting: {
+        get: (key) => {
+            let value;
+            try {
+                value = botDB.get(`SELECT value FROM settings WHERE key="${key}"`)[0].values[0][0];
+            } catch (err) {
+                Logger.error(err);
+            }
+            if (value) {
+                if (value === 'true' || value === 'false') {
+                    value = (value === 'true');
+                }
+                if (util.isNumeric(value)) value = parseInt(value);
+                return value;
+            }
+        },
+        set: (key, value) => {
+            if (typeof key !== 'string') return;
+            if (typeof value === 'boolean') value = value.toString();
+            try {
+                botDB.run(`UPDATE settings SET value = "${value}" WHERE key="${key}"`);
+            } catch (err) {
+                Logger.error(err);
+            }
+        },
+        confirm: (key, value) => {
+            // Only sets the value if the key does not exist
+            if (typeof key !== 'string') return;
+            if (typeof value === 'boolean') value = value.toString();
+            try {
+                botDB.run(`INSERT OR IGNORE INTO settings (key, value) ` +
+                          `VALUES ("${key}", "${value}");`);
+            } catch (err) {
+                Logger.error(err);
+            }
+        }
+    },
+
     addCommand: (name, cooldown, permission, status, module) => {
         if (!name || !module) {
             Logger.bot('Failed to add command. Name & module are required.');
@@ -164,13 +239,6 @@ module.exports.bot = {
         }
         botDB.run('INSERT INTO commands (name, cooldown, permission, status, module)' +
             `VALUES ("${name}", "${cooldown}", "${permission}", "${status}", "${module}");`);
-    },
-
-    initSettings: () => {
-        botDB.run('INSERT OR REPLACE INTO settings (key, value, info)' +
-            `VALUES ("prefix","!","");`);
-        botDB.run('' +
-            `VALUES ("defaultCooldown","30","");`);
     },
 
     addUser: (user) => {
@@ -182,23 +250,22 @@ module.exports.bot = {
         let permission = 7;
         try {
             permission = botDB.get(`SELECT permission FROM users WHERE name='${user}'`)[0].values[0][0];
-            return permission;
         } catch (err) {
             Logger.debug(err);
         }
+        return permission;
     },
 
-    // @TODO Always returns true?? What the eff.
-    getStatus: (cmd) => {
+    getCommandStatus: (cmd) => {
         let status = false;
         try {
             status = botDB.get(`SELECT status FROM commands WHERE name='${cmd}'`)[0].values[0][0];
             status = (status === 'true');
             Logger.trace(`'${cmd}' is ${(status) ? 'enabled' : 'disabled'}.`);
-            return status;
         } catch (err) {
             Logger.error(err);
         }
+        return status;
     },
 
     setCommandStatus: (cmd, bool) => {
@@ -206,156 +273,32 @@ module.exports.bot = {
         if (bool !== 'true' && bool !== 'false') {
             return Logger.debug('ERR in setCommandStatus:: requires boolean string');
         }
-        botDB.run(`UPDATE commands SET status = '${bool}' WHERE name='${cmd}'`);
-        // return (botDB.get(`SELECT status FROM commands WHERE name='${cmd}'`)[0].values[0][0] === 'true');
+        botDB.run(`UPDATE commands SET status = "${bool}" WHERE name="${cmd}"`);
     },
     
     getCommandPrefix: () => {
-        return botDB.get(`SELECT value FROM settings WHERE key='prefix'`)[0].values[0][0];
-    }
-};
+        return botDB.get(`SELECT value FROM settings WHERE key="prefix"`)[0].values[0][0];
+    },
 
-/*
-import NeDB from 'nedb';
-
-let _db = {};
-_db.main = new NeDB({
-    filename: path.resolve(__dirname, '..', 'db', 'singularity_test.db'),
-    autoload: true
-});
-_db.main.ensureIndex({ fieldName: 'id', unique: true });
-
-_db.test = new NeDB({
-    filename: path.resolve(__dirname, '..', 'db', 'test.db'),
-    autoload: true
-});
-_db.test.insert({ followers: {}, subscribers: {}, hosts: {}, tips: {} });
- */
-
-/**
- * @function _dbFollowersAdd
- * @description Adds a follower to the database, or updates one that already exists
- * @params [ id | username | (timestamp) | (notifications) ]
- */
-/*
-module.exports._dbFollowersAdd = (id, username, timestamp, notifications) => {
-    if (!id || !username) {
-        Logger.error('Failed to add or update follower. ID & username are required.');
-        return;
-    }
-    // _db.main.insert({ id, username, timestamp, notifications });
-
-    _db.main.find({ id }, (err, docs) => {
-        if (docs.length < 1) {
-            _db.main.insert({ id, username, timestamp, notifications }, (err) => {
-                if (err) Logger.debug(err);
-                Logger.trace(`New follower added: ${username}`);
-            });
-        } else {
-            Logger.trace(`${username} is already in the database.`);
+    getWhisperMode: () => {
+        let mode = false;
+        try {
+            mode = botDB.get(`SELECT value FROM settings WHERE name="whisperMode"`)[0].values[0][0];
+            mode = (mode === 'true');
+            Logger.trace(`Whisper mode is ${(mode) ? 'enabled' : 'disabled'}.`);
+        } catch (err) {
+            Logger.error(err);
         }
-    });
-    _db.test.find({ 'followers.id': id }, (err, followers) => {
-        if (followers.length < 1) {
-            _db.test.insert({ 'followers.id': id, username, timestamp, notifications }, (err) => {
-                if (err) Logger.debug(err);
-                Logger.trace(`New follower added: ${username}`);
-            });
-        } else {
-            Logger.trace(`${username} is already in the database.`);
+        return mode;
+    },
+    setWhisperMode: (bool) => {
+        if (typeof bool !== 'string') bool = bool.toString();
+        if (bool !== 'true' && bool !== 'false') {
+            return Logger.debug('ERR in setWhisperMode:: requires boolean string');
         }
-    });
-};
-
-setTimeout(() => {
-    _db.main.find({ name: 'test' }, (err, docs) => {
-        if (err) Logger.debug(err);
-        Logger.info(docs);
-    });
-}, 5000);
-*/
-
-/*
-module.exports.dbGetEvents = () => {
-    const CUTOFF = moment().subtract(60, 'days').valueOf();
-    let followers =
-        db.select(`SELECT * FROM followers WHERE timestamp > ${CUTOFF} ORDER BY timestamp DESC`).array[0].values;
-    let hosts =
-        db.select('SELECT * FROM hosts ORDER BY timestamp DESC').array[0].values;
-
-    let events = followers.concat(hosts);
-    events = events.sort((a, b) => {
-        let x = a[2];
-        let y = b[2];
-        return y-x;
-    });
-    return events;
-};
-
-module.exports.initBotDB = () => {
-    botDB = dbstore(path.resolve(__dirname, '..', 'db', 'bot.db'));
-};
-module.exports.addTable = (name, bot, ...args) => {
-    let query = [];
-    let unique = false;
-    for (let key of args) {
-        if (typeof key !== null && typeof key === 'object' && unique === false) {
-            unique = true;
-            if (key.hasOwnProperty('unique')) {
-                query.push(`${key.name} TEXT UNIQUE`);
-            }
-        } else {
-            query.push(`${key} TEXT`);
-        }
-    }
-    let queryString = query.join(', ');
-    if (!bot) {
-        db.run(`CREATE TABLE IF NOT EXISTS ${name} (${queryString});`);
-    } else {
-        botDB.run(`CREATE TABLE IF NOT EXISTS ${name} (${queryString});`);
+        botDB.run(`UPDATE settings SET value = "${bool}" WHERE name="whisperMode"`);
     }
 };
 
-module.exports.dbFollowersAdd = (id, username, timestamp, notifications) => {
-    if (!id || !username) {
-        Logger.error('Failed to add or update follower. ID & username are required.');
-        return;
-    }
-    db.run('INSERT OR REPLACE INTO followers (twitchid, username, timestamp, evtype, notifications)' +
-        `VALUES ("${id}", "${username}", "${timestamp}", "follower", "${notifications}");`);
-};
-
-module.exports.dbSubscribersAdd = (id, username, timestamp, months) => {
-    let evtype = 'subscriber';
-    if (!id || !username) {
-        Logger.error('Failed to add or update subscriber. ID & username are required.');
-        return;
-    }
-    if (months && months > 0) evtype = 'resub';
-    db.run('INSERT OR REPLACE INTO subscribers (twitchid, username, timestamp, evtype, months)' +
-        `VALUES ("${id}", "${username}", "${timestamp}", "${evtype}", "${months}");`);
-};
-
-module.exports.dbHostsAdd = (id, username, timestamp, viewers) => {
-    if (!username || !viewers) {
-        Logger.error('Failed to add host. Username & viewers are required.');
-        return;
-    }
-    db.run(`INSERT INTO hosts VALUES ("${id}", "${username}", "${timestamp}", "host", "${viewers}");`);
-};
-
-module.exports.dbTipsAdd = (username, timestamp, amount, message) => {
-    if (!username || !amount) {
-        Logger.error('Failed to add tip. Name & amount are required.');
-        return;
-    }
-    db.run(`INSERT INTO tips VALUES ("${username}", "${timestamp}", "tip", "${amount}", "${message}");`);
-};
-
-module.exports.dbGetFollows = () => {
-    const CUTOFF = moment().subtract(60, 'days').valueOf();
-    return db.select(`SELECT * FROM followers WHERE timestamp > ${CUTOFF} ORDER BY timestamp DESC`);
-};
-
-
-*/
+module.exports = data;
+module.exports.bot = bot;

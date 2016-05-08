@@ -93,6 +93,14 @@ const onError = (error) => {
     winston.addColors(defaultLogLevels.colors);
     Logger.info('Starting app...');
 
+    // Spin up a global event emitter for core interaction
+    global.Transit = new EventEmitter();
+
+    global.Emitter = new EmitterClass();
+    global.WindowManager = new WindowManagerClass();
+    global.Settings = new SettingsClass();
+    global.PlaybackAPI = new PlaybackAPIClass();
+
     const server = require('./server.js');
     server.setPort(PORT);
     server.start();
@@ -100,10 +108,11 @@ const onError = (error) => {
     server.on('error', onError);
     server.on('listening', () => {
         Logger.info(`Listening on *:${PORT}`);
+        Settings.set('port', PORT)
     });
 
     configureApp(app);
-    
+
     let mainWindow = null;
 
     const shouldQuit = app.makeSingleInstance(() => {
@@ -120,18 +129,6 @@ const onError = (error) => {
         app.quit();
         return;
     }
-
-    // Spin up a global event emitter for core interaction
-    global.Transit = new EventEmitter();
-
-    // Make the port global so it's accessible from the remote
-    // @TODO do this better
-    global.ServerPort = PORT;
-
-    global.Emitter = new EmitterClass();
-    global.WindowManager = new WindowManagerClass();
-    global.Settings = new SettingsClass();
-    global.PlaybackAPI = new PlaybackAPIClass();
 
     // Replace the log level with those from settings.
     Logger.transports.console.level = Settings.get('consoleLogLevel', defaultConsoleLogLevel);

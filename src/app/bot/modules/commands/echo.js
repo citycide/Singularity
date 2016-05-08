@@ -1,5 +1,5 @@
 module.exports.echo = (event) => {
-    core.say(event.argString);
+    core.say(event.sender, event.argString);
 };
 
 Transit.on('bot:command:listen', () => {

@@ -3,17 +3,18 @@
 
 import fs from 'fs-jetpack';
 import moment from 'moment';
-const irc = require('tmi.js'),
+import { app } from 'electron';
+const tmi = require('tmi.js'),
       emitter = require('./emitter'),
       config = require('./configstore'),
       db = require('./db');
 
 const CHANNEL = {
-    name: config.get('channel'),
-    id: config.get('channelID'),
-    token: config.get('accessToken')
+    name: Settings.get('channel'),
+    id: Settings.get('channelID'),
+    token: Settings.get('accessToken')
 };
-const CLIENT_ID = config.get('clientID');
+const CLIENT_ID = Settings.get('clientID');
 let animating = false,
     followers = [],
     queue = [];
@@ -71,7 +72,7 @@ const OPTIONS = {
     channels: [CHANNEL.name]
 };
 
-const client = new irc.client(OPTIONS);
+const client = new tmi.client(OPTIONS);
       client.connect();
 client.on('connected', (address, port) => {
     Logger.info(`Connected to Twitch chat at ${address}:${port}`)
@@ -81,15 +82,14 @@ const BASE_URL = 'https://api.twitch.tv/kraken';
 const CHANNEL_EP = `/channels/${CHANNEL.name}/`;
 
 const initAPI = (pollInterval) => {
-    Logger.info('Initializing Twitch API requests');
     if (!pollInterval) pollInterval = 30 * 1000;
     setTimeout(() => {
+        Logger.info('Initializing Twitch API requests');
         pollFollowers(pollInterval);
-    }, 5000);
-    setTimeout(checkQueue, 10000);
+    }, 5 * 1000);
+    setTimeout(checkQueue, 10 * 1000);
 };
 
-let once = false;
 const pollFollowers = (pollInterval) => {
     if (!pollInterval) pollInterval = 30 * 1000;
     Logger.absurd(`Hitting follower endpoint for ${CHANNEL.name}...`);
@@ -98,7 +98,7 @@ const pollFollowers = (pollInterval) => {
         method: 'GET',
         headers: {
             'Accept': "application/vnd.twitchtv.v3+json",
-            // 'Authorization': 'OAuth ' + CHANNEL.token.slice(6),
+            'Authorization': `OAuth ${CHANNEL.token.slice(6)}`,
             'Client-ID': CLIENT_ID
         }
     }, (err, res, body) => {
@@ -135,7 +135,6 @@ const pollFollowers = (pollInterval) => {
                             ntf: follower.notifications
                         };
                         db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
-                        // db._dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
                     });
                     writeFollower(followers[followers.length-1]);
                 } else {
@@ -161,7 +160,6 @@ const pollFollowers = (pollInterval) => {
                                 ntf: follower.notifications
                             };
                             db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
-                            // db._dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
                             writeFollower(s.name);
                         }
                     });
@@ -173,7 +171,7 @@ const pollFollowers = (pollInterval) => {
 };
 
 const writeFollower = (followerName) => {
-    let followerFile = __dirname + '/../outputs/latestfollower.txt';
+    let followerFile = `${Settings.get('dataPath')}/text/latestfollower.txt`;
     if (fs.read(followerFile) !== followerName) {
         fs.file(followerFile, {
             content: followerName
@@ -282,19 +280,23 @@ const actOnQueue = (data, type) => {
         case 'follower':
             Logger.trace('Queue item is a follower event.');
             io.emit('alert:follow', data);
+            Transit.emit('alert:follow', data);
             io.emit('alert:follow:event', db.makeFollowObj(data));
             break;
         case 'host':
             Logger.trace('Queue item is a host event.');
             io.emit('alert:host', data);
+            Transit.emit('alert:host', data);
             break;
         case 'subscriber':
             Logger.trace('Queue item is a subscriber event.');
             io.emit('alert:subscriber', data);
+            Transit.emit('alert:subscriber', data);
             break;
         case 'tip':
             Logger.trace('Queue item is a tip event.');
             io.emit('alert:tip', data);
+            Transit.emit('alert:tip', data);
             break;
         default:
             Logger.debug(`ERR in actOnQueue:: Queue item is of unknown type '${type}'`);
@@ -375,19 +377,19 @@ const resolveUser = (username, callback) => {
         method: 'GET',
         headers: {
             'Accept': "application/vnd.twitchtv.v3+json",
-            // 'Authorization': 'OAuth ' + channel.token.slice(6),
+            'Authorization': `OAuth ${CHANNEL.token.slice(6)}`,
             'Client-ID': CLIENT_ID
         }
     }, (err, res, body) => {
         if (err) {
-            Logger.debug(err);
+            Logger.error(err);
             return;
         }
 
         try {
             body = JSON.parse(body);
         } catch (error) {
-            Logger.debug(error);
+            Logger.error(error);
             return;
         }
 

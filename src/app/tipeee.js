@@ -12,7 +12,7 @@ const tm = {
     tipeeeConnect: () => {
         Logger.debug('Connecting to TipeeeStream...');
         tipeee = socket.connect('https://sso.tipeeestream.com:4242');
-        key = config.get('tipeeeAccessToken');
+        key = Settings.get('tipeeeAccessToken');
 
         tm.connectHandler();
     },
@@ -23,19 +23,19 @@ const tm = {
         tipeee = null;
     },
     tipeeeActivate: (data) => {
-        config.set('tipeeeActive', true);
-        config.set('tipeeeAccessToken', data);
+        Settings.set('tipeeeActive', true);
+        Settings.set('tipeeeAccessToken', data);
         tm.tipeeeConnect();
     },
     tipeeeDeactivate: () => {
-        config.set('tipeeeActive', false);
-        config.del('tipeeeAccessToken');
+        Settings.set('tipeeeActive', false);
+        Settings.del('tipeeeAccessToken');
         tm.tipeeeDisconnect();
     },
     connectHandler: () => {
         tipeee.on('connect', () => {
-            Logger.info('Connected to tipeeestream');
-            tipeee.emit('join-room', { room: key, username: config.get('channel') });
+            Logger.info('Connected to TipeeeStream');
+            tipeee.emit('join-room', { room: key, username: Settings.get('channel') });
         });
 
         tipeee.on('new-event', (data) => {
@@ -56,17 +56,18 @@ const tm = {
     }
 };
 
-if (config.get('tipeeeActive')) {
-    if (config.get('tipeeeAccessToken')) {
-        tm.tipeeeConnect();
+if (Settings.get('tipeeeActive')) {
+    if (Settings.get('tipeeeAccessToken')) {
+        setTimeout(tm.tipeeeConnect, 5 * 1000);
     }
 }
 
+io.on('connection', (socket) => {
+    socket.on('tipeee:activate', (data) => {
+        tm.tipeeeActivate(data);
+    });
 
-Transit.on('tipeee:activate', (data) => {
-    tm.tipeeeActivate(data);
-});
-
-Transit.on('tipeee:deactivate', () => {
-    tm.tipeeeDeactivate();
+    socket.on('tipeee:deactivate', () => {
+        tm.tipeeeDeactivate();
+    });
 });

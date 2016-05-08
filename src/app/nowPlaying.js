@@ -7,18 +7,18 @@ import jetpack from 'fs-jetpack';
 const config = require('./configstore'),
       emitter = require('./emitter');
 
-let filePath = config.get('nowPlayingFile') || null;
-let sep = config.get('nowPlayingSep') || '             //             ';
+let filePath = Settings.get('nowPlayingFile') || null;
+let sep = Settings.get('nowPlayingSep') || '             //             ';
 // const FILE_PATH = 'C:\\Users\\Bo\\Apps\\PhantomBotv2\\addons\\youtubePlayer\\currentsong.txt';
 
 io.on('music:set:file', (_path) => {
-    config.set('nowPlayingFile', _path);
-    filePath = config.get('nowPlayingFile');
+    Settings.set('nowPlayingFile', _path);
+    filePath = Settings.get('nowPlayingFile');
 });
 
 io.on('music:set:separator', (_sep) => {
-    config.set('nowPlayingSep', _sep);
-    sep = config.get('nowPlayingSep');
+    Settings.set('nowPlayingSep', _sep);
+    sep = Settings.get('nowPlayingSep');
 });
 
 let song;

@@ -11,10 +11,10 @@ const OPTIONS = {
         cluster: 'aws'
     },
     identity: {
-        username: config.get('botName'),
-        password: config.get('botAuth').slice(6)
+        username: Settings.get('botName'),
+        password: Settings.get('botAuth').slice(6)
     },
-    channels: [config.get('channel')]
+    channels: [Settings.get('channel')]
 };
 
 const bot = new tmi.client(OPTIONS);
@@ -54,7 +54,7 @@ let api = {
             mod: _mod,
             permLevel: api.checkPermLevel(user['display-name']),
             raw: message,
-            command: api.getCommand(message),
+            command: api.getCommand(message).toLowerCase(),
             args: api.getCommandArgs(message),
             argString: api.getCommandArgString(message)
         });

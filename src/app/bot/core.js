@@ -18,7 +18,7 @@ const bot = require('./bot'),
       mods = require('./moduleHandler'),
       registry = require('./modules/core/commandRegistry');
 
-const botStore = dbstore(path.resolve(global.rootDir, 'db', 'bot.db'));
+const botStore = dbstore(path.resolve(rootDir, 'db', 'bot.db'));
 
 let core = {
 
@@ -28,14 +28,27 @@ let core = {
     bot: bot,
     config: config,
     db: db,
-    events: emitter,
 
     channel: {
-        name: config.get('channel'),
-        botName: config.get('botName')
+        name: Settings.get('channel'),
+        botName: Settings.get('botName')
     },
 
-    say: (message) => {
+    say: function(user, message) {
+        if (arguments.length === 1) {
+            message = user;
+            return bot.say(core.channel.name, message);
+        }
+        if (core.settings.get('whisperMode') === false) {
+            return bot.say(core.channel.name, message);
+        } else {
+            return bot.whisper(user, message);
+        }
+    },
+    whisper: (user, message) => {
+        bot.whisper(user, message);
+    },
+    shout: (message) => {
         bot.say(core.channel.name, message);
     },
 
@@ -47,7 +60,7 @@ let core = {
             return mods.requireModule(registry[cmd].module);
         },
         getRunner: (cmd) => {
-            return core.command.getModule(cmd)[cmd];
+            return core.command.getModule(cmd)[registry[cmd].handler];
         },
         getCooldown: (cmd) => {
             return botStore.get(`SELECT cooldown FROM commands WHERE name="${cmd}"`) || 30;
@@ -56,7 +69,7 @@ let core = {
             return botStore.get(`SELECT permission FROM commands WHERE name="${cmd}"`) || 0;
         },
         isEnabled: (cmd) => {
-            return db.bot.getStatus(cmd);
+            return db.bot.getCommandStatus(cmd);
         },
         enableCommand: (cmd) => {
             if (!registry.hasOwnProperty(cmd)) {
@@ -75,21 +88,37 @@ let core = {
             return 200;
         }
     },
+    
+    settings: {
+        whisperMode: () => {
+            // db.bot.getWhisperMode()
+            return db.bot.setting.get('whisperMode');
+        },
+        setWhisperMode: (bool) => {
+            // db.bot.setWhisperMode(bool);
+            db.bot.setting.set('whisperMode', bool);
+        },
+        get: (key) => {
+            return db.bot.setting.get(key);
+        },
+        set: (key, value) => {
+            db.bot.setting.set(key, value);
+        }
+    },
 
     isFollower: (user) => {
         let _status = false;
         bot.api({
-            url: `//api.twitch.tv/kraken/users/${user}/follows/channels/${core.channel.name}`,
+            url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${core.channel.name}`,
             method: "GET",
             headers: {
                 "Accept": "application/vnd.twitchtv.v3+json",
-                "Authorization": "OAuth 3eb787117110834e079932bedfb8e6a7",
-                "Client-ID": config.get('clientID')
+                "Authorization": `OAuth ${Settings.get('accessToken').slice(6)}`,
+                "Client-ID": Settings.get('clientID')
             }
         }, (err, res, body) => {
             if (err) Logger.bot(err);
-            if (body.error && body.status === 404) _status = false;
-            // Logger.trace(body);
+            _status = (body.error && body.status === 404) ? false : true;
         });
         return _status;
     },
@@ -112,7 +141,8 @@ let core = {
             return;
         }*/
         try {
-            core.command.getModule(event.command)[event.command](event)
+            // core.command.getModule(event.command)[event.command](event);
+            core.command.getRunner(event.command)(event);
         } catch (err) {
             Logger.error(err);
         }
@@ -123,17 +153,21 @@ global.core = core;
 global.bot = bot;
 
 const initialize = () => {
-    Logger.bot('Initializing bot...');
-    bot.connect();
+    setTimeout(() => {
+        Logger.bot('Initializing bot...');
+        bot.connect();
 
-    db.initBotDB();
-    db.addTable('settings', true, { name: 'key', unique: true }, 'value', 'info');
-    db.addTable('users', true, { name: 'name', unique: true }, 'permission', 'mod', 'following', 'seen');
-    db.bot.initSettings();
-    db.addTable('commands', true, { name: 'name', unique: true }, 'cooldown', 'permission', 'status', 'module');
+        db.initBotDB(() => {
+            db.addTable('settings', true, { name: 'key', unique: true }, 'value', 'info');
+            db.addTable('users', true, { name: 'name', unique: true }, 'permission', 'mod', 'following', 'seen');
+            db.bot.initSettings();
 
-    Logger.bot('Bot ready.');
-    Transit.emit('bot:ready');
+            db.addTable('commands', true, { name: 'name', unique: true }, 'cooldown', 'permission', 'status', 'module');
+
+            Logger.bot('Bot ready.');
+            Transit.emit('bot:ready');
+        });
+    }, 5 * 1000);
 };
 
 module.exports.initialize = initialize;

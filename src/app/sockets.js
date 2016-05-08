@@ -14,25 +14,25 @@ io.on('connection', (socket) => {
 
     socket.on('auth:callback', (data) => {
         if (data.token.length > 20) {
-            config.set('accessToken', data.token);
-            config.set('channel', data.user);
-            config.set('channelAvatar', data.logo);
-            config.set('channelID', data.id);
-            config.set('isLoggedIn', true);
-            Logger.debug(`${config.get('accessToken')} authed as ${config.get('channel')}`);
+            Settings.set('accessToken', data.token);
+            Settings.set('channel', data.user);
+            Settings.set('channelAvatar', data.logo);
+            Settings.set('channelID', data.id);
+            Settings.set('isLoggedIn', true);
+            Logger.debug(`${Settings.get('accessToken')} authed as ${Settings.get('channel')}`);
         }
     });
 
     socket.on('setup:complete', () => {
-        config.set('setupComplete', true);
+        Settings.set('setupComplete', true);
     });
 
     socket.on('getUserInfo', () => {
         socket.emit('setUserInfo', {
-            user: config.get('channel'),
-            logo: config.get('channelAvatar'),
-            token: config.get('accessToken'),
-            clientID: config.get('clientID')
+            user: Settings.get('channel'),
+            logo: Settings.get('channelAvatar'),
+            token: Settings.get('accessToken'),
+            clientID: Settings.get('clientID')
         });
     });
 
@@ -73,6 +73,7 @@ io.on('connection', (socket) => {
         io.emit('receiveFollowers', db.dbGetFollows().object);
     });
 
+    /*
     socket.on('tipeee:activate', (data) => {
         Transit.emit('tipeee:activate', data);
     });
@@ -80,4 +81,5 @@ io.on('connection', (socket) => {
     socket.on('tipeee:deactivate', () => {
         Transit.emit('tipeee:deactivate');
     });
+    */
 });

@@ -19,7 +19,7 @@ export const showWinOverlay = () => {
         // icon: path.resolve(`${__dirname}/../../../assets/singularity.${(process.platform === 'win32' ? 'ico' : 'png')}`), // eslint-disable-line
         title: 'singularity overlay'
     });
-    winOverlay.loadURL(`http://localhost:2881/shell?src=overlay`);
+    winOverlay.loadURL(`http://localhost:${Settings.get('port')}/shell?src=${encodeURI('/overlay')}`);
     winOverlay.show();
 
     WindowManager.add(winOverlay, 'winOverlay');

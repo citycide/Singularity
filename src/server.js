@@ -17,7 +17,7 @@ let twitch, tipeee, bot;
 
 const app = express();
 const server = http.createServer(app);
-const io = global.io = socketio(server);
+global.io = socketio(server);
 
 const ROUTES = require('./app/routes')(app);
 const SOCKETS = require('./app/sockets');
@@ -32,20 +32,20 @@ const start = () => {
     server.listen(PORT, () => {});
 };
 
-setTimeout(() => {
-    if (config.get('channel') && config.get('isLoggedIn')) {
+{
+    if (Settings.get('channel') && Settings.get('isLoggedIn')) {
         twitch = require(__dirname + '/app/twitch');
         twitch.initAPI();
     }
-    if (config.get('channel') && config.get('isLoggedIn')) {
+    if (Settings.get('channel') && Settings.get('isLoggedIn')) {
         tipeee = require(__dirname + '/app/tipeee');
     }
-    if (config.get('botEnabled') && config.get('isLoggedIn')) {
+    if (Settings.get('botEnabled') && Settings.get('isLoggedIn')) {
         global.rootDir = __dirname;
         bot = require(__dirname + '/app/bot/core');
         bot.initialize();
     }
-}, 5 * 1000);
+}
 
 /******************************** FILE WATCHER *********************************/
 

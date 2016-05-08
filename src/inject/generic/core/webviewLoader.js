@@ -51,6 +51,7 @@ if (webview) {
                     nodeIntegration: false,
                     webSecurity: false,
                     plugins: true,
+                    partition: 'persist:twitch',
                     allowRunningInsecureContent: true,
                     preload: path.resolve(`${__dirname}/../../bttv/index.js`)
                 }
