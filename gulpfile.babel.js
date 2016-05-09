@@ -7,7 +7,9 @@ import { spawn, exec } from 'child_process';
 const paths = {
     internalScripts: ['src/**/*.js', '!src/public/js/vendor/**/*.js'],
     vendorScripts: ['src/public/js/vendor/**/*',
-                    'node_modules/keen-ui/dist/min/keen-ui.min.js'],
+                    'node_modules/keen-ui/dist/min/keen-ui.min.js',
+                    'node_modules/vue/dist/vue.js',
+                    'node_modules/vue/dist/vue.min.js'],
     vendorStyles: ['node_modules/keen-ui/dist/min/keen-ui.min.css'],
     views: ['src/public/views/**/*.ejs'],
     fonts: ['node_modules/font-awesome/fonts/*.{otf,eot,svg,ttf,woff,woff2}',
