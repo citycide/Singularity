@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>singularity - setup</title>
+    <!-- styling -->
+    <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="../fonts/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../css/loader.css" />
+    <link rel="stylesheet" type="text/css" href="../css/setup.css" />
+    <link rel="stylesheet" type="text/css" href="../css/vendor/waves.css" />
+    <script src="../js/contextHandler.js"></script>
+</head>
+<body>
+    <div class="window-frame-left"></div>
+    <div class="window-frame-right"></div>
+    <div class="window-frame-top"></div>
+    <div class="window-frame-bottom"></div>
+
+    <section class="window-content">
+        <header class="title-bar">
+            <div class="drag-handle"></div>
+            <div class="controls">
+                <div id="winRefresh" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="REFRESH">
+                    <i class="fa fa-refresh"></i>
+                </div>
+                <div id="winMinimize" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MINIMIZE">
+                    <i class="fa fa-minus"></i>
+                </div>
+                <div id="winMaximize" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MAXIMIZE">
+                    <i class="fa fa-square-o"></i>
+                </div>
+                <div id="winClose" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="CLOSE">
+                    <i class="fa fa-times"></i>
+                </div>
+            </div>
+        </header>
+
+        <div id="fullwrapper">
+            <div id="loader-wrapper">
+                <div id="loader"></div>
+                <div class="loader-section section-left"></div>
+                <div class="loader-section section-right"></div>
+            </div>
+
+            <div id="bodywrapper">
+                <section>
+                    <div class="container">
+                        <div class="row">
+                            <div class="board">
+                                <div class="board-inner">
+                                    <ul class="nav nav-tabs" id="myTab">
+                                        <div class="liner"></div>
+                                        <li class="active">
+                                            <a href="#home" data-toggle="tab" title="WELCOME" class="tab-link">
+                                                <span class="round-tabs one">
+                                                    <i class="fa fa-home"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li class="disabled">
+                                            <a href="#changelog" data-toggle="tab" title="CHANGELOG" class="tab-link">
+                                                <span class="round-tabs two">
+                                                    <i class="fa fa-bullhorn"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li class="disabled">
+                                            <a href="#feedback" data-toggle="tab" title="FEEDBACK" class="tab-link">
+                                                <span class="round-tabs three">
+                                                    <i class="fa fa-comments"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li class="disabled">
+                                            <a href="#twitch" data-toggle="tab" title="CONNECT TO TWITCH" class="tab-link">
+                                                <span class="round-tabs four">
+                                                     <i class="fa fa-twitch"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+
+                                        <li class="disabled">
+                                            <a href="#done" data-toggle="tab" title="DONE" class="tab-link">
+                                                <span class="round-tabs five">
+                                                     <i class="fa fa-check"></i>
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div class="tab-content">
+                                    <div class="tab-pane fade in active" id="home">
+
+                                        <div class="singularity-logo text-center">
+                                            <img src="../images/singularity_lg.png" width="128" height="128">
+                                        </div>
+                                        <h3 class="head text-center">WELCOME TO THE SINGULARITY</h3>
+                                        <p class="narrow text-center">
+                                            Let's take care of a few things before we get started.
+                                        </p>
+
+                                        <form class="form-horizontal text-center" id="home_form" name="home_form" role="form">
+                                            <fieldset>
+                                                <button type="submit" href="#changelog" name="home_form" class="btn-submit btn btn-primary waves-effect waves-light btn-startSetup">START<i style="margin-left:10px;" class="fa fa-arrow-right"></i></button>
+                                            </fieldset>
+                                        </form>
+
+                                    </div>
+                                    <div class="tab-pane fade" id="changelog">
+                                        <h3 class="head text-center">CHANGELOG</h3>
+
+                                        <code data-gist-id="ec807949812fa0c6a58ea6735d7f2143"></code>
+
+                                        <form class="form-horizontal text-center" id="changelog_form" name="changelog_form" role="form">
+                                            <fieldset>
+                                                <button type="submit" href="#feedback" name="changelog_form" class="btn-submit btn btn-primary waves-effect waves-light btn-changelogComplete">NEXT<i style="margin-left:10px;" class="fa fa-arrow-right"></i></button>
+                                            </fieldset>
+                                        </form>
+
+                                    </div>
+                                    <div class="tab-pane fade" id="feedback">
+                                        <h3 class="head text-center">HOW'S MY CODING?</h3>
+                                        <p class="narrow text-center">
+                                            Sure, sure, I made it with <i class="fa fa-heart"></i> and all, but how is it? Let me know!
+                                        </p>
+                                        <div class="text-center">
+                                            <div>
+                                                <a href="https://twitter.com/intent/tweet?screen_name=thecitycide"
+                                                   class="twitter-mention-button" data-size="large" data-related="thecitycide">Tweet to
+                                                    @thecitycide</a>
+                                                <script>
+                                                    !function (d, s, id) {
+                                                        var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https';
+                                                        if (!d.getElementById(id)) {
+                                                            js = d.createElement(s);
+                                                            js.id = id;
+                                                            js.src = p + '://platform.twitter.com/widgets.js';
+                                                            fjs.parentNode.insertBefore(js, fjs);
+                                                        }
+                                                    }(document, 'script', 'twitter-wjs');
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <form class="form-horizontal text-center" id="feedback_form" name="feedback_form" role="form">
+                                            <fieldset>
+                                                <button type="submit" href="#twitch" name="feedback_form" class="btn-submit btn btn-primary waves-effect waves-light btn-feedbackComplete">NEXT<i style="margin-left:10px;" class="fa fa-arrow-right"></i></button>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                    <div class="tab-pane fade" id="twitch">
+                                        <h3 class="head text-center">CONNECT TO TWITCH</h3>
+                                        <p class="narrow text-center">
+                                            In order to use <strong>singularity</strong>, we need you to authenticate with Twitch.
+                                            By clicking below you'll be directed to Twitch to sign in or authorize. Once complete,
+                                            Twitch will redirect you back here and we'll set everything up for you.
+                                        </p>
+
+                                        <form class="form-inline text-center" onsubmit="return false;">
+                                                <img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" class="twitch-connect" />
+                                        </form>
+
+                                        <form class="form-horizontal text-center" id="twitch_form" name="twitch_form" role="form">
+                                            <fieldset>
+                                                <button type="submit" href="#done" name="twitch_form" class="btn-submit btn btn-primary waves-effect waves-light" style="visibility: hidden">NEXT<i style="margin-left:10px;" class="fa fa-arrow-right"></i></button>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                    <div class="tab-pane fade" id="done">
+                                        <div class="text-center">
+                                            <i class="img-intro icon-checkmark-circle"></i>
+                                        </div>
+                                        <div class="shuttle-header text-center">
+                                            <i class="fa fa-space-shuttle fa-rotate-270"></i>
+                                        </div>
+                                        <h3 class="head text-center">YOU'RE ALL SET,
+                                            <span id="authedUser"><%= channel %></span>
+                                        </h3>
+                                        <p class="narrow text-center">
+                                            Are you ready to cross the event horizon?
+                                        </p>
+
+                                        <form class="form-horizontal text-center" id="final_form" name="final_form" role="form">
+                                            <fieldset>
+                                                <button type="submit" href="" name="final_form" class="btn btn-submit btn-primary waves-effect waves-light btn-lg btn-setupComplete">LET'S GO!</button>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- ejs -->
+    <script>
+        var channel = '<%= channel %>';
+        var clientID = '<%= clientID %>';
+    </script>
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Electron jQuery fix -->
+    <script>window._module = window.module; window.module = undefined;</script>
+    <!-- Javascript Libs -->
+    <script type="text/javascript" src="../js/vendor/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/vendor/bootstrap.min.js"></script>
+    <!-- more scripts -->
+    <script src="../js/setup.js"></script>
+    <script src="../js/menubar.js"></script>
+    <script src="../js/vendor/gist-embed.min.js"></script>
+    <script src="../js/vendor/waves.js"></script>
+    <script>
+        $('.twitch-connect').click(function(e) {
+            e.preventDefault();
+            window.location.href = 'https://api.twitch.tv/kraken/oauth2/authorize?response_type=token' +
+                                   '&client_id=' + clientID +
+                                   '&redirect_uri=' + window.location.origin + '/auth' +
+                                   '&scope=user_read+channel_read+channel_editor+channel_subscriptions+chat_login' +
+                                   '&force_verify=true';
+        });
+    </script>
+    <script>
+        window.module = window._module;
+        // document.body.classList.add(process.platform);
+    </script>
+</body>
+</html>

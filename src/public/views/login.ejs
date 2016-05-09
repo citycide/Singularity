@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>singularity - login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
+    <!-- CSS Libs -->
+    <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../fonts/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/vendor/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap-switch.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/vendor/checkbox3.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/vendor/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/vendor/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../css/vendor/select2.min.css">
+    <!-- CSS App -->
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link rel="stylesheet" type="text/css" href="../css/loader.css" />
+    <link rel="stylesheet" type="text/css" href="../css/themes/flat-blue.css">
+
+    <script src="../js/contextHandler.js"></script>
+</head>
+
+<body class="flat-blue login-page">
+    <div class="window-frame-left"></div>
+    <div class="window-frame-right"></div>
+    <div class="window-frame-top"></div>
+    <div class="window-frame-bottom"></div>
+
+    <section class="window-content">
+        <header class="title-bar">
+            <div class="drag-handle"></div>
+            <div class="controls">
+                <div id="winRefresh" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="REFRESH">
+                    <i class="fa fa-refresh"></i>
+                </div>
+                <div id="winMinimize" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MINIMIZE">
+                    <i class="fa fa-minus"></i>
+                </div>
+                <div id="winMaximize" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MAXIMIZE">
+                    <i class="fa fa-square-o"></i>
+                </div>
+                <div id="winClose" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="CLOSE">
+                    <i class="fa fa-times"></i>
+                </div>
+            </div>
+        </header>
+
+        <div id="fullwrapper">
+            <div id="loader-wrapper">
+                <div id="loader"></div>
+                <div class="loader-section section-left"></div>
+                <div class="loader-section section-right"></div>
+            </div>
+            <div id="bg-container">
+                <canvas id="star-canvas" width="1610" height="851"></canvas>
+            </div>
+            <div class="container">
+                <div class="login-box">
+                    <div>
+                        <div class="login-form row">
+                            <div class="col-sm-12 text-center login-header">
+                                <img src="/images/singularity_lg.png" width="128" height="128">
+                                <h4 class="login-title">singularity</h4>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="login-body">
+                                    <div class="progress hidden" id="login-progress">
+                                        <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                            Log In...
+                                        </div>
+                                    </div>
+                                    <div class="twitch-button-container text-center">
+                                        <p>Login with your Twitch account to continue.</p>
+                                        <img src="http://ttv-api.s3.amazonaws.com/assets/connect_dark.png" class="twitch-connect" href="#" />
+                                    </div>
+                                </div>
+                                <div class="login-footer">
+                                    <span class="text-right"><a href="#" class="color-white">Need a Twitch account?</a></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- ejs -->
+    <script>
+        var clientID = '<%= clientID %>';
+    </script>
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Electron jQuery fix -->
+    <script>window._module = window.module; window.module = undefined;</script>
+    <!-- Javascript Libs -->
+    <script type="text/javascript" src="../js/vendor/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/vendor/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/vendor/Chart.min.js"></script>
+    <script type="text/javascript" src="../js/vendor/bootstrap-switch.min.js"></script>
+
+    <script type="text/javascript" src="../js/vendor/jquery.matchHeight-min.js"></script>
+    <script type="text/javascript" src="../js/vendor/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="../js/vendor/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/vendor/select2.full.min.js"></script>
+    <!-- Javascript -->
+    <script type="text/javascript" src="../js/menubar.js"></script>
+    <script type="text/javascript" src="../js/vendor/TweenMax.min.js"></script>
+    <script type="text/javascript" src="../js/constellation.js"></script>
+    <script>
+        $(window).load(function() {
+            setTimeout(function() {
+                $('body').addClass('loaded');
+            }, 200);
+        });
+
+        $('.twitch-connect').click(function (e) {
+            e.preventDefault();
+            window.location.href = 'https://api.twitch.tv/kraken/oauth2/authorize?response_type=token' +
+                    '&client_id=' + clientID +
+                    '&redirect_uri=' + window.location.origin + '/auth' +
+                    '&scope=user_read+channel_read+channel_editor+channel_subscriptions+chat_login' +
+                    '&force_verify=true';
+        });
+    </script>
+    <script>
+        window.module = window._module;
+        // document.body.classList.add(process.platform);
+    </script>
+</body>
+
+</html>

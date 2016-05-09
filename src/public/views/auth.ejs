@@ -1,0 +1,92 @@
+<html>
+<head>
+    <!-- CSS App -->
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/loader.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/themes/flat-main.css">
+    <!-- Electron jQuery fix -->
+    <script>window._module = window.module; window.module = undefined;</script>
+    <script src="../js/vendor/jquery.min.js"></script>
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- ejs -->
+    <script>
+        var clientID = '<%= clientID %>';
+        var setupComplete = '<%= setupComplete %>'
+    </script>
+    <script>
+        $(document).ready(function() {
+            var socket = io();
+
+            var username = '', logo = '', id;
+            var access_token = "oauth:" + window.location.hash.substring(14, 44);
+
+            $.when($.getJSON(
+                    'https://api.twitch.tv/kraken?oauth_token=' + access_token.slice(6) +
+                    '&client_id=' + clientID)
+            ).done(function(data) {
+                username = data.token.user_name;
+                $.when($.getJSON('https://api.twitch.tv/kraken/users/' + username)
+                ).done(function (res) {
+                    if (res.logo === null) {
+                        logo = 'http://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_300x300.png';
+                    } else {
+                        logo = res.logo;
+                    }
+                    id = res._id;
+                    socket.emit('auth:callback', {
+                        token: access_token,
+                        user: username,
+                        logo: logo,
+                        id: id
+                    });
+                    if (setupComplete) {
+                        console.log(window.location.origin + '/setup#done');
+                        window.location.assign(window.location.origin + '/setup#done');
+                    } else {
+                        window.location.assign(window.location.origin);
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        window.module = window._module;
+        // document.body.classList.add(process.platform);
+    </script>
+</head>
+<body class="flat-main">
+    <div class="window-frame-left"></div>
+    <div class="window-frame-right"></div>
+    <div class="window-frame-top"></div>
+    <div class="window-frame-bottom"></div>
+
+    <section class="window-content">
+        <header class="title-bar">
+            <div class="drag-handle"></div>
+            <div class="controls">
+                <div id="winRefresh" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="REFRESH">
+                    <i class="fa fa-refresh"></i>
+                </div>
+                <div id="winMinimize" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MINIMIZE">
+                    <i class="fa fa-minus"></i>
+                </div>
+                <div id="winMaximize" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="MAXIMIZE">
+                    <i class="material-icons">crop_square</i>
+                </div>
+                <div id="winClose" class="control" data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="CLOSE">
+                    <i class="material-icons">close</i>
+                </div>
+            </div>
+        </header>
+
+        <main class="full-container">
+            <div id="loader-wrapper">
+                <div id="loader"></div>
+                <div class="loader-section section-left"></div>
+                <div class="loader-section section-right"></div>
+            </div>
+        </main>
+    </section>
+</body>
+</html>
