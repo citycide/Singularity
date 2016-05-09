@@ -15,5 +15,6 @@ src/public/views/pages/
 src/public/views/icons/
 src/public/views/form/
 src/public/views/components/
+src/app/bot/cooldown/
 outputs/
 dbStructure.js
