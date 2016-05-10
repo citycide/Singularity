@@ -1,37 +1,36 @@
-var socket = io();
-var dev = false;
+const socket = io();
 
-$(window).load(function() {
-    setTimeout(function() {
+$(window).load(() => {
+    setTimeout(() => {
         $('body').addClass('loaded');
     }, 200);
 });
 
-$(function() {
-    $(".navbar-expand-toggle").click(function() {
-        $(".app-container").toggleClass("expanded");
-        return $(".navbar-expand-toggle").toggleClass("fa-rotate-90");
+$(() => {
+    $('.navbar-expand-toggle').click(() => {
+        $('.app-container').toggleClass('expanded');
+        return $('.navbar-expand-toggle').toggleClass('fa-rotate-90');
     });
-    return $(".navbar-right-expand-toggle").click(function() {
-        $(".navbar-right").toggleClass("expanded");
-        return $(".navbar-right-expand-toggle").toggleClass("fa-rotate-90");
+    return $('.navbar-right-expand-toggle').click(() => {
+        $('.navbar-right').toggleClass('expanded');
+        return $('.navbar-right-expand-toggle').toggleClass('fa-rotate-90');
     });
 });
 
 $(function() {
-    var streamEmbed = document.getElementById("streamEmbed");
-    var btnCollapsePanel = $(".btnCollapsePanel");
-    btnCollapsePanel.click(function () {
+    const STREAM_EMBED = document.getElementById('streamEmbed');
+    const btnCollapsePanel = $('.btnCollapsePanel');
+    btnCollapsePanel.click(function() {
         if ($(this).css('transform') == 'none') {
             $(this).css('transform', 'rotate(180deg)');
             if ($(this).hasClass('twitch-player')) {
-                streamEmbed.src = '//player.twitch.tv/?channel=' + channel;
+                STREAM_EMBED.src = '//player.twitch.tv/?channel=' + state.user.channel;
             }
         } else {
             $(this).css('transform', '');
             if ($(this).hasClass('twitch-player')) {
-                setTimeout(function() {
-                    streamEmbed.src = '';
+                setTimeout(() => {
+                    STREAM_EMBED.src = '';
                 }, 1000);
             }
         }
@@ -40,30 +39,17 @@ $(function() {
 
 Vue.use(Keen);
 
-var followerModel = JSON.parse(followerObj);
-var nowPlaying = {
-    title: currentSong
-};
-var state = {
-    services: {
-        tipeee: tipeeeEnabled
-    }
-};
-
-var app = new Vue({
+const app = new Vue({
     el: 'body',
     components: {},
     methods: {
-        say: function(msg) {
-            alert(msg)
-        },
         sendFollow: function() {
-            // alert(this.follow.name + ' followed.');
+            // console.log(this.follow.name + ' followed.');
             socket.emit('test:follower', this.follow.name);
         },
         sendHost: function() {
             socket.emit('test:host', {
-                // alert(this.host.name + ' hosted for ' + this.host.viewers + ' viewers.');
+                // console.log(this.host.name + ' hosted for ' + this.host.viewers + ' viewers.');
                 user: {
                     display_name: this.host.name
                 },
@@ -71,7 +57,7 @@ var app = new Vue({
             });
         },
         sendSubscribe: function() {
-            // alert(this.subscribe.name + ' has subbed for ' + this.subscribe.months + ' months.');
+            // console.log(this.subscribe.name + ' has subbed for ' + this.subscribe.months + ' months.');
             if (this.subscribe.months === null || this.subscribe.months === undefined || this.subscribe.months === 0 || isNaN(this.subscribe.months)) {
                 socket.emit('test:subscriber', this.subscribe.name);
             } else {
@@ -84,8 +70,8 @@ var app = new Vue({
             }
         },
         sendTip: function() {
-            // alert(this.tip.name + ' tipped ' + this.tip.amount + ' and said ' + this.tip.message);
-            var formattedAmount = '$' + this.tip.amount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
+            // console.log(this.tip.name + ' tipped ' + this.tip.amount + ' and said ' + this.tip.message);
+            const formattedAmount = '$' + this.tip.amount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
             socket.emit('test:tip', {
                 user: {
                     name: this.tip.name
@@ -95,70 +81,63 @@ var app = new Vue({
             });
         },
         sendSong: function(current) {
-            var song = current ? this.currentSong : this.testSong;
+            const song = current ? this.state.data.currentSong : this.testSong;
             socket.emit('test:music', song);
         },
         tipeeeEnable: function() {
-            // this.loaders.tipeee = true;
             state.services.tipeee = true;
             socket.emit('tipeee:activate');
         },
         tipeeeDisable: function() {
-            // this.loaders.tipeee = true;
             state.services.tipeee = false;
             socket.emit('tipeee:deactivate');
         }
     },
     data: {
         follow: {
-            name: channel
+            name: state.user.channel
         },
         host: {
-            name: channel,
+            name: state.user.channel,
             viewers: 10
         },
         subscribe: {
-            name: channel,
+            name: state.user.channel,
             months: 10
         },
         tip: {
-            name: channel,
+            name: state.user.channel,
             amount: 10,
             message: ''
         },
         show: {
             tipeeeDeactModal: false
         },
-        loaders: {
-            tipeee: false
-        },
-        state: state,
-        testSong: 'Never Gonna Give You Up - Rick Astley',
-        nowPlaying: nowPlaying,
-        followTable: followerModel
+        state,
+        testSong: 'Never Gonna Give You Up - Rick Astley'
     }
 });
 
-socket.on('alert:follow:event', function(data) {
-    followerModel.followers.unshift({
+socket.on('alert:follow:event', (data) => {
+    state.data.followers.unshift({
         name: data.name,
         time: 'just now'
     });
 });
 
-socket.on('music:update', function(data) {
-    nowPlaying.title = data;
+socket.on('music:update', (data) => {
+    state.data.currentSong = data;
 });
 
-socket.on('music:init', function(data) {
-    nowPlaying.title = data;
+socket.on('music:init', (data) => {
+    state.data.currentSong = data;
 });
 
 $(function() {
     openTabHash();
-    window.addEventListener("hashchange", openTabHash, false);
+    window.addEventListener('hashchange', openTabHash, false);
 
-    $('.btn-submit').on('click', function (e) {
+    $('.btn-submit').on('click', function(e) {
         var formname = $(this).attr('name');
         var tabname = $(this).attr('href');
 
@@ -169,14 +148,14 @@ $(function() {
         }
     });
 
-    $('ul.nav li').on('click', function (e) {
+    $('ul.nav li').on('click', function(e) {
         if ($(this).hasClass('disabled')) {
             e.preventDefault();
             return false;
         }
     });
 
-    $('.btn-setupComplete').on('click', function (e) {
+    $('.btn-setupComplete').on('click', function(e) {
         e.preventDefault();
         window.location.href = window.location.origin;
         return false;
@@ -184,54 +163,55 @@ $(function() {
 });
 
 $(function() {
-    var gameSpan = $('#streamGame');
-    var statusSpan = $('#streamTitle');
-    var followSpan = $('#follower-panel-label');
-    var viewsSpan = $('#views-panel-label');
-    function getStreamInfo() {
+    const GAME_SPAN = $('#streamGame');
+    const STATUS_SPAN = $('#streamTitle');
+    const FOLLOW_SPAN = $('#follower-panel-label');
+    const VIEWS_SPAN = $('#views-panel-label');
+    const getStreamInfo = () => {
         $.getJSON(
-            'https://api.twitch.tv/kraken/channels/' + channel,
+            'https://api.twitch.tv/kraken/channels/' + state.user.channel,
             {
-                "client_id": clientID
+                "client_id": state.clientID
             },
-            function (data) {
-                // console.log(data);
+            (data) => {
                 var game = data.game;
                 var status = data.status;
                 var followers = parseInt(data.followers);
                 var views = parseInt(data.views);
-                if (followers === null || followers === undefined || followers === "" || isNaN(followers)) {
-                    followSpan.text('???');
+                if (followers === null || followers === undefined || followers === '' || isNaN(followers)) {
+                    FOLLOW_SPAN.text('???');
                     console.log('Could not get follower count.');
                 } else {
-                    followSpan.text(followers);
-                    // console.log('Retrieved follower count. (' + followers + ')');
+                    FOLLOW_SPAN.text(followers);
                 }
-                if (views === null || views === undefined || views === "" || isNaN(views)) {
-                    viewsSpan.text('???');
+                if (views === null || views === undefined || views === '' || isNaN(views)) {
+                    VIEWS_SPAN.text('???');
                     console.log('Could not get follower count.');
                 } else {
-                    viewsSpan.text(views);
-                    // console.log('Retrieved views count. (' + views + ')');
+                    VIEWS_SPAN.text(views);
                 }
-                if (game === null || game === undefined || game === "") {
-                    gameSpan.text('<< No game set on Twitch. >>');
-                    // log('No game is set on Twitch.', 'dash');
+                if (game === null || game === undefined || game === '') {
+                    GAME_SPAN.text('<< No game set on Twitch. >>');
                 } else {
-                    gameSpan.text(game);
-                    // log('Game set to: ' + game, 'dash');
+                    GAME_SPAN.text(game);
                 }
-                if (status === null || status === undefined || status === "") {
-                    statusSpan.text('<< No status set on Twitch. >>');
-                    // log('No status is set on Twitch.', 'dash');
+                if (status === null || status === undefined || status === '') {
+                    STATUS_SPAN.text('<< No status set on Twitch. >>');
                 } else {
-                    statusSpan.text(status);
-                    // log('Status set to: ' + status, 'dash');
+                    STATUS_SPAN.text(status);
                 }
             });
-    }
+    };
     getStreamInfo();
-    setInterval(getStreamInfo, 60 * 1000);
+    let intervalID = null;
+    const streamInfoInterval = (flag, time) => {
+        if (flag) {
+            intervalID = setInterval(getStreamInfo, time);
+        } else {
+            clearInterval(intervalID);
+        }
+    };
+    streamInfoInterval(true, 60 * 1000);
 
     $('[data-toggle="popover"]').popover({
         trigger: 'hover',
@@ -239,197 +219,154 @@ $(function() {
     });
     $('[data-toggle="tooltip"]').tooltip();
 
-    document.getElementById('profile-dropdown-logo').src = channelAvatar;
+    document.getElementById('profile-dropdown-logo').src = state.user.channelAvatar;
 
-    var isEditingTitle = false;
-    var currentTitle;
-    statusSpan.click(function () {
-        if (isEditingTitle == false) {
+    let isEditingTitle = false;
+    let currentTitle;
+    STATUS_SPAN.click(function() {
+        if (isEditingTitle === false) {
             currentTitle = $(this).text();
             $(this).text(currentTitle)
-                .attr("contenteditable", "true").focus();
+                .attr('contenteditable', 'true').focus();
             setEndOfContenteditable($(this).get(0));
             isEditingTitle = true;
+            streamInfoInterval(false);
         }
-    }).blur(function () {
+    }).blur(function() {
         isEditingTitle = false;
         var newTitle = $(this).text();
-        $(this).html(newTitle).removeAttr("contenteditable");
+        $(this).html(newTitle).removeAttr('contenteditable');
         if (currentTitle != newTitle) {
             updateTitle(newTitle);
         }
+        streamInfoInterval(true, 60 * 1000);
     }).keydown(function(e) {
         if (e.keyCode === 13) {
             e.preventDefault();
-            $(this).removeAttr("contenteditable");
+            $(this).removeAttr('contenteditable');
             return false;
         }
     });
 
-    var isEditingGame = false;
-    var currentGame;
-    gameSpan.click(function () {
-        if (isEditingGame == false) {
+    let isEditingGame = false;
+    let currentGame;
+    GAME_SPAN.click(function() {
+        if (isEditingGame === false) {
             currentGame = $(this).text();
             $(this).text(currentGame)
-                .attr("contenteditable", "true").focus();
+                .attr('contenteditable', 'true').focus();
             setEndOfContenteditable($(this).get(0));
             isEditingGame = true;
+            streamInfoInterval(false);
         }
-    }).blur(function () {
+    }).blur(function() {
         isEditingGame = false;
         var newGame = $(this).text();
-        $(this).html(newGame).removeAttr("contenteditable");
+        $(this).html(newGame).removeAttr('contenteditable');
         if (currentGame != newGame) {
             updateGame(newGame);
         }
+        streamInfoInterval(true, 60 * 1000);
     }).keydown(function(e) {
         if (e.keyCode === 13) {
             e.preventDefault();
-            $(this).removeAttr("contenteditable");
+            $(this).removeAttr('contenteditable');
             return false;
         }
     });
 
-    $('div[contenteditable]').keydown(function(e) {
-        if (e.keyCode === 13) {
-            e.preventDefault();
-            $(this).removeAttr("contenteditable");
-            return false;
-        }
-    });
-
-    $("#extTipeeeKey").click(function() {
+    $('#extTipeeeKey').click(() => {
         openLink('https://www.tipeeestream.com/dashboard/api-key');
         $('#step2-tab').trigger('click');
         return false;
     });
 
-    $("#extTwitchChannel").click(function() {
-        openLink('https://www.twitch.tv/' + channel);
+    $('#extTwitchChannel').click(() => {
+        openLink('https://www.twitch.tv/' + state.user.channel);
         return false;
     });
-    $("#extTwitchProfile").click(function() {
-        openLink('https://www.twitch.tv/' + channel + '/profile');
+    $('#extTwitchProfile').click(() => {
+        openLink('https://www.twitch.tv/' + state.user.channel + '/profile');
         return false;
     });
 
-    document.addEventListener('dragover', function(e) {
+    document.addEventListener('dragover', (e) => {
         e.preventDefault();
         e.stopPropagation();
     }, false);
-    document.addEventListener('drop', function(e) {
+    document.addEventListener('drop', (e) => {
         e.preventDefault();
         e.stopPropagation();
     }, false);
 
-    var btnOpenOverlay = $('a#btnOpenOverlay');
+    const btnOpenOverlay = $('a#btnOpenOverlay');
     if (isElectron) {
-        btnOpenOverlay.click(function(e) {
+        btnOpenOverlay.click((e) => {
             e.preventDefault();
             Emitter.fire('window:overlay:open');
         });
-        /*
-        btnOpenOverlay.click(function() {
-            var winAlerts = nw.Window.open(window.location.host + '/overlay', {
-                position: 'center',
-                focus: true,
-                width: 1280,
-                height: 720
-            });
-            winAlerts.on('loaded', function(){
-                log('SYS: Opened alerts window.');
-            });
-            return false;
-        });
-
-        nw.Window.get().on('new-win-policy', function (frame, url, policy) {
-            if (url.indexOf('bttvSettings') !== -1) {
-                policy.setNewWindowManifest({
-                    'frame': true,
-                    'title': 'BetterTTV Settings',
-                    'min_width': 810,
-                    'width': 810,
-                    'height': 548
-                });
-            } else {
-                policy.setNewWindowManifest({
-                    'frame': true,
-                    'min_width': 600,
-                    'width': 800,
-                    'height': 600
-                });
-            }
-        });
-         */
     } else {
-        btnOpenOverlay.click(function() {
+        btnOpenOverlay.click(() => {
             window.open('/overlay');
         });
     }
 });
 
 $(function() {
-  return $(".side-menu .nav .dropdown").on('show.bs.collapse', function() {
-    return $(".side-menu .nav .dropdown .collapse").collapse('hide');
-  });
+    return $('.side-menu .nav .dropdown').on('show.bs.collapse', () => {
+        return $('.side-menu .nav .dropdown .collapse').collapse('hide');
+    });
 });
 
-function setEndOfContenteditable(contentEditableElement)
-{
-    var range,selection;
-    if(document.createRange)//Firefox, Chrome, Opera, Safari, IE 9+
-    {
+const setEndOfContenteditable = (contentEditableElement) => {
+    let range, selection;
+    if (document.createRange) {
         range = document.createRange();//Create a range (a range is a like the selection but invisible)
         range.selectNodeContents(contentEditableElement);//Select the entire contents of the element with the range
         range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
         selection = window.getSelection();//get the selection object (allows you to change selection)
         selection.removeAllRanges();//remove any selections already made
         selection.addRange(range);//make the range you have just created the visible selection
-    }
-    else if(document.selection)//IE 8 and lower
-    {
+    } else if (document.selection) {
         range = document.body.createTextRange();//Create a range (a range is a like the selection but invisible)
         range.moveToElementText(contentEditableElement);//Select the entire contents of the element with the range
         range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
-        range.select();//Select the range (make it the visible selection
+        range.select();//Select the range (make it the visible selection)
     }
 }
 
-function updateTitle(title) {
+const updateTitle = (title) => {
     $.get(
-        'https://api.twitch.tv/kraken/channels/' + channel,
+        'https://api.twitch.tv/kraken/channels/' + state.user.channel,
         {
             "channel[status]": title,
             "_method": "put",
             "oauth_token": token.slice(6)
         }
     );
-    log('Updated stream title to: ' + title, 'dash');
-}
+};
 
-function updateGame(game) {
+const updateGame = (game) => {
     $.get(
-        'https://api.twitch.tv/kraken/channels/' + channel,
+        'https://api.twitch.tv/kraken/channels/' + state.user.channel,
         {
             "channel[game]": game,
             "_method": "put",
             "oauth_token": token.slice(6)
         }
     );
-    log('Updated current game to: ' + game, 'dash');
-}
+};
 
-function openLink(url) {
+const openLink = (url) => {
     if (isElectron) {
         const remote = require ('remote');
         remote.shell.openExternal(url);
     } else {
         window.open(url);
     }
-}
+};
 
-function openTabHash() {
+const openTabHash = () => {
     var url = document.location.toString();
     if (url.match('#')) {
         var hash = url.split('#')[1];
@@ -439,11 +376,11 @@ function openTabHash() {
         }
     }
 
-    $('.tabnav li a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('.tabnav li a[data-toggle="tab"]').on('shown.bs.tab', (e) => {
         if(history.pushState) {
             history.pushState(null, null, e.target.hash);
         } else {
             window.location.hash = e.target.hash;
         }
     });
-}
+};

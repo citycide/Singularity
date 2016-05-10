@@ -73,7 +73,7 @@
                                 </button>
                                 <li class="now-playing-header">
                                     <i class="fa fa-music"></i>&nbsp;&nbsp;
-                                    <span id="currentSongTitle">{{ nowPlaying.title }}</span>
+                                    <span id="currentSongTitle">{{ state.data.currentSong }}</span>
                                     &nbsp;&nbsp;<i class="fa fa-music"></i>
                                 </li>
                                 <li class="dropdown">
@@ -122,15 +122,15 @@
                                 </li>
                                 -->
                                 <li class="dropdown profile">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%- channel %> <span class="caret"></span></a>
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%= state.user.channel %> <span class="caret"></span></a>
                                     <ul class="dropdown-menu animated fadeInDown">
                                         <li class="profile-img">
                                             <img id="profile-dropdown-logo" src="" width="150px" height="150px" class="profile-img">
                                         </li>
                                         <li>
                                             <div class="profile-info">
-                                                <h4 class="username"><%- channel %></h4>
-                                                <p>twitch.tv/<%- channel %></p>
+                                                <h4 class="username"><%- state.user.channel %></h4>
+                                                <p>twitch.tv/<%= state.user.channel %></p>
                                                 <div class="btn-group margin-bottom-2x" role="group">
                                                     <button id="extTwitchProfile" type="button" class="btn btn-default waves-effect"><i class="fa fa-external-link"></i> Profile</button>
                                                     <button id="extTwitchChannel" type="button" class="btn btn-default waves-effect"><i class="fa fa-external-link"></i> Channel</button>
@@ -328,11 +328,11 @@
                                                                         </thead>
                                                                          -->
                                                                         <tbody>
-                                                                            <tr v-for="follower in followTable.followers" transition="stagger" stagger="100">
-                                                                                <td class="col-lg-3 table-follower-time text-center">{{ follower.time }}</td>
-                                                                                <td class="col-lg-9 table-follower-name">{{ follower.name }}</td>
-                                                                                <!-- <td>{{ follower.notifications }}</td> -->
-                                                                            </tr>
+                                                                        <tr v-for="follower in state.data.followers" transition="stagger" stagger="100">
+                                                                            <td class="col-lg-3 table-follower-time text-center">{{ follower.time }}</td>
+                                                                            <td class="col-lg-9 table-follower-name">{{ follower.name }}</td>
+                                                                            <!-- <td>{{ follower.notifications }}</td> -->
+                                                                        </tr>
                                                                         </tbody>
                                                                     </table>
                                                                 </div>
@@ -408,8 +408,7 @@
                                                     </div>
                                                     <div id="collapseChat" class="panel-collapse collapse in">
                                                         <div class="card-body no-padding no-margin-bottom">
-                                                            <script>var chatView = decodeURIComponent('<%= chatView %>');</script>
-                                                            <webview id='chat_embed' src="//www.twitch.tv/<%- channel %>/chat" style="height: 675px; width: 100%;" preload="<%- decodeURIComponent(chatView) %>" partition="persist:twitch" plugins disablewebsecurity></webview>
+                                                            <webview id='chat_embed' src="//www.twitch.tv/<%= state.user.channel %>/chat" style="height: 675px; width: 100%;" preload="<%- decodeURIComponent(state.bttvInject) %>" partition="persist:twitch" plugins disablewebsecurity></webview>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -474,7 +473,7 @@
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
                                                                         <!--<div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
-                                                                        <input type="text" id="testHostUser" name="user" class="form-control" value="<%= channel %>">-->
+                                                                            <input type="text" id="testHostUser" name="user" class="form-control" value="<%= state.user.channel %>">-->
                                                                         <ui-textbox name="host-username" icon="person" type="text" v-bind:value.sync="host.name" :max-length="32" validation-rules="required|numeric|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
@@ -592,7 +591,7 @@
                                                                 <div class="col-lg-8">
                                                                     <div class="well">
                                                                         <div><h6><i class="fa fa-music"></i>&nbsp;&nbsp;CURRENT SONG</h6></div>
-                                                                        <div id="currentSongTitlePanel">{{ nowPlaying.title }}</div>
+                                                                        <div id="currentSongTitlePanel">{{ state.data.currentSong }}</div>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-lg-4">
@@ -719,13 +718,7 @@
     </section>
     <!-- ejs -->
     <script>
-        var channel = '<%= channel %>';
-        var token = '<%= token %>';
-        var channelAvatar = '<%= channelAvatar %>';
-        var clientID = '<%= clientID %>';
-        var currentSong = '<%= currentSong %>';
-        var followerObj = '<%- JSON.stringify(followerObj) %>';
-        var tipeeeEnabled = <%- tipeeeEnabled %>;
+        var state = <%- JSON.stringify(state) %>;
     </script>
     <!-- Electron jQuery fix -->
     <script>window._module = window.module; window.module = undefined;</script>

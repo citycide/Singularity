@@ -62,14 +62,22 @@ module.exports = (app) => {
         if (Settings.get('setupComplete') === true) {
             if (Settings.get('isLoggedIn')) {
                 res.render('index', {
-                    channel: Settings.get('channel'),
-                    channelAvatar: Settings.get('channelAvatar'),
-                    token: Settings.get('accessToken'),
-                    chatView: encodeURIComponent(path.resolve(`${__dirname}/../inject/bttv.js`)),
-                    clientID: Settings.get('clientID'),
-                    currentSong: musicWatcher.getCurrentSong(),
-                    tipeeeEnabled: Settings.get('tipeeeActive'),
-                    followerObj: db.dbGetFollows().object
+                    state: {
+                        user: {
+                            channel: Settings.get('channel'),
+                            channelAvatar: Settings.get('channelAvatar'),
+                            token: Settings.get('accessToken')
+                        },
+                        services: {
+                            tipeee: Settings.get('tipeeeActive')
+                        },
+                        data: {
+                            currentSong: musicWatcher.getCurrentSong(),
+                            followers: db.dbGetFollows().object.followers
+                        },
+                        clientID: Settings.get('clientID'),
+                        bttvInject: encodeURIComponent(path.resolve(`${__dirname}/../inject/bttv.js`))
+                    }
                 });
                 Logger.trace('Directing to home page.');
             } else {
@@ -82,26 +90,7 @@ module.exports = (app) => {
         }
     });
     app.get('/dashboard', (req, res) => {
-        if (Settings.get('setupComplete') === true) {
-            if (Settings.get('isLoggedIn')) {
-                res.render('index', {
-                    channel: Settings.get('channel'),
-                    channelAvatar: Settings.get('channelAvatar'),
-                    token: Settings.get('accessToken'),
-                    clientID: Settings.get('clientID'),
-                    currentSong: musicWatcher.getCurrentSong(),
-                    tipeeeEnabled: Settings.get('tipeeeActive'),
-                    followerObj: db.dbGetFollows().object
-                });
-                Logger.trace('Directing to home page.');
-            } else {
-                res.redirect('/login');
-                Logger.trace('Directing to login page.');
-            }
-        } else {
-            res.redirect('/setup');
-            Logger.trace('Directing to setup page.');
-        }
+        res.redirect('/');
     });
     /*
      **  ACCOUNTS / LOGIN / LOGOUT
