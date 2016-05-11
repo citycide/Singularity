@@ -5,11 +5,6 @@ import path from 'path';
 import express from 'express';
 import chokidar from 'chokidar';
 import socketio from 'socket.io';
-import ejs from 'ejs';
-
-const emitter = require(__dirname + '/app/emitter'),
-      config = require(__dirname + '/app/configstore'),
-      db = require(__dirname + '/app/db');
 
 let twitch, tipeee, bot;
 
@@ -34,27 +29,26 @@ const start = () => {
 
 {
     if (Settings.get('channel') && Settings.get('isLoggedIn')) {
-        twitch = require(__dirname + '/app/twitch');
+        twitch = require('./app/twitch');
         twitch.initAPI();
     }
     if (Settings.get('channel') && Settings.get('isLoggedIn')) {
-        tipeee = require(__dirname + '/app/tipeee');
+        tipeee = require('./app/tipeee');
     }
     if (Settings.get('botEnabled') && Settings.get('isLoggedIn')) {
         global.rootDir = __dirname;
-        bot = require(__dirname + '/app/bot/core');
+        bot = require('./app/bot/core');
         bot.initialize();
     }
 }
 
 /******************************** FILE WATCHER *********************************/
 
-const watcher = chokidar.watch('./app/*.js', {
+const watcher = chokidar.watch('./build/app/*.js', {
     persistent: true
 });
 
 watcher.on('change', (_path, stats) => {
-    Logger.debug('File updated.');
     let _module = '.' + path.sep + path.relative(__dirname, _path);
     delete require.cache[_path];
 });

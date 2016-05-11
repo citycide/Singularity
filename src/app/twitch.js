@@ -4,9 +4,9 @@
 import fs from 'fs-jetpack';
 import moment from 'moment';
 import { app } from 'electron';
+import { Timers, Intervals } from './tock';
 const tmi = require('tmi.js'),
       emitter = require('./emitter'),
-      config = require('./configstore'),
       db = require('./db');
 
 const CHANNEL = {
@@ -15,46 +15,12 @@ const CHANNEL = {
     token: Settings.get('accessToken')
 };
 const CLIENT_ID = Settings.get('clientID');
-let animating = false,
+let alertInProgress = false,
     followers = [],
     queue = [];
 
-/*
-const cooldown = require('./cooldown/index');
-
-let test = cooldown({
-    cmd: 'rekt',  // name of command to put on cooldown
-    time: 10,     // time in seconds until command can be used again
-    user: 'test'  // user-specific cooldown, or global if omitted
-}, function() {
-    console.log('This is a test. The command should only be able to be used every 5 seconds.');
-});
-
-test({cmd: 'rip', time: 10, user: 'fiftyffive'});
-
-setTimeout(test({cmd: 'rip', time: 10, user: 'fiftyffive'}), 5 * 1000);
-
-setTimeout(test({cmd: 'rip', time: 10, user: 'fiftyffive'}), 15 * 1000);
-
-test.on('cooldown.calledOnCooldown', function(func, args) {
-    console.log('Command called while on cooldown.');
-});
-
-test.on('cooldown.start', function() {
-    console.log('Cooldown started.');
-});
-
-test.on('cooldown.end', function() {
-    console.log('Cooldown is over.');
-});
-*/
-
-/*io.on('alert:complete', () => {
-    animating = false;
-});*/
-
 Transit.on('alert:complete', () => {
-    animating = false;
+    alertInProgress = false;
 });
 
 const OPTIONS = {
@@ -87,7 +53,7 @@ const initAPI = (pollInterval) => {
         Logger.info('Initializing Twitch API requests');
         pollFollowers(pollInterval);
     }, 5 * 1000);
-    setTimeout(checkQueue, 10 * 1000);
+    Timers.set(checkQueue, 10 * 1000);
 };
 
 const pollFollowers = (pollInterval) => {
@@ -139,7 +105,7 @@ const pollFollowers = (pollInterval) => {
                     writeFollower(followers[followers.length-1]);
                 } else {
                     body.follows.reverse().map((follower) => {
-                        if (followers.indexOf(follower.user.display_name) == -1) {
+                        if (followers.indexOf(follower.user.display_name) === -1) {
                             followers.push(follower.user.display_name);
                             let queueFollower = {
                                 user: {
@@ -257,25 +223,37 @@ client.on('subanniversary', (channel, username, months) => {
                 },
                 type: 'subscriber'
             };
-            db.dbSubscribersAdd(null, thisReub.user.display_name, moment().valueOf(), thisResub.user.months);
+            db.dbSubscribersAdd(null, thisResub.user.display_name, moment().valueOf(), thisResub.user.months);
         }
         queue.push(thisResub);
     });
 });
 
-const checkQueue = () => {
-    if(!queue.length || animating) {
-        setTimeout(checkQueue, 5 * 1000);
+const checkQueue = (attempts = 0) => {
+    if (alertInProgress) {
+        if (attempts < 2) {
+            Logger.absurd(`checkQueue:: An alert is either in progress or no client has responded with 'alert:complete'`);
+            attempts++;
+            Timers.set(checkQueue, 5 * 1000, attempts);
+        } else {
+            Logger.absurd(`checkQueue:: Maximum attempts reached. Forcing alertInProgress to false.`);
+            alertInProgress = false;
+            checkQueue();
+        }
+        return;
+    }
+    if (!queue.length) {
+        Timers.set(checkQueue, 5 * 1000);
         return;
     }
     let queueItem = queue.pop();
     actOnQueue(queueItem.user, queueItem.type);
-    setTimeout(checkQueue, 5 * 1000);
+    Timers.set(checkQueue, 5 * 1000);
 };
 
 const actOnQueue = (data, type) => {
     Logger.trace('Pushing queue item...');
-    animating = true;
+    alertInProgress = true;
     switch (type) {
         case 'follower':
             Logger.trace('Queue item is a follower event.');

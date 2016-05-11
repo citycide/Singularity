@@ -2,7 +2,6 @@
 'use strict';
 
 const emitter = require('./emitter');
-const config = require('./configstore');
 const db = require('./db');
 
 io.on('connection', (socket) => {
@@ -72,14 +71,4 @@ io.on('connection', (socket) => {
     socket.on('getFollowers', () => {
         io.emit('receiveFollowers', db.dbGetFollows().object);
     });
-
-    /*
-    socket.on('tipeee:activate', (data) => {
-        Transit.emit('tipeee:activate', data);
-    });
-    
-    socket.on('tipeee:deactivate', () => {
-        Transit.emit('tipeee:deactivate');
-    });
-    */
 });
