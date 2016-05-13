@@ -8,9 +8,7 @@
 import path from 'path';
 import moment from 'moment';
 /*** app ***/
-const dbstore = require('../../app/stores.js'),
-      db = require('../../app/db'),
-      config = require('../../app/configstore'),
+const db = require('../../app/db'),
       emitter = require('../../app/emitter.js');
 /*** bot ***/
 const bot = require('./bot'),
@@ -18,15 +16,12 @@ const bot = require('./bot'),
       mods = require('./moduleHandler'),
       registry = require('./modules/core/commandRegistry');
 
-const botStore = dbstore(path.resolve(rootDir, 'db', 'bot.db'));
-
 let core = {
 
     /**
      * @exports - Export core modules for global use
      */
     bot: bot,
-    config: config,
     db: db,
 
     channel: {
@@ -63,10 +58,15 @@ let core = {
             return core.command.getModule(cmd)[registry[cmd].handler];
         },
         getCooldown: (cmd) => {
-            return botStore.get(`SELECT cooldown FROM commands WHERE name="${cmd}"`) || 30;
+            // return botStore.get(`SELECT cooldown FROM commands WHERE name="${cmd}"`) || 30;
+            return core.data.get('commands', 'cooldown', { name: cmd });
         },
         getPermLevel: (cmd) => {
-            return botStore.get(`SELECT permission FROM commands WHERE name="${cmd}"`) || 0;
+            // return botStore.get(`SELECT permission FROM commands WHERE name="${cmd}"`) || 0;
+            return core.data.get('commands', 'permission', { name: cmd });
+        },
+        setPermLevel: (cmd, level) => {
+            
         },
         isEnabled: (cmd) => {
             return db.bot.getCommandStatus(cmd);
@@ -91,11 +91,9 @@ let core = {
     
     settings: {
         whisperMode: () => {
-            // db.bot.getWhisperMode()
             return db.bot.setting.get('whisperMode');
         },
         setWhisperMode: (bool) => {
-            // db.bot.setWhisperMode(bool);
             db.bot.setting.set('whisperMode', bool);
         },
         get: (key) => {
@@ -103,6 +101,12 @@ let core = {
         },
         set: (key, value) => {
             db.bot.setting.set(key, value);
+        }
+    },
+
+    data: {
+        get(table, what, where) {
+            return db.bot.data.get(table, what, where);
         }
     },
 
@@ -135,13 +139,12 @@ let core = {
             return;
         }
         // Check that the user has sufficient privileges to use the command
-        /*
-        if (event.sender.permLevel > core.command.getPermLevel(cmd)) {
-            Logger.bot(`${user} does not have sufficient permissions to use !${cmd}`);
-            return;
-        }*/
+        if (event.permLevel > core.command.getPermLevel(event.command)) {
+            Logger.bot(`${event.sender} does not have sufficient permissions to use !${event.command}.`);
+            return core.say(event.sender, `You don't have what it takes to use !${event.command}.`);
+        }
+
         try {
-            // core.command.getModule(event.command)[event.command](event);
             core.command.getRunner(event.command)(event);
         } catch (err) {
             Logger.error(err);

@@ -24,7 +24,7 @@ $(function() {
         if ($(this).css('transform') == 'none') {
             $(this).css('transform', 'rotate(180deg)');
             if ($(this).hasClass('twitch-player')) {
-                STREAM_EMBED.src = '//player.twitch.tv/?channel=' + state.user.channel;
+                STREAM_EMBED.src = `//player.twitch.tv/?channel=${state.user.channel}`;
             }
         } else {
             $(this).css('transform', '');
@@ -169,7 +169,7 @@ $(function() {
     const VIEWS_SPAN = $('#views-panel-label');
     const getStreamInfo = () => {
         $.getJSON(
-            'https://api.twitch.tv/kraken/channels/' + state.user.channel,
+            `https://api.twitch.tv/kraken/channels/${state.user.channel}`,
             {
                 "client_id": state.clientID
             },
@@ -282,11 +282,11 @@ $(function() {
     });
 
     $('#extTwitchChannel').click(() => {
-        openLink('https://www.twitch.tv/' + state.user.channel);
+        openLink(`https://www.twitch.tv/${state.user.channel}`);
         return false;
     });
     $('#extTwitchProfile').click(() => {
-        openLink('https://www.twitch.tv/' + state.user.channel + '/profile');
+        openLink(`https://www.twitch.tv/${state.user.channel}/profile`);
         return false;
     });
 
@@ -337,22 +337,22 @@ const setEndOfContenteditable = (contentEditableElement) => {
 
 const updateTitle = (title) => {
     $.get(
-        'https://api.twitch.tv/kraken/channels/' + state.user.channel,
+        `https://api.twitch.tv/kraken/channels/${state.user.channel}`,
         {
             "channel[status]": title,
             "_method": "put",
-            "oauth_token": token.slice(6)
+            "oauth_token": state.user.token.slice(6)
         }
     );
 };
 
 const updateGame = (game) => {
     $.get(
-        'https://api.twitch.tv/kraken/channels/' + state.user.channel,
+        `https://api.twitch.tv/kraken/channels/${state.user.channel}`,
         {
             "channel[game]": game,
             "_method": "put",
-            "oauth_token": token.slice(6)
+            "oauth_token": state.user.token.slice(6)
         }
     );
 };
@@ -371,7 +371,7 @@ const openTabHash = () => {
     if (url.match('#')) {
         var hash = url.split('#')[1];
         $('.tabnav li a[href=#'+hash+']').tab('show') ;
-        if (!hash || hash !== dashboard) {
+        if (!hash || hash !== 'dashboard') {
             // hideStreamPreview();
         }
     }

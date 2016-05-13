@@ -23,7 +23,6 @@ bot.on('chat', (channel, user, message, self) => {
     if (self) return;
     api.messageHandler(user, message);
     if (api.isCommand(message)) api.commandHandler(user, message);
-    // Logger.bot(api.checkPermLevel(user['display-name']));
 });
 
 let api = {
@@ -32,7 +31,6 @@ let api = {
     },
 
     messageHandler: (user, message) => {
-        // api.checkPermLevel(user['display-name']);
         let _timestamp = moment().valueOf();
         let _mod = false;
         if (user['user-type'] === 'mod') _mod = true;

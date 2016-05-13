@@ -3,7 +3,7 @@
 
 import jetpack from 'fs-jetpack';
 import moment from 'moment';
-const sql = require('sql.js');
+import sql from 'sql.js';
 
 const dbstore = (fileName) => {
     if (!fileName) return null;
@@ -103,8 +103,3 @@ const dbstore = (fileName) => {
 };
 
 module.exports = dbstore;
-module.exports.bot = {
-    get: (query) => {
-        // die bot
-    }
-};

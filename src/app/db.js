@@ -7,8 +7,10 @@ import jetpack from 'fs-jetpack';
 import moment from 'moment';
 import util from './main/utils/util';
 import { app } from 'electron';
+import Store from './datastore.js';
 
 let db = null, botDB = null;
+let _db = null;
 
 /**
  * @function
@@ -22,6 +24,15 @@ let db = null, botDB = null;
      */
     jetpack.dir(path.resolve(__dirname, '..', 'db'));
     db = dbstore(path.resolve(__dirname, '..', 'db', 'singularity.db'));
+
+    /*
+    _db = new Store(path.resolve(__dirname, '..', 'db', 'testing.db'));
+    _db.run('CREATE TABLE IF NOT EXISTS followers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, notifications TEXT);');
+    _db.run('INSERT INTO followers (twitchid, username, timestamp, evtype, notifications) ' +
+            `VALUES (3457558, 'testycide', ${moment().valueOf()}, 'follow', 'false');`);
+
+    const response = _db.get('followers', '*');
+    */
 
     /**
      * ... or in the app's directory in the user's home folder?
@@ -69,7 +80,7 @@ let data = {
      * @function - Creates or accesses bot.db when bot is enabled
      */
     initBotDB: (fn) => {
-        botDB = dbstore(path.resolve(__dirname, '..', 'db', 'bot.db'));
+        botDB = new Store(path.resolve(__dirname, '..', 'db', 'bot.db'));
         if (!fn) return true;
         fn();
     },
@@ -196,12 +207,8 @@ let bot = {
 
     setting: {
         get: (key) => {
-            let value;
-            try {
-                value = botDB.get(`SELECT value FROM settings WHERE key="${key}"`)[0].values[0][0];
-            } catch (err) {
-                Logger.error(err);
-            }
+            let value = botDB.getValue('settings', 'value', { key });
+            if (value.error) return Logger.error(value.error);
             if (value) {
                 if (value === 'true' || value === 'false') {
                     value = (value === 'true');
@@ -214,7 +221,9 @@ let bot = {
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
             try {
-                botDB.run(`UPDATE settings SET value = "${value}" WHERE key="${key}"`);
+                botDB.update('settings', { value }, { key }, (err, res) => {
+                    if (err) Logger.error(err);
+                });
             } catch (err) {
                 Logger.error(err);
             }
@@ -223,11 +232,22 @@ let bot = {
             // Only sets the value if the key does not exist
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
-            try {
-                botDB.run(`INSERT OR IGNORE INTO settings (key, value) ` +
-                          `VALUES ("${key}", "${value}");`);
-            } catch (err) {
-                Logger.error(err);
+            botDB.put('settings', { key, value }, { conflict: 'ignore' }, (err, res) => {
+                if (err) Logger.error(err);
+            });
+        }
+    },
+
+    data: {
+        get: (table, what, where) => {
+            let response = botDB.getValue(table, what, where);
+            if (response === null) return 404;
+            if (response) {
+                if (response === 'true' || response === 'false') {
+                    response = (response === 'true');
+                }
+                if (util.isNumeric(response)) response = parseInt(response);
+                return response;
             }
         }
     },
@@ -237,34 +257,25 @@ let bot = {
             Logger.bot('Failed to add command. Name & module are required.');
             return;
         }
-        botDB.run('INSERT INTO commands (name, cooldown, permission, status, module)' +
-            `VALUES ("${name}", "${cooldown}", "${permission}", "${status}", "${module}");`);
+        botDB.put('commands', { name, cooldown, permission, status, module }, (err, res) => {});
     },
 
     addUser: (user) => {
-        botDB.run('INSERT OR REPLACE INTO users (name, permission, mod, following, seen)' +
-            `VALUES ("${user.name}","${user.permLevel}","${user.mod}","${user.following}","${user.seen}");`)
+        const { name, permLevel, mod, following, seen } = user;
+        let permission = bot.getPermLevel(name) || permLevel;
+        botDB.put('users', { name, permission, mod, following, seen }, { conflict: 'replace' }, (err, res) => {
+            if (err) Logger.error(err);
+        });
     },
 
     getPermLevel: (user) => {
-        let permission = 7;
-        try {
-            permission = botDB.get(`SELECT permission FROM users WHERE name='${user}'`)[0].values[0][0];
-        } catch (err) {
-            Logger.debug(err);
-        }
-        return permission;
+        return botDB.getValue('users', 'permission', { name: user });
     },
 
     getCommandStatus: (cmd) => {
-        let status = false;
-        try {
-            status = botDB.get(`SELECT status FROM commands WHERE name='${cmd}'`)[0].values[0][0];
-            status = (status === 'true');
-            Logger.trace(`'${cmd}' is ${(status) ? 'enabled' : 'disabled'}.`);
-        } catch (err) {
-            Logger.error(err);
-        }
+        let status = botDB.getValue('commands', 'status', { name: cmd });
+        if (status) status = (status === 'true');
+        // Logger.trace(`'${cmd}' is ${(status) ? 'enabled' : 'disabled'}.`);
         return status;
     },
 
@@ -273,22 +284,17 @@ let bot = {
         if (bool !== 'true' && bool !== 'false') {
             return Logger.debug('ERR in setCommandStatus:: requires boolean string');
         }
-        botDB.run(`UPDATE commands SET status = "${bool}" WHERE name="${cmd}"`);
+        botDB.update('commands', { status: bool }, { name: cmd });
     },
     
     getCommandPrefix: () => {
-        return botDB.get(`SELECT value FROM settings WHERE key="prefix"`)[0].values[0][0];
+        return botDB.getValue('settings', 'value', { key: 'prefix' });
     },
 
     getWhisperMode: () => {
-        let mode = false;
-        try {
-            mode = botDB.get(`SELECT value FROM settings WHERE name="whisperMode"`)[0].values[0][0];
-            mode = (mode === 'true');
-            Logger.trace(`Whisper mode is ${(mode) ? 'enabled' : 'disabled'}.`);
-        } catch (err) {
-            Logger.error(err);
-        }
+        let mode = botDB.getValue('settings', 'value', { name: 'whisperMode' });
+        mode = (mode === 'true');
+        Logger.trace(`Whisper mode is ${(mode) ? 'enabled' : 'disabled'}.`);
         return mode;
     },
     setWhisperMode: (bool) => {
@@ -296,7 +302,9 @@ let bot = {
         if (bool !== 'true' && bool !== 'false') {
             return Logger.debug('ERR in setWhisperMode:: requires boolean string');
         }
-        botDB.run(`UPDATE settings SET value = "${bool}" WHERE name="whisperMode"`);
+        botDB.update('settings', { value: bool }, { name: 'whisperMode' }, (err, res) => {
+            if (err) Logger.error(err);
+        });
     }
 };
 

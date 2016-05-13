@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 module.exports.command = (event) => {
     let action = event.args[0];
     let param1 = event.args[1];
@@ -35,12 +37,9 @@ module.exports.command = (event) => {
 
 module.exports.whisperMode = (event) => {
     let action = event.args[0];
-    let param1 = event.args[1];
-    let param2 = event.args[2] || null;
-    if (!action) return core.say(event.sender, `Usage: !whispermode [enable | disable]`);
+    if (!action) return core.say(event.sender, `Whisper mode is currently ${core.settings.get('whisperMode') ? 'enabled' : 'disabled'}.`);
     switch (action) {
         case 'enable':
-            // core.setWhisperMode(true);
             core.settings.set('whisperMode', true);
             core.say(event.sender, 'Whisper mode enabled.');
             break;
@@ -54,19 +53,39 @@ module.exports.whisperMode = (event) => {
     
 };
 
+module.exports.lastSeen = (event) => {
+    let target = event.args[0];
+    if (!target) return core.say(event.sender, `Usage: !lastseen [user]`);
+
+    let ts = core.data.get('users', 'seen', { name: target });
+    if (ts === 404) return core.say(event.sender, `We haven't seen ${target} yet.`);
+
+    let time = moment(ts, 'x').fromNow();
+    core.say(event.sender, `${target} was last seen ${time}.`);
+};
+
 Transit.on('bot:command:listen', () => {
     Transit.emit('bot:command:register', [
         {
             name: 'command',
             handler: 'command',
             cooldown: 0,
-            permLevel: 0
+            permLevel: 0,
+            status: true
         },
         {
             name: 'whispermode',
             handler: 'whisperMode',
             cooldown: 0,
-            permLevel: 0
+            permLevel: 0,
+            status: true
+        },
+        {
+            name: 'lastseen',
+            handler: 'lastSeen',
+            cooldown: 30,
+            permLevel: 0,
+            status: true
         }
     ], './modules/core/admin');
 });

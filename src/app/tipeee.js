@@ -2,9 +2,7 @@
 'use strict';
 
 import moment from 'moment';
-import * as socket from 'socket.io-client';
-const db = require('./db'),
-      config = require('./configstore');
+import socket from 'socket.io-client';
 
 let tipeee = null;
 let key = null;
@@ -18,8 +16,6 @@ const tm = {
     },
     tipeeeDisconnect: () => {
         Logger.info('Disconnected from TipeeeStream.');
-        // @TODO find out how to close the socket connection, this doesn't work
-        // socket.close();
         tipeee = null;
     },
     tipeeeActivate: (data) => {
@@ -49,7 +45,7 @@ const tm = {
                     messageRaw: data.event.parameters.message,
                     timestamp: moment(data.event.created_at).valueOf()
                 },
-                type: "tip"
+                type: 'tip'
             };
             Transit.emit('alert:tipeee:event', thisEvent);
         });
