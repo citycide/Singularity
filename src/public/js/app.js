@@ -86,7 +86,7 @@ const app = new Vue({
         },
         tipeeeEnable: function() {
             state.services.tipeee = true;
-            socket.emit('tipeee:activate');
+            socket.emit('tipeee:activate', this.tipeeeKeyInput);
         },
         tipeeeDisable: function() {
             state.services.tipeee = false;
@@ -114,14 +114,18 @@ const app = new Vue({
             tipeeeDeactModal: false
         },
         state,
+        tipeeeKeyInput: '',
         testSong: 'Never Gonna Give You Up - Rick Astley'
     }
 });
 
 socket.on('alert:follow:event', (data) => {
     state.data.followers.unshift({
-        name: data.name,
-        time: 'just now'
+        twitchid: data.twitchid,
+        username: data.username,
+        timestamp: 'just now',
+        evtype: 'follower',
+        notifications: data.notifications
     });
 });
 

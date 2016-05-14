@@ -1,6 +1,5 @@
 import moment from 'moment';
-const tmi = require('tmi.js');
-const config = require('../../app/configstore');
+import tmi from 'tmi.js';
 
 const OPTIONS = {
     options: {

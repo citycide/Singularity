@@ -1,26 +1,16 @@
 /*********************************** CORE *************************************/
 
-/* global $ */
-/**
- * Load modules
- */
-/*** node ***/
 import path from 'path';
 import moment from 'moment';
-/*** app ***/
-const db = require('../../app/db'),
-      emitter = require('../../app/emitter.js');
-/*** bot ***/
-const bot = require('./bot'),
-      loader = require('require-directory')(module, './modules'),
-      mods = require('./moduleHandler'),
-      registry = require('./modules/core/commandRegistry');
+
+const db = require('../../app/db');
+const bot = require('./bot');
+const loader = require('require-directory')(module, './modules');
+const mods = require('./moduleHandler');
+const registry = require('./modules/core/commandRegistry');
 
 let core = {
 
-    /**
-     * @exports - Export core modules for global use
-     */
     bot: bot,
     db: db,
 

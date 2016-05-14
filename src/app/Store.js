@@ -6,7 +6,7 @@ import moment from 'moment';
 import SQL from 'sql.js';
 
 export default class Store {
-    constructor (fileName) {
+    constructor(fileName) {
         this.fileName = fileName;
         this.db = null;
         this.debug = false;
@@ -49,26 +49,9 @@ export default class Store {
         }
     }
 
-    /**
-     * @TODO Remove this.
-     */
     select(query) {
         try {
-            const response = this.db.exec(query);
-            return { array: response, object: this.makeObj(response), erbject: this.eventObj(response) };
-        } catch (err) {
-            Logger.error(err);
-            return false;
-        }
-    }
-
-    /**
-     * @TODO Remove this.
-     */
-    retrieve(query) {
-        try {
-            const response = this.db.exec(query);
-            return response;
+            return this.db.exec(query);
         } catch (err) {
             Logger.error(err);
             return false;
@@ -76,58 +59,9 @@ export default class Store {
     }
 }
 
-/**
- * @TODO Remove this.
- */
-Store.prototype.makeObj = (dataset) => {
-    let output = { followers: [] };
-    for (let j = 0; j < dataset.length; j++) {
-        for (let i = 0; i < dataset[j].values.length; i++) {
-            let thisFollower = {
-                name: dataset[j].values[i][1],
-                time: moment(dataset[j].values[i][2], 'x').fromNow()
-                // notifications: dataset[j].values[i][4]
-            };
-            output.followers.push(thisFollower);
-        }
-    }
-    return output;
-};
-
-/**
- * @TODO Remove this.
- */
-Store.prototype.eventObj = (dataset) => {
-    let output = { events: [] };
-    for (let j = 0; j < dataset.length; j++) {
-        let thisEvent = {
-            name: dataset[j][1],
-            time: moment(dataset[j][2], 'x').fromNow(),
-            type: dataset[j][3]
-        };
-        output.events.push(thisEvent);
-    }
-};
-
-/**
- * @TODO Remove this.
- */
-Store.prototype.newFollowerObj = (follower) => {
-    return {
-        name: follower.display_name,
-        time: moment(follower.created_at, 'x').fromNow()
-    };
-};
-
 /** PUBLIC FUNCTIONS **/
 
-/*
-Store.prototype.run = function(query) {
-    if (query) this._run(query);
-};
-*/
-
-Store.prototype.put = function(table, data, options, callback) {
+Store.prototype.put = function (table, data, options, callback) {
     if (arguments.length > 3) {
         if (typeof(options) === 'function') {
             callback = options;
@@ -145,6 +79,7 @@ Store.prototype.put = function(table, data, options, callback) {
     const keys = [];
     const values = [];
     for (let key in data) {
+        if (!data.hasOwnProperty(key)) { continue; }
         keys.push(key);
         values.push(data[key]);
     }
@@ -176,24 +111,69 @@ Store.prototype.put = function(table, data, options, callback) {
 };
 
 /**
+ *
  * @param {string} table
  * @param {string|array} what
  * @param {object} where
+ * @param {object} order
+ * @param {string} limit
  * @returns {*}
  */
-Store.prototype.get = function(table, what, where) {
+Store.prototype.get = function (table, what, where = null, order = null, limit = null) {
     if (!Array.isArray(what)) {
         what = what.split(', ');
         if (what.length < 1) what = ' * ';
     }
     const location = [];
     if (where) {
-        for (let key in where){
-            location.push(`${key} = '${where[key]}'`);
+        for (let key in where) {
+            if (!where.hasOwnProperty(key)) { continue; }
+            if (typeof where[key] !== null && typeof where[key] === 'object') {
+                for (let rule in where[key]) {
+                    if (!where[key].hasOwnProperty(rule)) { continue; }
+                    let operand = where[key][rule];
+                    // console.log(rule, operand);
+                    switch (rule) {
+                        case 'gt':
+                            location.push(`${key} > ${operand}`);
+                            break;
+                        case 'lt':
+                            location.push(`${key} < ${operand}`);
+                            break;
+                        case 'gte':
+                            location.push(`${key} >= ${operand}`);
+                            break;
+                        case 'lte':
+                            location.push(`${key} <= ${operand}`);
+                            break;
+                        case 'not':
+                            location.push(`${key} != '${operand}'`);
+                            break;
+                    }
+                }
+            } else {
+                location.push(`${key} = '${where[key]}'`);
+            }
+        }
+    }
+    let orderString = '';
+    if (order) {
+        for (let key in order) {
+            orderString = ` ORDER BY ${order[key]} ${key.toUpperCase()}`;
         }
     }
 
-    const queryString = `SELECT ${what.join(', ')} FROM ${table}${(where) ? ' WHERE ' : ''}${location.join(' AND ')}`;
+    let limitString = '';
+    if (limit && typeof limit === 'string') {
+        /**
+         * 'limit' should be a string in one of two formats:
+         * '[count]' to impose only a limit
+         * '[offset], [count]' to impose a limit along with an offset (skip count)
+         */
+        limitString = ` LIMIT ${limit}`;
+    }
+
+    const queryString = `SELECT ${what.join(', ')} FROM ${table} ${(where) ? 'WHERE' : ''} ${location.join(' AND ')}${orderString}${limitString}`;
     this.sql = queryString;
 
     try {
@@ -205,7 +185,11 @@ Store.prototype.get = function(table, what, where) {
             for (let i = 0; i < values.length; i++) {
                 let line = {};
                 for (let j = 0; j < columns.length; j++) {
-                    line[columns[j]] = values[i][j];
+                    if (columns[j] === 'timestamp') {
+                        line[columns[j]] = moment(values[i][j], 'x').fromNow();
+                    } else {
+                        line[columns[j]] = values[i][j];
+                    }
                 }
                 results.push(line);
             }
@@ -221,10 +205,11 @@ Store.prototype.get = function(table, what, where) {
     }
 };
 
-Store.prototype.getValue = function(table, what, where) {
+Store.prototype.getValue = function (table, what, where) {
     const location = [];
     if (where) {
-        for (let key in where){
+        for (let key in where) {
+            if (!where.hasOwnProperty(key)) { continue; }
             location.push(`${key} = '${where[key]}'`);
         }
     }
@@ -257,15 +242,16 @@ Store.prototype.getValue = function(table, what, where) {
     }
 };
 
-Store.prototype.del = function(table, where, callback) {
+Store.prototype.del = function (table, where, callback) {
     const location = [];
-    if (typeof(where) === 'function'){
+    if (typeof(where) === 'function') {
         callback = where;
         where = [];
     }
 
     if (where) {
-        for (let key in where){
+        for (let key in where) {
+            if (!where.hasOwnProperty(key)) { continue; }
             location.push(`${key} = '${where[key]}'`);
         }
     }
@@ -296,7 +282,7 @@ Store.prototype.del = function(table, where, callback) {
     }
 };
 
-Store.prototype.update = function(table, data, where, options, callback) {
+Store.prototype.update = function (table, data, where, options, callback) {
     if (arguments.length > 3) {
         if (typeof(options) === 'function') {
             callback = options;
@@ -314,9 +300,11 @@ Store.prototype.update = function(table, data, where, options, callback) {
     const sets = [];
     const location = [];
     for (let key in data) {
+        if (!data.hasOwnProperty(key)) { continue; }
         sets.push(`${key} = '${data[key]}'`);
     }
     for (let key in where) {
+        if (!where.hasOwnProperty(key)) { continue; }
         location.push(`${key} = '${where[key]}'`);
     }
 
@@ -348,7 +336,7 @@ Store.prototype.update = function(table, data, where, options, callback) {
 
 /** PRIVATE FUNCTIONS **/
 
-Store.prototype._delete = function(query, location) {
+Store.prototype._delete = function (query, location) {
     if (location) {
         for (let i = 0; i < location.length; i++) {
             query = query.replace('?', location[i]);
@@ -369,7 +357,7 @@ Store.prototype._delete = function(query, location) {
     }
 };
 
-Store.prototype._update = function(query, data) {
+Store.prototype._update = function (query, data) {
     if (data) {
         for (let i = 0; i < data.length; i++) {
             query = query.replace('?', `'${data[i]}'`);
@@ -390,7 +378,7 @@ Store.prototype._update = function(query, data) {
     }
 };
 
-Store.prototype._getConflictString = function(conflict) {
+Store.prototype._getConflictString = function (conflict) {
     let conflictString = ' ';
     switch (conflict) {
         case 'replace':

@@ -3,43 +3,50 @@
 
 import chokidar from 'chokidar';
 import jetpack from 'fs-jetpack';
+import { EventEmitter } from 'events';
 
-let filePath = Settings.get('nowPlayingFile') || null;
-let sep = Settings.get('nowPlayingSep') || '             //             ';
+export default class NowPlaying extends EventEmitter {
+    constructor(filePath, separator) {
+        super();
+        this.filePath = filePath || null;
+        this.separator = separator || '             //             ';
+        this.current = 'No song is currently playing.';
+        this.watcher = null;
 
-io.on('music:set:file', (_path) => {
-    Settings.set('nowPlayingFile', _path);
-    filePath = Settings.get('nowPlayingFile');
-});
+        this.watch();
+    }
 
-io.on('music:set:separator', (_sep) => {
-    Settings.set('nowPlayingSep', _sep);
-    sep = Settings.get('nowPlayingSep');
-});
+    watch() {
+        if (!this.filePath) return;
+        let file = jetpack.read(this.filePath).replace(this.separator, '').trim();
+        this.current = file;
+        this.emit('music:init', this.current);
+        this.watcher = chokidar.watch(this.filePath, {
+            persistent: true
+        });
 
-let song;
-if (filePath !== null) {
-    let file = jetpack.read(filePath).toString().replace(sep, '');
+        this.watcher.on('change', (_path, stats) => {
+            file = jetpack.read(this.filePath).replace(this.separator, '').trim();
+            if (file !== 'No song is currently playing.' || file !== this.separator) {
+                this.current = file;
+                this.emit('music:update', this.current);
+            }
+        });
+    }
 
-    io.emit('music:init', file);
+    getCurrent() {
+        if (!this.filePath) return;
+        if (this.current === null || this.current === '' || this.current === undefined) return 'No song is currently playing.';
+        return this.current;
+    }
 
-    song = file;
-    const watcher = chokidar.watch(filePath, {
-        persistent: true
-    });
+    updateFilePath(newPath) {
+        this.watcher.unwatch(this.filePath);
+        this.filePath = newPath;
+        this.watcher.add(this.filePath);
+    }
 
-    watcher.on('change', (_path, stats) => {
-        file = jetpack.read(filePath).toString().replace(sep, '');
-        if (file != 'No song is currently playing.') {
-            io.emit('music:update', file);
-        }
-        song = file;
-    });
+    updateSeparator(newSep) {
+        this.separator = newSep;
+    }
 }
-
-const getCurrentSong = () => {
-    if (song === null || song === ' ' || song === undefined) return 'No song is currently playing.';
-    return song.trim();
-};
-
-module.exports.getCurrentSong = getCurrentSong;

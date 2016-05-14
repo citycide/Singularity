@@ -5,6 +5,9 @@ import path from 'path';
 import express from 'express';
 import chokidar from 'chokidar';
 import socketio from 'socket.io';
+import moment from 'moment';
+import TwitchClass from './app/Twitch';
+import TipeeeStream from './app/tipeee';
 
 let twitch, tipeee, bot;
 
@@ -29,11 +32,38 @@ const start = () => {
 
 {
     if (Settings.get('channel') && Settings.get('isLoggedIn')) {
-        twitch = require('./app/twitch');
+        twitch = new TwitchClass();
         twitch.initAPI();
     }
     if (Settings.get('channel') && Settings.get('isLoggedIn')) {
-        tipeee = require('./app/tipeee');
+        tipeee = new TipeeeStream(Settings.get('tipeeeAccessToken'), Settings.get('channel'));
+        tipeee.connectDelayed();
+
+        tipeee.on('wtf', () => {
+            console.log('wtf');
+        });
+
+        tipeee.on('connect', () => {
+            Logger.info('Connected to TipeeeStream');
+        });
+        
+        tipeee.on('disconnect', () => {
+            Logger.info('Disconnected from TipeeeStream');
+        });
+
+        tipeee.on('donation', (data) => {
+            let thisEvent = {
+                user: {
+                    name: data.event.parameters.username,
+                    amount: data.event.formattedAmount,
+                    message: data.event.parameters.formattedMessage,
+                    messageRaw: data.event.parameters.message,
+                    timestamp: moment(data.event.created_at).valueOf()
+                },
+                type: 'tip'
+            };
+            Transit.emit('alert:tipeee:event', thisEvent);
+        });
     }
     if (Settings.get('botEnabled') && Settings.get('isLoggedIn')) {
         global.rootDir = __dirname;
@@ -41,6 +71,21 @@ const start = () => {
         bot.initialize();
     }
 }
+
+io.on('connection', (socket) => {
+    socket.on('tipeee:activate', (data) => {
+        Settings.set('tipeeeActive', true);
+        Settings.set('tipeeeAccessToken', data);
+        tipeee.key = data;
+        tipeee.connect();
+    });
+
+    socket.on('tipeee:deactivate', () => {
+        tipeee.disconnect();
+        Settings.set('tipeeeActive', false);
+        Settings.del('tipeeeAccessToken');
+    });
+});
 
 /******************************** FILE WATCHER *********************************/
 

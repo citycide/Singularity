@@ -1,16 +1,23 @@
 /*********************************** ROUTES ***********************************/
 'use strict';
 
-const express = require('express'),
-      path = require('path'),
-      config = require('./configstore'),
-      cookieParser = require('cookie-parser'),
-      bodyParser = require('body-parser'),
-      ejs = require('ejs'),
-      session = require('express-session');
+import express from 'express';
+import path from 'path';
+import ejs from 'ejs';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import session from 'express-session';
 
-const db = require('./db'),
-      musicWatcher = require('./nowPlaying');
+import db from './db';
+import NowPlaying from './NowPlaying';
+
+const music = new NowPlaying(Settings.get('nowPlayingFile'), Settings.get('nowPlayingSep'));
+music.on('music:init', (data) => {
+    io.emit('music:init', data);
+});
+music.on('music:update', (data) => {
+    io.emit('music:update', data);
+});
 
 module.exports = (app) => {
     app.use(cookieParser());
@@ -40,7 +47,7 @@ module.exports = (app) => {
     const nowPlaying = require('../public/views/overlays/nowPlaying');
     const chat = require('../public/views/chat');
     const shell = require('../public/views/shell');
-    
+
     app.use('/', home);
     app.use('/dashboard', home);
     app.use('/login', login);
@@ -72,8 +79,8 @@ module.exports = (app) => {
                             tipeee: Settings.get('tipeeeActive')
                         },
                         data: {
-                            currentSong: musicWatcher.getCurrentSong(),
-                            followers: db.dbGetFollows().object.followers
+                            currentSong: music.getCurrent(),
+                            followers: db.dbGetFollows()
                         },
                         clientID: Settings.get('clientID'),
                         bttvInject: encodeURIComponent(path.resolve(`${__dirname}/../inject/bttv.js`))

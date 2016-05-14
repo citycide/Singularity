@@ -329,8 +329,8 @@
                                                                          -->
                                                                         <tbody>
                                                                         <tr v-for="follower in state.data.followers" transition="stagger" stagger="100">
-                                                                            <td class="col-lg-3 table-follower-time text-center">{{ follower.time }}</td>
-                                                                            <td class="col-lg-9 table-follower-name">{{ follower.name }}</td>
+                                                                            <td class="col-lg-3 table-follower-time text-center">{{ follower.timestamp }}</td>
+                                                                            <td class="col-lg-9 table-follower-name">{{ follower.username }}</td>
                                                                             <!-- <td>{{ follower.notifications }}</td> -->
                                                                         </tr>
                                                                         </tbody>
@@ -668,8 +668,7 @@
                                                                         <form class="form-horizontal" onSubmit="return false;">
                                                                             <div class="form-group">
                                                                                 <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                                    <div class="input-group-addon"><i class="fa fa-key fa-fw"></i></div>
-                                                                                    <input type="text" id="tipeeeKeyInput" name="user" class="form-control" placeholder="TipeeeStream API Key">
+                                                                                    <ui-textbox name="API Key" icon="vpn_key" type="text" v-bind:value.sync="tipeeeKeyInput" placeholder="TipeeeStream API Key" help-text="Enter your TipeeeStream API Key here." validation-rules="required|min:35|max:45">
                                                                                 </div>
                                                                             </div>
                                                                             <div class="pull-right">

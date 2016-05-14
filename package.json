@@ -1,7 +1,7 @@
 {
   "name": "Singularity",
   "description": "Twitch overlay & alert system",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "main": "build/main.js",
   "start": "electron . --debug",
   "port": 2881,
@@ -20,18 +20,15 @@
     "express": "4.x",
     "express-session": "^1.13.0",
     "fs-jetpack": "^0.8.0",
-    "keen-ui": "^0.8.7",
     "lodash": "^4.0.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.12.0",
-    "nedb": "^1.8.0",
     "require-directory": "^2.1.1",
     "require-uncached": "^1.0.2",
     "simple-json-store": "^0.0.1",
     "socket.io": "latest",
     "sql.js": "^0.3.2",
     "tmi.js": "latest",
-    "vue": "^1.0.22",
     "winston": "^2.2.0",
     "yargs": "^4.2.0"
   },
@@ -45,7 +42,9 @@
     "gulp-babel": "^6.1.2",
     "gulp-clean": "^0.3.2",
     "gulp-electron": "^0.1.2",
-    "material-design-icons-iconfont": "^2.0.4"
+    "keen-ui": "^0.8.7",
+    "material-design-icons-iconfont": "^2.0.4",
+    "vue": "^1.0.22"
   },
   "optionalDependencies": {
     "ll-keyboard-hook-win": "^3.0.0"

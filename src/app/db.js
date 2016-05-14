@@ -1,16 +1,14 @@
 /********************************** DATABASE **********************************/
 'use strict';
 
-const dbstore = require('./stores.js');
 import path from 'path';
 import jetpack from 'fs-jetpack';
 import moment from 'moment';
-import util from './main/utils/util';
 import { app } from 'electron';
-import Store from './datastore.js';
+import util from './main/utils/util';
+import Store from './Store.js';
 
 let db = null, botDB = null;
-let _db = null;
 
 /**
  * @function
@@ -23,16 +21,7 @@ let _db = null;
      * Possibly make it user-defined as well
      */
     jetpack.dir(path.resolve(__dirname, '..', 'db'));
-    db = dbstore(path.resolve(__dirname, '..', 'db', 'singularity.db'));
-
-    /*
-    _db = new Store(path.resolve(__dirname, '..', 'db', 'testing.db'));
-    _db.run('CREATE TABLE IF NOT EXISTS followers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, notifications TEXT);');
-    _db.run('INSERT INTO followers (twitchid, username, timestamp, evtype, notifications) ' +
-            `VALUES (3457558, 'testycide', ${moment().valueOf()}, 'follow', 'false');`);
-
-    const response = _db.get('followers', '*');
-    */
+    db = new Store(path.resolve(__dirname, '..', 'db', 'singularity.db'));
 
     /**
      * ... or in the app's directory in the user's home folder?
@@ -52,6 +41,7 @@ let _db = null;
  * twitchid | username | timestamp | evtype
  */
 db.run('CREATE TABLE IF NOT EXISTS followers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, notifications TEXT);');
+// data.addTable('followers', false, { name: 'twitchid', type: 'INT', unique: true }, 'username', 'timestamp', 'evtype', 'notifications');
 
 /**
  * Creates a table of subscribers with columns:
@@ -125,8 +115,9 @@ let data = {
             Logger.error('Failed to add or update follower. ID & username are required.');
             return;
         }
-        db.run('INSERT OR REPLACE INTO followers (twitchid, username, timestamp, evtype, notifications)' +
-            `VALUES ("${id}", "${username}", "${timestamp}", "follower", "${notifications}");`);
+        db.put('followers', { twitchid: id, username, timestamp, evtype: 'follower', notifications }, { conflict: 'replace' }, (err, res) => {
+            if (err) Logger.error(err);
+        });
     },
 
     /**
@@ -141,8 +132,10 @@ let data = {
             return;
         }
         if (months && months > 0) evtype = 'resub';
-        db.run('INSERT OR REPLACE INTO subscribers (twitchid, username, timestamp, evtype, months)' +
-            `VALUES ("${id}", "${username}", "${timestamp}", "${evtype}", "${months}");`);
+        db.put('subscribers', { twitchid: id, username, timestamp, evtype, months }, { conflict: 'replace' }, (err, res) => {
+            if (err) Logger.error(err);
+        });
+
     },
 
     /**
@@ -155,7 +148,9 @@ let data = {
             Logger.error('Failed to add host. Username & viewers are required.');
             return;
         }
-        db.run(`INSERT INTO hosts VALUES ("${id}", "${username}", "${timestamp}", "host", "${viewers}");`);
+        db.put('hosts', { twitchid: id, username, timestamp, evtype: 'host', viewers }, (err, res) => {
+            if (err) Logger.error(err);
+        });
     },
 
     /**
@@ -163,17 +158,23 @@ let data = {
      * @description Adds a tip event to the database
      * @params [ id | username | timestamp | amount | (message) ]
      */
-    dbTipsAdd: (username, timestamp, amount, message) => {
+    dbTipsAdd: (username, timestamp, amount, message = '') => {
         if (!username || !amount) {
             Logger.error('Failed to add tip. Name & amount are required.');
             return;
         }
-        db.run(`INSERT INTO tips VALUES ("${username}", "${timestamp}", "tip", "${amount}", "${message}");`);
+        db.put('tips', { username, timestamp, evtype: 'tip', amount, message }, (err, res) => {
+            if (err) Logger.error(err);
+        });
     },
     dbGetFollows: () => {
         const CUTOFF = moment().subtract(60, 'days').valueOf();
-        return db.select(`SELECT * FROM followers WHERE timestamp > ${CUTOFF} ORDER BY timestamp DESC`);
+        return db.get('followers', ' * ', { timestamp: { gt: CUTOFF } }, { desc: 'timestamp' });
     },
+    
+    /**
+     * @TODO make this actually pull & combine the different types of events
+     */
     dbGetEvents: () => {
         const CUTOFF = moment().subtract(60, 'days').valueOf();
         let followers =
@@ -188,9 +189,6 @@ let data = {
             return y-x;
         });
         return events;
-    },
-    makeFollowObj: (follower) => {
-        return db.newFollowerObj(follower);
     }
 };
 
@@ -220,13 +218,9 @@ let bot = {
         set: (key, value) => {
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
-            try {
-                botDB.update('settings', { value }, { key }, (err, res) => {
-                    if (err) Logger.error(err);
-                });
-            } catch (err) {
-                Logger.error(err);
-            }
+            botDB.update('settings', { value }, { key }, (err, res) => {
+                if (err) Logger.error(err);
+            });
         },
         confirm: (key, value) => {
             // Only sets the value if the key does not exist
@@ -257,7 +251,9 @@ let bot = {
             Logger.bot('Failed to add command. Name & module are required.');
             return;
         }
-        botDB.put('commands', { name, cooldown, permission, status, module }, (err, res) => {});
+        botDB.put('commands', { name, cooldown, permission, status, module }, (err, res) => {
+            if (err) Logger.error(err);
+        });
     },
 
     addUser: (user) => {
@@ -275,7 +271,7 @@ let bot = {
     getCommandStatus: (cmd) => {
         let status = botDB.getValue('commands', 'status', { name: cmd });
         if (status) status = (status === 'true');
-        // Logger.trace(`'${cmd}' is ${(status) ? 'enabled' : 'disabled'}.`);
+        Logger.absurd(`'${cmd}' is ${(status) ? 'enabled' : 'disabled'}.`);
         return status;
     },
 

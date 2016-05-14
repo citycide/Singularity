@@ -1,31 +1,30 @@
-const Timers = {
-    timeouts: new Map(),
-    intervals: new Map(),
+export default class Tock {
+    constructor() {
+        this.timers = new Map();
+        this.intervals = new Map();
+    }
 
-    set(fn, time, ...args) {
-        if (this.timeouts.has(fn)) this.clear(fn);
-        return this.timeouts.set(fn, setTimeout(fn, time, args));
-    },
+    setTimeout(fn, time, ...args) {
+        if (this.timers.has(fn)) this.clearTimeout(fn);
+        this.timers.set(fn, setTimeout(fn, time, args));
+        return this.timers.get(fn);
+    }
 
-    clear(fn) {
-        if (!this.timeouts.has(fn)) return;
-        const id = this.timeouts.get(fn);
+    clearTimeout(fn) {
+        if (!this.timers.has(fn)) return;
+        const id = this.timers.get(fn);
         return clearTimeout(id);
     }
-};
 
-const Intervals = {
-    set(fn, interval, ...args) {
-        if (this.intervals.has(fn)) this.clear(fn);
-        return this.intervals.set(fn, setInterval(fn, interval, args));
-    },
+    setInterval(fn, interval, ...args) {
+        if (this.intervals.has(fn)) this.clearInterval(fn);
+        this.intervals.set(fn, setInterval(fn, interval, args));
+        return this.intervals.get(fn);
+    }
 
-    clear(fn) {
+    clearInterval(fn) {
         if (!this.intervals.has(fn)) return;
         const id = this.intervals.get(fn);
         return clearInterval(id);
     }
-};
-
-module.exports.Timers = Timers;
-module.exports.Intervals = Intervals;
+}

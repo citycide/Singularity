@@ -1,8 +1,7 @@
 /*********************************** SOCKET ***********************************/
 'use strict';
 
-const emitter = require('./emitter');
-const db = require('./db');
+import db from './db';
 
 io.on('connection', (socket) => {
     Logger.debug('Client connected.');
@@ -18,7 +17,7 @@ io.on('connection', (socket) => {
             Settings.set('channelAvatar', data.logo);
             Settings.set('channelID', data.id);
             Settings.set('isLoggedIn', true);
-            Logger.debug(`${Settings.get('accessToken')} authed as ${Settings.get('channel')}`);
+            Logger.debug(`${Settings.get('accessToken')} authorized as ${Settings.get('channel')}`);
         }
     });
 
@@ -36,27 +35,22 @@ io.on('connection', (socket) => {
     });
 
     socket.on('test:follower', (user) => {
-        Logger.debug(`Received new follower test with name: ${user}`);
         Transit.emit('test:follower', user);
     });
 
     socket.on('test:host', (data) => {
-        Logger.debug(`Received new host test: ${data.user.display_name} for ${data.viewers} viewers`);
         Transit.emit('test:host', data);
     });
 
     socket.on('test:subscriber', (user) => {
-        Logger.debug(`Received new subscriber test with name: ${user}`);
         Transit.emit('test:subscriber', user);
     });
 
     socket.on('test:tip', (data) => {
-        Logger.debug(`Received new tip test: ${data.user.name} for ${data.amount} | ${data.message}`);
         Transit.emit('test:tip', data);
     });
 
     socket.on('test:music', (data) => {
-        Logger.debug(`Received new music test: ${data}`);
         io.emit('music:test', data);
     });
 
@@ -69,6 +63,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getFollowers', () => {
-        io.emit('receiveFollowers', db.dbGetFollows().object);
+        io.emit('receiveFollowers', db.dbGetFollows());
     });
 });
