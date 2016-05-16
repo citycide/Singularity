@@ -6,8 +6,8 @@ import express from 'express';
 import chokidar from 'chokidar';
 import socketio from 'socket.io';
 import moment from 'moment';
-import TwitchClass from './app/Twitch';
-import TipeeeStream from './app/tipeee';
+import TwitchClass from './app/main/features/core/Twitch';
+import TipeeeStream from './app/main/features/core/TipeeeStream';
 
 let twitch, tipeee, bot;
 
@@ -30,43 +30,42 @@ const start = () => {
     server.listen(PORT, () => {});
 };
 
+/******************************* CORE MODULES ********************************/
+
 {
     if (Settings.get('channel') && Settings.get('isLoggedIn')) {
         twitch = new TwitchClass();
         twitch.initAPI();
     }
+    
     if (Settings.get('channel') && Settings.get('isLoggedIn')) {
         tipeee = new TipeeeStream(Settings.get('tipeeeAccessToken'), Settings.get('channel'));
         tipeee.connectDelayed();
 
-        tipeee.on('wtf', () => {
-            console.log('wtf');
-        });
-
         tipeee.on('connect', () => {
             Logger.info('Connected to TipeeeStream');
-        });
-        
-        tipeee.on('disconnect', () => {
-            Logger.info('Disconnected from TipeeeStream');
-        });
 
-        tipeee.on('donation', (data) => {
-            let thisEvent = {
-                user: {
-                    name: data.event.parameters.username,
-                    amount: data.event.formattedAmount,
-                    message: data.event.parameters.formattedMessage,
-                    messageRaw: data.event.parameters.message,
-                    timestamp: moment(data.event.created_at).valueOf()
-                },
-                type: 'tip'
-            };
-            Transit.emit('alert:tipeee:event', thisEvent);
+            tipeee.on('disconnect', () => {
+                Logger.info('Disconnected from TipeeeStream');
+            });
+
+            tipeee.on('donation', (data) => {
+                let thisEvent = {
+                    user: {
+                        name: data.event.parameters.username,
+                        amount: data.event.formattedAmount,
+                        message: data.event.parameters.formattedMessage,
+                        messageRaw: data.event.parameters.message,
+                        timestamp: moment(data.event.created_at).valueOf()
+                    },
+                    type: 'tip'
+                };
+                Transit.emit('alert:tipeee:event', thisEvent);
+            });
         });
     }
+    
     if (Settings.get('botEnabled') && Settings.get('isLoggedIn')) {
-        global.rootDir = __dirname;
         bot = require('./app/bot/core');
         bot.initialize();
     }

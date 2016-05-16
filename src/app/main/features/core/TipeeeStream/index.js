@@ -26,29 +26,33 @@ class TipeeeStream extends EventEmitter {
     }
 
     disconnect() {
-        // SOCKET NEEDS TO -DIE- WHEN I TELL IT TO.
-        // THIS WON'T FUNCTION UNTIL IT DOES. EVENTS STILL HAPPEN.
-        // socket.close();
-        this.tipeee = null;
+        if (this.tipeee) {
+            this.tipeee.close();
+            this.tipeee = null;
+        }
         this.emit('disconnect');
     }
 
     _listen() {
-        this.tipeee.on('connect', () => {
-            this.emit('connect');
-            this.tipeee.emit('join-room', { room: this.key, username: this.username });
-        });
+        if (this.tipeee) {
+            this.tipeee.on('connect', () => {
+                this.emit('connect');
+                this.tipeee.emit('join-room', { room: this.key, username: this.username });
+            });
 
-        this.tipeee.on('new-event', (data) => {
-            switch (data.event.type) {
-                case 'donation':
-                    this.emit('donation', data);
-                    break;
-                default:
-                    this.emit('unknown', data);
-                    break;
-            }
-        });
+            this.tipeee.on('new-event', (data) => {
+                switch (data.event.type) {
+                    case 'donation':
+                        this.emit('donation', data);
+                        break;
+                    default:
+                        this.emit('unknown', data);
+                        break;
+                }
+            });
+        } else {
+            this.connect();
+        }
     }
 }
 

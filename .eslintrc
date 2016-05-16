@@ -1,5 +1,9 @@
 {
-  "extends": "airbnb/base",
+  "rules": {
+    "max-len": [1, 150],
+    "no-var": 2,
+    "prefer-const": 1
+  },
   "globals": {
     "Logger": true,
     "Settings": true,
@@ -7,7 +11,6 @@
     "Emitter": true,
     "WindowManager": true,
     "PlaybackAPI": true,
-    "GPM": true,
-    "$": true
+    "GPM": true
   }
 }

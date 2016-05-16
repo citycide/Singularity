@@ -9,7 +9,7 @@ import bodyParser from 'body-parser';
 import session from 'express-session';
 
 import db from './db';
-import NowPlaying from './NowPlaying';
+import NowPlaying from './main/features/core/NowPlaying';
 
 const music = new NowPlaying(Settings.get('nowPlayingFile'), Settings.get('nowPlayingSep'));
 music.on('music:init', (data) => {

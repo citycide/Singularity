@@ -6,7 +6,7 @@ import jetpack from 'fs-jetpack';
 import moment from 'moment';
 import { app } from 'electron';
 import util from './main/utils/util';
-import Store from './Store.js';
+import Store from './main/utils/Store.js';
 
 let db = null, botDB = null;
 

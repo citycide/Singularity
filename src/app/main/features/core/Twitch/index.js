@@ -4,8 +4,8 @@
 import jetpack from 'fs-jetpack';
 import moment from 'moment';
 import tmi from 'tmi.js';
-import Tock from './Tock';
-import db from './db';
+import Tock from '../../../utils/Tock';
+import db from '../../../../db';
 
 const tick = new Tock();
 
