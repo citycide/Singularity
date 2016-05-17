@@ -439,13 +439,13 @@
                                                     </div>
                                                     <div id="collapseFollow" class="panel-collapse collapse in">
                                                         <div class="card-body">
-                                                            <form class="form-horizontal" onSubmit="return false;">
+                                                            <form class="form-horizontal" v-on:submit.prevent="sendFollow">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
                                                                         <ui-textbox name="follow-username" icon="person" type="text" v-bind:value.sync="follow.name" :max-length="32" validation-rules="required|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
-                                                                <button @click.stop.prevent="sendFollow();" class="btn btn-info pull-right waves-effect waves-light">SEND</button>
+                                                                <button @click.stop.prevent="sendFollow" class="btn btn-info pull-right waves-effect waves-light">SEND</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -469,22 +469,18 @@
                                                     </div>
                                                     <div id="collapseHost" class="panel-collapse collapse in">
                                                         <div class="card-body">
-                                                            <form class="form-horizontal" onSubmit="return false;">
+                                                            <form class="form-horizontal" v-on:submit.prevent="sendHost">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <!--<div class="input-group-addon"><i class="fa fa-user fa-fw"></i></div>
-                                                                            <input type="text" id="testHostUser" name="user" class="form-control" value="<%= state.user.channel %>">-->
                                                                         <ui-textbox name="host-username" icon="person" type="text" v-bind:value.sync="host.name" :max-length="32" validation-rules="required|numeric|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <!--<div class="input-group-addon"><i class="fa fa-eye fa-fw"></i></div>
-                                                                        <input type="number" id="testHostViewers" name="viewers" class="form-control" value="10">-->
                                                                         <ui-textbox name="host-viewers" icon="remove_red_eye" type="number" v-bind:value.sync="host.viewers" validation-rules="required|min:1" help-text="Enter the number of viewers"></ui-textbox>
                                                                     </div>
                                                                 </div>
-                                                                <button @click.stop.prevent="sendHost();" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
+                                                                <button @click.stop.prevent="sendHost" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -510,7 +506,7 @@
                                                     </div>
                                                     <div id="collapseSub" class="panel-collapse collapse in">
                                                         <div class="card-body">
-                                                            <form class="form-horizontal" onSubmit="return false;">
+                                                            <form class="form-horizontal" v-on:submit.prevent="sendSubscribe">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
                                                                         <ui-textbox name="subscribe-username" icon="person" type="text" v-bind:value.sync="subscribe.name" :max-length="32" validation-rules="required|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
@@ -521,7 +517,7 @@
                                                                         <ui-textbox name="subscribe-months" icon="event_note" type="number" v-bind:value.sync="subscribe.months" validation-rules="required|min:1" help-text="Enter a number of months for a resub."></ui-textbox>
                                                                     </div>
                                                                 </div>
-                                                                <button @click.stop.prevent="sendSubscribe();" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
+                                                                <button @click.stop.prevent="sendSubscribe" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
                                                             </form>
                                                         </div>
                                                     </div>
@@ -545,7 +541,7 @@
                                                     </div>
                                                     <div id="collapseTip" class="panel-collapse collapse in">
                                                         <div class="card-body">
-                                                            <form class="form-horizontal" onSubmit="return false;">
+                                                            <form class="form-horizontal" v-on:submit.prevent="sendTip">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
                                                                         <ui-textbox name="tip-username" icon="person" type="text" v-bind:value.sync="tip.name" :max-length="32" validation-rules="required|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
@@ -553,7 +549,7 @@
                                                                 </div>
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <ui-textbox name="tip-amount" icon="attach_money" type="number" v-bind:value.sync="tip.amount" validation-rules="required|min:1" help-text="Enter the amount"></ui-textbox>
+                                                                        <ui-textbox name="tip-amount" icon="attach_money" type="number" step="0.01" v-bind:value.sync="tip.amount" validation-rules="required|min:1" help-text="Enter the amount"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
@@ -561,7 +557,7 @@
                                                                         <ui-textbox name="tip-message" icon="message" type="text" v-bind:value.sync="tip.message" help-text="(Optional) Enter a message"></ui-textbox>
                                                                     </div>
                                                                 </div>
-                                                                <button @click.stop.prevent="sendTip();" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
+                                                                <button @click.stop.prevent="sendTip" class="btn btn-info fresh-color pull-right waves-effect waves-light">SEND</button>
                                                             </form>
                                                         </div>
                                                     </div>
