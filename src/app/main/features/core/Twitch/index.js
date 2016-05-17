@@ -300,7 +300,7 @@ TwitchClass.prototype.pollFollowers = function(pollInterval = 30 * 1000) {
                 }
             }
         }
-        setTimeout(this.pollFollowers.bind(this), pollInterval);
+        tick.setTimeout(this.pollFollowers.bind(this), pollInterval);
     });
 };
 
