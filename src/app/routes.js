@@ -32,7 +32,13 @@ module.exports = (app) => {
 
     app.use(session(sessionConfig));
     app.use(express.static(__dirname + '/../public'));
+
+    // Extend an express static directory to allow for user modules
+    // available at localhost:[PORT]/user/server
+    app.use('/user/server', express.static(Settings.get('userServerPath')));
+
     app.set('views', __dirname + '/../public/views');
+
     app.set('view engine', 'ejs');
 
     const home = require('../public/views/index');
@@ -66,6 +72,14 @@ module.exports = (app) => {
      **  HOME PAGE
      */
     app.get('/', (req, res) => {
+        // this logic will later be used to redirect remote requests to a specially designed portal
+        // ie. accessing the app over (W)LAN will result in a different page being rendered
+        // this will allow for more node usage in locally rendered pages
+        if (req.ip === '::1' || req.ip === '127.0.0.1' || req.ip === '::ffff:127.0.0.1') {
+            Logger.absurd('HTTP request is local.', `IP:: '${req.ip}'`);
+        } else {
+            Logger.absurd('HTTP request is remote.', `IP:: '${req.ip}'`);
+        }
         if (Settings.get('setupComplete') === true) {
             if (Settings.get('isLoggedIn')) {
                 res.render('index', {
@@ -76,7 +90,9 @@ module.exports = (app) => {
                             token: Settings.get('accessToken')
                         },
                         services: {
-                            tipeee: Settings.get('tipeeeActive')
+                            tipeee: Settings.get('tipeeeActive'),
+                            twitchAlerts: Settings.get('twitchAlertsActive'),
+                            streamTip: Settings.get('streamTipActive')
                         },
                         data: {
                             currentSong: music.getCurrent(),

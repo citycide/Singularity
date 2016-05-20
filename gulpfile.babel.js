@@ -11,7 +11,7 @@ const paths = {
                     'node_modules/vue/dist/vue.js',
                     'node_modules/vue/dist/vue.min.js'],
     vendorStyles: ['node_modules/keen-ui/dist/min/keen-ui.min.css'],
-    views: ['src/public/views/**/*.ejs'],
+    views: ['src/public/views/**/*.{ejs,html}'],
     fonts: ['node_modules/font-awesome/fonts/*.{otf,eot,svg,ttf,woff,woff2}',
             'node_modules/material-design-icons-iconfont/dist/fonts/*.{otf,eot,svg,ttf,woff,woff2}'],
     images: ['src/public/images/**/*'],

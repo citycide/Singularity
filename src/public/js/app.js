@@ -91,6 +91,22 @@ const app = new Vue({
         tipeeeDisable: function() {
             state.services.tipeee = false;
             socket.emit('tipeee:deactivate');
+        },
+        twitchAlertsEnable: function() {
+            state.services.twitchAlerts = true;
+            socket.emit('twitchalerts:activate', this.twitchAlertsKeyInput);
+        },
+        twitchAlertsDisable: function() {
+            state.services.twitchAlerts = false;
+            socket.emit('twitchalerts:deactivate');
+        },
+        streamTipEnable: function() {
+            state.services.streamTip = true;
+            socket.emit('streamtip:activate', this.streamTipKeyInput);
+        },
+        streamTipDisable: function() {
+            state.services.streamTip = false;
+            socket.emit('streamtip:deactivate');
         }
     },
     data: {
@@ -111,10 +127,14 @@ const app = new Vue({
             message: ''
         },
         show: {
-            tipeeeDeactModal: false
+            tipeeeDeactModal: false,
+            twitchAlertsDeactModal: false,
+            streamTipDeactModal: false
         },
         state,
         tipeeeKeyInput: '',
+        twitchAlertsKeyInput: '',
+        streamTipKeyInput: '',
         testSong: 'Never Gonna Give You Up - Rick Astley'
     }
 });
@@ -281,7 +301,19 @@ $(function() {
 
     $('#extTipeeeKey').click(() => {
         openLink('https://www.tipeeestream.com/dashboard/api-key');
-        $('#step2-tab').trigger('click');
+        $('#tipeee-step2-tab').trigger('click');
+        return false;
+    });
+
+    $('#extTwitchAlertsKey').click(() => {
+        openLink('https://www.twitchalerts.com/dashboard/api-settings');
+        $('#twitchalerts-step2-tab').trigger('click');
+        return false;
+    });
+
+    $('#extStreamTipKey').click(() => {
+        openLink('https://streamtip.com/account');
+        $('#streamtip-step2-tab').trigger('click');
         return false;
     });
 

@@ -14,7 +14,9 @@ class TipeeeStream extends EventEmitter {
 
     connect() {
         if (this.key && this.username) {
-            this.tipeee = socket.connect('https://sso.tipeeestream.com:4242');
+            this.tipeee = socket.connect('https://sso.tipeeestream.com:4242', {
+                forceNew: true
+            });
             this._listen();
         } else {
             console.log('TipeeeStream needs auth.');

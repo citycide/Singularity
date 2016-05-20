@@ -592,18 +592,18 @@
                                                                 </div>
                                                                 <div class="col-lg-4">
                                                                     <div class="pull-right">
-                                                                        <button @click.stop.prevent="sendSong(true);" class="btn btn-info pull-right waves-effect waves-light">RESEND CURRENT SONG</button>
+                                                                        <button @click.stop.prevent="sendSong(true)" class="btn btn-info pull-right waves-effect waves-light">RESEND CURRENT SONG</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <form class="form-horizontal" onSubmit="return false;">
+                                                            <form class="form-horizontal" v-on:submit.prevent="sendSong">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
                                                                         <ui-textbox name="tip-message" icon="music_note" type="text" v-bind:value.sync="testSong" help-text="Enter song information"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="pull-right">
-                                                                    <button @click.stop.prevent="sendSong(false);" class="btn btn-info waves-effect waves-light">SEND</button>
+                                                                    <button @click.stop.prevent="sendSong(false)" class="btn btn-info waves-effect waves-light">SEND</button>
                                                                 </div>
                                                             </form>
                                                         </div>
@@ -623,7 +623,7 @@
                                                             <div class="container-fluid">
                                                                 <ul class="nav nav-tabs nav-justified" role="tablist">
                                                                     <li role="step" class="active">
-                                                                        <a href="#step1" id="step1-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true" data-ytta-id="-">
+                                                                        <a href="#tipeee-step1" id="tipeee-step1-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true" data-ytta-id="-">
                                                                             <div class="icon fa fa-arrow-right"></div>
                                                                             <div class="step-title">
                                                                                 <div class="title">INSERT COIN</div>
@@ -632,7 +632,7 @@
                                                                         </a>
                                                                     </li>
                                                                     <li role="step" class="">
-                                                                        <a href="#step2" role="tab" id="step2-tab" data-toggle="tab" aria-controls="profile" data-ytta-id="-" aria-expanded="false">
+                                                                        <a href="#tipeee-step2" role="tab" id="tipeee-step2-tab" data-toggle="tab" aria-controls="profile" data-ytta-id="-" aria-expanded="false">
                                                                             <div class="icon fa fa-key"></div>
                                                                             <div class="step-title">
                                                                                 <div class="title">KEY TO THE KINGDOM</div>
@@ -642,11 +642,11 @@
                                                                     </li>
                                                                 </ul>
                                                                 <div class="tab-content">
-                                                                    <div role="tabpanel" class="tab-pane fade active in" id="step1">
+                                                                    <div role="tabpanel" class="tab-pane fade active in" id="tipeee-step1">
                                                                         <p class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1 tipeee-header">
                                                                             <strong>singularity</strong> supports tip alerts through TipeeeStream. To activate this feature, you'll need to get
-                                                                            your API key. Due to a limitation of TipeeeStream's API, we can't do this automatically, so please click the link below
-                                                                            to open TipeeeStream's dashboard in a new window where you can copy the API key. Then come back here to submit it.
+                                                                            your API key. Please click the link below to open TipeeeStream's dashboard in a new window where you can copy the
+                                                                            API key. Then come back here to submit it.
                                                                         </p>
                                                                         <div class="tipeee-image text-center">
                                                                             <img src="/images/tipeee-setup.png" class="tipeee-img-responsive">
@@ -657,11 +657,11 @@
                                                                             </button>
                                                                         </div>
                                                                     </div>
-                                                                    <div role="tabpanel" class="tab-pane fade" id="step2">
+                                                                    <div role="tabpanel" class="tab-pane fade" id="tipeee-step2">
                                                                         <p class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                            Enter the API key you just grabbed from Tipeee below, then click <strong>SUBMIT</strong>.
+                                                                            Enter the API key you just grabbed from TipeeeStream below, then click <strong>SUBMIT</strong>.
                                                                         </p>
-                                                                        <form class="form-horizontal" onSubmit="return false;">
+                                                                        <form class="form-horizontal" v-on:submit.prevent="tipeeeEnable">
                                                                             <div class="form-group">
                                                                                 <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
                                                                                     <ui-textbox name="API Key" icon="vpn_key" type="text" v-bind:value.sync="tipeeeKeyInput" placeholder="TipeeeStream API Key" help-text="Enter your TipeeeStream API Key here." validation-rules="required|min:35|max:45">
@@ -683,15 +683,143 @@
                                                         </div>
                                                     </ui-tab>
                                                     <ui-tab header="TwitchAlerts">
-                                                        <h1>COMING SOON</h1>
+                                                        <div class="step" v-if="state.services.twitchAlerts === false">
+                                                            <div class="container-fluid">
+                                                                <ul class="nav nav-tabs nav-justified" role="tablist">
+                                                                    <li role="step" class="active">
+                                                                        <a href="#twitchalerts-step1" id="twitchalerts-step1-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true" data-ytta-id="-">
+                                                                            <div class="icon fa fa-arrow-right"></div>
+                                                                            <div class="step-title">
+                                                                                <div class="title">INSERT COIN</div>
+                                                                                <div class="description">Get your API key</div>
+                                                                            </div>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li role="step" class="">
+                                                                        <a href="#twitchalerts-step2" role="tab" id="twitchalerts-step2-tab" data-toggle="tab" aria-controls="profile" data-ytta-id="-" aria-expanded="false">
+                                                                            <div class="icon fa fa-key"></div>
+                                                                            <div class="step-title">
+                                                                                <div class="title">KEY TO THE KINGDOM</div>
+                                                                                <div class="description">We're going to need that</div>
+                                                                            </div>
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                                <div class="tab-content">
+                                                                    <div role="tabpanel" class="tab-pane fade active in" id="twitchalerts-step1">
+                                                                        <p class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1 tipeee-header">
+                                                                            <strong>singularity</strong> supports tip alerts through TwitchAlerts. To activate this feature, you'll need to get
+                                                                            your API Access Token. Please click the link below to open TwitchAlerts' dashboard in a new window where you can copy the
+                                                                            API Access Token. Then come back here to submit it.
+                                                                        </p>
+                                                                        <div class="tipeee-image text-center">
+                                                                            <img src="/images/twitchalerts-setup.png" class="tipeee-img-responsive">
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <button href="" id="extTwitchAlertsKey" class="btn btn-primary btn-tipeeeStart waves-effect waves-light">
+                                                                                GO TO TWITCHALERTS&nbsp;&nbsp;<i class="fa fa-external-link"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div role="tabpanel" class="tab-pane fade" id="twitchalerts-step2">
+                                                                        <p class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
+                                                                            Enter the API key you just grabbed from TwitchAlerts below, then click <strong>SUBMIT</strong>.
+                                                                        </p>
+                                                                        <form class="form-horizontal" v-on:submit.prevent="twitchAlertsEnable">
+                                                                            <div class="form-group">
+                                                                                <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
+                                                                                    <ui-textbox name="Access Token" icon="vpn_key" type="text" v-bind:value.sync="twitchAlertsKeyInput" placeholder="TwitchAlerts Access Token" help-text="Enter your TwitchAlerts Access Token here." validation-rules="required|min:15|max:25">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="pull-right">
+                                                                                <button @click="twitchAlertsEnable" class="btn btn-info waves-effect waves-light">SUBMIT</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div v-else>
+                                                            <div class="container-fluid">
+                                                                <p>TwitchAlerts has already been enabled. If you want to disable it, click the button below.</p>
+                                                                <button @click="show.twitchAlertsDeactModal = true" class="btn btn-warning waves-effect waves-light">DEACTIVATE</button>
+                                                            </div>
+                                                        </div>
                                                     </ui-tab>
                                                     <ui-tab header="StreamTip">
-                                                        <h1>COMING SOON</h1>
+                                                        <div class="step" v-if="state.services.streamTip === false">
+                                                            <div class="container-fluid">
+                                                                <ul class="nav nav-tabs nav-justified" role="tablist">
+                                                                    <li role="step" class="active">
+                                                                        <a href="#streamtip-step1" id="streamtip-step1-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true" data-ytta-id="-">
+                                                                            <div class="icon fa fa-arrow-right"></div>
+                                                                            <div class="step-title">
+                                                                                <div class="title">INSERT COIN</div>
+                                                                                <div class="description">Get your API key</div>
+                                                                            </div>
+                                                                        </a>
+                                                                    </li>
+                                                                    <li role="step" class="">
+                                                                        <a href="#streamtip-step2" role="tab" id="streamtip-step2-tab" data-toggle="tab" aria-controls="profile" data-ytta-id="-" aria-expanded="false">
+                                                                            <div class="icon fa fa-key"></div>
+                                                                            <div class="step-title">
+                                                                                <div class="title">KEY TO THE KINGDOM</div>
+                                                                                <div class="description">We're going to need that</div>
+                                                                            </div>
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                                <div class="tab-content">
+                                                                    <div role="tabpanel" class="tab-pane fade active in" id="streamtip-step1">
+                                                                        <p class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1 tipeee-header">
+                                                                            <strong>singularity</strong> supports tip alerts through Streamtip. To activate this feature, you'll need to get
+                                                                            your API Access Token. Please click the link below to open Streamtip's dashboard in a new window where
+                                                                            you can copy these. Then come back here to submit it.
+                                                                        </p>
+                                                                        <div class="tipeee-image text-center">
+                                                                            <img src="/images/streamtip-setup.png" class="tipeee-img-responsive">
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <button href="" id="extStreamTipKey" class="btn btn-primary btn-tipeeeStart waves-effect waves-light">
+                                                                                GO TO STREAMTIP&nbsp;&nbsp;<i class="fa fa-external-link"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div role="tabpanel" class="tab-pane fade" id="streamtip-step2">
+                                                                        <p class="col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
+                                                                            Enter the Access Token you just grabbed from Streamtip below, then click <strong>SUBMIT</strong>.
+                                                                        </p>
+                                                                        <form class="form-horizontal" v-on:submit.prevent="streamTipEnable">
+                                                                            <div class="form-group">
+                                                                                <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
+                                                                                    <ui-textbox name="Access Token" icon="vpn_key" type="text" v-bind:value.sync="streamTipKeyInput" placeholder="Streamtip Access Token" help-text="Enter your Streamtip Access Token here." validation-rules="required|min:27|max:37">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="pull-right">
+                                                                                <button @click="streamTipEnable" class="btn btn-info waves-effect waves-light">SUBMIT</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div v-else>
+                                                            <div class="container-fluid">
+                                                                <p>Streamtip has already been enabled. If you want to disable it, click the button below.</p>
+                                                                <button @click="show.streamTipDeactModal = true" class="btn btn-warning waves-effect waves-light">DEACTIVATE</button>
+                                                            </div>
+                                                        </div>
                                                     </ui-tab>
                                                 </ui-tabs>
 
                                                 <ui-confirm header="Deactivate TipeeeStream?" @confirmed="tipeeeDisable" @denied="" :show.sync="show.tipeeeDeactModal" close-on-confirm>
                                                     If you deactivate TipeeeStream, you'll need to go through the setup process again. Are you sure?
+                                                </ui-confirm>
+                                                <ui-confirm header="Deactivate TwitchAlerts?" @confirmed="twitchAlertsDisable" @denied="" :show.sync="show.twitchAlertsDeactModal" close-on-confirm>
+                                                    If you deactivate TwitchAlerts, you'll need to go through the setup process again. Are you sure?
+                                                </ui-confirm>
+                                                <ui-confirm header="Deactivate Streamtip?" @confirmed="streamTipDisable" @denied="" :show.sync="show.streamTipDeactModal" close-on-confirm>
+                                                    If you deactivate Streamtip, you'll need to go through the setup process again. Are you sure?
                                                 </ui-confirm>
                                             </div>
                                         </div>
