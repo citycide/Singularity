@@ -580,6 +580,9 @@ li.now-playing-header {
     #followerTable .stagger-enter, .stagger-leave {
       opacity: 0;
       height: 0; }
+#events-panel .VueTables.VueTables--Client > .row {
+  display: none;
+}
 
 #pageContent {
     padding: 0;
@@ -726,6 +729,9 @@ body.no-electron .app-container .content-container .side-menu {
   .app-container .navbar-top {
     top: 30px;
     min-width: 300px; }
+  body.no-electron .app-container .navbar-top {
+    top: 0;
+  }
   .app-container .content-container .side-menu {
     -webkit-app-region: no-drag;
     margin-left: -250px;
@@ -1028,7 +1034,7 @@ body.login-page {
   border-top: 0; }
 
 .tab-content > div {
-  padding: 20px; }
+  /*padding: 20px;*/ }
 
 .tabs-below > .nav-tabs,
 .tabs-right > .nav-tabs,

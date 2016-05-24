@@ -8,17 +8,17 @@
     <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
     <!-- CSS Libs -->
-    <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="../fonts/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" href="../css/vendor/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/waves.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vendor/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/fonts/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vendor/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/vendor/waves.css" />
     <link rel="stylesheet" type="text/css" href="/css/vendor/keen-ui.min.css" />
     <!-- CSS App -->
-    <link rel="stylesheet" type="text/css" href="../css/style.css">
-    <link rel="stylesheet" type="text/css" href="../css/loader.css" />
-    <link rel="stylesheet" type="text/css" href="../css/themes/flat-main.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/loader.css" />
+    <link rel="stylesheet" type="text/css" href="/css/themes/flat-main.css">
 
-    <script src="../js/contextHandler.js"></script>
+    <script src="/js/contextHandler.js"></script>
 </head>
 
 <body class="flat-main">
@@ -171,22 +171,11 @@
                                             <span class="icon fa fa-clone"></span><span class="title">Launch Overlay</span>
                                         </a>
                                     </li>
-                                    <!-- Dropdown
-                                    <li class="panel panel-default dropdown">
-                                        <a data-toggle="collapse" href="#dropdown-icon">
-                                            <span class="icon fa fa-archive"></span><span class="title">Icons</span>
+                                    <li>
+                                        <a href="#events" data-toggle="tab">
+                                            <span class="icon fa fa-list"></span><span class="title">Events</span>
                                         </a>
-                                        <!-- Dropdown level 1
-                                        <div id="dropdown-icon" class="panel-collapse collapse">
-                                            <div class="panel-body">
-                                                <ul class="nav navbar-nav">
-                                                    <li><a href="icons/glyphicons.html">Glyphicons</a></li>
-                                                    <li><a href="icons/font-awesome.html">Font Awesome</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
                                     </li>
-                                    -->
                                     <li>
                                         <a href="#settings">
                                             <span class="icon fa fa-cog"></span><span class="title">Settings</span>
@@ -328,11 +317,11 @@
                                                                         </thead>
                                                                          -->
                                                                         <tbody>
-                                                                        <tr v-for="follower in state.data.followers" transition="stagger" stagger="100">
-                                                                            <td class="col-lg-3 table-follower-time text-center">{{ follower.timestamp }}</td>
-                                                                            <td class="col-lg-9 table-follower-name">{{ follower.username }}</td>
-                                                                            <!-- <td>{{ follower.notifications }}</td> -->
-                                                                        </tr>
+                                                                            <tr v-for="follower in state.data.followers" transition="stagger" stagger="100">
+                                                                                <td class="col-lg-3 table-follower-time text-center">{{ follower.age }}</td>
+                                                                                <td class="col-lg-9 table-follower-name">{{ follower.username }}</td>
+                                                                                <!-- <td>{{ follower.notifications }}</td> -->
+                                                                            </tr>
                                                                         </tbody>
                                                                     </table>
                                                                 </div>
@@ -613,6 +602,32 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="tab-pane fade" id="events">
+                                    <div class="container-fluid" id="events-panel">
+                                        <div class="row">
+                                            <div class="col-xs-12">
+                                                <ui-tabs type="text" fullwidth>
+                                                    <ui-tab header="Followers">
+                                                        <div class="alphabet-filter">
+                                                            <p class="text-center"><button class="btn btn-link" :class="{active:letter==selectedLetter}" v-for="letter in letters" @click="alphabetFilter(letter)">{{letter}}</button></p>
+                                                            <p class="text-center"><button class="btn btn-default" @click="alphabetFilter('')">CLEAR FILTER</button></p><br>
+                                                        </div>
+                                                        <v-client-table :data="state.data.allFollowers" :columns="columns" :options="options"></v-client-table>
+                                                    </ui-tab>
+                                                    <ui-tab header="Subscribers">
+                                                        <h2 class="text-center">COMING <s>SOON</s> EVENTUALLY</h2>
+                                                    </ui-tab>
+                                                    <ui-tab header="Hosts">
+                                                        <h2 class="text-center">COMING <s>SOON</s> EVENTUALLY</h2>
+                                                    </ui-tab>
+                                                    <ui-tab header="Tips">
+                                                        <h2 class="text-center">COMING <s>SOON</s> EVENTUALLY</h2>
+                                                    </ui-tab>
+                                                </ui-tabs>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="tab-pane fade" id="settings">
                                     <div class="container-fluid" id="settingsPanel">
                                         <div class="row">
@@ -825,7 +840,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -850,11 +864,12 @@
     <!-- socket.io -->
     <script src="/socket.io/socket.io.js"></script>
     <!-- js libs -->
+    <script type="text/javascript" src="/js/vendor/moment.min.js"></script>
     <script type="text/javascript" src="/js/vendor/jquery.min.js"></script>
     <script type="text/javascript" src="/js/vendor/bootstrap.min.js"></script>
     <script type="text/javascript" src="/js/vendor/keen-ui.min.js"></script>
+    <script type="text/javascript" src="/js/vendor/vue-tables.min.js"></script>
     <script type="text/javascript" src="/js/vendor/Chart.min.js"></script>
-    <script type="text/javascript" src="/js/vendor/moment.min.js"></script>
     <script type="text/javascript" src="/js/vendor/waves.js"></script>
     <!-- js -->
     <script type="text/javascript" src="/js/app.js"></script>

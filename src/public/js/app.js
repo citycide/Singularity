@@ -39,13 +39,34 @@ $(function() {
 
 Vue.use(Keen);
 
+Vue.use(VueTables.client, {
+    compileTemplates: true,
+    pagination: {
+        dropdown: false,
+        chunk: 10
+    },
+    filterByColumn: true,
+    texts: {
+        filter: "Search:",
+        count: '{count} followers'
+    },
+    datepickerOptions: {
+        showDropdowns: true
+    },
+    sortIcon:{
+        base:'fa',
+        up: 'fa-chevron-up',
+        down: 'fa-chevron-down'
+    }
+});
+
 const app = new Vue({
     el: 'body',
     components: {},
     methods: {
-        sendFollow: function() {
-            // console.log(this.follow.name + ' followed.');
-            socket.emit('test:follower', this.follow.name);
+        sendFollow: function(event, username) {
+            // console.log(username ? username : this.follow.name + ' followed.');
+            socket.emit('test:follower', username ? username : this.follow.name);
         },
         sendHost: function() {
             socket.emit('test:host', {
@@ -107,6 +128,10 @@ const app = new Vue({
         streamTipDisable: function() {
             state.services.streamTip = false;
             socket.emit('streamtip:deactivate');
+        },
+        alphabetFilter: function(letter) {
+            this.selectedLetter = letter;
+            this.$broadcast('vue-tables.filter::alphabet', letter);
         }
     },
     data: {
@@ -135,7 +160,50 @@ const app = new Vue({
         tipeeeKeyInput: '',
         twitchAlertsKeyInput: '',
         streamTipKeyInput: '',
-        testSong: 'Never Gonna Give You Up - Rick Astley'
+        testSong: 'Never Gonna Give You Up - Rick Astley',
+        columns: ['username'],
+        options: {
+            // dateColumns: ['followDate'],
+            headings: {
+                username: 'USERNAME',
+                followDate: 'DATE',
+                followAge: 'AGE',
+                notif: 'NOTIFICATIONS',
+                resend: 'RESEND'
+            },
+            templates: {
+                followDate: function(row) {
+                    return moment(row.timestamp, 'x').format('ll');
+                },
+                followAge: function(row) {
+                    return moment(row.timestamp, 'x').fromNow(' ');
+                },
+                notif: function(row) {
+                    return (row.notifications === 'true')
+                        ? `<i class="fa fa-check" style="color: green;"></i></a>`
+                        : `<i class="fa fa-close" style="color: red;"></i></a>`;
+                },
+                resend: `<a href="" @click.stop.prevent="$parent.$parent.$parent.sendFollow(null, '{username}')"><i class="fa fa-paper-plane" style="color: #039BE5"></i></a>`
+            },
+            customFilters: [{
+                name: 'alphabet',
+                callback: function(row, query) {
+                    return row.username[0] == query;
+                }
+            }],
+            trackBy: 'twitchid',
+            sortIcon: {
+                base: 'fa',
+                up: 'fa-chevron-up',
+                down: 'fa-chevron-down'
+            },
+            orderBy: {
+                column: 'username',
+                ascending: true
+            }
+        },
+        letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+        selectedLetter: ''
     }
 });
 
@@ -143,7 +211,8 @@ socket.on('alert:follow:event', (data) => {
     state.data.followers.unshift({
         twitchid: data.twitchid,
         username: data.username,
-        timestamp: 'just now',
+        timestamp: moment().valueOf(),
+        age: 'just now',
         evtype: 'follower',
         notifications: data.notifications
     });
@@ -369,7 +438,7 @@ const setEndOfContenteditable = (contentEditableElement) => {
         range.collapse(false);//collapse the range to the end point. false means collapse to end rather than the start
         range.select();//Select the range (make it the visible selection)
     }
-}
+};
 
 const updateTitle = (title) => {
     $.get(
