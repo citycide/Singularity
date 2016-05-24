@@ -216,7 +216,7 @@ export default class TwitchClass {
             this.checkQueue();
         });
 
-        Transit.on('alert:tipeee:event', (data) => {
+        Transit.on('alert:tip:event', (data) => {
             this.alertQueue.push(data);
         });
 

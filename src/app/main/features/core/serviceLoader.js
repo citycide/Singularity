@@ -7,6 +7,7 @@ import Tock from '../../utils/Tock';
 
 const tick = new Tock();
 let twitch, tipeee, streamTip, twitchAlerts, bot;
+const tips = [];
 
 const listeners = {
     tipeee() {
@@ -29,7 +30,7 @@ const listeners = {
                 },
                 type: 'tip'
             };
-            Transit.emit('alert:tipeee:event', thisEvent);
+            Transit.emit('alert:tip:event', thisEvent);
         });
     },
     streamTip() {
@@ -61,7 +62,7 @@ const listeners = {
                 },
                 type: 'tip'
             };
-            Transit.emit('alert:tipeee:event', thisEvent);
+            Transit.emit('alert:tip:event', thisEvent);
         });
 
         streamTip.on('error', (err) => {
@@ -77,7 +78,6 @@ const listeners = {
     twitchAlerts() {
         if (twitchAlerts) {
             Logger.absurd('Checking for TwitchAlerts donations');
-            const tips = [];
             let donations = twitchAlerts.getRecentDonations();
 
             donations.then((data) => {
@@ -111,7 +111,7 @@ const listeners = {
                                 },
                                 type: 'tip'
                             };
-                            Transit.emit('alert:tipeee:event', queueTip);
+                            Transit.emit('alert:tip:event', queueTip);
                         }
                     });
                 }
