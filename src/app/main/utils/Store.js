@@ -185,11 +185,7 @@ Store.prototype.get = function (table, what, where = null, order = null, limit =
             for (let i = 0; i < values.length; i++) {
                 let line = {};
                 for (let j = 0; j < columns.length; j++) {
-                    if (columns[j] === 'timestamp') {
-                        line[columns[j]] = moment(values[i][j], 'x').fromNow();
-                    } else {
-                        line[columns[j]] = values[i][j];
-                    }
+                    line[columns[j]] = values[i][j];
                 }
                 results.push(line);
             }
