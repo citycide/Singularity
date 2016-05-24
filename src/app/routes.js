@@ -96,7 +96,8 @@ module.exports = (app) => {
                         },
                         data: {
                             currentSong: music.getCurrent(),
-                            followers: db.dbGetFollows()
+                            followers: db.getRecentFollows(),
+                            allFollowers: db.getFollows()
                         },
                         clientID: Settings.get('clientID'),
                         bttvInject: encodeURIComponent(path.resolve(`${__dirname}/../inject/bttv.js`))

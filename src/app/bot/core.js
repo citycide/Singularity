@@ -3,7 +3,8 @@
 import path from 'path';
 import moment from 'moment';
 
-const db = require('../../app/db');
+import db from '../../app/db';
+
 const bot = require('./bot');
 const loader = require('require-directory')(module, './modules');
 const mods = require('./moduleHandler');

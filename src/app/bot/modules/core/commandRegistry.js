@@ -1,6 +1,6 @@
 /****************************** COMMAND REGISTRY ******************************/
 
-const db = require('../../../../app/db');
+import db from '../../../../app/db';
 
 let commands = {};
 

@@ -36,36 +36,38 @@ let db = null, botDB = null;
     */
 }
 
-/**
- * Creates a table of followers with columns:
- * twitchid | username | timestamp | evtype
- */
-db.run('CREATE TABLE IF NOT EXISTS followers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, notifications TEXT);');
-// data.addTable('followers', false, { name: 'twitchid', type: 'INT', unique: true }, 'username', 'timestamp', 'evtype', 'notifications');
+{
+    /**
+     * Creates a table of followers with columns:
+     * twitchid | username | timestamp | evtype
+     */
+    db.run('CREATE TABLE IF NOT EXISTS followers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, notifications TEXT);');
+    // data.addTable('followers', false, { name: 'twitchid', type: 'INT', unique: true }, 'username', 'timestamp', 'evtype', 'notifications');
 
-/**
- * Creates a table of subscribers with columns:
- * twitchid | username | timestamp | evtype | months
- */
-db.run('CREATE TABLE IF NOT EXISTS subscribers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, months TEXT);');
+    /**
+     * Creates a table of subscribers with columns:
+     * twitchid | username | timestamp | evtype | months
+     */
+    db.run('CREATE TABLE IF NOT EXISTS subscribers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, months TEXT);');
 
-/**
- * Creates a table of host events with columns:
- * twitchid | username | timestamp | evtype | viewers
- */
-db.run('CREATE TABLE IF NOT EXISTS hosts (twitchid TEXT, username TEXT, timestamp TEXT, evtype TEXT, viewers TEXT);');
+    /**
+     * Creates a table of host events with columns:
+     * twitchid | username | timestamp | evtype | viewers
+     */
+    db.run('CREATE TABLE IF NOT EXISTS hosts (twitchid TEXT, username TEXT, timestamp TEXT, evtype TEXT, viewers TEXT);');
 
-/**
- * Creates a table of tip events with columns:
- * twitchid | username | timestamp | evtype | amount | message
- */
-db.run('CREATE TABLE IF NOT EXISTS tips (username TEXT, timestamp TEXT, evtype TEXT, amount TEXT, message TEXT);');
+    /**
+     * Creates a table of tip events with columns:
+     * twitchid | username | timestamp | evtype | amount | message
+     */
+    db.run('CREATE TABLE IF NOT EXISTS tips (username TEXT, timestamp TEXT, evtype TEXT, amount TEXT, message TEXT);');
+}
 
 /**
  * Collection of api methods for main database functions
  * @export default
  */
-let data = {
+const data = {
     /**
      * @function - Creates or accesses bot.db when bot is enabled
      */
@@ -167,9 +169,20 @@ let data = {
             if (err) Logger.error(err);
         });
     },
-    dbGetFollows: () => {
+    getRecentFollows: () => {
         const CUTOFF = moment().subtract(60, 'days').valueOf();
-        return db.get('followers', ' * ', { timestamp: { gt: CUTOFF } }, { desc: 'timestamp' });
+        const response = db.get('followers', ' * ', { timestamp: { gt: CUTOFF } }, { desc: 'timestamp' });
+        for (let follow of response) {
+            follow.age = moment(follow.timestamp, 'x').fromNow();
+        }
+        return response;
+    },
+    getFollows: () => {
+        const response = db.get('followers', ' * ', null, { desc: 'timestamp' });
+        for (let follow of response) {
+            follow.age = moment(follow.timestamp, 'x').fromNow(' ');
+        }
+        return response;
     },
     
     /**
@@ -196,11 +209,11 @@ let data = {
  * Collection of api methods related to the bot database
  * @export bot
  */
-let bot = {
-    initSettings: () => {
-        bot.setting.confirm('prefix', '!');
-        bot.setting.confirm('defaultCooldown', '30');
-        bot.setting.confirm('whisperMode', 'false');
+data.bot = {
+    initSettings: function() {
+        this.setting.confirm('prefix', '!');
+        this.setting.confirm('defaultCooldown', '30');
+        this.setting.confirm('whisperMode', 'false');
     },
 
     setting: {
@@ -282,27 +295,10 @@ let bot = {
         }
         botDB.update('commands', { status: bool }, { name: cmd });
     },
-    
+
     getCommandPrefix: () => {
         return botDB.getValue('settings', 'value', { key: 'prefix' });
-    },
-
-    getWhisperMode: () => {
-        let mode = botDB.getValue('settings', 'value', { name: 'whisperMode' });
-        mode = (mode === 'true');
-        Logger.trace(`Whisper mode is ${(mode) ? 'enabled' : 'disabled'}.`);
-        return mode;
-    },
-    setWhisperMode: (bool) => {
-        if (typeof bool !== 'string') bool = bool.toString();
-        if (bool !== 'true' && bool !== 'false') {
-            return Logger.debug('ERR in setWhisperMode:: requires boolean string');
-        }
-        botDB.update('settings', { value: bool }, { name: 'whisperMode' }, (err, res) => {
-            if (err) Logger.error(err);
-        });
     }
 };
 
-module.exports = data;
-module.exports.bot = bot;
+export { data as default };
