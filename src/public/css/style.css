@@ -79,38 +79,10 @@ a:hover {
 .text-indent {
   text-indent: 1em; }
 
-/*
-.window-border {
-  z-index: 15000;
-  position: fixed;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  border: .4em solid #039BE5;
-  border-top-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-*/
-/*
-.window-frame {
-  pointer-events: none;
-  background-color: transparent;
-  z-index: 20000;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  border: .4em solid #039BE5;
-  -webkit-app-region: drag; }
-  */
 .window-frame-left, .window-frame-right, .window-frame-bottom, .window-frame-top {
   background-color: #039BE5;
   position: fixed;
   z-index: 20000;
-  -webkit-app-region: drag;
   -webkit-user-select: none; }
   .window-frame-left, .window-frame-right {
     top: 0;
@@ -181,24 +153,6 @@ body.loaded .window-content .title-bar {
 .window-content .main-content-container {
   padding-top: 40px;
 }
-/*
-.window-content .full-container .embedded-player {
-  height: calc(100vh - 2.4em);
-  display: block;
-  transition: opacity .4s linear;
-  position: relative;
-  z-index: 2;
-  outline: 0
-}
-[loading] .window-content .full-container .embedded-player {
-  opacity: 0
-}
-.window-content .full-container .embedded-player::shadow object {
-  height: 100%;
-  width: 100%;
-  outline: 0
-}
-*/
 .drag-handle-large {
   position: absolute;
   top: 10px;
@@ -207,38 +161,6 @@ body.loaded .window-content .title-bar {
   width: calc(100% - 14px);
   display: block;
 }
-
-/*
-.menubar {
-  -webkit-app-region: drag;
-  z-index: 10005;
-  position: fixed;
-  background-color: #039BE5;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 30px; }
-  .menubar .navbar-right {
-    -webkit-app-region: no-drag;
-    margin-right: 0;
-  }
-  .menubar li {
-      height: 30px !important;
-      padding: 0; }
-  .menubar #winClose {
-      margin-top: -1.5px; }
-  .menubar #winMinimize {
-      margin-top: 3.5px; }
-  .menubar li > a:hover, .menubar li > a:focus {
-      background-color: transparent; }
-  .menubar li > a {
-      padding-top: 0;
-      padding-bottom: 0; }
-      .menubar li > a > i {
-        color: #fff;
-        line-height: 30px;
-        margin-top: 0; }
-*/
 .navbar {
   z-index: 10001;
   padding-left: 60px;
