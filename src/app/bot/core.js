@@ -4,13 +4,24 @@ import path from 'path';
 import moment from 'moment';
 
 import db from '../../app/db';
+import userModules from '../../app/main/utils/_userModuleSetup';
 
 const bot = require('./bot');
-const loader = require('require-directory')(module, './modules');
 const mods = require('./moduleHandler');
 const registry = require('./modules/core/commandRegistry');
 
-let core = {
+const loaders = {
+    sys: null,
+    user: null
+}
+
+{
+    userModules(__dirname);
+    loaders.sys = require('require-directory')(module, './modules');
+    loaders.user = require('require-directory')(module, Settings.get('userModulePath'));
+}
+
+const core = {
 
     bot: bot,
     db: db,
@@ -121,14 +132,21 @@ let core = {
     runCommand: (event) => {
         // Check if the specified command is registered
         if (!registry.hasOwnProperty(event.command)) {
-            Logger.bot(`${event.command} is not a registered command.`);
+            Logger.bot(`'${event.command}' is not a registered command.`);
             return;
         }
         // Check if the specified command is enabled
         if (core.command.isEnabled(event.command) === false) {
-            Logger.bot(`${event.command} is installed but is not enabled.`);
+            Logger.bot(`'${event.command}' is installed but is not enabled.`);
             return;
         }
+
+        // Check if the specified command is on cooldown for this user
+        // if (core.command.isOnCooldown(event.command, event.sender)) {
+        //     Logger.bot(`'${event.command}' is on cooldown for '${event.sender}'.`);
+        //     return;
+        // }
+
         // Check that the user has sufficient privileges to use the command
         if (event.permLevel > core.command.getPermLevel(event.command)) {
             Logger.bot(`${event.sender} does not have sufficient permissions to use !${event.command}.`);
