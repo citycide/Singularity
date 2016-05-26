@@ -259,19 +259,20 @@ data.bot = {
         }
     },
 
-    addCommand: (name, cooldown, permission, status, module) => {
+    addCommand(name, cooldown, permission, status, module) {
         if (!name || !module) {
             Logger.bot('Failed to add command. Name & module are required.');
             return;
         }
+        status = this.getCommandStatus(name) || status;
         botDB.put('commands', { name, cooldown, permission, status, module }, (err, res) => {
             if (err) Logger.error(err);
         });
     },
 
-    addUser: (user) => {
+    addUser(user) {
         const { name, permLevel, mod, following, seen } = user;
-        let permission = bot.getPermLevel(name) || permLevel;
+        let permission = this.getPermLevel(name) || permLevel;
         botDB.put('users', { name, permission, mod, following, seen }, { conflict: 'replace' }, (err, res) => {
             if (err) Logger.error(err);
         });
