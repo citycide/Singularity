@@ -1,26 +1,15 @@
-/******************************* MODULE HANDLER *******************************/
+import chokidar from 'chokidar';
+import requireUncached from 'require-uncached';
 
-// use chokidar for this
-// http://stackoverflow.com/questions/1972242/auto-reload-of-files-in-node-js
-// usage example: ```delete require.cache[$.command.getModule]```
-    
-const requireUncached = require('require-uncached');
-const chokidar = require('chokidar');
-
-// chokidar / file watching in general might be completely unnecessary here
-// at least for changes to files. might still be useful for watching for new
-// files, then emitting a request for command registry to get the new module's
-// functions set up with the core. would prevent requiring an app restart
-// ```/\.js$/```
-const watcher = chokidar.watch('./modules/**/*.js', {
+const watcher = chokidar.watch(Settings.get('userModulePath'), {
     persistent: true
 });
 
 watcher.on('add', (path, stats) => {
-    exports.reloadModule(path);
+    handler.reloadModule(path);
 });
 
-module.exports = exports = {
+const handler = {
     /**
      * @function requireModule
      * @description Wraps the standard require syntax to clear the cached version first
@@ -28,7 +17,7 @@ module.exports = exports = {
      * @return {module} Returns the module after being reloaded
      * @export
      */
-    requireModule: function(_module) {
+    requireModule(_module) {
         return requireUncached(_module);
     },
 
@@ -38,7 +27,7 @@ module.exports = exports = {
      * @param {string} _module - Path to the module to be reloaded
      * @export
      */
-    reloadModule: function(_module) {
+    reloadModule(_module) {
         try {
             requireUncached(_module);
             return true;
@@ -48,3 +37,5 @@ module.exports = exports = {
         }
     }
 };
+
+export default handler;

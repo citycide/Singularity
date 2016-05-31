@@ -32,13 +32,13 @@ const serviceLoader = require('./app/main/features/core/serviceLoader');
 
 /******************************** FILE WATCHER *********************************/
 
-const watcher = chokidar.watch(__dirname + '/app/*.js', {
+const watcher = chokidar.watch(__dirname + '/app/**/*.js', {
     persistent: true
 });
 
 watcher.on('change', (_path, stats) => {
     // let _module = '.' + path.sep + path.relative(__dirname, _path);
-    Logger.trace('File updated, reloading...', `'${_path}'`);
+    Logger.absurd('File updated, reloading...', `'${_path}'`);
     delete require.cache[_path];
 });
 

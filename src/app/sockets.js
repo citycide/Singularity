@@ -4,10 +4,10 @@
 import db from './db';
 
 io.on('connection', (socket) => {
-    Logger.debug('Client connected.');
+    Logger.absurd('Client connected.');
 
     socket.on('disconnect', () => {
-        Logger.debug('Client disconnected.');
+        Logger.absurd('Client disconnected.');
     });
 
     socket.on('auth:callback', (data) => {

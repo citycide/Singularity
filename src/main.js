@@ -1,5 +1,4 @@
 import { app, BrowserWindow, screen } from 'electron';
-import debugMenu from 'debug-menu';
 import EventEmitter from 'events';
 import winston from 'winston';
 import { argv } from 'yargs';
@@ -19,11 +18,10 @@ import handleStartupEvent from './squirrel';
 
 const pkg = require('../package.json');
 const PORT = pkg.port || 2881;
-/*
+
 process.on('uncaughtException', (err) => {
-    console.error(err.stack);
+    console.error(err);
 });
-*/
 
 const onError = (error) => {
     if (error.syscall !== 'listen') {
@@ -91,7 +89,7 @@ const onError = (error) => {
     });
     Logger.setLevels(defaultLogLevels.levels);
     winston.addColors(defaultLogLevels.colors);
-    Logger.info('Starting app...');
+    Logger.info('Starting singularity...');
 
     // Spin up a global event emitter for core interaction
     global.Transit = new EventEmitter();
@@ -185,7 +183,7 @@ const onError = (error) => {
         I3IpcHelper.setupEventListener();
 
         app.on('before-quit', () => {
-            Logger.info('collapsing the singularity...');
+            Logger.info('Collapsing the singularity...');
             global.quitting = true;
         });
     });
