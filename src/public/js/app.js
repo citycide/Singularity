@@ -111,29 +111,39 @@ const app = new Vue({
         botDisable: function() {
             socket.emit('settings:services:bot:deactivate');
         },
+        botConfigure: function() {
+            this.editing.bot = !this.editing.bot;
+            if (this.editing.bot) return;
+            if (!state.services.bot.name || !state.services.bot.auth)
+                return console.log('ERR in botConfigure:: Missing arguments.');
+            socket.emit('settings:services:bot:configure', {
+                name: state.services.bot.name,
+                auth: state.services.bot.auth
+            });
+        },
         tipeeeEnable: function() {
             state.services.tipeee = true;
-            socket.emit('tipeee:activate', this.tipeeeKeyInput);
+            socket.emit('settings:services:tipeee:activate', this.tipeeeKeyInput);
         },
         tipeeeDisable: function() {
             state.services.tipeee = false;
-            socket.emit('tipeee:deactivate');
+            socket.emit('settings:services:tipeee:deactivate');
         },
         twitchAlertsEnable: function() {
             state.services.twitchAlerts = true;
-            socket.emit('twitchalerts:activate', this.twitchAlertsKeyInput);
+            socket.emit('settings:services:twitchalerts:activate', this.twitchAlertsKeyInput);
         },
         twitchAlertsDisable: function() {
             state.services.twitchAlerts = false;
-            socket.emit('twitchalerts:deactivate');
+            socket.emit('settings:services:twitchalerts:deactivate');
         },
         streamTipEnable: function() {
             state.services.streamTip = true;
-            socket.emit('streamtip:activate', this.streamTipKeyInput);
+            socket.emit('settings:services:streamtip:activate', this.streamTipKeyInput);
         },
         streamTipDisable: function() {
             state.services.streamTip = false;
-            socket.emit('streamtip:deactivate');
+            socket.emit('settings:services:streamtip:deactivate');
         },
         alphabetFilter: function(letter) {
             this.selectedLetter = letter;
@@ -163,6 +173,9 @@ const app = new Vue({
             streamTipDeactModal: false
         },
         state,
+        editing: {
+            bot: false
+        },
         tipeeeKeyInput: '',
         twitchAlertsKeyInput: '',
         streamTipKeyInput: '',
@@ -212,7 +225,7 @@ const app = new Vue({
         selectedLetter: ''
     },
     watch: {
-        'state.services.bot': function(val, old) {
+        'state.services.bot.status': function(val, old) {
             val ? this.botEnable() : this.botDisable();
         }
     }

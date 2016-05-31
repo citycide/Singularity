@@ -1,7 +1,7 @@
 import jetpack from 'fs-jetpack';
 import path from 'path';
 import db from '../../app/db';
-import bot from './bot';
+import { updateAuth, default as bot } from './bot';
 import userModules from '../../app/main/utils/_userModuleSetup';
 import mods from './moduleHandler';
 import cooldown from './core/cooldown';
@@ -184,6 +184,10 @@ const disconnect = (botDir) => {
     Logger.bot('Deactivated bot.');
 };
 
+const reconfigure = (name, auth) => {
+    updateAuth(name, auth);
+};
+
 const _loadModules = () => {
     userModules();
     loaders.sys = require('require-directory')(module, './modules');
@@ -220,3 +224,4 @@ const _unloadModules = (botDir) => {
 
 module.exports.initialize = initialize;
 module.exports.disconnect = disconnect;
+module.exports.reconfigure = reconfigure;

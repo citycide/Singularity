@@ -158,24 +158,47 @@ const initServices = (() => {
     }
 })();
 
-io.on('connection', (socket) => {
-    /** BEGIN BOT EVENTS **/
-    socket.on('settings:services:bot:activate', () => {
+const botConfig = {
+    activate() {
         if (!bot) bot = require('../../../bot/core');
         bot.initialize(true);
         Settings.set('botEnabled', true);
-    });
-
-    socket.on('settings:services:bot:deactivate', () => {
+    },
+    deactivate() {
         if (!bot) return;
         bot.disconnect(path.resolve(__dirname + '/../../../bot'));
         bot = null;
         Settings.set('botEnabled', false);
+    }
+};
+
+io.on('connection', (socket) => {
+    /** BEGIN BOT EVENTS **/
+    socket.on('settings:services:bot:activate', () => {
+        botConfig.activate();
+    });
+
+    socket.on('settings:services:bot:deactivate', () => {
+        botConfig.deactivate();
+    });
+
+    socket.on('settings:services:bot:configure', (data) => {
+        if (data.name !== Settings.get('botName') && data.auth !== Settings.get('botAuth')) {
+            Settings.set('botName', data.name);
+            Settings.set('botAuth', data.auth);
+            if (!bot) return;
+            Logger.bot('Bot authorization has changed. Reloading...');
+            bot.reconfigure(data.name, data.auth);
+            if (Settings.get('botEnabled')) {
+                botConfig.deactivate();
+                botConfig.activate();
+            }
+        }
     });
     /** END BOT EVENTS **/
     
     /** BEGIN TIPEEE EVENTS **/
-    socket.on('tipeee:activate', (data) => {
+    socket.on('settings:services:tipeee:activate', (data) => {
         Settings.set('tipeeeActive', true);
         Settings.set('tipeeeAccessToken', data);
         if (!tipeee) {
@@ -187,7 +210,7 @@ io.on('connection', (socket) => {
         listeners.tipeee();
     });
 
-    socket.on('tipeee:deactivate', () => {
+    socket.on('settings:services:tipeee:deactivate', () => {
         tipeee.disconnect();
         tipeee = null;
         Settings.set('tipeeeActive', false);
@@ -196,7 +219,7 @@ io.on('connection', (socket) => {
     /** END TIPEEE EVENTS **/
 
     /** BEGIN STREAMTIP EVENTS **/
-    socket.on('streamtip:activate', (data) => {
+    socket.on('settings:services:streamtip:activate', (data) => {
         Settings.set('streamTipActive', true);
         Settings.set('stAccessToken', data);
         if (!streamTip) {
@@ -208,7 +231,7 @@ io.on('connection', (socket) => {
         listeners.streamTip();
     });
 
-    socket.on('streamtip:deactivate', () => {
+    socket.on('settings:services:streamtip:deactivate', () => {
         streamTip.disconnect();
         streamTip = null;
         Settings.set('streamTipActive', false);
@@ -217,7 +240,7 @@ io.on('connection', (socket) => {
     /** END STREAMTIP EVENTS **/
 
     /** BEGIN TWITCHALERTS EVENTS **/
-    socket.on('twitchalerts:activate', (data) => {
+    socket.on('settings:services:twitchalerts:activate', (data) => {
         Logger.info('Initializing TwitchAlerts donations API');
         Settings.set('twitchAlertsActive', true);
         Settings.set('taAccessToken', data);
@@ -230,7 +253,7 @@ io.on('connection', (socket) => {
         tick.setInterval('pollTwitchAlerts', listeners.twitchAlerts, 60 * 1000);
     });
 
-    socket.on('twitchalerts:deactivate', () => {
+    socket.on('settings:services:twitchalerts:deactivate', () => {
         Logger.info('Deactivated TwitchAlerts donations API');
         tick.clearInterval('pollTwitchAlerts', listeners.twitchAlerts);
         twitchAlerts = null;

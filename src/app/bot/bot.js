@@ -112,3 +112,8 @@ const api = {
 };
 
 export default bot;
+
+export function updateAuth(name, auth) {
+    OPTIONS.identity.username = name;
+    OPTIONS.identity.password = auth.slice(6);
+}

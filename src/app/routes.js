@@ -90,7 +90,11 @@ module.exports = (app) => {
                             token: Settings.get('accessToken')
                         },
                         services: {
-                            bot: Settings.get('botEnabled'),
+                            bot: {
+                                status: Settings.get('botEnabled'),
+                                name: Settings.get('botName'),
+                                auth: Settings.get('botAuth')
+                            },
                             tipeee: Settings.get('tipeeeActive'),
                             twitchAlerts: Settings.get('twitchAlertsActive'),
                             streamTip: Settings.get('streamTipActive')

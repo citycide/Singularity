@@ -430,7 +430,7 @@
                                                             <form class="form-horizontal" v-on:submit.prevent="sendFollow">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <ui-textbox name="follow-username" icon="person" type="text" v-bind:value.sync="follow.name" :max-length="32" validation-rules="required|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
+                                                                        <ui-textbox name="follow-username" icon="person" type="text" v-bind:value.sync="follow.name" :max-length="25" validation-rules="required|min:4|max:25|regex:/^[a-zA-Z0-9][\w]/" help-text="Enter the user's name, minimum 4 characters, maximum 25 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <button @click.stop.prevent="sendFollow" class="btn btn-info pull-right waves-effect waves-light">SEND</button>
@@ -460,7 +460,7 @@
                                                             <form class="form-horizontal" v-on:submit.prevent="sendHost">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <ui-textbox name="host-username" icon="person" type="text" v-bind:value.sync="host.name" :max-length="32" validation-rules="required|numeric|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
+                                                                        <ui-textbox name="host-username" icon="person" type="text" v-bind:value.sync="host.name" :max-length="25" validation-rules="required|min:4|max:25|regex:/^[a-zA-Z0-9][\w]/" help-text="Enter the user's name, minimum 4 characters, maximum 25 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
@@ -497,7 +497,7 @@
                                                             <form class="form-horizontal" v-on:submit.prevent="sendSubscribe">
                                                                 <div class="form-group">
                                                                     <div class="input-group col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
-                                                                        <ui-textbox name="subscribe-username" icon="person" type="text" v-bind:value.sync="subscribe.name" :max-length="32" validation-rules="required|min:3|max:32" help-text="Enter the user's name, minimum 3 characters, maximum 32 characters"></ui-textbox>
+                                                                        <ui-textbox name="subscribe-username" icon="person" type="text" v-bind:value.sync="subscribe.name" :max-length="25" validation-rules="required|min:4|max:25|regex:/^[a-zA-Z0-9][\w]/" help-text="Enter the user's name, minimum 4 characters, maximum 25 characters"></ui-textbox>
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group">
@@ -634,8 +634,21 @@
                                                 <ui-tabs type="text" fullwidth>
                                                     <ui-tab header="Bot">
                                                         <div class="container-fluid">
-                                                            <div class="group">
-                                                                <ui-switch name="bot-enabled" :value.sync="state.services.bot">Bot enabled</ui-switch>
+                                                            <div class="row">
+                                                                <div class="col-lg-3 col-md-3 col-xs-12">
+                                                                    <ui-textbox name="bot name" type="text" v-bind:value.sync="state.services.bot.name" placeholder="your-bot-username" :disabled="!editing.bot" validation-rules="required|min:4|max:25|regex:/^[a-zA-Z0-9][\w]/"></ui-textbox>
+                                                                </div>
+                                                                <div class="col-lg-4 col-md-5 col-xs-12">
+                                                                    <ui-textbox name="bot chat token" type="text" v-bind:value.sync="state.services.bot.auth" placeholder="oauth:25xhi34oh3o48s9x5zod54hw9084hd" :disabled="!editing.bot" validation-rules="required|size:36"></ui-textbox>
+                                                                </div>
+                                                                <div class="col-lg-2 col-md-1 col-xs-12">
+                                                                    <button @click.stop.prevent="botConfigure" class="btn btn-primary waves-effect waves-light">
+                                                                        {{ editing.bot ? 'SAVE' : 'EDIT' }}
+                                                                    </button>
+                                                                </div>
+                                                                <div class="col-lg-3 col-md-3 col-xs-12">
+                                                                    <ui-switch name="bot-enabled" :value.sync="state.services.bot.status" :disabled="!state.services.bot.auth">Bot {{ state.services.bot.status ? 'enabled' : 'disabled' }}</ui-switch>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </ui-tab>
