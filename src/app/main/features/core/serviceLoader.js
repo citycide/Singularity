@@ -1,4 +1,5 @@
 import moment from 'moment';
+import path from 'path';
 import TwitchClass from './Twitch';
 import TipeeeStream from './TipeeeStream';
 import StreamTip from './StreamTip';
@@ -137,10 +138,10 @@ const initServices = (() => {
 
         if (Settings.get('twitchAlertsActive')) {
             if (!twitchAlerts) twitchAlerts = new TwitchAlerts({ token: Settings.get('taAccessToken') });
-            tick.setTimeout(() => {
+            setTimeout(() => {
                 Logger.info('Initializing TwitchAlerts donations API');
                 listeners.twitchAlerts();
-                tick.setInterval(listeners.twitchAlerts, 60 * 1000);
+                tick.setInterval('pollTwitchAlerts', listeners.twitchAlerts, 60 * 1000);
             }, 10 * 1000);
         }
 
@@ -158,6 +159,21 @@ const initServices = (() => {
 })();
 
 io.on('connection', (socket) => {
+    /** BEGIN BOT EVENTS **/
+    socket.on('settings:services:bot:activate', () => {
+        if (!bot) bot = require('../../../bot/core');
+        bot.initialize(true);
+        Settings.set('botEnabled', true);
+    });
+
+    socket.on('settings:services:bot:deactivate', () => {
+        if (!bot) return;
+        bot.disconnect(path.resolve(__dirname + '/../../../bot'));
+        bot = null;
+        Settings.set('botEnabled', false);
+    });
+    /** END BOT EVENTS **/
+    
     /** BEGIN TIPEEE EVENTS **/
     socket.on('tipeee:activate', (data) => {
         Settings.set('tipeeeActive', true);
@@ -211,12 +227,12 @@ io.on('connection', (socket) => {
             twitchAlerts.token = data;
         }
         listeners.twitchAlerts();
-        tick.setInterval(listeners.twitchAlerts, 60 * 1000);
+        tick.setInterval('pollTwitchAlerts', listeners.twitchAlerts, 60 * 1000);
     });
 
     socket.on('twitchalerts:deactivate', () => {
         Logger.info('Deactivated TwitchAlerts donations API');
-        tick.clearInterval(listeners.twitchAlerts);
+        tick.clearInterval('pollTwitchAlerts', listeners.twitchAlerts);
         twitchAlerts = null;
         Settings.set('twitchAlertsActive', false);
         Settings.del('taAccessToken');

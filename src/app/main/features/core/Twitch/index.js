@@ -48,10 +48,11 @@ export default class TwitchClass {
         setTimeout(() => {
             Logger.info('Initializing Twitch API');
             this.chatConnect();
-            this.pollFollowers(pollInterval);
+            this.pollFollowers();
+            tick.setInterval('pollFollowers', this.pollFollowers.bind(this), pollInterval);
             this.eventHandler();
         }, 5 * 1000);
-        tick.setTimeout(this.checkQueue.bind(this), 10 * 1000);
+        tick.setTimeout('checkQueue', this.checkQueue.bind(this), 10 * 1000);
     }
 
     chatConnect() {
@@ -225,7 +226,7 @@ export default class TwitchClass {
         });
     }
 }
-TwitchClass.prototype.pollFollowers = function(pollInterval = 30 * 1000) {
+TwitchClass.prototype.pollFollowers = function() {
     Logger.absurd(`Hitting follower endpoint for ${this.CHANNEL.name}...`);
     this.client.api({
         url: `${this.API.BASE_URL}${this.API.CHANNEL_EP}follows?limit=100&timestamp=` + new Date().getTime(),
@@ -238,12 +239,10 @@ TwitchClass.prototype.pollFollowers = function(pollInterval = 30 * 1000) {
     }, (err, res, body) => {
         if (err) {
             Logger.debug(err);
-            tick.setTimeout(this.pollFollowers.bind(this), pollInterval);
             return;
         }
         if (res.statusCode != 200) {
             Logger.debug(`Unknown response code: ${res.statusCode}`);
-            tick.setTimeout(this.pollFollowers.bind(this), pollInterval);
             return;
         }
 
@@ -300,7 +299,6 @@ TwitchClass.prototype.pollFollowers = function(pollInterval = 30 * 1000) {
                 }
             }
         }
-        tick.setTimeout(this.pollFollowers.bind(this), pollInterval);
     });
 };
 
@@ -318,7 +316,7 @@ TwitchClass.prototype.checkQueue = function(attempts = 0) {
         if (attempts < 2) {
             Logger.absurd(`checkQueue:: An alert is either in progress or no client has responded with 'alert:complete'`);
             attempts++;
-            tick.setTimeout(this.checkQueue.bind(this), 5 * 1000, attempts);
+            tick.setTimeout('checkQueue', this.checkQueue.bind(this), 5 * 1000, attempts);
         } else {
             Logger.absurd(`checkQueue:: Maximum attempts reached. Unblocking the alert queue...`);
             this.alertInProgress = false;
@@ -327,12 +325,12 @@ TwitchClass.prototype.checkQueue = function(attempts = 0) {
         return;
     }
     if (!this.alertQueue.length) {
-        tick.setTimeout(this.checkQueue.bind(this), 5 * 1000);
+        tick.setTimeout('checkQueue', this.checkQueue.bind(this), 5 * 1000);
         return;
     }
     let queueItem = this.alertQueue.pop();
     this.actOnQueue(queueItem.user, queueItem.type);
-    tick.setTimeout(this.checkQueue.bind(this), 5 * 1000);
+    tick.setTimeout('checkQueue', this.checkQueue.bind(this), 5 * 1000);
 };
 
 TwitchClass.prototype.actOnQueue = function(data, type) {
