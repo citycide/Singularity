@@ -291,11 +291,17 @@ data.bot = {
         });
     },
 
-    getPermLevel: (user) => {
+    getPermLevel: (user, fn) => {
         const _permission = parseInt(botDB.getValue('users', 'permission', { name: user }));
-        if (typeof _permission === 'number') return _permission;
-        Logger.debug('ERR in getPermLevel:: defaulting to viewer level');
-        return 7;
+        if (!Number.isNaN(_permission)) {
+            if (fn && typeof fn === 'function') fn(_permission);
+            return _permission;
+        } else {
+            const type = Number.isNaN(_permission) ? 'NaN' : typeof v;
+            Logger.debug(`ERR in getPermLevel:: Expected a number, got ${type}`);
+            if (fn && typeof fn === 'function') fn(7);
+            return 7;
+        }
     },
 
     getCommandStatus: (cmd) => {
