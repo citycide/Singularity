@@ -24,18 +24,18 @@ bot.on('chat', (channel, user, message, self) => {
     if (api.isCommand(message)) api.commandHandler(user, message);
 });
 
-let api = {
-    isCommand: (message) => {
+const api = {
+    isCommand(message) {
         return (message.charAt(0) === core.command.prefix());
     },
 
-    messageHandler: (user, message) => {
+    messageHandler(user, message) {
         let _timestamp = moment().valueOf();
         let _mod = false;
         if (user['user-type'] === 'mod') _mod = true;
         let _user = {
             name: user['display-name'],
-            permLevel: api.getPermissions(user),
+            permLevel: this.getPermissions(user),
             mod: _mod,
             following: core.isFollower(user['display-name']),
             seen: _timestamp
@@ -43,17 +43,17 @@ let api = {
         core.db.bot.addUser(_user);
     },
 
-    commandHandler: (user, message) => {
+    commandHandler(user, message) {
         let _mod = false;
         if (user['user-type'] === 'mod') _mod = true;
         core.runCommand({
             sender: user['display-name'],
             mod: _mod,
-            permLevel: api.checkPermLevel(user['display-name']),
+            permLevel: this.getPermissions(user),
             raw: message,
-            command: api.getCommand(message).toLowerCase(),
-            args: api.getCommandArgs(message),
-            argString: api.getCommandArgString(message)
+            command: this.getCommand(message),
+            args: this.getCommandArgs(message),
+            argString: this.getCommandArgString(message)
         });
     },
 
@@ -63,8 +63,9 @@ let api = {
      * @param message
      * @returns {string}
      */
-    getCommand: (message) => {
-        return message.slice(1).split(' ', 1)[0];
+    getCommand(message) {
+        const prefixLength = core.command.prefix().length || 1;
+        return message.slice(prefixLength).split(' ', 1)[0].toLowerCase();
     },
 
     /**
@@ -73,7 +74,7 @@ let api = {
      * @param message
      * @returns {Array.<T>}
      */
-    getCommandArgs: (message) => {
+    getCommandArgs(message) {
         return message.split(' ').slice(1);
     },
 
@@ -83,17 +84,13 @@ let api = {
      * @param message
      * @returns {string}
      */
-    getCommandArgString: (message) => {
+    getCommandArgString(message) {
         return message.split(' ').slice(1).join(' ');
     },
 
-    checkPermLevel: (user) => {
-        return core.db.bot.getPermLevel(user);
-    },
-
-    getPermissions: (user) => {
+    getPermissions(user) {
         /**
-         * Viewer permission levels:
+         * Command permission levels:
          *     7: 'viewer'
          *     6: 'regular'
          *     5: ' '
@@ -103,6 +100,9 @@ let api = {
          *     1: 'moderator'
          *     0: 'admin'
          */
+        let _storedPermLevel = core.db.bot.getPermLevel(user['display-name']);
+        if (typeof _storedPermLevel === 'number') return _storedPermLevel;
+
         let _permLevel = 7;
         if (user['user-type'] === 'mod') _permLevel = 1;
         if (user['display-name'] === core.channel.name) _permLevel = 0;
@@ -111,4 +111,4 @@ let api = {
     }
 };
 
-module.exports = bot;
+export default bot;

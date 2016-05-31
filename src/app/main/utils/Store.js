@@ -43,6 +43,7 @@ export default class Store {
             return true;
         } catch (err) {
             if (err.message === 'UNIQUE constraint failed: commands.name') return Logger.absurd('ERR in addCommand:: Command already exists.');
+            if (err.message === 'UNIQUE constraint failed: users.name') return Logger.absurd('ERR in addUser:: User already exists.');
             if (err.message === 'UNIQUE constraint failed: settings.key') return Logger.absurd('ERR in addCommand:: Setting already exists.');
             Logger.error(err);
             return false;
@@ -383,8 +384,8 @@ Store.prototype._getConflictString = function (conflict) {
         case 'ignore':
             conflictString = ' OR IGNORE ';
             break;
-        case 'update':
-            conflictString = ' OR UPDATE ';
+        case 'abort':
+            conflictString = ' OR ABORT ';
             break;
         case 'fail':
             conflictString = ' OR FAIL ';

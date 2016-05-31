@@ -1,6 +1,3 @@
-/********************************** DATABASE **********************************/
-'use strict';
-
 import path from 'path';
 import jetpack from 'fs-jetpack';
 import moment from 'moment';
@@ -211,31 +208,35 @@ const data = {
  */
 data.bot = {
     initSettings: function() {
-        this.setting.confirm('prefix', '!');
-        this.setting.confirm('defaultCooldown', '30');
-        this.setting.confirm('whisperMode', 'false');
+        this.settings.confirm('prefix', '!');
+        this.settings.confirm('defaultCooldown', '30');
+        this.settings.confirm('whisperMode', 'false');
+        this.settings.confirm('globalCooldown', 'false');
+        this.settings.confirm('followAlerts', 'true');
+        this.settings.confirm('hostAlerts', 'true');
+        this.settings.confirm('subAlerts', 'true');
+        this.settings.confirm('tipAlerts', 'false');
     },
 
-    setting: {
-        get: (key) => {
+    settings: {
+        get(key) {
             let value = botDB.getValue('settings', 'value', { key });
-            if (value.error) return Logger.error(value.error);
-            if (value) {
-                if (value === 'true' || value === 'false') {
-                    value = (value === 'true');
-                }
+            if (value !== null) {
+                if (value.hasOwnProperty('error')) return Logger.error(value.error);
+
+                if (value === 'true' || value === 'false') value = (value === 'true');
                 if (util.isNumeric(value)) value = parseInt(value);
                 return value;
             }
         },
-        set: (key, value) => {
+        set(key, value) {
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
-            botDB.update('settings', { value }, { key }, (err, res) => {
+            botDB.put('settings', { key, value }, { conflict: 'replace'}, (err, res) => {
                 if (err) Logger.error(err);
             });
         },
-        confirm: (key, value) => {
+        confirm(key, value) {
             // Only sets the value if the key does not exist
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
@@ -256,6 +257,19 @@ data.bot = {
                 if (util.isNumeric(response)) response = parseInt(response);
                 return response;
             }
+        },
+        set(table, what, where) {
+            if (typeof table !== 'string') return;
+            if (!(typeof what !== null && typeof what === 'object')) return;
+            if (!(typeof where !== null && typeof where === 'object')) return;
+            
+            let obj = { conflict: 'replace' };
+            Object.assign(obj, where);
+            
+            botDB.put(table, what, where);
+        },
+        setPermissionTest(user, permission) {
+            botDB.update('users', { permission }, { name: user });
         }
     },
 
@@ -264,27 +278,29 @@ data.bot = {
             Logger.bot('Failed to add command. Name & module are required.');
             return;
         }
-        status = this.getCommandStatus(name) || status;
-        botDB.put('commands', { name, cooldown, permission, status, module }, (err, res) => {
+        botDB.put('commands', { name, cooldown, permission, status, module }, { conflict: 'ignore' }, (err, res) => {
             if (err) Logger.error(err);
         });
     },
 
     addUser(user) {
         const { name, permLevel, mod, following, seen } = user;
-        let permission = this.getPermLevel(name) || permLevel;
-        botDB.put('users', { name, permission, mod, following, seen }, { conflict: 'replace' }, (err, res) => {
+        botDB.put('users', { name, permission: permLevel, mod, following, seen }, { conflict: 'abort' }, (err, res) => {
             if (err) Logger.error(err);
+            botDB.update('users', { mod, following, seen }, { name });
         });
     },
 
     getPermLevel: (user) => {
-        return botDB.getValue('users', 'permission', { name: user });
+        const _permission = parseInt(botDB.getValue('users', 'permission', { name: user }));
+        if (typeof _permission === 'number') return _permission;
+        Logger.debug('ERR in getPermLevel:: defaulting to viewer level');
+        return 7;
     },
 
     getCommandStatus: (cmd) => {
         let status = botDB.getValue('commands', 'status', { name: cmd });
-        if (status) status = (status === 'true');
+        status = (status === 'true');
         Logger.absurd(`'${cmd}' is ${(status) ? 'enabled' : 'disabled'}.`);
         return status;
     },
