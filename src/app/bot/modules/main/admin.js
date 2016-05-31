@@ -5,12 +5,13 @@ module.exports.command = (event) => {
     let param1 = event.args[1];
     let param2 = event.args[2] || null;
     if (!action) return core.say(event.sender, `Usage: !command [enable | disable | permission]`);
+    let status;
     switch (action) {
         case 'enable':
             if (event.args.length < 2) {
                 return core.say(event.sender, `Usage: !command [enable] [command name]`);
             }
-            let status = core.command.enableCommand(param1);
+            status = core.command.enableCommand(param1);
             if (status === 404) return core.say(event.sender, `That command is not registered.`);
             if (status === 200) return core.say(event.sender, `Command '${param1}' enabled.`);
             break;
@@ -64,7 +65,13 @@ module.exports.lastSeen = (event) => {
     core.say(event.sender, `${target} was last seen ${time}.`);
 };
 
-Transit.on('bot:command:listen', () => {
+module.exports.setPerm = (event) => {
+    let target = event.args[0];
+    let level = parseInt(event.args[1]);
+    core.db.bot.data.setPermissionTest(target, level);
+};
+
+(() => {
     Transit.emit('bot:command:register', [
         {
             name: 'command',
@@ -86,6 +93,13 @@ Transit.on('bot:command:listen', () => {
             cooldown: 30,
             permLevel: 0,
             status: true
+        },
+        {
+            name: 'setperm',
+            handler: 'setPerm',
+            cooldown: 0,
+            permLevel: 0,
+            status: true
         }
-    ], './modules/core/admin');
-});
+    ], './modules/main/admin');
+})();
