@@ -320,7 +320,6 @@
                                                                             <tr v-for="follower in state.data.followers" transition="stagger" stagger="100">
                                                                                 <td class="col-lg-3 table-follower-time text-center">{{ follower.age }}</td>
                                                                                 <td class="col-lg-9 table-follower-name">{{ follower.username }}</td>
-                                                                                <!-- <td>{{ follower.notifications }}</td> -->
                                                                             </tr>
                                                                         </tbody>
                                                                     </table>
@@ -632,6 +631,16 @@
                                     <div class="container-fluid" id="settingsPanel">
                                         <div class="row">
                                             <div class="col-xs-12">
+                                                <ui-tabs type="text" fullwidth>
+                                                    <ui-tab header="Bot">
+                                                        <div class="container-fluid">
+                                                            <div class="group">
+                                                                <ui-switch name="bot-enabled" :value.sync="state.services.bot">Bot enabled</ui-switch>
+                                                            </div>
+                                                        </div>
+                                                    </ui-tab>
+                                                </ui-tabs>
+
                                                 <ui-tabs type="text" fullwidth>
                                                     <ui-tab header="TipeeeStream">
                                                         <div class="step" v-if="state.services.tipeee === false">

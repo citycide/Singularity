@@ -90,6 +90,7 @@ module.exports = (app) => {
                             token: Settings.get('accessToken')
                         },
                         services: {
+                            bot: Settings.get('botEnabled'),
                             tipeee: Settings.get('tipeeeActive'),
                             twitchAlerts: Settings.get('twitchAlertsActive'),
                             streamTip: Settings.get('streamTipActive')
@@ -201,7 +202,7 @@ module.exports = (app) => {
 
     app.get('*', (req, res) => {
         // TODO: use res.render to send the user to a custom 404 page
-        res.send('Page not found.', 404);
+        // res.send('Page not found.', 404);
     });
 
     const userLogout = (callback) => {

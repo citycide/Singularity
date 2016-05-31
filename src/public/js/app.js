@@ -105,6 +105,12 @@ const app = new Vue({
             const song = current ? this.state.data.currentSong : this.testSong;
             socket.emit('test:music', song);
         },
+        botEnable: function() {
+            socket.emit('settings:services:bot:activate');
+        },
+        botDisable: function() {
+            socket.emit('settings:services:bot:deactivate');
+        },
         tipeeeEnable: function() {
             state.services.tipeee = true;
             socket.emit('tipeee:activate', this.tipeeeKeyInput);
@@ -204,6 +210,11 @@ const app = new Vue({
         },
         letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
         selectedLetter: ''
+    },
+    watch: {
+        'state.services.bot': function(val, old) {
+            val ? this.botEnable() : this.botDisable();
+        }
     }
 });
 
