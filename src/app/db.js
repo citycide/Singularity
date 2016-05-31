@@ -292,15 +292,23 @@ data.bot = {
     },
 
     getPermLevel: (user, fn) => {
-        const _permission = parseInt(botDB.getValue('users', 'permission', { name: user }));
+        const username = user['display-name'];
+        const userType = user['user-type'];
+        let defaultPermLevel = 7;
+    
+        if (userType === 'mod') defaultPermLevel = 1;
+        if (username === Settings.get('channel') || username === Settings.get('botName'))
+            defaultPermLevel = 0;
+    
+        const _permission = parseInt(botDB.getValue('users', 'permission', { name: username }));
         if (!Number.isNaN(_permission)) {
             if (fn && typeof fn === 'function') fn(_permission);
             return _permission;
         } else {
             const type = Number.isNaN(_permission) ? 'NaN' : typeof v;
             Logger.debug(`ERR in getPermLevel:: Expected a number, got ${type}`);
-            if (fn && typeof fn === 'function') fn(7);
-            return 7;
+            if (fn && typeof fn === 'function') fn(defaultPermLevel);
+            return defaultPermLevel;
         }
     },
 
