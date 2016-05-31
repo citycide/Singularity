@@ -88,26 +88,14 @@ const api = {
         return message.split(' ').slice(1).join(' ');
     },
 
+    /**
+     * @function getPermissions
+     * @description returns the user's permission level
+     * @param {object} user
+     * @returns {number}
+     **/
     getPermissions(user) {
-        /**
-         * Command permission levels:
-         *     7: 'viewer'
-         *     6: 'regular'
-         *     5: ' '
-         *     4: ' '
-         *     3: ' '
-         *     2: 'subscriber'
-         *     1: 'moderator'
-         *     0: 'admin'
-         */
-        let _storedPermLevel = core.db.bot.getPermLevel(user['display-name']);
-        if (typeof _storedPermLevel === 'number') return _storedPermLevel;
-
-        let _permLevel = 7;
-        if (user['user-type'] === 'mod') _permLevel = 1;
-        if (user['display-name'] === core.channel.name) _permLevel = 0;
-        if (user['display-name'] === core.channel.botName) _permLevel = 0;
-        return _permLevel;
+        return core.db.bot.getPermLevel(user);
     }
 };
 
