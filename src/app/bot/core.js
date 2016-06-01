@@ -26,8 +26,12 @@ const core = {
             message = user;
             return bot.say(this.channel.name, message);
         }
+
+        let mention = '';
+        if (this.settings.get('responseMention')) mention = `${user}: `;
+
         if (this.settings.get('whisperMode') === false) {
-            return bot.say(this.channel.name, `${user}: ${message}`);
+            return bot.say(this.channel.name, `${mention}${message}`);
         } else {
             return bot.whisper(user, message);
         }
@@ -102,8 +106,9 @@ const core = {
 
     isFollower(user) {
         let _status = false;
+        const self = this;
         bot.api({
-            url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${this.channel.name}`,
+            url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${self.channel.name}`,
             method: "GET",
             headers: {
                 "Accept": "application/vnd.twitchtv.v3+json",
@@ -153,7 +158,8 @@ const core = {
 };
 
 global.core = core;
-global.bot = bot;
+global.$ = core;
+// global.bot = bot;
 
 const initialize = (instant = false) => {
     const delay = instant ? 1 : 5 * 1000;

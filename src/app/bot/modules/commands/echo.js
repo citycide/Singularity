@@ -10,7 +10,7 @@
  * @param {object} event
  */
 module.exports.echo = (event) => {
-    core.say(event.sender, event.argString);
+    $.say(event.sender, event.argString);
 };
 
 /**
