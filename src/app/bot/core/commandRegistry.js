@@ -8,33 +8,35 @@ Transit.on('bot:ready', () => {
     Transit.emit('bot:command:listen');
 });
 
-Transit.on('bot:command:register', (data, module) => {
-    if (!modules.includes(module)) {
-        modules.push(module);
-        Logger.debug(`Module loaded:: ${module}`);
+Transit.on('bot:command:register', (data, _module) => {
+    if (!modules.includes(_module)) {
+        modules.push(_module);
+        Logger.debug(`Module loaded:: ${_module}`);
     }
     for (let cmd of data) {
         let name = cmd.name.toLowerCase();
-        let handler = (cmd.handler) ? (cmd.handler) : (name);
+        let handler = (cmd.hasOwnProperty('handler')) ? cmd.handler : name;
+        let cooldown = (cmd.hasOwnProperty('cooldown')) ? cmd.cooldown : 30;
+        let permLevel = (cmd.hasOwnProperty('permLevel')) ? cmd.permLevel : 0;
         let status = (cmd.hasOwnProperty('status')) ? cmd.status : false;
 
         if (commands.hasOwnProperty(name)) {
-            if (commands[name].module === module) return;
-            Logger.bot(`Duplicate command registration attempted by '${module}'`);
+            if (commands[name].module === _module) return;
+            Logger.bot(`Duplicate command registration attempted by '${_module}'`);
             Logger.bot(`'${name}' already registered to '${commands[name].module}'`);
             return;
         }
 
         commands[name] = {
-            name: name,
-            handler: handler,
-            cooldown: cmd.cooldown,
-            permLevel: cmd.permLevel,
-            status: status,
-            module: module
+            name,
+            handler,
+            cooldown,
+            permLevel,
+            status,
+            module: _module
         };
-        db.bot.addCommand(name, cmd.cooldown, cmd.permLevel, status, module);
-        Logger.trace(`\`- Command loaded:: '${name}' (${module})`);
+        db.bot.addCommand(name, cooldown, permLevel, status, _module);
+        Logger.trace(`\`- Command loaded:: '${name}' (${_module})`);
     }
 });
 
