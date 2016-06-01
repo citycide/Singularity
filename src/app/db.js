@@ -216,6 +216,7 @@ data.bot = {
         this.settings.confirm('hostAlerts', 'true');
         this.settings.confirm('subAlerts', 'true');
         this.settings.confirm('tipAlerts', 'false');
+        this.settings.confirm('responseMention', 'false');
     },
 
     settings: {
