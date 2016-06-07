@@ -10,6 +10,14 @@
  * @param {object} event
  */
 module.exports.echo = (event) => {
+    if (event.args[0] === 'twice') {
+        $.say(event.sender, `${event.argString} ${event.argString}`);
+        return;
+    }
+    if (event.args[0] === 'loudly') {
+        $.say(event.sender, `${event.argString.toUpperCase()}`);
+        return;
+    }
     $.say(event.sender, event.argString);
 };
 
@@ -18,33 +26,33 @@ module.exports.echo = (event) => {
  * @function {IIFE}
  */
 (() => {
-    // Sends a message over the global 'Transit' emitter
-    // The command registry listens for this event
-    Transit.emit('bot:command:register', [
-        // an array of objects
-        // each object should represent a command
-        {
-            /**
-             * @property {string} name - what must be typed in chat to run the command
-             */
-            name: 'echo',
-            /**
-             * @property {string} handler - the exported function that actually runs the command
-             * @description if absent the handler defaults to using the name property
-             */
-            handler: 'echo',
-            /**
-             * @property {number} cooldown - the default cooldown time for the command
-             */
-            cooldown: 30,
-            /**
-             * @property {number} permLevel - the default permissions required to use the command
-             */
-            permLevel: 0
-        }
-    ], './modules/commands/echo'); // the path to this file
+    /**
+     * $.addCommand
+     * @param {string} name - what must be typed in chat to run the command
+     * @param {string} path - path to this file
+     * @param {object} options - override the defaults when registering the command
+     *      @property {string} handler - the exported function that actually runs the command
+     *      @property {number} cooldown - the default cooldown time for the command
+     *      @property {number} permLevel - the default permissions required to use the command
+     *      @property {boolean} status - whether the command is enabled / disabled by default
+     *      @property {number} price - the default number of points paid to use the command
+     */
+    $.addCommand('echo', './modules/commands/echo', {
+        status: true,
+        price: 2
+    });
+
+    $.addSubcommand('twice', 'echo', {
+        status: true,
+        cooldown: 10
+    });
+    $.addSubcommand('loudly', 'echo', {
+        status: true,
+        cooldown: 10
+    });
+
     /**
      * Modules included in the app package use a relative file path as above
-     * User-installed modules should use the variable __filename
+     * User-installed modules should use the variable `__filename`
      */
 })();

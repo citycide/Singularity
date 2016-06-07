@@ -89,11 +89,8 @@ module.exports.alerts = (event) => {
 };
 
 (() => {
-    Transit.emit('bot:command:register', [
-        {
-            name: 'alerts',
-            cooldown: 0,
-            permLevel: 0
-        }
-    ], './modules/main/events');
+    $.addCommand('alerts', './modules/main/events', {
+        permLevel: 0,
+        status: true
+    });
 })();

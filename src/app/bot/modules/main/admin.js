@@ -11,17 +11,37 @@ module.exports.command = (event) => {
             if (event.args.length < 2) {
                 return $.say(event.sender, `Usage: !command [enable] [command name]`);
             }
-            status = $.command.enableCommand(param1);
-            if (status === 404) return $.say(event.sender, `That command is not registered.`);
-            if (status === 200) return $.say(event.sender, `Command '${param1}' enabled.`);
+
+            if (param1.includes('>')) {
+                const pair = param1.split('>');
+                status = $.command.enable(pair[0], pair[1]);
+            } else {
+                status = $.command.enable(param1);
+            }
+            
+            if (status === 404)
+                return $.say(event.sender, `That command is not registered.`);
+            if (status === 200)
+                return $.say(event.sender, `Command '${param1}' enabled.`);
+            
             break;
         case 'disable':
             if (event.args.length < 2) {
                 return $.say(event.sender, `Usage: !command [disable] [command name]`);
             }
-            status = $.command.disableCommand(param1);
-            if (status === 404) return $.say(event.sender, `That command is not registered.`);
-            if (status === 200) return $.say(event.sender, `Command '${param1}' disabled.`);
+
+            if (param1.includes('>')) {
+                const pair = param1.split('>');
+                status = $.command.disable(pair[0], pair[1]);
+            } else {
+                status = $.command.disable(param1);
+            }
+            
+            if (status === 404)
+                return $.say(event.sender, `That command is not registered.`);
+            if (status === 200)
+                return $.say(event.sender, `Command '${param1}' disabled.`);
+            
             break;
         case 'permission':
             if (event.args.length < 2) {
@@ -65,41 +85,34 @@ module.exports.lastSeen = (event) => {
     $.say(event.sender, `${target} was last seen ${time}.`);
 };
 
+/*
 module.exports.setPerm = (event) => {
     let target = event.args[0];
     let level = parseInt(event.args[1]);
     $.db.bot.data.setPermissionTest(target, level);
 };
+*/
 
 (() => {
-    Transit.emit('bot:command:register', [
-        {
-            name: 'command',
-            handler: 'command',
-            cooldown: 0,
-            permLevel: 0,
-            status: true
-        },
-        {
-            name: 'whispermode',
-            handler: 'whisperMode',
-            cooldown: 0,
-            permLevel: 0,
-            status: true
-        },
-        {
-            name: 'lastseen',
-            handler: 'lastSeen',
-            cooldown: 30,
-            permLevel: 0,
-            status: true
-        },
-        {
-            name: 'setperm',
-            handler: 'setPerm',
-            cooldown: 0,
-            permLevel: 0,
-            status: true
-        }
-    ], './modules/main/admin');
+    $.addCommand('command', './modules/main/admin', {
+        cooldown: 0,
+        permLevel: 0,
+        status: true
+    });
+    $.addCommand('whispermode', './modules/main/admin', {
+        handler: 'whisperMode',
+        cooldown: 0,
+        permLevel: 0,
+        status: true
+    });
+    $.addCommand('lastseen', './modules/main/admin', {
+        handler: 'lastSeen',
+        status: true
+    });
+    $.addCommand('setperm', './modules/main/admin', {
+        handler: 'setPerm',
+        cooldown: 0,
+        permLevel: 0,
+        status: true
+    });
 })();
