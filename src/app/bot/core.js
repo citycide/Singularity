@@ -172,7 +172,7 @@ const core = {
         }
 
         // Check if the specified command is enabled
-        if (this.command.isEnabled(event.command) === false) {
+        if (!this.command.isEnabled(event.command)) {
             Logger.bot(`'${event.command}' is installed but is not enabled`);
             return;
         }
@@ -186,6 +186,10 @@ const core = {
                 subcommand = undefined;
                 return;
             }
+
+            // add subcommand argument properties to the event object
+            event.subArgs = event.args.slice(1);
+            event.subArgString = event.subArgs.join(' ');
         } else {
             subcommand = undefined;
         }

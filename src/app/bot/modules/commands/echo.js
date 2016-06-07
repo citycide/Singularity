@@ -11,11 +11,11 @@
  */
 module.exports.echo = (event) => {
     if (event.args[0] === 'twice') {
-        $.say(event.sender, `${event.argString} ${event.argString}`);
+        $.say(event.sender, `${event.subArgString} ${event.subArgString}`);
         return;
     }
     if (event.args[0] === 'loudly') {
-        $.say(event.sender, `${event.argString.toUpperCase()}`);
+        $.say(event.sender, `${event.subArgString.toUpperCase()}`);
         return;
     }
     $.say(event.sender, event.argString);

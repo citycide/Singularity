@@ -186,7 +186,7 @@ data.bot = {
     settings: {
         get(key, fn) {
             let value = botDB.getValue('settings', 'value', { key });
-            if (value !== null) {
+            if (value !== null && value !== undefined) {
                 if (value.hasOwnProperty('error')) return Logger.error(value.error);
 
                 if (value === 'true' || value === 'false') value = (value === 'true');
