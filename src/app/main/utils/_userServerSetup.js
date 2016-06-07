@@ -7,12 +7,12 @@ export default function(rootDir) {
         const dst = jetpack.cwd(Settings.get('userServerPath'));
 
         if (!jetpack.list(dst.path()) || jetpack.list(dst.path()).length < 1) {
-            Logger.info('User server does not exist yet - initiating user server files.');
+            Logger.info('User server does not exist yet - initiating user server files');
             src.copy('.', dst.path());
         }
     } catch (err) {
         if (err.message.substr(0, 31) === 'Destination path already exists') {
-            Logger.trace('User server already in place.');
+            Logger.trace('User server already in place');
         } else {
             Logger.error(err);
         }
