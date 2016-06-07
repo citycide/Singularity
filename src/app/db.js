@@ -8,8 +8,8 @@ import Trilogy from './main/utils/Trilogy.js';
 let db = null, botDB = null;
 
 /**
- * @function
- * @description Creates or accesses singularity.db
+ * Creates or accesses singularity.db
+ * @function IIFE
  */
 {
     /**
@@ -39,49 +39,53 @@ let db = null, botDB = null;
  */
 const data = {
     /**
-     * @function - Creates or accesses bot.db when bot is enabled
+     * Creates or accesses bot.db when bot is enabled
+     * @function initBotDB
+     * @param {function} callback
      */
     initBotDB(fn = () => {}) {
         botDB = new Trilogy(path.resolve(__dirname, '..', 'db', 'bot.db'));
         fn();
         return botDB;
     },
-    errHandler(err) {
-        if (err) return Logger.error(err);
-    },
-    addTable(name, args, bot = false, ifNotExists = true, fn = this.errHandler) {
+    addTable(name, args, bot = false, ifNotExists = true, fn = errHandler) {
         if (!bot) {
-            db.create(name, args, ifNotExists, (err, res) => {
-                if (err) Logger.error(err);
-                if (fn) fn(err, res);
-            });
+            db.create(name, args, ifNotExists, errHandler);
         } else {
-            botDB.create(name, args, ifNotExists, (err, res) => {
-                fn(err, res);
-            });
+            botDB.create(name, args, ifNotExists, errHandler);
         }
         return this;
     },
 
     /**
+     * Adds a follower to the database, or updates one that already exists
      * @function dbFollowersAdd
-     * @description Adds a follower to the database, or updates one that already exists
-     * @params [ id | username | (timestamp) | (notifications) ]
+     * @param id
+     * @param username
+     * @param [timestamp]
+     * @param [notifications]
      */
     dbFollowersAdd: (id, username, timestamp, notifications) => {
         if (!id || !username) {
             Logger.error('Failed to add or update follower. ID & username are required.');
             return;
         }
-        db.put('followers', { twitchid: id, username, timestamp, evtype: 'follower', notifications }, { conflict: 'replace' }, (err, res) => {
-            if (err) Logger.error(err);
-        });
+        db.put('followers', {
+            twitchid: id,
+            username,
+            timestamp,
+            evtype: 'follower',
+            notifications
+        }, { conflict: 'replace' }, errHandler);
     },
 
     /**
+     * Adds a subscriber to the database, or updates one that already exists
      * @function dbSubscribersAdd
-     * @description Adds a subscriber to the database, or updates one that already exists
-     * @params [ id | username | (timestamp) | (months) ]
+     * @param id
+     * @param username
+     * @param [timestamp]
+     * @param [months]
      */
     dbSubscribersAdd: (id, username, timestamp, months) => {
         let evtype = 'subscriber';
@@ -90,40 +94,57 @@ const data = {
             return;
         }
         if (months && months > 0) evtype = 'resub';
-        db.put('subscribers', { twitchid: id, username, timestamp, evtype, months }, { conflict: 'replace' }, (err, res) => {
-            if (err) Logger.error(err);
-        });
+        db.put('subscribers', {
+            twitchid: id,
+            username,
+            timestamp,
+            evtype,
+            months
+        }, { conflict: 'replace' }, errHandler);
 
     },
 
     /**
+     * Adds a host event to the database
      * @function dbHostsAdd
-     * @description Adds a host event to the database
-     * @params [ id | username | (timestamp) | viewers ]
+     * @param id
+     * @param username
+     * @param [timestamp]
+     * @param [viewers]
      */
     dbHostsAdd: (id, username, timestamp, viewers) => {
         if (!username || !viewers) {
             Logger.error('Failed to add host. Username & viewers are required.');
             return;
         }
-        db.put('hosts', { twitchid: id, username, timestamp, evtype: 'host', viewers }, (err, res) => {
-            if (err) Logger.error(err);
-        });
+        db.put('hosts', {
+            twitchid: id,
+            username,
+            timestamp,
+            evtype: 'host',
+            viewers
+        }, errHandler);
     },
 
-    /**
+    /**Adds a tip event to the database
      * @function dbTipsAdd
-     * @description Adds a tip event to the database
-     * @params [ id | username | timestamp | amount | (message) ]
+     * @param username
+     * @param [timestamp]
+     * @param amount
+     * @param [message='']
      */
     dbTipsAdd: (username, timestamp, amount, message = '') => {
         if (!username || !amount) {
             Logger.error('Failed to add tip. Name & amount are required.');
             return;
         }
-        db.put('tips', { username, timestamp, evtype: 'tip', amount, message }, (err, res) => {
-            if (err) Logger.error(err);
-        });
+        db.put('tips', {
+            username,
+            timestamp,
+            evtype: 'tip',
+            amount,
+            message
+        }, errHandler);
     },
     getRecentFollows: () => {
         const CUTOFF = moment().subtract(60, 'days').valueOf();
@@ -163,7 +184,7 @@ const data = {
 
 /**
  * Collection of api methods related to the bot database
- * @export bot
+ * @export default.bot
  */
 data.bot = {
     initSettings: function() {
@@ -186,33 +207,35 @@ data.bot = {
     settings: {
         get(key, fn) {
             let value = botDB.getValue('settings', 'value', { key });
-            if (value !== null && value !== undefined) {
-                if (value.hasOwnProperty('error')) return Logger.error(value.error);
-
-                if (value === 'true' || value === 'false') value = (value === 'true');
-                if (util.str.isNumeric(value)) value = parseInt(value);
-                if (fn) {
-                    fn(value);
-                    return this;
-                }
-                return value;
+            if (util.val.isNullLike(value)) return undefined;
+            
+            if (typeof value === 'object' && value.hasOwnProperty('error')) {
+                Logger.error(value.error);
+                return undefined;
             }
+
+            if (value === 'true' || value === 'false') value = (value === 'true');
+            
+            if (util.str.isNumeric(value)) value = parseInt(value);
+            
+            if (fn) {
+                fn(value);
+                return this;
+            }
+            
+            return value;
         },
         set(key, value) {
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
-            botDB.put('settings', { key, value }, { conflict: 'replace'}, (err, res) => {
-                if (err) Logger.error(err);
-            });
+            botDB.put('settings', { key, value }, { conflict: 'replace'}, errHandler);
             return this;
         },
         confirm(key, value) {
             // Only sets the value if the key does not exist
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
-            botDB.put('settings', { key, value }, { conflict: 'ignore' }, (err, res) => {
-                if (err) Logger.error(err);
-            });
+            botDB.put('settings', { key, value }, { conflict: 'ignore' }, errHandler);
             return this;
         }
     },
@@ -220,22 +243,27 @@ data.bot = {
     data: {
         get(table, what, where, fn) {
             let response = botDB.getValue(table, what, where);
-            if (response === null) return;
-            if (response) {
-                if (response === 'true' || response === 'false') {
-                    response = (response === 'true');
-                }
-                if (util.str.isNumeric(response)) response = parseInt(response);
-                if (fn) {
-                    fn(response);
-                    return this;
-                }
-                return response;
+            if (util.val.isNullLike(response))) return undefined;
+            
+            if (typeof response === 'object' && response.hasOwnProperty('error')) {
+                Logger.error(response.error);
+                return undefined;
             }
+            
+            if (response === 'true' || response === 'false') response = (response === 'true');
+            
+            if (util.str.isNumeric(response)) response = parseInt(response);
+            
+            if (fn) {
+                fn(response);
+                return this;
+            }
+            
+            return response;
         },
         set(table, what, where = null, options = {}) {
             if (typeof table !== 'string') return;
-            if (!(typeof what !== null && typeof what === 'object')) return;
+            if (util.val.isNullLike(what) || typeof what !== 'object') return;
 
             let whatWhere = Object.assign({}, what, where);
 
@@ -254,13 +282,13 @@ data.bot = {
         },
         confirm(table, what, where) {
             if (typeof table !== 'string') return;
-            if (!(typeof what !== null && typeof what === 'object')) return;
+            if (util.val.isNullLike(what) || typeof what !== 'object') return;
 
             let whatWhere = Object.assign({}, what, where);
 
             let obj = { conflict: 'abort' };
 
-            botDB.put(table, whatWhere, obj, () => {});
+            botDB.put(table, whatWhere, obj, errHandler);
             
             return this;
         },
@@ -274,27 +302,29 @@ data.bot = {
             Logger.bot('Failed to add command. Name & module are required.');
             return;
         }
-        botDB.put('commands', { name, cooldown, permission, status, price, module }, { conflict: 'ignore' }, (err, res) => {
-            if (err) Logger.error(err);
-        });
+        botDB.put('commands', {
+            name, cooldown, permission, status, price, module
+        }, { conflict: 'ignore' }, errHandler);
         return this;
     },
 
-    addSubCommand(name, cooldown, permission, status, price, module, parent) {
+    addSubcommand(name, cooldown, permission, status, price, module, parent) {
         if (!name || !module || !parent) {
             Logger.bot('Failed to add command. Name, module, & parent are required.');
             return;
         }
-        botDB.put('subcommands', { name, cooldown, permission, status, price, module, parent }, { conflict: 'ignore' }, (err, res) => {
-            if (err) Logger.error(err);
-        });
+        botDB.put('subcommands', {
+            name, cooldown, permission, status, price, module, parent
+        }, { conflict: 'ignore' }, errHandler);
         return this;
     },
 
     addUser(user) {
         const { name, permLevel, mod, following, seen, points } = user;
-        botDB.put('users', { name, permission: permLevel, mod, following, seen, points }, { conflict: 'abort' }, (err, res) => {
-            if (err) Logger.error(err);
+        botDB.put('users', {
+            name, permission: permLevel, mod, following, seen, points
+        }, { conflict: 'abort' }, (err, res) => {
+            if (err) Logger.error(err, res);
             botDB.update('users', { permission: permLevel, mod, following, seen, points }, { name });
         });
     },
@@ -309,7 +339,7 @@ data.bot = {
             defaultPermLevel = 7;
     
         const _permission = util.num.validate(botDB.getValue('users', 'permission', { name: username }));
-        if (_permission >= 0) {
+        if (!util.val.isNullLike(_permission) && _permission >= 0) {
             fn(_permission);
             return _permission;
         } else {
@@ -325,7 +355,6 @@ data.bot = {
      * Creates a table of followers with columns:
      * twitchid | username | timestamp | evtype
      */
-    // db.run('CREATE TABLE IF NOT EXISTS followers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, notifications TEXT);');
     data.addTable('followers', [{
         name: 'twitchid',
         type: 'INT',
@@ -336,7 +365,6 @@ data.bot = {
      * Creates a table of subscribers with columns:
      * twitchid | username | timestamp | evtype | months
      */
-    // db.run('CREATE TABLE IF NOT EXISTS subscribers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, months TEXT);');
     data.addTable('subscribers', [{
         name: 'twitchid',
         type: 'INT',
@@ -347,7 +375,6 @@ data.bot = {
      * Creates a table of host events with columns:
      * twitchid | username | timestamp | evtype | viewers
      */
-    // db.run('CREATE TABLE IF NOT EXISTS hosts (twitchid TEXT, username TEXT, timestamp TEXT, evtype TEXT, viewers TEXT);');
     data.addTable('hosts', [{
         name: 'twitchid',
         type: 'INT'
@@ -357,8 +384,11 @@ data.bot = {
      * Creates a table of tip events with columns:
      * twitchid | username | timestamp | evtype | amount | message
      */
-    // db.run('CREATE TABLE IF NOT EXISTS tips (username TEXT, timestamp TEXT, evtype TEXT, amount TEXT, message TEXT);');
     data.addTable('tips', ['username', 'timestamp', 'evtype', 'amount', 'message']);
 }
+
+const errHandler = function(err) {
+    if (err) Logger.error(err);
+};
 
 export { data as default };
