@@ -1,0 +1,19 @@
+{
+  "bitwise": true,
+  "curly": false,
+  "eqeqeq": true,
+  "forin": true,
+  "esversion": 6,
+  "browser": true,
+  "node": true,
+  "globals": {
+    "Logger": true,
+    "Settings": true,
+    "Transit": true,
+    "core": true,
+    "$": true,
+    "Emitter": true,
+    "WindowManager": true,
+    "PlaybackAPI": true
+  }
+}

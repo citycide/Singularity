@@ -1,5 +1,6 @@
 import moment from 'moment';
 import tmi from 'tmi.js';
+import db from '../db';
 
 const OPTIONS = {
     options: {
@@ -26,7 +27,7 @@ bot.on('chat', (channel, user, message, self) => {
 
 const api = {
     isCommand(message) {
-        return (message.charAt(0) === core.command.prefix());
+        return (message.charAt(0) === core.command.getPrefix());
     },
 
     messageHandler(user, message) {
@@ -37,10 +38,11 @@ const api = {
             name: user['display-name'],
             permLevel: this.getPermissions(user),
             mod: _mod,
-            following: core.isFollower(user['display-name']),
-            seen: _timestamp
+            following: core.users.isFollower(user['display-name']),
+            seen: _timestamp,
+            points: core.points.get(user['display-name']) || 0
         };
-        core.db.bot.addUser(_user);
+        db.bot.addUser(_user);
     },
 
     commandHandler(user, message) {
@@ -64,7 +66,7 @@ const api = {
      * @returns {string}
      */
     getCommand(message) {
-        const prefixLength = core.command.prefix().length || 1;
+        const prefixLength = core.command.getPrefix().length || 1;
         return message.slice(prefixLength).split(' ', 1)[0].toLowerCase();
     },
 
@@ -95,7 +97,7 @@ const api = {
      * @returns {number}
      **/
     getPermissions(user) {
-        return core.db.bot.getPermLevel(user);
+        return db.bot.getPermLevel(user);
     }
 };
 

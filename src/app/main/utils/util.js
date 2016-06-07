@@ -5,7 +5,18 @@ export default {
      * @returns {boolean}
      * @reference http://stackoverflow.com/a/24457420
      */
-    isNumeric: (value) => {
-        return /^\d+$/.test(value);
+    str: {
+        isNumeric(value) {
+            return /^\d+$/.test(value);
+        }
+    },
+    num: {
+        validate(value) {
+            if (!isNaN(parseInt(value))) {
+                return parseInt(value);
+            } else {
+                return null;
+            }
+        }
     }
 }

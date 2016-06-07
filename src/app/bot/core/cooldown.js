@@ -1,11 +1,21 @@
+/* jshint -W014, -W018 */
+
 const cooldown = {
     // cooldowns['command-name'] = { name, until, scope }
     cooldowns: [],
-    set(cmd, user) {
+    get(cmd, sub) {
+        if (!sub) {
+            return core.data.get('commands', 'cooldown', { name: cmd });
+        } else {
+            return core.data.get('subcommands', 'cooldown', { name: sub });
+        }
+    },
+    start(cmd, user, sub) {
         // if this command has no default specified, use the bot default
-        const time = core.command.getCooldown(cmd) || this.getDefault();
+        const time = this.get(cmd, sub) || this.getDefault();
         this.cooldowns.push({
             name: cmd,
+            sub: sub,
             until: Date.now() + (time * 1000),
             // if globalCooldown is set to true or no user was provided
             scope: (core.settings.get('globalCooldown') || !user)
@@ -15,8 +25,8 @@ const cooldown = {
                 : user || false
         });
     },
-    clear(cmd, user) {
-        const index = this.getIndex(cmd, user);
+    clear(cmd, user, sub) {
+        const index = this.getIndex(cmd, user, sub);
 
         // check that the item was actually in the array, remove if it was
         if (index >= 0) {
@@ -28,12 +38,13 @@ const cooldown = {
         }
     },
     clearAll() {
-        return this.cooldowns = [];
+        this.cooldowns = [];
+        return this;
     },
     getDefault() {
         return core.settings.get('defaultCooldown');
     },
-    isActive(cmd, user) {
+    isActive(cmd, user, sub) {
         // see above for comments about cooldown scope
         const scope = (core.settings.get('globalCooldown') || !user)
             ? false
@@ -41,10 +52,12 @@ const cooldown = {
 
         for (let [index, command] of this.cooldowns.entries()) {
             // if we matched a command name & scope combination
-            if (command.name === cmd && command.scope === scope) {
+            if (command.name === cmd && command.scope === scope && command.sub === sub) {
+
                 const timeLeft = command.until - Date.now();
 
                 if (timeLeft > 0) {
+                    if (user === $.channel.name) return false;
                     // return the number of seconds left if > 0
                     return parseInt(timeLeft / 1000);
                 } else {
@@ -55,7 +68,7 @@ const cooldown = {
             }
         }
     },
-    getIndex(cmd, user) {
+    getIndex(cmd, user, sub) {
         // see above for comments about cooldown scope
         const scope = (core.settings.get('globalCooldown') || !user)
             ? false
@@ -63,12 +76,28 @@ const cooldown = {
 
         for (let [index, command] of this.cooldowns.entries()) {
             // if we matched a command name & scope combination
-            if (command.name === cmd && command.scope === scope) {
+            if (command.name === cmd && command.scope === scope && command.sub === sub) {
                 // return the position in the array
                 return index;
             }
         }
     }
 };
+
+/**
+ * Add methods to the global core object
+ **/
+const exportAPI = {
+    getCooldown: cooldown.get,
+    startCooldown: cooldown.start.bind(cooldown),
+    clearCooldown: cooldown.clear.bind(cooldown),
+    isOnCooldown: cooldown.isActive.bind(cooldown)
+};
+
+// this needs to happen on bot:ready
+// `core` is undefined until the bot fires up
+Transit.on('bot:ready', () => {
+    Object.assign($.command, exportAPI);
+});
 
 export default cooldown;

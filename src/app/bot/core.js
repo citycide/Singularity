@@ -1,10 +1,15 @@
+/* jshint -W014 */
+
 import jetpack from 'fs-jetpack';
 import path from 'path';
 import db from '../../app/db';
+import Tock from '../main/utils/Tock';
 import { updateAuth, default as bot } from './bot';
 import userModules from '../../app/main/utils/_userModuleSetup';
 import mods from './moduleHandler';
 import cooldown from './core/cooldown';
+import points from './core/points';
+import twitchapi from './core/twitchapi';
 import { unregister, default as registry } from './core/commandRegistry';
 
 const loaders = {
@@ -13,8 +18,9 @@ const loaders = {
 };
 
 const core = {
-    bot: bot,
-    db: db,
+    api: bot.api,
+    tick: new Tock(),
+    // db: db,
 
     channel: {
         name: Settings.get('channel'),
@@ -44,8 +50,8 @@ const core = {
     },
 
     command: {
-        prefix() {
-            return db.bot.getCommandPrefix() || '!';
+        getPrefix() {
+            return core.settings.get('prefix') || '!';
         },
         getModule(cmd) {
             return mods.requireModule(registry[cmd].module);
@@ -53,43 +59,72 @@ const core = {
         getRunner: (cmd) => {
             return core.command.getModule(cmd)[registry[cmd].handler];
         },
-        getCooldown: (cmd) => {
-            return core.data.get('commands', 'cooldown', { name: cmd });
+        isEnabled(cmd, sub) {
+            if (!sub) {
+                return core.data.get('commands', 'status', { name: cmd });
+            } else {
+                return core.data.get('subcommands', 'status', { name: sub });
+            }
         },
-        getPermLevel: (cmd) => {
-            return core.data.get('commands', 'permission', { name: cmd });
+        exists(cmd, sub) {
+            if (!registry.hasOwnProperty(cmd)) return false;
+            
+            if (!sub) {
+                return registry.hasOwnProperty(cmd);
+            } else {
+                return registry[cmd].subcommands.hasOwnProperty(sub);
+            }
         },
-        setPermLevel: (cmd, level) => {
-            return core.data.set('commands', { permission: level }, { name: cmd });
-        },
-        isEnabled(cmd) {
-            return db.bot.getCommandStatus(cmd);
-        },
-        enableCommand(cmd) {
-            if (!registry.hasOwnProperty(cmd)) {
+        enable(cmd, sub) {
+            if (!this.exists(cmd, sub)) {
                 Logger.bot(`ERR in enableCommand:: ${cmd} is not a registered command`);
                 return 404;
             }
-            db.bot.setCommandStatus(cmd, true);
+
+            if (sub) {
+                core.data.set('subcommands', { status: true }, { name: sub });
+            } else {
+                core.data.set('commands', { status: true }, { name: cmd });
+            }
+
             return 200;
         },
-        disableCommand(cmd) {
-            if (!registry.hasOwnProperty(cmd)) {
-                Logger.bot(`ERR in disableCommand:: ${cmd} is not a registered command`);
+        disable(cmd, sub) {
+            if (!this.exists(cmd, sub)) {
+                Logger.bot(`ERR in enableCommand:: ${cmd} is not a registered command`);
                 return 404;
             }
-            db.bot.setCommandStatus(cmd, false);
+
+            if (sub) {
+                core.data.set('subcommands', { status: false }, { name: sub });
+            } else {
+                core.data.set('commands', { status: false }, { name: cmd });
+            }
+
+            return 200;
+        },
+        getPermLevel: (cmd, sub) => {
+            return (sub)
+                ? core.data.get('commands', 'permission', { name: cmd })
+                : core.data.get('subcommands', 'permission', { name: sub });
+        },
+        setPermLevel: (cmd, level, sub) => {
+            if (!this.exists(cmd, sub)) {
+                Logger.bot(`ERR in setPermLevel:: ${cmd} is not a registered command`);
+                return 404;
+            }
+
+            if (sub) {
+                core.data.set('subcommands', { permission: level }, { name: sub });
+            } else {
+                core.data.set('commands', { permission: level }, { name: cmd });
+            }
+
             return 200;
         }
     },
 
     settings: {
-        whisperMode() {
-            return db.bot.settings.get('whisperMode');
-        },
-        setWhisperMode(bool) {
-            db.bot.settings.set('whisperMode', bool);
-        },
         get(key) {
             return db.bot.settings.get(key);
         },
@@ -101,56 +136,92 @@ const core = {
     data: {
         get(table, what, where) {
             return db.bot.data.get(table, what, where);
+        },
+        set(table, what, where, options) {
+            db.bot.data.set(table, what, where, options);
         }
     },
 
-    isFollower(user) {
-        let _status = false;
-        const self = this;
-        bot.api({
-            url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${self.channel.name}`,
-            method: "GET",
-            headers: {
-                "Accept": "application/vnd.twitchtv.v3+json",
-                "Authorization": `OAuth ${Settings.get('accessToken').slice(6)}`,
-                "Client-ID": Settings.get('clientID')
-            }
-        }, (err, res, body) => {
-            if (err) Logger.bot(err);
-            _status = (body.error && body.status === 404) ? false : true;
-        });
-        return _status;
+    users: {
+        isFollower(user) {
+            let _status = false;
+            bot.api({
+                url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${core.channel.name}`,
+                method: "GET",
+                headers: {
+                    "Accept": "application/vnd.twitchtv.v3+json",
+                    "Authorization": `OAuth ${Settings.get('accessToken').slice(6)}`,
+                    "Client-ID": Settings.get('clientID')
+                }
+            }, (err, res, body) => {
+                if (err) Logger.bot(err);
+                _status = (body.error && body.status === 404) ? false : true;
+            });
+            return _status;
+        },
+        getPermLevel(user, fn) {
+            return db.bot.getPermLevel(user, fn);
+        }
     },
 
     runCommand(event) {
         // Check if the specified command is registered
-        if (!registry.hasOwnProperty(event.command)) {
+        if (!this.command.exists(event.command)) {
             Logger.bot(`'${event.command}' is not a registered command`);
             return;
         }
+
         // Check if the specified command is enabled
         if (this.command.isEnabled(event.command) === false) {
             Logger.bot(`'${event.command}' is installed but is not enabled`);
             return;
         }
 
-        // Check if the specified command is on cooldown for this user (or globally depending on settings)
-        const cooldownActive = cooldown.isActive(event.command, event.sender);
+        // Check if the first argument is a subcommand
+        let subcommand = event.args[0] || undefined;
+        if (subcommand && this.command.exists(event.command, subcommand)) {
+            // if it is, check if the subcommand is enabled
+            if (!this.command.isEnabled(event.command, subcommand)) {
+                Logger.bot(`'${event.command} ${subcommand}' is installed but is not enabled`);
+                subcommand = undefined;
+                return;
+            }
+        } else {
+            subcommand = undefined;
+        }
+
+        // Check if the specified (sub)command is on cooldown for this user (or globally depending on settings)
+        const cooldownActive = this.command.isOnCooldown(event.command, event.sender, subcommand);
         if (cooldownActive) {
             Logger.bot(`'${event.command}' is on cooldown for ${event.sender} (${cooldownActive} seconds)`);
             return this.say(event.sender, `You need to wait ${cooldownActive} seconds to use !${event.command} again.`);
         }
 
-        // Check that the user has sufficient privileges to use the command
-        // console.log(event.permLevel, core.command.getPermLevel(event.command));
-        if (event.permLevel > this.command.getPermLevel(event.command)) {
+        // Check that the user has sufficient privileges to use the (sub)command
+        if (event.permLevel > this.command.getPermLevel(event.command, subcommand)) {
             Logger.bot(`${event.sender} does not have sufficient permissions to use !${event.command}`);
             return this.say(event.sender, `You don't have what it takes to use !${event.command}.`);
         }
 
+        // Check that the user has enough points to use the (sub)command
+        const commandPrice = this.command.getPrice(event.command, subcommand);
+        const userPoints = this.points.get(event.sender);
+        if (userPoints < commandPrice) {
+            Logger.bot(`${event.sender} does not have enough points to use !${event.command}.`);
+            return this.say(event.sender, `You don't have enough points to use !${event.command}. (costs ${commandPrice}, you have ${userPoints})`);
+        }
+
+        // Finally, run the (sub)command
         try {
             this.command.getRunner(event.command)(event);
-            cooldown.set(event.command, event.sender);
+
+            if (subcommand) {
+                this.command.startCooldown(event.command, event.sender, subcommand);
+            } else {
+                this.command.startCooldown(event.command, event.sender);
+            }
+
+            this.points.sub(event.sender, commandPrice);
         } catch (err) {
             Logger.error(err);
         }
@@ -159,7 +230,6 @@ const core = {
 
 global.core = core;
 global.$ = core;
-// global.bot = bot;
 
 const initialize = (instant = false) => {
     const delay = instant ? 1 : 5 * 1000;
@@ -169,11 +239,17 @@ const initialize = (instant = false) => {
         bot.connect();
 
         db.initBotDB(() => {
-            db.addTable('settings', true, { name: 'key', unique: true }, 'value', 'info');
-            db.addTable('users', true, { name: 'name', unique: true }, 'permission', 'mod', 'following', 'seen');
+            db.addTable('settings', [{ name: 'key', unique: true }, 'value', 'info'], true)
+                .addTable('users', [{ name: 'name', unique: true }, 'permission', 'mod', 'following', 'seen', 'points'], true);
+
             db.bot.initSettings();
 
-            db.addTable('commands', true, { name: 'name', unique: true }, 'cooldown', 'permission', 'status', 'module');
+            db.addTable('commands', [{ name: 'name', unique: true },
+                'cooldown', 'permission', 'status', 'price', 'module'
+            ], true)
+                .addTable('users', [{ name: 'name', unique: true },
+                    'cooldown', 'permission', 'status', 'price', 'module', 'parent'
+                ], true);
 
             Logger.bot('Bot ready.');
             Transit.emit('bot:ready');

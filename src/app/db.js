@@ -3,7 +3,7 @@ import jetpack from 'fs-jetpack';
 import moment from 'moment';
 import { app } from 'electron';
 import util from './main/utils/util';
-import Store from './main/utils/Store.js';
+import Trilogy from './main/utils/Trilogy.js';
 
 let db = null, botDB = null;
 
@@ -18,7 +18,7 @@ let db = null, botDB = null;
      * Possibly make it user-defined as well
      */
     jetpack.dir(path.resolve(__dirname, '..', 'db'));
-    db = new Store(path.resolve(__dirname, '..', 'db', 'singularity.db'));
+    db = new Trilogy(path.resolve(__dirname, '..', 'db', 'singularity.db'));
 
     /**
      * ... or in the app's directory in the user's home folder?
@@ -33,33 +33,6 @@ let db = null, botDB = null;
     */
 }
 
-{
-    /**
-     * Creates a table of followers with columns:
-     * twitchid | username | timestamp | evtype
-     */
-    db.run('CREATE TABLE IF NOT EXISTS followers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, notifications TEXT);');
-    // data.addTable('followers', false, { name: 'twitchid', type: 'INT', unique: true }, 'username', 'timestamp', 'evtype', 'notifications');
-
-    /**
-     * Creates a table of subscribers with columns:
-     * twitchid | username | timestamp | evtype | months
-     */
-    db.run('CREATE TABLE IF NOT EXISTS subscribers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, months TEXT);');
-
-    /**
-     * Creates a table of host events with columns:
-     * twitchid | username | timestamp | evtype | viewers
-     */
-    db.run('CREATE TABLE IF NOT EXISTS hosts (twitchid TEXT, username TEXT, timestamp TEXT, evtype TEXT, viewers TEXT);');
-
-    /**
-     * Creates a table of tip events with columns:
-     * twitchid | username | timestamp | evtype | amount | message
-     */
-    db.run('CREATE TABLE IF NOT EXISTS tips (username TEXT, timestamp TEXT, evtype TEXT, amount TEXT, message TEXT);');
-}
-
 /**
  * Collection of api methods for main database functions
  * @export default
@@ -68,40 +41,26 @@ const data = {
     /**
      * @function - Creates or accesses bot.db when bot is enabled
      */
-    initBotDB: (fn) => {
-        botDB = new Store(path.resolve(__dirname, '..', 'db', 'bot.db'));
-        if (!fn) return true;
+    initBotDB(fn = () => {}) {
+        botDB = new Trilogy(path.resolve(__dirname, '..', 'db', 'bot.db'));
         fn();
+        return botDB;
     },
-    addTable: (name, bot, ...args) => {
-        let query = [];
-        let unique = false;
-        for (let key of args) {
-            if (typeof key !== null && typeof key === 'object' && unique === false) {
-                unique = true;
-                if (key.hasOwnProperty('unique')) {
-                    if (!key.hasOwnProperty('type')) {
-                        query.push(`${key.name} TEXT UNIQUE`);
-                    } else {
-                        query.push(`${key.name} ${key.type} UNIQUE`);
-                    }
-                } else {
-                    if (!key.hasOwnProperty('type')) {
-                        query.push(`${key.name} TEXT`);
-                    } else {
-                        query.push(`${key.name} ${key.type}`);
-                    }
-                }
-            } else {
-                query.push(`${key} TEXT`);
-            }
-        }
-        let queryString = query.join(', ');
+    errHandler(err) {
+        if (err) return Logger.error(err);
+    },
+    addTable(name, args, bot = false, ifNotExists = true, fn = this.errHandler) {
         if (!bot) {
-            db.run(`CREATE TABLE IF NOT EXISTS ${name} (${queryString});`);
+            db.create(name, args, ifNotExists, (err, res) => {
+                if (err) Logger.error(err);
+                if (fn) fn(err, res);
+            });
         } else {
-            botDB.run(`CREATE TABLE IF NOT EXISTS ${name} (${queryString});`);
+            botDB.create(name, args, ifNotExists, (err, res) => {
+                fn(err, res);
+            });
         }
+        return this;
     },
 
     /**
@@ -208,25 +167,34 @@ const data = {
  */
 data.bot = {
     initSettings: function() {
-        this.settings.confirm('prefix', '!');
-        this.settings.confirm('defaultCooldown', '30');
-        this.settings.confirm('whisperMode', 'false');
-        this.settings.confirm('globalCooldown', 'false');
-        this.settings.confirm('followAlerts', 'true');
-        this.settings.confirm('hostAlerts', 'true');
-        this.settings.confirm('subAlerts', 'true');
-        this.settings.confirm('tipAlerts', 'false');
-        this.settings.confirm('responseMention', 'false');
+        this.settings.confirm('prefix', '!')
+            .confirm('defaultCooldown', '30')
+            .confirm('whisperMode', 'false')
+            .confirm('globalCooldown', 'false')
+            .confirm('followAlerts', 'true')
+            .confirm('hostAlerts', 'true')
+            .confirm('subAlerts', 'true')
+            .confirm('tipAlerts', 'false')
+            .confirm('responseMention', 'false')
+
+            .confirm('pointsPayoutLive', '6')
+            .confirm('pointsPayoutOffline', '-1')
+            .confirm('pointsIntervalLive', '1')
+            .confirm('pointsIntervalOffline', '-1');
     },
 
     settings: {
-        get(key) {
+        get(key, fn) {
             let value = botDB.getValue('settings', 'value', { key });
             if (value !== null) {
                 if (value.hasOwnProperty('error')) return Logger.error(value.error);
 
                 if (value === 'true' || value === 'false') value = (value === 'true');
-                if (util.isNumeric(value)) value = parseInt(value);
+                if (util.str.isNumeric(value)) value = parseInt(value);
+                if (fn) {
+                    fn(value);
+                    return this;
+                }
                 return value;
             }
         },
@@ -236,6 +204,7 @@ data.bot = {
             botDB.put('settings', { key, value }, { conflict: 'replace'}, (err, res) => {
                 if (err) Logger.error(err);
             });
+            return this;
         },
         confirm(key, value) {
             // Only sets the value if the key does not exist
@@ -244,93 +213,152 @@ data.bot = {
             botDB.put('settings', { key, value }, { conflict: 'ignore' }, (err, res) => {
                 if (err) Logger.error(err);
             });
+            return this;
         }
     },
 
     data: {
-        get: (table, what, where) => {
+        get(table, what, where, fn) {
             let response = botDB.getValue(table, what, where);
-            if (response === null) return 404;
+            if (response === null) return;
             if (response) {
                 if (response === 'true' || response === 'false') {
                     response = (response === 'true');
                 }
-                if (util.isNumeric(response)) response = parseInt(response);
+                if (util.str.isNumeric(response)) response = parseInt(response);
+                if (fn) {
+                    fn(response);
+                    return this;
+                }
                 return response;
             }
         },
-        set(table, what, where) {
+        set(table, what, where = null, options = {}) {
             if (typeof table !== 'string') return;
             if (!(typeof what !== null && typeof what === 'object')) return;
-            if (!(typeof where !== null && typeof where === 'object')) return;
+
+            let whatWhere = Object.assign({}, what, where);
+
+            let obj = { conflict: 'abort' };
+            Object.assign(obj, options);
             
-            let obj = { conflict: 'replace' };
-            Object.assign(obj, where);
+            botDB.put(table, whatWhere, obj, () => {
+                if (obj.conflict === 'abort') {
+                    if (typeof where !== null && typeof where === 'object') {
+                        botDB.update(table, what, where);
+                    }
+                }
+            });
             
-            botDB.put(table, what, where);
+            return this;
+        },
+        confirm(table, what, where) {
+            if (typeof table !== 'string') return;
+            if (!(typeof what !== null && typeof what === 'object')) return;
+
+            let whatWhere = Object.assign({}, what, where);
+
+            let obj = { conflict: 'abort' };
+
+            botDB.put(table, whatWhere, obj, () => {});
+            
+            return this;
         },
         setPermissionTest(user, permission) {
             botDB.update('users', { permission }, { name: user });
         }
     },
 
-    addCommand(name, cooldown, permission, status, module) {
+    addCommand(name, cooldown, permission, status, price, module) {
         if (!name || !module) {
             Logger.bot('Failed to add command. Name & module are required.');
             return;
         }
-        botDB.put('commands', { name, cooldown, permission, status, module }, { conflict: 'ignore' }, (err, res) => {
+        botDB.put('commands', { name, cooldown, permission, status, price, module }, { conflict: 'ignore' }, (err, res) => {
             if (err) Logger.error(err);
         });
+        return this;
+    },
+
+    addSubCommand(name, cooldown, permission, status, price, module, parent) {
+        if (!name || !module || !parent) {
+            Logger.bot('Failed to add command. Name, module, & parent are required.');
+            return;
+        }
+        botDB.put('subcommands', { name, cooldown, permission, status, price, module, parent }, { conflict: 'ignore' }, (err, res) => {
+            if (err) Logger.error(err);
+        });
+        return this;
     },
 
     addUser(user) {
-        const { name, permLevel, mod, following, seen } = user;
-        botDB.put('users', { name, permission: permLevel, mod, following, seen }, { conflict: 'abort' }, (err, res) => {
+        const { name, permLevel, mod, following, seen, points } = user;
+        botDB.put('users', { name, permission: permLevel, mod, following, seen, points }, { conflict: 'abort' }, (err, res) => {
             if (err) Logger.error(err);
-            botDB.update('users', { mod, following, seen }, { name });
+            botDB.update('users', { permission: permLevel, mod, following, seen, points }, { name });
         });
     },
 
-    getPermLevel: (user, fn) => {
+    getPermLevel: (user, fn = () => {}) => {
         const username = user['display-name'];
         const userType = user['user-type'];
         let defaultPermLevel = 7;
     
         if (userType === 'mod') defaultPermLevel = 1;
         if (username === Settings.get('channel') || username === Settings.get('botName'))
-            defaultPermLevel = 0;
+            defaultPermLevel = 7;
     
-        const _permission = parseInt(botDB.getValue('users', 'permission', { name: username }));
-        if (!Number.isNaN(_permission)) {
-            if (fn && typeof fn === 'function') fn(_permission);
+        const _permission = util.num.validate(botDB.getValue('users', 'permission', { name: username }));
+        if (_permission >= 0) {
+            fn(_permission);
             return _permission;
         } else {
-            const type = Number.isNaN(_permission) ? 'NaN' : typeof v;
-            Logger.debug(`ERR in getPermLevel:: Expected a number, got ${type}`);
-            if (fn && typeof fn === 'function') fn(defaultPermLevel);
+            Logger.debug(`ERR in getPermLevel:: assigning default permissions to ${username}`);
+            fn(defaultPermLevel);
             return defaultPermLevel;
         }
-    },
-
-    getCommandStatus: (cmd) => {
-        let status = botDB.getValue('commands', 'status', { name: cmd });
-        status = (status === 'true');
-        Logger.absurd(`'${cmd}' is ${(status) ? 'enabled' : 'disabled'}.`);
-        return status;
-    },
-
-    setCommandStatus: (cmd, bool) => {
-        if (typeof bool !== 'string') bool = bool.toString();
-        if (bool !== 'true' && bool !== 'false') {
-            return Logger.debug('ERR in setCommandStatus:: requires boolean string');
-        }
-        botDB.update('commands', { status: bool }, { name: cmd });
-    },
-
-    getCommandPrefix: () => {
-        return botDB.getValue('settings', 'value', { key: 'prefix' });
     }
 };
+
+{
+    /**
+     * Creates a table of followers with columns:
+     * twitchid | username | timestamp | evtype
+     */
+    // db.run('CREATE TABLE IF NOT EXISTS followers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, notifications TEXT);');
+    data.addTable('followers', [{
+        name: 'twitchid',
+        type: 'INT',
+        unique: true
+    }, 'username', 'timestamp', 'evtype', 'notifications']);
+
+    /**
+     * Creates a table of subscribers with columns:
+     * twitchid | username | timestamp | evtype | months
+     */
+    // db.run('CREATE TABLE IF NOT EXISTS subscribers (twitchid INT UNIQUE, username TEXT, timestamp TEXT, evtype TEXT, months TEXT);');
+    data.addTable('subscribers', [{
+        name: 'twitchid',
+        type: 'INT',
+        unique: true
+    }, 'username', 'timestamp', 'evtype', 'months']);
+
+    /**
+     * Creates a table of host events with columns:
+     * twitchid | username | timestamp | evtype | viewers
+     */
+    // db.run('CREATE TABLE IF NOT EXISTS hosts (twitchid TEXT, username TEXT, timestamp TEXT, evtype TEXT, viewers TEXT);');
+    data.addTable('hosts', [{
+        name: 'twitchid',
+        type: 'INT'
+    }, 'username', 'timestamp', 'evtype', 'viewers']);
+
+    /**
+     * Creates a table of tip events with columns:
+     * twitchid | username | timestamp | evtype | amount | message
+     */
+    // db.run('CREATE TABLE IF NOT EXISTS tips (username TEXT, timestamp TEXT, evtype TEXT, amount TEXT, message TEXT);');
+    data.addTable('tips', ['username', 'timestamp', 'evtype', 'amount', 'message']);
+}
 
 export { data as default };
