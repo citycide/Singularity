@@ -30,7 +30,7 @@ const registerCommand = (cmd, _module, parent = false) => {
             module: _module,
             subcommands: {}
         };
-        db.bot.addSubCommand(name, cooldown, permLevel, status, price, _module, parent);
+        db.bot.addSubcommand(name, cooldown, permLevel, status, price, _module, parent);
     } else {
         commands[name] = {
             name,
