@@ -182,7 +182,7 @@ const exportAPI = {
     setPrice: points.setCommandPrice
 };
 
-Transit.on('bot:ready', () => {
+$.on('bot:ready', () => {
     Object.assign($.command, exportAPI);
 
     $.points = {

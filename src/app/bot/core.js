@@ -1,26 +1,25 @@
 /* jshint -W014 */
 
 import jetpack from 'fs-jetpack';
+import EventEmitter from 'events';
 import path from 'path';
 import db from '../../app/db';
 import Tock from '../main/utils/Tock';
 import { updateAuth, default as bot } from './bot';
 import userModules from '../../app/main/utils/_userModuleSetup';
 import mods from './moduleHandler';
-import cooldown from './core/cooldown';
-import points from './core/points';
-import twitchapi from './core/twitchapi';
-import { unregister, default as registry } from './core/commandRegistry';
+
+let commandRegistry = null;
+let registry = null;
 
 const loaders = {
     sys: null,
     user: null
 };
 
-const core = {
+const coreMethods = {
     api: bot.api,
     tick: new Tock(),
-    // db: db,
 
     channel: {
         name: Settings.get('channel'),
@@ -68,7 +67,7 @@ const core = {
         },
         exists(cmd, sub) {
             if (!registry.hasOwnProperty(cmd)) return false;
-            
+
             if (!sub) {
                 return registry.hasOwnProperty(cmd);
             } else {
@@ -232,8 +231,20 @@ const core = {
     }
 };
 
-global.core = core;
+class Core extends EventEmitter {
+    constructor() {
+        super();
+        Object.assign(this, coreMethods);
+    }
+}
+const core = new Core();
+
+/**
+ * Exports & Globals
+ */
+
 global.$ = core;
+global.core = core;
 
 const initialize = (instant = false) => {
     const delay = instant ? 1 : 5 * 1000;
@@ -254,33 +265,57 @@ const initialize = (instant = false) => {
                 .addTable('users', [{ name: 'name', unique: true },
                     'cooldown', 'permission', 'status', 'price', 'module', 'parent'
                 ], true);
+            
+            _loadComponents();
 
             Logger.bot('Bot ready.');
-            Transit.emit('bot:ready');
+            core.emit('bot:ready');
+            // Transit.emit('bot:ready');
 
             _loadModules();
         });
     }, delay);
+
+    setTimeout(() => {
+        core.emit('testing', { string: 'hello', number: 2 });
+    }, 10 * 1000);
 };
 
-const disconnect = (botDir) => {
+const disconnect = function(botDir) {
     Logger.bot('Deactivating bot...');
     bot.disconnect();
     _unloadModules(botDir);
     Logger.bot('Deactivated bot.');
 };
 
-const reconfigure = (name, auth) => {
+const reconfigure = function(name, auth) {
     updateAuth(name, auth);
 };
 
-const _loadModules = () => {
+module.exports.initialize = initialize;
+module.exports.disconnect = disconnect;
+module.exports.reconfigure = reconfigure;
+
+/**
+ * Private functions
+ */
+
+const _loadComponents = function() {
+    commandRegistry = require('./components/commandRegistry');
+    registry = commandRegistry.default;
+
+    require('./components/twitchapi');
+    require('./components/cooldown');
+    require('./components/points');
+};
+
+const _loadModules = function() {
     userModules();
     loaders.sys = require('require-directory')(module, './modules');
     loaders.user = require('require-directory')(module, Settings.get('userModulePath'));
 };
 
-const _unloadModules = (botDir) => {
+const _unloadModules = function(botDir) {
     const modules = [];
     const root = jetpack.cwd(botDir);
     root.find('./modules', { matching: ['**/*.js'] }).forEach((_path) => {
@@ -305,9 +340,5 @@ const _unloadModules = (botDir) => {
     loaders.sys = null;
     loaders.user = null;
     
-    unregister(true);
+    commandRegistry.unregister(true);
 };
-
-module.exports.initialize = initialize;
-module.exports.disconnect = disconnect;
-module.exports.reconfigure = reconfigure;

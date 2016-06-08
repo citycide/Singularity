@@ -80,7 +80,7 @@ const _registerSubcommand = (name, parent, options) => {
     registerCommand(obj, parentModule, parent);
 };
 
-Transit.on('bot:ready', () => {
+$.on('bot:ready', () => {
     $.addCommand = _registerCommand;
     $.addSubcommand = _registerSubcommand;
 

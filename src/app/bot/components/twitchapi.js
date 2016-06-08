@@ -149,7 +149,7 @@ const twitchAPI = {
     }
 };
 
-Transit.on('bot:ready', () => {
+$.on('bot:ready', () => {
     $.users.list = [];
     $.users.count = 0;
 

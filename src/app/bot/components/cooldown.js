@@ -96,7 +96,7 @@ const exportAPI = {
 
 // this needs to happen on bot:ready
 // `core` is undefined until the bot fires up
-Transit.on('bot:ready', () => {
+$.on('bot:ready', () => {
     Object.assign($.command, exportAPI);
 });
 
