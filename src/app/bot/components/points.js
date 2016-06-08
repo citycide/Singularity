@@ -1,6 +1,16 @@
 /* jshint -W014 */
 
 const points = {
+    makeString(amount) {
+        const inputAmount = parseInt(amount);
+        if (inputAmount === 1) {
+            // singular
+            return `${inputAmount} ${this.settings.getPointName(true)}`;
+        } else {
+            // plural
+            return `${inputAmount} ${this.settings.getPointName()}`;
+        }
+    },
     getCommandPrice(cmd, sub = null) {
         return (sub)
             ? core.data.get('subcommands', 'price', { name: cmd })
@@ -103,6 +113,27 @@ const points = {
     settings: {
         lastPayout: 0,
         lastUserList: [],
+        getPointName(plural = false) {
+            const pointName = $.settings.get('pointName');
+            if (plural) {
+                if ($.settings.get('pointNamePlural')) {
+                    return $.settings.get('pointNamePlural');
+                }
+                if (pointName && pointName !== 'point') {
+                    return `${pointName}s`;
+                }
+                return 'points';
+            } else {
+                return pointName || 'point';
+            }
+        },
+        setPointName(name, plural = false) {
+            if (plural) {
+                $.settings.set('pointNamePlural', name);
+            } else {
+                $.settings.set('pointName', name);
+            }
+        },
         getPayoutAmount(offline) {
             if (!offline) {
                 return $.settings.get('pointsPayoutLive');
@@ -189,7 +220,10 @@ $.on('bot:ready', () => {
         add: points.add.bind(points),
         sub: points.sub.bind(points),
         get: points.getUserPoints,
-        set: points.setUserPoints
+        set: points.setUserPoints,
+        str: points.makeString.bind(points),
+        getName: points.getPointName,
+        setName: points.setPointName
     };
 
     points.run();
