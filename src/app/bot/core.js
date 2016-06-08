@@ -138,6 +138,12 @@ const coreMethods = {
         },
         set(table, what, where, options) {
             db.bot.data.set(table, what, where, options);
+        },
+        incr(table, what, where) {
+            return db.bot.data.incr(table, what, where);
+        },
+        decr(table, what, where) {
+            return db.bot.data.decr(table, what, where);
         }
     },
 
