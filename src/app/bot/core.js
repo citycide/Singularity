@@ -254,15 +254,19 @@ const initialize = (instant = false) => {
         bot.connect();
 
         db.initBotDB(() => {
-            db.addTable('settings', [{ name: 'key', unique: true }, 'value', 'info'], true)
-                .addTable('users', [{ name: 'name', unique: true }, 'permission', 'mod', 'following', 'seen', 'points'], true);
+            db.addTable('settings', [{ name: 'key', unique: true },
+                'value', 'info'
+            ], true)
+                .addTable('users', [{ name: 'name', unique: true },
+                    'permission', 'mod', 'following', 'seen', 'points', 'time', 'rank', 'group'
+                ], true);
 
             db.bot.initSettings();
 
             db.addTable('commands', [{ name: 'name', unique: true },
                 'cooldown', 'permission', 'status', 'price', 'module'
             ], true)
-                .addTable('users', [{ name: 'name', unique: true },
+                .addTable('subcommands', [{ name: 'name', unique: true },
                     'cooldown', 'permission', 'status', 'price', 'module', 'parent'
                 ], true);
             
