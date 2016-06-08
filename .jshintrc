@@ -6,6 +6,7 @@
   "esversion": 6,
   "browser": true,
   "node": true,
+  "eqnull": true,
   "globals": {
     "Logger": true,
     "Settings": true,

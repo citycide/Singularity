@@ -7,6 +7,10 @@ import Trilogy from './main/utils/Trilogy.js';
 
 let db = null, botDB = null;
 
+const errHandler = function(err) {
+    if (err) Logger.error(err);
+};
+
 /**
  * Creates or accesses singularity.db
  * @function IIFE
@@ -41,7 +45,7 @@ const data = {
     /**
      * Creates or accesses bot.db when bot is enabled
      * @function initBotDB
-     * @param {function} callback
+     * @param {function} fn
      */
     initBotDB(fn = () => {}) {
         botDB = new Trilogy(path.resolve(__dirname, '..', 'db', 'bot.db'));
@@ -243,7 +247,7 @@ data.bot = {
     data: {
         get(table, what, where, fn) {
             let response = botDB.getValue(table, what, where);
-            if (util.val.isNullLike(response))) return undefined;
+            if (util.val.isNullLike(response)) return undefined;
             
             if (typeof response === 'object' && response.hasOwnProperty('error')) {
                 Logger.error(response.error);
@@ -386,9 +390,5 @@ data.bot = {
      */
     data.addTable('tips', ['username', 'timestamp', 'evtype', 'amount', 'message']);
 }
-
-const errHandler = function(err) {
-    if (err) Logger.error(err);
-};
 
 export { data as default };
