@@ -27,6 +27,7 @@ bot.on('chat', (channel, user, message, self) => {
 
 const api = {
     isCommand(message) {
+        // @TODO change this to allow prefixes of more than 1 character
         return (message.charAt(0) === $.command.getPrefix());
     },
 
@@ -36,7 +37,7 @@ const api = {
         if (user['user-type'] === 'mod') _mod = true;
         let _user = {
             name: user['display-name'],
-            permLevel: this.getPermissions(user),
+            permLevel: $.users.getGroup(user),
             mod: _mod,
             following: $.users.isFollower(user['display-name']),
             seen: _timestamp,
@@ -53,7 +54,7 @@ const api = {
         core.runCommand({
             sender: user['display-name'],
             mod: _mod,
-            permLevel: this.getPermissions(user),
+            permLevel: $.users.getGroup(user),
             raw: message,
             command: this.getCommand(message),
             args: this.getCommandArgs(message),
@@ -90,16 +91,6 @@ const api = {
      */
     getCommandArgString(message) {
         return message.split(' ').slice(1).join(' ');
-    },
-
-    /**
-     * @function getPermissions
-     * @description returns the user's permission level
-     * @param {object} user
-     * @returns {number}
-     **/
-    getPermissions(user) {
-        return db.bot.getPermLevel(user);
     }
 };
 
