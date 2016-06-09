@@ -296,6 +296,48 @@ data.bot = {
             
             return this;
         },
+        incr(table, what, where) {
+            if (typeof table !== 'string') return;
+            if (util.val.isNullLike(what) || typeof what !== 'object') return;
+            
+            let newValue;
+            let keys = 0;
+            
+            for (let key in what) {
+                keys++;
+                this.get(table, what, where, (currentValue) => {
+                    if (typeof currentValue === 'number') {
+                        const newValue = currentValue + Math.abs(what[key]);
+                        this.set(table, { [key]: newValue }, where);
+                    }
+                });
+            }
+            
+            if (keys === 1) return newValue;
+        },
+        decr(table, what, where = null, allowNegative = false) {
+            if (typeof table !== 'string') return;
+            if (util.val.isNullLike(what) || typeof what !== 'object') return;
+            
+            let newValue;
+            let keys = 0;
+            
+            for (let key in what) {
+                keys++;
+                this.get(table, what, where, (currentValue) => {
+                    if (typeof currentValue === 'number') {
+                        if (allowNegative) {
+                            newValue = currentValue - Math.abs(what[key]);
+                        } else {
+                            newValue = Math.floor(0, currentValue - Math.abs(what[key]));
+                        }
+                        this.set(table, { [key]: newValue }, where);
+                    }
+                });
+            }
+            
+            if (keys === 1) return newValue;
+        },
         setPermissionTest(user, permission) {
             botDB.update('users', { permission }, { name: user });
         }
