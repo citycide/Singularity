@@ -8,6 +8,14 @@ export default {
          */
         isNumeric(value) {
             return /^\d+$/.test(value);
+        },
+        /**
+         * Check if a string is either of 'true' or 'false'
+         * @param {string} value
+         * @returns {boolean}
+         */
+        isBoolean(value) {
+            return (value === 'true' || value === 'false');
         }
     },
     num: {
