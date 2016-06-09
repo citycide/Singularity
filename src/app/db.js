@@ -219,7 +219,7 @@ data.bot = {
                 return defaultValue;
             }
 
-            if (value === 'true' || value === 'false') value = (value === 'true');
+            if (util.str.isBoolean(value)) value = (value === 'true');
             if (util.str.isNumeric(value)) value = parseInt(value);
             
             if (fn) {
@@ -254,8 +254,7 @@ data.bot = {
                 return undefined;
             }
             
-            if (response === 'true' || response === 'false') response = (response === 'true');
-            
+            if (util.str.isBoolean(response)) response = (response === 'true');
             if (util.str.isNumeric(response)) response = parseInt(response);
             
             if (fn) {
@@ -391,29 +390,6 @@ data.bot = {
                 permission: permLevel, mod, following, seen, points, time, rank
             }, { name });
         });
-    },
-
-    getPermLevel: (user, fn = () => {}) => {
-        const username = user['display-name'];
-        const userType = user['user-type'];
-        let defaultPermLevel = 5;
-        let isNotAdmin = true;
-
-        if (userType === 'mod') defaultPermLevel = 1;
-        if (username === Settings.get('channel') || username === Settings.get('botName')) {
-            defaultPermLevel = 0;
-            isNotAdmin = false;
-        }
-    
-        const _permission = util.num.validate(botDB.getValue('users', 'permission', { name: username }));
-        if (!util.val.isNullLike(_permission) && _permission >= 0 && isNotAdmin) {
-            fn(_permission);
-            return _permission;
-        } else {
-            Logger.debug(`getPermLevel:: assigning default permissions to ${username} (level ${defaultPermLevel})`);
-            fn(defaultPermLevel);
-            return defaultPermLevel;
-        }
     }
 };
 
