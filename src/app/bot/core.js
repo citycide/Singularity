@@ -124,8 +124,8 @@ const coreMethods = {
     },
 
     settings: {
-        get(key) {
-            return db.bot.settings.get(key);
+        get(key, defaultValue) {
+            return db.bot.settings.get(key, defaultValue);
         },
         set(key, value) {
             db.bot.settings.set(key, value);
@@ -144,6 +144,9 @@ const coreMethods = {
         },
         decr(table, what, where) {
             return db.bot.data.decr(table, what, where);
+        },
+        getRow(table, where) {
+            return db.bot.data.getRow(table, where);
         }
     },
 
@@ -163,6 +166,10 @@ const coreMethods = {
                 _status = (body.error && body.status === 404) ? false : true;
             });
             return _status;
+        },
+        exists(user) {
+            const response = db.bot.data.getRow('users', { name: user });
+            return (response) ? true : false;
         },
         getPermLevel(user, fn) {
             return db.bot.getPermLevel(user, fn);
@@ -263,17 +270,40 @@ const initialize = (instant = false) => {
             db.addTable('settings', [{ name: 'key', unique: true },
                 'value', 'info'
             ], true)
-                .addTable('users', [{ name: 'name', unique: true },
-                    'permission', 'mod', 'following', 'seen', 'points', 'time', 'rank', 'group'
+                .addTable('users', [
+                    { name: 'name', unique: true },
+                    { name: 'permission', type: 'int' },
+                    { name: 'mod', defaultValue: 'false' },
+                    { name: 'following', defaultValue: 'false' },
+                    { name: 'seen', type: 'int', defaultValue: 0 },
+                    { name: 'points', type: 'int', defaultValue: 0 },
+                    { name: 'time', type: 'int', defaultValue: 0 },
+                    { name: 'rank', type: 'int', defaultValue: 1 }
+                ], true)
+                .addTable('groups', [
+                    { name: 'level', type: 'int', unique: true },
+                    'name',
+                    { name: 'bonus', type: 'int' }
                 ], true);
 
             db.bot.initSettings();
 
-            db.addTable('commands', [{ name: 'name', unique: true },
-                'cooldown', 'permission', 'status', 'price', 'module'
+            db.addTable('commands', [
+                { name: 'name', unique: true },
+                { name: 'cooldown', type: 'int', defaultValue: 30 },
+                { name: 'permission', type: 'int', defaultValue: 5 },
+                { name: 'status', defaultValue: 'false' },
+                { name: 'price', type: 'int', defaultValue: 0 },
+                'module'
             ], true)
-                .addTable('subcommands', [{ name: 'name', unique: true },
-                    'cooldown', 'permission', 'status', 'price', 'module', 'parent'
+                .addTable('subcommands', [
+                    { name: 'name', unique: true },
+                    { name: 'cooldown', type: 'int', defaultValue: 30 },
+                    { name: 'permission', type: 'int', defaultValue: 5 },
+                    { name: 'status', defaultValue: 'false' },
+                    { name: 'price', type: 'int', defaultValue: 0 },
+                    'module',
+                    'parent'
                 ], true);
             
             _loadComponents();
@@ -307,8 +337,7 @@ module.exports.disconnect = disconnect;
 module.exports.reconfigure = reconfigure;
 
 /**
- * Private functions
- */
+ * Private functions*/
 
 const _loadComponents = function() {
     commandRegistry = require('./components/commandRegistry');
@@ -317,6 +346,8 @@ const _loadComponents = function() {
     require('./components/twitchapi');
     require('./components/cooldown');
     require('./components/points');
+    require('./components/time');
+    require('./components/groups');
 };
 
 const _loadModules = function() {

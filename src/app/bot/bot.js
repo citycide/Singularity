@@ -27,7 +27,7 @@ bot.on('chat', (channel, user, message, self) => {
 
 const api = {
     isCommand(message) {
-        return (message.charAt(0) === core.command.getPrefix());
+        return (message.charAt(0) === $.command.getPrefix());
     },
 
     messageHandler(user, message) {
@@ -38,9 +38,11 @@ const api = {
             name: user['display-name'],
             permLevel: this.getPermissions(user),
             mod: _mod,
-            following: core.users.isFollower(user['display-name']),
+            following: $.users.isFollower(user['display-name']),
             seen: _timestamp,
-            points: core.points.get(user['display-name']) || 0
+            points: $.points.get(user['display-name']) || 0,
+            time: $.data.get('users', 'time', { name: user['display-name'] }) || 0,
+            rank: $.data.get('users', 'rank', { name: user['display-name'] }) || 1
         };
         db.bot.addUser(_user);
     },
@@ -66,7 +68,7 @@ const api = {
      * @returns {string}
      */
     getCommand(message) {
-        const prefixLength = core.command.getPrefix().length || 1;
+        const prefixLength = $.command.getPrefix().length || 1;
         return message.slice(prefixLength).split(' ', 1)[0].toLowerCase();
     },
 

@@ -12,6 +12,30 @@ const twitchAPI = {
             }
         }
     },
+    resolveUser(username) {
+        const opts = Object.assign({
+            url: `https://api.twitch.tv/kraken/users/${username}`
+        }, this.settings.API_OPTIONS);
+
+        $.api(opts, (err, res, body) => {
+            if (err) return Logger.error(err);
+
+            if (body) {
+                try {
+                    body = JSON.parse(body);
+                } catch (e) {
+                    Logger.error(e);
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            if (body.error && body.status === 404) return false;
+
+            if (body.display_name) return body.display_name;
+        });
+    },
     getStreamInfo() {
         const opts = Object.assign({
             url: `https://api.twitch.tv/kraken/streams/${$.channel.name}?ts=${Date.now()}`
@@ -66,7 +90,7 @@ const twitchAPI = {
         let userCount = 0;
 
         const opts = Object.assign({
-            url: `https://tmi.twitch.tv/group/user/${$.channel.name}/chatters?ts=${Date.now()}`
+            url: `https://tmi.twitch.tv/group/user/${$.channel.name}/chatters?ts=${new Date().getTime()}`
         }, this.settings.API_OPTIONS);
 
         $.api(opts, (err, res, body) => {
@@ -90,7 +114,7 @@ const twitchAPI = {
                 for (let user of body.chatters.staff) {
                     // if (user !== $.channel.name && user !== $.channel.botName) {
                         users.push({
-                            username: user,
+                            name: user,
                             role: 'staff'
                         });
                     // }
@@ -99,12 +123,10 @@ const twitchAPI = {
 
             if (body.chatters.moderators) {
                 for (let user of body.chatters.moderators) {
-                    // if (user !== $.channel.name && user !== $.channel.botName) {
-                        users.push({
-                            username: user,
-                            role: 'mod'
-                        });
-                    // }
+                    users.push({
+                        name: user,
+                        role: 'mod'
+                    });
                 }
             }
 
@@ -112,7 +134,7 @@ const twitchAPI = {
                 for (let user of body.chatters.admin) {
                     // if (user !== $.channel.name && user !== $.channel.botName) {
                         users.push({
-                            username: user,
+                            name: user,
                             role: 'admin'
                         });
                     // }
@@ -123,7 +145,7 @@ const twitchAPI = {
                 for (let user of body.chatters.global_mods) {
                     // if (user !== $.channel.name && user !== $.channel.botName) {
                         users.push({
-                            username: user,
+                            name: user,
                             role: 'globalmod'
                         });
                     // }
@@ -134,7 +156,7 @@ const twitchAPI = {
                 for (let user of body.chatters.viewers) {
                     // if (user !== $.channel.name && user !== $.channel.botName) {
                         users.push({
-                            username: user,
+                            name: user,
                             role: 'viewer'
                         });
                     // }
@@ -152,6 +174,8 @@ const twitchAPI = {
 $.on('bot:ready', () => {
     $.users.list = [];
     $.users.count = 0;
+
+    $.users.resolve = twitchAPI.resolveUser;
 
     $.stream = Object.assign({}, {
         isLive: false,

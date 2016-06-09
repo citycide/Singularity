@@ -49,6 +49,7 @@ const data = {
      */
     initBotDB(fn = () => {}) {
         botDB = new Trilogy(path.resolve(__dirname, '..', 'db', 'bot.db'));
+
         fn();
         return botDB;
     },
@@ -200,26 +201,25 @@ data.bot = {
             .confirm('hostAlerts', 'true')
             .confirm('subAlerts', 'true')
             .confirm('tipAlerts', 'false')
-            .confirm('responseMention', 'false')
-
-            .confirm('pointsPayoutLive', '6')
-            .confirm('pointsPayoutOffline', '-1')
-            .confirm('pointsIntervalLive', '1')
-            .confirm('pointsIntervalOffline', '-1');
+            .confirm('responseMention', 'false');
     },
 
     settings: {
-        get(key, fn) {
+        get(key, defaultValue, fn) {
+            if (typeof defaultValue === 'function') fn = defaultValue;
+
             let value = botDB.getValue('settings', 'value', { key });
-            if (util.val.isNullLike(value)) return undefined;
+            if (util.val.isNullLike(value)) {
+                this.set(key, defaultValue);
+                return defaultValue;
+            }
             
             if (typeof value === 'object' && value.hasOwnProperty('error')) {
                 Logger.error(value.error);
-                return undefined;
+                return defaultValue;
             }
 
             if (value === 'true' || value === 'false') value = (value === 'true');
-            
             if (util.str.isNumeric(value)) value = parseInt(value);
             
             if (fn) {
@@ -302,12 +302,17 @@ data.bot = {
             
             let newValue;
             let keys = 0;
-            
+
             for (let key in what) {
+                if (!what.hasOwnProperty(key)) { continue; }
                 keys++;
-                this.get(table, what, where, (currentValue) => {
+
+                this.get(table, key, where, (currentValue) => {
                     if (typeof currentValue === 'number') {
-                        const newValue = currentValue + Math.abs(what[key]);
+                        newValue = currentValue + Math.abs(what[key]);
+                        this.set(table, { [key]: newValue }, where);
+                    } else {
+                        newValue = Math.abs(what[key]);
                         this.set(table, { [key]: newValue }, where);
                     }
                 });
@@ -323,8 +328,10 @@ data.bot = {
             let keys = 0;
             
             for (let key in what) {
+                if (!what.hasOwnProperty(key)) { continue; }
                 keys++;
-                this.get(table, what, where, (currentValue) => {
+
+                this.get(table, key, where, (currentValue) => {
                     if (typeof currentValue === 'number') {
                         if (allowNegative) {
                             newValue = currentValue - Math.abs(what[key]);
@@ -337,6 +344,14 @@ data.bot = {
             }
             
             if (keys === 1) return newValue;
+        },
+        getRow(table, where) {
+            const response = botDB.get(table, '*', where);
+            if (response && Array.isArray(response)) {
+                return response[0];
+            } else {
+                return response;
+            }
         },
         setPermissionTest(user, permission) {
             botDB.update('users', { permission }, { name: user });
@@ -366,30 +381,36 @@ data.bot = {
     },
 
     addUser(user) {
-        const { name, permLevel, mod, following, seen, points } = user;
+        const { name, permLevel, mod, following, seen, points, time, rank } = user;
         botDB.put('users', {
-            name, permission: permLevel, mod, following, seen, points
+            name, permission: permLevel, mod, following, seen, points, time, rank
         }, { conflict: 'abort' }, (err, res) => {
             if (err) Logger.error(err, res);
-            botDB.update('users', { permission: permLevel, mod, following, seen, points }, { name });
+
+            botDB.update('users', {
+                permission: permLevel, mod, following, seen, points, time, rank
+            }, { name });
         });
     },
 
     getPermLevel: (user, fn = () => {}) => {
         const username = user['display-name'];
         const userType = user['user-type'];
-        let defaultPermLevel = 7;
-    
+        let defaultPermLevel = 5;
+        let isNotAdmin = true;
+
         if (userType === 'mod') defaultPermLevel = 1;
-        if (username === Settings.get('channel') || username === Settings.get('botName'))
-            defaultPermLevel = 7;
+        if (username === Settings.get('channel') || username === Settings.get('botName')) {
+            defaultPermLevel = 0;
+            isNotAdmin = false;
+        }
     
         const _permission = util.num.validate(botDB.getValue('users', 'permission', { name: username }));
-        if (!util.val.isNullLike(_permission) && _permission >= 0) {
+        if (!util.val.isNullLike(_permission) && _permission >= 0 && isNotAdmin) {
             fn(_permission);
             return _permission;
         } else {
-            Logger.debug(`ERR in getPermLevel:: assigning default permissions to ${username}`);
+            Logger.debug(`getPermLevel:: assigning default permissions to ${username} (level ${defaultPermLevel})`);
             fn(defaultPermLevel);
             return defaultPermLevel;
         }

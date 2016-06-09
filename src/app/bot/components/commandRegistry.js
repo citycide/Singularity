@@ -12,7 +12,7 @@ const registerCommand = (cmd, _module, parent = false) => {
     let name = cmd.name.toLowerCase();
     let handler = (cmd.hasOwnProperty('handler')) ? cmd.handler : name;
     let cooldown = (cmd.hasOwnProperty('cooldown')) ? cmd.cooldown : 30;
-    let permLevel = (cmd.hasOwnProperty('permLevel')) ? cmd.permLevel : 7;
+    let permLevel = (cmd.hasOwnProperty('permLevel')) ? cmd.permLevel : 5;
     let status = (cmd.hasOwnProperty('status')) ? cmd.status : false;
     let price = (cmd.hasOwnProperty('price')) ? cmd.price : 0;
 
@@ -55,7 +55,7 @@ const _registerCommand = (name, module, options) => {
         name,
         handler: name,
         cooldown: 30,
-        permLevel: 7,
+        permLevel: 5,
         status: false,
         price: 0
     };
@@ -69,7 +69,7 @@ const _registerSubcommand = (name, parent, options) => {
         name,
         parent,
         cooldown: 30,
-        permLevel: 7,
+        permLevel: 5,
         status: false,
         price: 0
     };

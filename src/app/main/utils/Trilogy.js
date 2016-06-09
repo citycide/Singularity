@@ -2,11 +2,11 @@ import jetpack from 'fs-jetpack';
 import SQL from 'sql.js';
 
 export default class Trilogy {
-    constructor(fileName) {
+    constructor(fileName, options = {}) {
         if (!fileName) throw new Error('Trilogy constructors must be provided a file path.');
         this.fileName = fileName;
         this.db = null;
-        this.debug = false;
+        this.debug = options.debug || false;
         this._init();
     }
 
@@ -84,24 +84,24 @@ Trilogy.prototype.create = function(table, args, ifNotExists = true, callback = 
 
             keyString.push(opts.name);
             keyString.push(opts.type.toUpperCase());
-            
-            if (opts.primaryKey && !hasPrimary) {
+
+            if (opts.hasOwnProperty('primaryKey') && !hasPrimary) {
                 hasPrimary = true;
-                keyString.push('PRIMARY KEY');
+                if (opts.primaryKey !== undefined) keyString.push('PRIMARY KEY');
             }
 
-            if (opts.notNull) {
+            if (opts.hasOwnProperty('notNull')) {
                 hasNotNull = true;
-                keyString.push('NOT NULL');
+                if (opts.notNull !== undefined) keyString.push('NOT NULL');
             }
 
-            if (!hasNotNull && opts.defaultValue) {
-                keyString.push(`DEFAULT ${key.defaultValue}`);
+            if (opts.hasOwnProperty('defaultValue')) {
+                if (opts.defaultValue !== undefined) keyString.push(`DEFAULT ${key.defaultValue}`);
             }
 
-            if (!hasUnique && opts.unique) {
+            if (!hasUnique && opts.hasOwnProperty('unique')) {
                 hasUnique = true;
-                keyString.push('UNIQUE');
+                if (opts.unique !== undefined) keyString.push('UNIQUE');
             }
 
             query.push(keyString.join(' '));
@@ -552,8 +552,8 @@ Trilogy.prototype._getOperandString = function(rule, key, operand) {
 Trilogy.prototype._defaultTableKeys = {
     // name: '',
     type: 'TEXT',
-    primaryKey: false,
-    unique: false,
-    notNull: false,
-    defaultValue: false
+    primaryKey: undefined,
+    unique: undefined,
+    notNull: undefined,
+    defaultValue: undefined
 };

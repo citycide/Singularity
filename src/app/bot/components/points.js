@@ -58,7 +58,7 @@ const points = {
         const nextOfflinePayout = this.lastPayout + (this.settings.getPayoutInterval(true) * 60 * 1000);
         let payout = 0;
 
-        if ($.isLive) {
+        if ($.stream.isLive) {
             if (this.settings.getPayoutAmount() > 0 && this.settings.getPayoutInterval() > 0) {
                 if (nextLivePayout >= now) {
                     return;
@@ -67,7 +67,7 @@ const points = {
                 }
             }
         } else {
-            if (!$.settings.get('pointsOffline')) return;
+            if (!$.settings.get('pointsOffline', false)) return;
             if (this.settings.getPayoutAmount(true) > 0 && this.settings.getPayoutInterval(true) > 0) {
                 if (nextOfflinePayout >= now) {
                     return;
@@ -80,7 +80,7 @@ const points = {
         const userList = $.users.list || [];
 
         for (let user of userList) {
-            let name = user.username;
+            let name = user.name;
             let bonus = 0;
 
             if (this.settings.lastUserList.includes(name)) {
@@ -90,11 +90,13 @@ const points = {
                      * @TODO unrelated - add ranks to the bot
                      */
 
-                    if (user.hasOwnProperty('rank')) {
-                        if (this.settings.getRankBonus(user.rank)) {
-                            bonus = this.settings.getRankBonus(user.rank);
+                    const userDB = $.data.getRow('users', { name });
+
+                    if (userDB) {
+                        if (this.settings.getRankBonus(userDB.rank)) {
+                            bonus = this.settings.getRankBonus(userDB.rank);
                         } else {
-                            bonus = this.settings.getGroupBonus(user.permLevel);
+                            bonus = this.settings.getGroupBonus(userDB.permission);
                         }
                     }
 
@@ -136,9 +138,9 @@ const points = {
         },
         getPayoutAmount(offline) {
             if (!offline) {
-                return $.settings.get('pointsPayoutLive');
+                return $.settings.get('pointsPayoutLive', 6);
             } else {
-                return $.settings.get('pointsPayoutOffline');
+                return $.settings.get('pointsPayoutOffline', -1);
             }
         },
         setPayoutAmount(amount, offline) {
@@ -150,9 +152,9 @@ const points = {
         },
         getPayoutInterval(offline) {
             if (!offline) {
-                return $.settings.get('pointsIntervalLive');
+                return $.settings.get('pointsIntervalLive', 5);
             } else {
-                return $.settings.get('pointsIntervalOffline');
+                return $.settings.get('pointsIntervalOffline', -1);
             }
         },
         setPayoutInterval(time, offline) {
@@ -178,12 +180,10 @@ const points = {
             let _storedGroupBonus;
     
             if (typeof groupName === 'number') {
-                groupName = $.data.get('groups', 'name', { id: group });
-            }
-    
-            if (groupName) {
+                _storedGroupBonus = $.data.get('groups', 'bonus', { level: group });
+            } else if (typeof groupName === 'string') {
                 _storedGroupBonus = $.data.get('groups', 'bonus', { name: groupName });
-            }
+            } else return 0;
     
             if (_storedGroupBonus) {
                 return _storedGroupBonus;
