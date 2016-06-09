@@ -1,4 +1,10 @@
 const groups = {
+    getGroupName(level) {
+        return $.data.get('groups', 'name', { level });
+    },
+    getGroupLevel(name) {
+        return parseInt($.data.get('groups', 'level', { name }));
+    },
     getUserGroup(user) {
         // 'user' parameter should always be an object
         // minimum requirements:
@@ -28,6 +34,10 @@ const groups = {
  **/
 $.on('bot:ready', () => {
     $.users.getGroup = groups.getUserGroup;
+    $.groups = {
+        getName: groups.getGroupName;
+        getLevel: groups.getGroupLevel;
+    };
     
     if ($.settings.get('groups', 'initial') === 'initial') {
         $.data.set('groups', { name: 'admin', level: 0, bonus: 0 });
