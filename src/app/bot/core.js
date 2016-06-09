@@ -348,6 +348,7 @@ const _loadComponents = function() {
     require('./components/points');
     require('./components/time');
     require('./components/groups');
+    require('./components/ranks');
 };
 
 const _loadModules = function() {
