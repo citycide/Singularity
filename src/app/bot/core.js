@@ -171,8 +171,8 @@ const coreMethods = {
             const response = db.bot.data.getRow('users', { name: user });
             return (response) ? true : false;
         },
-        getPermLevel(user, fn) {
-            return db.bot.getPermLevel(user, fn);
+        isAdmin(user) {
+            return (user === core.channel.name || user === core.channel.botName);
         }
     },
 
