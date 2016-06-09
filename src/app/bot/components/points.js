@@ -85,11 +85,6 @@ const points = {
 
             if (this.settings.lastUserList.includes(name)) {
                 if (name !== $.channel.botName) {
-                    /**
-                     * @TODO add bonus payout amounts for groups / ranks
-                     * @TODO unrelated - add ranks to the bot
-                     */
-
                     const userDB = $.data.getRow('users', { name });
 
                     if (userDB) {
@@ -116,18 +111,9 @@ const points = {
         lastPayout: 0,
         lastUserList: [],
         getPointName(plural = false) {
-            const pointName = $.settings.get('pointName');
-            if (plural) {
-                if ($.settings.get('pointNamePlural')) {
-                    return $.settings.get('pointNamePlural');
-                }
-                if (pointName && pointName !== 'point') {
-                    return `${pointName}s`;
-                }
-                return 'points';
-            } else {
-                return pointName || 'point';
-            }
+            return (!plural)
+                ? $.settings.get('pointName', 'point')
+                : $.settings.get('pointNamePlural', 'points');
         },
         setPointName(name, plural = false) {
             if (plural) {
@@ -176,30 +162,21 @@ const points = {
             $.data.set('ranks', { name: rank, bonus }, { name: rank });
         },
         getGroupBonus(group) {
-            let groupName = group;
             let _storedGroupBonus;
     
-            if (typeof groupName === 'number') {
+            if (typeof group === 'number') {
                 _storedGroupBonus = $.data.get('groups', 'bonus', { level: group });
-            } else if (typeof groupName === 'string') {
-                _storedGroupBonus = $.data.get('groups', 'bonus', { name: groupName });
+            } else if (typeof group === 'string') {
+                _storedGroupBonus = $.data.get('groups', 'bonus', { name: group });
             } else return 0;
     
-            if (_storedGroupBonus) {
-                return _storedGroupBonus;
-            } else {
-                return 0;
-            }
+            return (_storedGroupBonus) ? _storedGroupBonus : 0;
         },
         setGroupBonus(group, bonus) {
-            let groupName = group;
-    
-            if (typeof groupName === 'number') {
-                groupName = $.data.get('groups', 'name', { id: group });
-            }
-    
-            if (groupName) {
-                $.data.set('groups', { name: groupName, bonus }, { name: groupName });
+            if (typeof group === 'number') {
+                $.data.set('groups', { level: group, bonus }, { level: group });
+            } else if (typeof group === 'string') {
+                $.data.set('groups', { name: group, bonus }, { name: group });
             }
         }
     }
