@@ -5,6 +5,7 @@ import EventEmitter from 'events';
 import path from 'path';
 import db from '../../app/db';
 import Tock from '../main/utils/Tock';
+import util from '../../app/main/utils/util';
 import { updateAuth, default as bot } from './bot';
 import userModules from '../../app/main/utils/_userModuleSetup';
 import mods from './moduleHandler';
@@ -20,6 +21,7 @@ const loaders = {
 const coreMethods = {
     api: bot.api,
     tick: new Tock(),
+    util,
 
     channel: {
         name: Settings.get('channel'),
