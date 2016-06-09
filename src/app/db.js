@@ -79,7 +79,6 @@ const data = {
             twitchid: id,
             username,
             timestamp,
-            evtype: 'follower',
             notifications
         }, { conflict: 'replace' }, errHandler);
     },
@@ -126,7 +125,6 @@ const data = {
             twitchid: id,
             username,
             timestamp,
-            evtype: 'host',
             viewers
         }, errHandler);
     },
@@ -146,7 +144,6 @@ const data = {
         db.put('tips', {
             username,
             timestamp,
-            evtype: 'tip',
             amount,
             message
         }, errHandler);
