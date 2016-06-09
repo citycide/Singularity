@@ -35,9 +35,9 @@ const coreMethods = {
         }
 
         let mention = '';
-        if (this.settings.get('responseMention')) mention = `${user}: `;
+        if (this.settings.get('responseMention', false)) mention = `${user}: `;
 
-        if (this.settings.get('whisperMode') === false) {
+        if (!this.settings.get('whisperMode', false)) {
             return bot.say(this.channel.name, `${mention}${message}`);
         } else {
             return bot.whisper(user, message);
@@ -52,7 +52,7 @@ const coreMethods = {
 
     command: {
         getPrefix() {
-            return core.settings.get('prefix') || '!';
+            return core.settings.get('prefix', '!');
         },
         getModule(cmd) {
             return mods.requireModule(registry[cmd].module);
@@ -232,13 +232,7 @@ const coreMethods = {
         // Finally, run the (sub)command
         try {
             this.command.getRunner(event.command)(event);
-
-            if (subcommand) {
-                this.command.startCooldown(event.command, event.sender, subcommand);
-            } else {
-                this.command.startCooldown(event.command, event.sender);
-            }
-
+            this.command.startCooldown(event.command, event.sender, subcommand);
             this.points.sub(event.sender, commandPrice);
         } catch (err) {
             Logger.error(err);
@@ -312,15 +306,10 @@ const initialize = (instant = false) => {
 
             Logger.bot('Bot ready.');
             core.emit('bot:ready');
-            // Transit.emit('bot:ready');
 
             _loadModules();
         });
     }, delay);
-
-    setTimeout(() => {
-        core.emit('testing', { string: 'hello', number: 2 });
-    }, 10 * 1000);
 };
 
 const disconnect = function(botDir) {
