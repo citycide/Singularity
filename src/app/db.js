@@ -380,14 +380,14 @@ data.bot = {
     },
 
     addUser(user) {
-        const { name, permLevel, mod, following, seen, points, time, rank } = user;
+        const { name, groupID, mod, following, seen, points, time, rank } = user;
         botDB.put('users', {
-            name, permission: permLevel, mod, following, seen, points, time, rank
+            name, permission: groupID, mod, following, seen, points, time, rank
         }, { conflict: 'abort' }, (err, res) => {
             if (err) Logger.error(err, res);
 
             botDB.update('users', {
-                permission: permLevel, mod, following, seen, points, time, rank
+                permission: groupID, mod, following, seen, points, time, rank
             }, { name });
         });
     }
@@ -398,36 +398,48 @@ data.bot = {
      * Creates a table of followers with columns:
      * twitchid | username | timestamp | evtype
      */
-    data.addTable('followers', [{
-        name: 'twitchid',
-        type: 'INT',
-        unique: true
-    }, 'username', 'timestamp', 'evtype', 'notifications']);
+    data.addTable('followers', [
+        { name: 'twitchid', type: 'int', primaryKey: true },
+        { name: 'username', notNull: true },
+        { name: 'timestamp', type: 'int' },
+        { name: 'evtype', defaultValue: 'follower' },
+        { name: 'notifications', defaultValue: 'false' }
+    ]);
 
     /**
      * Creates a table of subscribers with columns:
      * twitchid | username | timestamp | evtype | months
      */
-    data.addTable('subscribers', [{
-        name: 'twitchid',
-        type: 'INT',
-        unique: true
-    }, 'username', 'timestamp', 'evtype', 'months']);
+    data.addTable('subscribers', [
+        { name: 'twitchid', type: 'int', primaryKey: true },
+        { name: 'username', notNull: true },
+        { name: 'timestamp', type: 'int' },
+        { name: 'evtype', defaultValue: 'subscriber' },
+        { name: 'months', type: 'int', defaultValue: 0 }
+    ]);
 
     /**
      * Creates a table of host events with columns:
      * twitchid | username | timestamp | evtype | viewers
      */
-    data.addTable('hosts', [{
-        name: 'twitchid',
-        type: 'INT'
-    }, 'username', 'timestamp', 'evtype', 'viewers']);
+    data.addTable('hosts', [
+        { name: 'twitchid', type: 'int', notNull: true },
+        { name: 'username', notNull: true },
+        { name: 'timestamp', type: 'int' },
+        { name: 'evtype', defaultValue: 'host' },
+        { name: 'viewers', type: 'int', defaultValue: 0 }
+    ]);
 
     /**
      * Creates a table of tip events with columns:
-     * twitchid | username | timestamp | evtype | amount | message
+     * username | timestamp | evtype | amount | message
      */
-    data.addTable('tips', ['username', 'timestamp', 'evtype', 'amount', 'message']);
+    data.addTable('tips', [
+        { name: 'username', notNull: true },
+        { name: 'timestamp', type: 'int' },
+        { name: 'evtype', defaultValue: 'tip' },
+        'amount', 'message'
+    ]);
 }
 
 export { data as default };
