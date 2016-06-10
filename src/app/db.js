@@ -332,7 +332,7 @@ data.bot = {
                         if (allowNegative) {
                             newValue = currentValue - Math.abs(what[key]);
                         } else {
-                            newValue = Math.floor(0, currentValue - Math.abs(what[key]));
+                            newValue = Math.min(0, currentValue - Math.abs(what[key]));
                         }
                         this.set(table, { [key]: newValue }, where);
                     }

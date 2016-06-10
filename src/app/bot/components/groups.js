@@ -35,8 +35,8 @@ const groups = {
 $.on('bot:ready', () => {
     $.users.getGroup = groups.getUserGroup;
     $.groups = {
-        getName: groups.getGroupName;
-        getLevel: groups.getGroupLevel;
+        getName: groups.getGroupName,
+        getLevel: groups.getGroupLevel
     };
     
     if ($.settings.get('groups', 'initial') === 'initial') {

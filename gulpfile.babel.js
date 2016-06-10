@@ -5,8 +5,8 @@ import rebuild from './vendor/rebuild';
 import { spawn, exec } from 'child_process';
 
 const paths = {
-    serverScripts: ['src/**/*.js', '!src/public'],
-    clientScripts: ['src/public/**/*.js', '!src/public/js/vendor/**/*.js'],
+    serverScripts: ['src/**/*.js', '!src/public{,/**}'],
+    clientScripts: ['src/public/**/*.js', '!src/public/js/vendor/{,/**}'],
     vendorScripts: ['src/public/js/vendor/**/*',
                     'node_modules/keen-ui/dist/min/keen-ui.min.js',
                     'node_modules/vue/dist/vue.js',
@@ -50,16 +50,16 @@ gulp.task('clean-overlayFNT', cleanGlob(['./build/public/views/overlays/fonts/**
 
 gulp.task('transpile-server', ['clean-server'], () => {
     gulp.src(paths.serverScripts)
-        .pipe(babel({ presets: ['es2015-node'] }))
+        .pipe(babel({ presets: ['es2015-node6'] }))
         .on('error', (err) => { console.error(err); })
         .pipe(gulp.dest('./build/'));
 });
 
 gulp.task('transpile-client', ['clean-client'], () => {
-    gulp.src(paths.clientScripts)
-        .pipe(babel( /* { presets: ['es2015'] } */ ))
+    gulp.src(paths.clientScripts, { base: './src/public' })
+        .pipe(babel({ presets: ['es2015'] }))
         .on('error', (err) => { console.error(err); })
-        .pipe(gulp.dest('./build/'));
+        .pipe(gulp.dest('./build/public'));
 });
 
 gulp.task('views', ['clean-views'], () => {
@@ -139,5 +139,7 @@ gulp.task('watch', ['build'], () => {
 });
 
 gulp.task('default', ['watch', 'transpile-server', 'transpile-client', 'images']);
+gulp.task('clean', ['clean-server', 'clean-client', 'clean-vendor', 'clean-views', 'clean-fonts', 'clean-images', 'clean-styles',
+                    'clean-assets', 'clean-overlayEJS', 'clean-overlayCSS', 'clean-overlaySND', 'clean-overlayFNT', 'clean-overlayIMG']);
 gulp.task('build', ['transpile-server', 'transpile-client', 'views', 'fonts', 'images', 'styles', 'assets', 'vendor-scripts',
                     'overlay-views', 'overlay-styles', 'overlay-sounds', 'overlay-fonts', 'overlay-images']);
