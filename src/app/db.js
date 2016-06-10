@@ -48,7 +48,13 @@ const data = {
                 default:
                     throw 'ERR in initDB:: Invalid LOCATION property';
             }
-            if (db && fn) fn(db);
+            
+            if (db) {
+                _initTables();
+                fn && fn(db);
+            } else {
+                throw 'ERR in initDB:: Database was not initialized.';
+            }
         }
     },
     /**
@@ -464,7 +470,7 @@ data.bot = {
     }
 };
 
-{
+const _initTables = function() {
     /**
      * Creates a table of followers with columns:
      * twitchid | username | timestamp | evtype
