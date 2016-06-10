@@ -13,36 +13,44 @@ const errHandler = function(err) {
 };
 
 /**
- * Creates or accesses singularity.db
- * @function IIFE
- */
-{
-    /**
-     * Store the database in the /build directory
-     * Probably best for development, so maybe make it based on dev mode?
-     * Possibly make it user-defined as well
-     */
-    jetpack.dir(path.resolve(__dirname, '..', 'db'));
-    db = new Trilogy(path.resolve(__dirname, '..', 'db', 'singularity.db'));
-
-    /**
-     * ... or in the app's directory in the user's home folder?
-    jetpack.dir(path.resolve(Settings.get('dataPath'), 'db'));
-    db = dbstore(path.resolve(Settings.get('dataPath'), 'db', 'singularity.db'));
-    */
-
-    /**
-     * ... or in the app's directory in the OS app folder?
-    jetpack.dir(path.resolve(app.getAppPath(), 'db'));
-    db = dbstore(path.resolve(app.getAppPath(), 'db', 'singularity.db'));
-    */
-}
-
-/**
  * Collection of api methods for main database functions
  * @export default
  */
 const data = {
+    /**
+     * Creates or accesses singularity.db
+     * @function IIFE
+     */
+    initDB(opts = {}, fn = () => {}) {
+        if (opts.DEV) {
+            /**
+             * Store the database in the /build directory
+             */
+            jetpack.dir(path.resolve(__dirname, '..', 'db'));
+            db = new Trilogy(path.resolve(__dirname, '..', 'db', 'singularity.db'));
+        } else {
+            switch (opts.LOCATION) {
+                case 'home':
+                    // app directory in the user home folder
+                    jetpack.dir(path.resolve(Settings.get('dataPath'), 'db'));
+                    db = dbstore(path.resolve(Settings.get('dataPath'), 'db', 'singularity.db'));
+                    break;
+                case 'data':
+                    // app directory in the OS data folder
+                    jetpack.dir(path.resolve(app.getAppPath(), 'db'));
+                    db = dbstore(path.resolve(app.getAppPath(), 'db', 'singularity.db'));
+                    break;
+                case 'custom':
+                    // user configured a custom location for the db
+                    const dbPath = Settings.get('databaseLocation', path.resolve(app.getAppPath(), 'db'));
+                    jetpack.dir(path.resolve(dbPath));
+                    break;
+                default:
+                    throw 'ERR in initDB:: Invalid LOCATION property';
+            }
+            if (db && fn) fn(db);
+        }
+    },
     /**
      * Creates or accesses bot.db when bot is enabled
      * @function initBotDB
