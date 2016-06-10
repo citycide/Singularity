@@ -1,7 +1,7 @@
 const events = [];
 
 Transit.on('alert:follow', (data) => {
-    if ($.settings.get('followAlerts')) {
+    if ($.settings.get('followAlerts', true)) {
         if (!events.includes(`${data.display_name}:follow`)) {
             events.push(`${data.display_name}:follow`);
             return $.shout(`Thanks for the follow, ${data.display_name}!`);
@@ -10,7 +10,7 @@ Transit.on('alert:follow', (data) => {
 });
 
 Transit.on('alert:host', (data) => {
-    if ($.settings.get('hostAlerts')) {
+    if ($.settings.get('hostAlerts', true)) {
         if (!events.includes(`${data.display_name}:host`)) {
             events.push(`${data.display_name}:host`);
             return $.shout(`${data.display_name} fired up the host machine. Thanks!`);
@@ -19,7 +19,7 @@ Transit.on('alert:host', (data) => {
 });
 
 Transit.on('alert:subscriber', (data) => {
-    if ($.settings.get('subAlerts')) {
+    if ($.settings.get('subAlerts', false)) {
         if (!events.includes(`${data.display_name}:sub`)) {
             events.push(`${data.display_name}:sub`);
             return $.shout(`Thanks for subscribing, ${data.display_name}!`);
@@ -28,7 +28,7 @@ Transit.on('alert:subscriber', (data) => {
 });
 
 Transit.on('alert:tip', (data) => {
-    if ($.settings.get('tipAlerts'))
+    if ($.settings.get('tipAlerts', false))
         return $.shout(`${data.name} tipped ${data.amount}. Thank you! PogChamp`);
 });
 

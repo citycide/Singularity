@@ -67,25 +67,26 @@ const points = {
                 }
             }
         } else {
-            if (!$.settings.get('pointsOffline', false)) return;
             if (this.settings.getPayoutAmount(true) > 0 && this.settings.getPayoutInterval(true) > 0) {
                 if (nextOfflinePayout >= now) {
                     return;
                 }  else {
                     payout = this.settings.getPayoutAmount(true);
                 }
+            } else {
+                return;
             }
         }
 
         const userList = $.users.list || [];
 
         for (let user of userList) {
-            let name = user.name;
             let bonus = 0;
 
-            if (this.settings.lastUserList.includes(name)) {
-                if (name !== $.channel.botName) {
-                    const userDB = $.data.getRow('users', { name });
+            if (user !== $.channel.botName) {
+                if (this.settings.lastUserList.includes(user)) {
+
+                    const userDB = $.data.getRow('users', { name: user });
 
                     if (userDB) {
                         if (this.settings.getRankBonus(userDB.rank)) {
@@ -94,11 +95,12 @@ const points = {
                             bonus = this.settings.getGroupBonus(userDB.permission);
                         }
                     }
-
-                    this.add(name, payout + bonus);
+                    
+                    // this.add(user, payout + bonus);
+                    $.data.incr('users', 'points', payout + bonus, { name: user });
+                } else {
+                    this.settings.lastUserList.push(user);
                 }
-            } else {
-                this.settings.lastUserList.push(name);
             }
 
         }
@@ -203,7 +205,9 @@ $.on('bot:ready', () => {
         setName: points.setPointName
     };
 
-    points.run();
+    setTimeout(() => {
+        points.run();
+    }, 5 * 1000);
 });
 
 export default points;

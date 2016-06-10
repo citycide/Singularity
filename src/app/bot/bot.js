@@ -21,8 +21,9 @@ const bot = new tmi.client(OPTIONS);
 
 bot.on('chat', (channel, user, message, self) => {
     if (self) return;
-    api.messageHandler(user, message);
-    if (api.isCommand(message)) api.commandHandler(user, message);
+    api.messageHandler(user, message, (userObj) => {
+        if (api.isCommand(message)) api.commandHandler(userObj, message);
+    });
 });
 
 const api = {
@@ -31,13 +32,13 @@ const api = {
         return (message.charAt(0) === $.command.getPrefix());
     },
 
-    messageHandler(user, message) {
+    messageHandler(user, message, fn) {
         let _timestamp = moment().valueOf();
         let _mod = false;
         if (user['user-type'] === 'mod') _mod = true;
         let _user = {
             name: user['display-name'],
-            permLevel: $.users.getGroup(user),
+            permission: $.users.getGroup(user),
             mod: _mod,
             following: $.users.isFollower(user['display-name']),
             seen: _timestamp,
@@ -45,16 +46,16 @@ const api = {
             time: $.data.get('users', 'time', { name: user['display-name'] }) || 0,
             rank: $.data.get('users', 'rank', { name: user['display-name'] }) || 1
         };
+        if (fn) fn(_user);
         db.bot.addUser(_user);
     },
 
     commandHandler(user, message) {
-        let _mod = false;
-        if (user['user-type'] === 'mod') _mod = true;
-        core.runCommand({
-            sender: user['display-name'],
-            mod: _mod,
-            permLevel: $.users.getGroup(user),
+        $.runCommand({
+            sender: user.name,
+            mod: user.mod,
+            groupID: user.permission,
+            rankID: user.rank,
             raw: message,
             command: this.getCommand(message),
             args: this.getCommandArgs(message),

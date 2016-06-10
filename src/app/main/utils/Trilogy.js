@@ -15,7 +15,9 @@ export default class Trilogy {
             const file = jetpack.read(this.fileName, 'buffer');
             this.db = new SQL.Database(file);
         } catch (err) {
-            Logger.error(err);
+            if (this.debug) {
+                throw err;
+            }
             this.db = new SQL.Database();
             this._write();
         }

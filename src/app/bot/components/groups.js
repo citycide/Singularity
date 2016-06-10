@@ -24,6 +24,7 @@ const groups = {
             return _groupID;
         } else {
             Logger.trace(`getUserGroup:: assigning default group to ${username} (level ${defaultGroupID})`);
+            $.data.set('users', { permission: defaultGroupID }, { name: username });
             return defaultGroupID;
         }
     }

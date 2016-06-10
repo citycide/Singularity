@@ -79,6 +79,8 @@ const twitchAPI = {
                 uptime
             });
         });
+        
+        $.tick.setTimeout('getChatUsers', this.getStreamInfo.bind(this), 30 * 1000);
     },
     /**
      * @function getChatUsers()
@@ -112,60 +114,40 @@ const twitchAPI = {
 
             if (body.chatters.staff) {
                 for (let user of body.chatters.staff) {
-                    // if (user !== $.channel.name && user !== $.channel.botName) {
-                        users.push({
-                            name: user,
-                            role: 'staff'
-                        });
-                    // }
+                    users.push(user);
                 }
             }
 
             if (body.chatters.moderators) {
                 for (let user of body.chatters.moderators) {
-                    users.push({
-                        name: user,
-                        role: 'mod'
-                    });
+                    users.push(user);
                 }
             }
 
             if (body.chatters.admin) {
                 for (let user of body.chatters.admin) {
-                    // if (user !== $.channel.name && user !== $.channel.botName) {
-                        users.push({
-                            name: user,
-                            role: 'admin'
-                        });
-                    // }
+                    users.push(user);
                 }
             }
 
             if (body.chatters.global_mods) {
                 for (let user of body.chatters.global_mods) {
-                    // if (user !== $.channel.name && user !== $.channel.botName) {
-                        users.push({
-                            name: user,
-                            role: 'globalmod'
-                        });
-                    // }
+                    users.push(user);
                 }
             }
 
             if (body.chatters.viewers) {
                 for (let user of body.chatters.viewers) {
-                    // if (user !== $.channel.name && user !== $.channel.botName) {
-                        users.push({
-                            name: user,
-                            role: 'viewer'
-                        });
-                    // }
+                    users.push(user);
                 }
             }
         });
 
+        
         $.users.list = users;
         $.users.count = userCount;
+        
+        $.tick.setTimeout('getChatUsers', this.getChatUsers.bind(this), 30 * 1000);
 
         return users;
     }
@@ -186,8 +168,4 @@ $.on('bot:ready', () => {
 
     twitchAPI.getStreamInfo();
     twitchAPI.getChatUsers();
-    setInterval(() => {
-        twitchAPI.getStreamInfo();
-        twitchAPI.getChatUsers();
-    }, 30 * 1000);
 });

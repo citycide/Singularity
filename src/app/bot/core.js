@@ -141,11 +141,11 @@ const coreMethods = {
         set(table, what, where, options) {
             db.bot.data.set(table, what, where, options);
         },
-        incr(table, what, where) {
-            return db.bot.data.incr(table, what, where);
+        incr(table, what, amount, where) {
+            return db.bot.data.incr(table, what, amount, where);
         },
-        decr(table, what, where) {
-            return db.bot.data.decr(table, what, where);
+        decr(table, what, amount, where, allowNegative) {
+            return db.bot.data.decr(table, what, amount, where, allowNegative);
         },
         getRow(table, where) {
             return db.bot.data.getRow(table, where);
@@ -216,7 +216,7 @@ const coreMethods = {
         }
 
         // Check that the user has sufficient privileges to use the (sub)command
-        if (event.permLevel > this.command.getPermLevel(event.command, subcommand)) {
+        if (event.groupID > this.command.getPermLevel(event.command, subcommand)) {
             Logger.bot(`${event.sender} does not have sufficient permissions to use !${event.command}`);
             return this.say(event.sender, `You don't have what it takes to use !${event.command}.`);
         }

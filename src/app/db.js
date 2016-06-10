@@ -4,6 +4,7 @@ import moment from 'moment';
 import { app } from 'electron';
 import util from './main/utils/util';
 import Trilogy from './main/utils/Trilogy.js';
+import _ from 'lodash';
 
 let db = null, botDB = null;
 
@@ -194,10 +195,6 @@ data.bot = {
             .confirm('defaultCooldown', '30')
             .confirm('whisperMode', 'false')
             .confirm('globalCooldown', 'false')
-            .confirm('followAlerts', 'true')
-            .confirm('hostAlerts', 'true')
-            .confirm('subAlerts', 'true')
-            .confirm('tipAlerts', 'false')
             .confirm('responseMention', 'false');
     },
 
@@ -244,10 +241,14 @@ data.bot = {
     data: {
         get(table, what, where, fn) {
             let response = botDB.getValue(table, what, where);
-            if (util.val.isNullLike(response)) return undefined;
+            if (util.val.isNullLike(response)) {
+                fn && fn();
+                return undefined;
+            }
             
-            if (typeof response === 'object' && response.hasOwnProperty('error')) {
+            if (_.isPlainObject(response) && response.hasOwnProperty('error')) {
                 Logger.error(response.error);
+                fn && fn();
                 return undefined;
             }
             
@@ -263,7 +264,7 @@ data.bot = {
         },
         set(table, what, where = null, options = {}) {
             if (typeof table !== 'string') return;
-            if (util.val.isNullLike(what) || typeof what !== 'object') return;
+            if (!_.isPlainObject(where)) return;
 
             let whatWhere = Object.assign({}, what, where);
 
@@ -272,7 +273,7 @@ data.bot = {
             
             botDB.put(table, whatWhere, obj, () => {
                 if (obj.conflict === 'abort') {
-                    if (typeof where !== null && typeof where === 'object') {
+                    if (_.isPlainObject(where)) {
                         botDB.update(table, what, where);
                     }
                 }
@@ -282,7 +283,7 @@ data.bot = {
         },
         confirm(table, what, where) {
             if (typeof table !== 'string') return;
-            if (util.val.isNullLike(what) || typeof what !== 'object') return;
+            if (!_.isPlainObject(what)) return;
 
             let whatWhere = Object.assign({}, what, where);
 
@@ -292,54 +293,119 @@ data.bot = {
             
             return this;
         },
-        incr(table, what, where) {
+        incr(table, what, amount, where) {
             if (typeof table !== 'string') return;
-            if (util.val.isNullLike(what) || typeof what !== 'object') return;
-            
-            let newValue;
-            let keys = 0;
-
-            for (let key in what) {
-                if (!what.hasOwnProperty(key)) { continue; }
-                keys++;
-
-                this.get(table, key, where, (currentValue) => {
-                    if (typeof currentValue === 'number') {
-                        newValue = currentValue + Math.abs(what[key]);
-                        this.set(table, { [key]: newValue }, where);
-                    } else {
-                        newValue = Math.abs(what[key]);
-                        this.set(table, { [key]: newValue }, where);
-                    }
-                });
+            if (typeof what !== 'string') return;
+            if (!_.isFinite(amount) || amount === 0) return;
+            if (!_.isPlainObject(where)) return;
+            if (amount < 0) {
+                this.decr(table, what, amount, where);
+                return;
             }
-            
-            if (keys === 1) return newValue;
-        },
-        decr(table, what, where = null, allowNegative = false) {
-            if (typeof table !== 'string') return;
-            if (util.val.isNullLike(what) || typeof what !== 'object') return;
-            
-            let newValue;
-            let keys = 0;
-            
-            for (let key in what) {
-                if (!what.hasOwnProperty(key)) { continue; }
-                keys++;
 
-                this.get(table, key, where, (currentValue) => {
-                    if (typeof currentValue === 'number') {
-                        if (allowNegative) {
-                            newValue = currentValue - Math.abs(what[key]);
+            let newValue = amount;
+
+            this.get(table, what, where, (currentValue) => {
+                if (_.isFinite(currentValue)) {
+                    newValue += currentValue;
+                }
+                this.set(table, { [what]: newValue }, where);
+            });
+            return newValue;
+        },
+        decr(table, what, amount, where, allowNegative) {
+            if (typeof table !== 'string') return;
+            if (typeof what !== 'string') return;
+            if (!_.isFinite(amount) || amount === 0) return;
+            if (!_.isPlainObject(where)) return;
+
+            let newValue = amount;
+
+            this.get(table, what, where, (currentValue) => {
+                if (_.isFinite(currentValue)) {
+                    if (allowNegative) {
+                        newValue = currentValue - Math.abs(amount);
+                    } else {
+                        newValue = Math.max(0, currentValue - Math.abs(amount));
+                    }
+                }
+                this.set(table, { [what]: newValue }, where);
+            });
+
+            return newValue;
+        },
+        incrBatch(table, what, where) {
+            /**
+             * Increment multiple rows in a table at once.
+             * If a 'where' object is provided, each row
+             * MUST meet the parameter in that where object
+             * or it will not be incremented.
+             * 
+             * Amounts are properties in the 'what' object
+             * and are coerced to positive unlike incr()
+             *
+             *** ARGUMENT TYPES:
+             * {string} table = 'users'
+             * {Array} what = [ { addToThis: 6 }, { AndThis: 4 } ]
+             * {object} where = { ifPropEquals: 'thisValue' }
+             */
+            if (typeof table !== 'string') return;
+            if (!Array.isArray(what)) return;
+            if (where && !_.isPlainObject(where)) return;
+            
+            let newValues = [];
+
+            for (let item of what) {
+                for (let [key, value] in Object.entries(item)) {
+                    if (!item.hasOwnProperty(key)) { continue; }
+                    if (_.isFinite(value)) { continue; }
+
+                    this.get(table, key, where, (currentValue) => {
+                        let newValue = value;
+                        if (_.isFinite(currentValue)) {
+                            newValue = currentValue + Math.abs(value);
                         } else {
-                            newValue = Math.min(0, currentValue - Math.abs(what[key]));
+                            newValue = Math.abs(value);
                         }
                         this.set(table, { [key]: newValue }, where);
-                    }
-                });
+                        newValues.push({ [key]: newValue });
+                    });
+                }
             }
             
-            if (keys === 1) return newValue;
+            return newValues;
+        },
+        decrBatch(table, what, where = null, allowNegative = false) {
+            /**
+             * See docs for incrBatch() above.
+             */
+            if (typeof table !== 'string') return;
+            if (!Array.isArray(what)) return;
+            if (where && !_.isPlainObject(where)) return;
+
+            let newValues = [];
+
+            for (let item of what) {
+                for (let [key, value] in Object.entries(item)) {
+                    if (!item.hasOwnProperty(key)) { continue; }
+                    if (_.isFinite(value)) { continue; }
+
+                    this.get(table, key, where, (currentValue) => {
+                        let newValue = value;
+                        if (_.isFinite(currentValue)) {
+                            if (allowNegative) {
+                                newValue = currentValue - Math.abs(value);
+                            } else {
+                                newValue = Math.max(0, currentValue - Math.abs(value));
+                            }
+                        }
+                        this.set(table, { [key]: newValue }, where);
+                        newValues.push({ [key]: newValue });
+                    });
+                }
+            }
+
+            return newValues;
         },
         getRow(table, where) {
             const response = botDB.get(table, '*', where);
@@ -377,14 +443,14 @@ data.bot = {
     },
 
     addUser(user) {
-        const { name, groupID, mod, following, seen, points, time, rank } = user;
+        const { name, permission, mod, following, seen, points, time, rank } = user;
         botDB.put('users', {
-            name, permission: groupID, mod, following, seen, points, time, rank
+            name, permission, mod, following, seen, points, time, rank
         }, { conflict: 'abort' }, (err, res) => {
             if (err) Logger.error(err, res);
 
             botDB.update('users', {
-                permission: groupID, mod, following, seen, points, time, rank
+                permission, mod, following, seen, points, time, rank
             }, { name });
         });
     }

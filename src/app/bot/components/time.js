@@ -14,27 +14,26 @@ const time = {
             const nextTime = moment();
             const lastTime = moment(this.settings.lastRun, 'x');
             const timeSince = nextTime.diff(lastTime, 'seconds');
-            
+
             for (let user of userList) {
-                let name = user.name;
                 let newTime = 0;
                 
-                if (name !== $.channel.botName) {
-                    if (this.settings.lastUserList.includes(name)) {
-                        newTime = $.data.incr('users', { time: timeSince }, { name });
+                if (user !== $.channel.botName) {
+                    if (this.settings.lastUserList.includes(user)) {
+                        newTime = $.data.incr('users', 'time', timeSince, { name: user });
 
                         if (this.settings.getAutoRegTime() > 0) {
-                            if (($.data.get('users', 'permission', { name }) || 5) > this.settings.getRegLevel()) {
+                            if (($.data.get('users', 'permission', { name: user }) || 5) > this.settings.getRegLevel()) {
                                 if (newTime > this.settings.getAutoRegTime()) {
                                     $.data.set('users', {
                                         permission: this.settings.getRegLevel()
-                                    }, { name });
-                                    $.shout(`${name} just became a Regular!`);
+                                    }, { name: user });
+                                    $.shout(`${user} just became a regular!`);
                                 }
                             }
                         }
                     } else {
-                        this.settings.lastUserList.push(name);
+                        this.settings.lastUserList.push(user);
                     }
                 }
             }
@@ -87,7 +86,7 @@ const time = {
 $.on('bot:ready', () => {
     setTimeout(() => {
         time.run();
-    }, 10 * 1000);
+    }, 5 * 1000);
 });
 
 export default time;
