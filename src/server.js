@@ -5,30 +5,39 @@ import express from 'express';
 import chokidar from 'chokidar';
 import socketio from 'socket.io';
 
-/********************************** EXPRESS ***********************************/
+import db from './app/db';
+import userServer from './app/main/utils/_userServerSetup';
 
 const app = express();
 const server = http.createServer(app);
 global.io = socketio(server);
 
 // Set up a basic user server if it doesn't exist
-import userServer from './app/main/utils/_userServerSetup';
 userServer(__dirname);
 
-const ROUTES = require('./app/routes')(app);
-const SOCKETS = require('./app/sockets');
 let PORT;
+let serviceLoader;
+let routes;
+let sockets;
 
-const setPort = (_port, callback) => {
+const setPort = function(_port, callback) {
     PORT = _port || 2881;
     callback && callback();
 };
 
-const start = () => {
+const start = function(isDev = false, dbLoc = 'home') {
     server.listen(PORT, () => {});
+    
+    // Initialize the database
+    db.initDB({ DEV: isDev, LOCATION: dbLoc }, () => {
+        // Database is ready
+        // Spin up the routes & sockets
+        routes = require('./app/routes')(app);
+        sockets = require('./app/sockets');
+        // Initialize the service loader
+        serviceLoader = require('./app/main/features/core/serviceLoader');
+    });
 };
-
-const serviceLoader = require('./app/main/features/core/serviceLoader');
 
 /******************************** FILE WATCHER *********************************/
 
@@ -42,7 +51,7 @@ watcher.on('change', (_path, stats) => {
     delete require.cache[_path];
 });
 
-// export the server object for electron
+// export the server object & init functions for electron
 module.exports = server;
 module.exports.start = start;
 module.exports.setPort = setPort;
