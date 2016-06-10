@@ -99,13 +99,16 @@ const onError = (error) => {
     global.Settings = new SettingsClass();
     global.PlaybackAPI = new PlaybackAPIClass();
 
+    // Initialize the database
+    const initDB = require('./app/db').initDB;
+    initDB({ DEV: global.DEV_MODE, LOCATION: 'home' });
+
     const server = require('./server.js');
     server.setPort(PORT);
-    server.start({ DEV: DEV_MODE, LOCATION: 'home' });
+    server.start();
 
     server.on('error', onError);
     server.on('listening', () => {
-        appReady();
         Logger.info(`Listening on *:${PORT}`);
         Settings.set('port', PORT);
     });
@@ -139,55 +142,53 @@ const onError = (error) => {
         }
     });
 
-    const appReady = () => {
-        app.on('ready', () => {
-            mainWindow = new BrowserWindow(generateBrowserConfig());
-            global.mainWindowID = WindowManager.add(mainWindow, 'main');
-            
-            const position = Settings.get('position');
-            let inBounds = false;
-            if (position) {
-                screen.getAllDisplays().forEach((display) => {
-                    if (position[0] >= display.workArea.x &&
-                        position[0] <= display.workArea.x + display.workArea.width &&
-                        position[1] >= display.workArea.y &&
-                        position[1] <= display.workArea.y + display.workArea.height) {
-                        inBounds = true;
-                    }
-                });
-            }
-    
-            let size = Settings.get('size');
-            size = size || [1200, 800];
-    
-            mainWindow.setSize(...size);
-            if (position && inBounds) {
-                mainWindow.setPosition(...position);
-            } else {
-                mainWindow.center();
-            }
-    
-            if (Settings.get('maximized', false)) {
-                mainWindow.maximize();
-            }
-    
-            mainWindow.loadURL(`http://localhost:${PORT}`);
-            require('./app/main/features');
-            // mainWindow.toggleDevTools();
-    
-            mainWindow.on('closed', () => {
-                mainWindow = null;
-                // server.close();
+    app.on('ready', () => {
+        mainWindow = new BrowserWindow(generateBrowserConfig());
+        global.mainWindowID = WindowManager.add(mainWindow, 'main');
+
+        const position = Settings.get('position');
+        let inBounds = false;
+        if (position) {
+            screen.getAllDisplays().forEach((display) => {
+                if (position[0] >= display.workArea.x &&
+                    position[0] <= display.workArea.x + display.workArea.width &&
+                    position[1] >= display.workArea.y &&
+                    position[1] <= display.workArea.y + display.workArea.height) {
+                    inBounds = true;
+                }
             });
-    
-            // setup i3 listener
-            const I3IpcHelper = new I3IpcHelperClass();
-            I3IpcHelper.setupEventListener();
-    
-            app.on('before-quit', () => {
-                Logger.info('Collapsing the singularity...');
-                global.quitting = true;
-            });
+        }
+
+        let size = Settings.get('size');
+        size = size || [1200, 800];
+
+        mainWindow.setSize(...size);
+        if (position && inBounds) {
+            mainWindow.setPosition(...position);
+        } else {
+            mainWindow.center();
+        }
+
+        if (Settings.get('maximized', false)) {
+            mainWindow.maximize();
+        }
+
+        mainWindow.loadURL(`http://localhost:${PORT}`);
+        require('./app/main/features');
+        // mainWindow.toggleDevTools();
+
+        mainWindow.on('closed', () => {
+            mainWindow = null;
+            // server.close();
         });
-    }
+
+        // setup i3 listener
+        const I3IpcHelper = new I3IpcHelperClass();
+        I3IpcHelper.setupEventListener();
+
+        app.on('before-quit', () => {
+            Logger.info('Collapsing the singularity...');
+            global.quitting = true;
+        });
+    });
 })();

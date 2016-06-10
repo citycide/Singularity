@@ -5,7 +5,6 @@ import express from 'express';
 import chokidar from 'chokidar';
 import socketio from 'socket.io';
 
-import db from './app/db';
 import userServer from './app/main/utils/_userServerSetup';
 
 const app = express();
@@ -17,27 +16,19 @@ userServer(__dirname);
 
 let PORT;
 let serviceLoader;
-let routes;
-let sockets;
+let ROUTES = require('./app/routes')(app);
+let SOCKETS = require('./app/sockets');
 
 const setPort = function(_port, callback) {
     PORT = _port || 2881;
     callback && callback();
 };
 
-const start = function(isDev = false, dbLoc = 'home') {
+const start = function() {
     server.listen(PORT, () => {});
-    
-    // Initialize the database
-    db.initDB({ DEV: isDev, LOCATION: dbLoc }, () => {
-        // Database is ready
-        // Spin up the routes & sockets
-        routes = require('./app/routes')(app);
-        sockets = require('./app/sockets');
-        // Initialize the service loader
-        serviceLoader = require('./app/main/features/core/serviceLoader');
-    });
 };
+
+serviceLoader = require('./app/main/features/core/serviceLoader');
 
 /******************************** FILE WATCHER *********************************/
 
