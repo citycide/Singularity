@@ -358,7 +358,7 @@ data.bot = {
             for (let item of what) {
                 for (let [key, value] in Object.entries(item)) {
                     if (!item.hasOwnProperty(key)) { continue; }
-                    if (_.isFinite(value)) { continue; }
+                    if (!_.isFinite(value)) { continue; }
 
                     this.get(table, key, where, (currentValue) => {
                         let newValue = value;
@@ -388,7 +388,7 @@ data.bot = {
             for (let item of what) {
                 for (let [key, value] in Object.entries(item)) {
                     if (!item.hasOwnProperty(key)) { continue; }
-                    if (_.isFinite(value)) { continue; }
+                    if (!_.isFinite(value)) { continue; }
 
                     this.get(table, key, where, (currentValue) => {
                         let newValue = value;
