@@ -264,7 +264,7 @@ data.bot = {
         },
         set(table, what, where = null, options = {}) {
             if (typeof table !== 'string') return;
-            if (!_.isPlainObject(where)) return;
+            if (!_.isPlainObject(what)) return;
 
             let whatWhere = Object.assign({}, what, where);
 
