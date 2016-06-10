@@ -101,12 +101,12 @@ const onError = (error) => {
 
     const server = require('./server.js');
     server.setPort(PORT);
-    server.start();
+    server.start({ DEV: DEV_MODE, LOCATION: 'home' });
 
     server.on('error', onError);
     server.on('listening', () => {
         Logger.info(`Listening on *:${PORT}`);
-        Settings.set('port', PORT)
+        Settings.set('port', PORT);
     });
 
     configureApp(app);
@@ -175,7 +175,7 @@ const onError = (error) => {
 
         mainWindow.on('closed', () => {
             mainWindow = null;
-            server.close();
+            // server.close();
         });
 
         // setup i3 listener
