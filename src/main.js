@@ -105,6 +105,7 @@ const onError = (error) => {
 
     server.on('error', onError);
     server.on('listening', () => {
+        appReady();
         Logger.info(`Listening on *:${PORT}`);
         Settings.set('port', PORT);
     });
@@ -138,53 +139,55 @@ const onError = (error) => {
         }
     });
 
-    app.on('ready', () => {
-        mainWindow = new BrowserWindow(generateBrowserConfig());
-        global.mainWindowID = WindowManager.add(mainWindow, 'main');
-        
-        const position = Settings.get('position');
-        let inBounds = false;
-        if (position) {
-            screen.getAllDisplays().forEach((display) => {
-                if (position[0] >= display.workArea.x &&
-                    position[0] <= display.workArea.x + display.workArea.width &&
-                    position[1] >= display.workArea.y &&
-                    position[1] <= display.workArea.y + display.workArea.height) {
-                    inBounds = true;
-                }
+    const appReady = () => {
+        app.on('ready', () => {
+            mainWindow = new BrowserWindow(generateBrowserConfig());
+            global.mainWindowID = WindowManager.add(mainWindow, 'main');
+            
+            const position = Settings.get('position');
+            let inBounds = false;
+            if (position) {
+                screen.getAllDisplays().forEach((display) => {
+                    if (position[0] >= display.workArea.x &&
+                        position[0] <= display.workArea.x + display.workArea.width &&
+                        position[1] >= display.workArea.y &&
+                        position[1] <= display.workArea.y + display.workArea.height) {
+                        inBounds = true;
+                    }
+                });
+            }
+    
+            let size = Settings.get('size');
+            size = size || [1200, 800];
+    
+            mainWindow.setSize(...size);
+            if (position && inBounds) {
+                mainWindow.setPosition(...position);
+            } else {
+                mainWindow.center();
+            }
+    
+            if (Settings.get('maximized', false)) {
+                mainWindow.maximize();
+            }
+    
+            mainWindow.loadURL(`http://localhost:${PORT}`);
+            require('./app/main/features');
+            // mainWindow.toggleDevTools();
+    
+            mainWindow.on('closed', () => {
+                mainWindow = null;
+                // server.close();
             });
-        }
-
-        let size = Settings.get('size');
-        size = size || [1200, 800];
-
-        mainWindow.setSize(...size);
-        if (position && inBounds) {
-            mainWindow.setPosition(...position);
-        } else {
-            mainWindow.center();
-        }
-
-        if (Settings.get('maximized', false)) {
-            mainWindow.maximize();
-        }
-
-        mainWindow.loadURL(`http://localhost:${PORT}`);
-        require('./app/main/features');
-        // mainWindow.toggleDevTools();
-
-        mainWindow.on('closed', () => {
-            mainWindow = null;
-            // server.close();
+    
+            // setup i3 listener
+            const I3IpcHelper = new I3IpcHelperClass();
+            I3IpcHelper.setupEventListener();
+    
+            app.on('before-quit', () => {
+                Logger.info('Collapsing the singularity...');
+                global.quitting = true;
+            });
         });
-
-        // setup i3 listener
-        const I3IpcHelper = new I3IpcHelperClass();
-        I3IpcHelper.setupEventListener();
-
-        app.on('before-quit', () => {
-            Logger.info('Collapsing the singularity...');
-            global.quitting = true;
-        });
-    });
+    }
 })();
