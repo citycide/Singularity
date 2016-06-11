@@ -126,6 +126,7 @@ const data = {
     getRecentFollows: () => {
         const CUTOFF = moment().subtract(60, 'days').valueOf();
         const response = db.get('followers', ' * ', { timestamp: { gt: CUTOFF } }, { desc: 'timestamp' });
+        if (!response) return [];
         for (let follow of response) {
             follow.age = moment(follow.timestamp, 'x').fromNow();
         }
@@ -133,6 +134,7 @@ const data = {
     },
     getFollows: () => {
         const response = db.get('followers', ' * ', null, { desc: 'timestamp' });
+        if (!response) return [];
         for (let follow of response) {
             follow.age = moment(follow.timestamp, 'x').fromNow(' ');
         }

@@ -270,6 +270,8 @@ TwitchClass.prototype.pollFollowers = function() {
                         db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
                     });
                     this.writeFollower(this.followers[this.followers.length-1]);
+
+                    emitFollowers({ recent: true, all: true });
                 } else {
                     body.follows.reverse().map((follower) => {
                         if (this.followers.indexOf(follower.user.display_name) === -1) {
@@ -412,4 +414,18 @@ TwitchClass.prototype.resolveUser = function(username, callback) {
             callback(resolvedUser);
         }
     });
+};
+
+const emitFollowers = function(opts = {}) {
+    if (opts.recent) {
+        setTimeout(() => {
+            io.emit('data:res:recentFollowers', db.getRecentFollows());
+        }, 3 * 1000);
+    }
+
+    if (opts.all) {
+        setTimeout(() => {
+            io.emit('data:res:followers', db.getFollows());
+        }, 3 * 1000);
+    }
 };

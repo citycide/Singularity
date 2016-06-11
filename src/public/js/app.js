@@ -250,6 +250,22 @@ socket.on('music:init', (data) => {
     state.data.currentSong = data;
 });
 
+socket.on('data:res:recentFollowers', (data) => {
+    if (!state.data.followers.length && Array.isArray(data) && data.length) {
+        for (let item of data) {
+            state.data.followers.push(item);
+        }
+    }
+});
+
+socket.on('data:res:followers', (data) => {
+    if (!state.data.allFollowers.length && Array.isArray(data) && data.length) {
+        for (let item of data) {
+            state.data.allFollowers.push(item);
+        }
+    }
+});
+
 $(function() {
     openTabHash();
     window.addEventListener('hashchange', openTabHash, false);
