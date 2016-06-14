@@ -1,8 +1,8 @@
-import gulp from'gulp';
+import gulp from 'gulp';
 import babel from 'gulp-babel';
 import clean from 'gulp-clean';
-import rebuild from './vendor/rebuild';
-import { spawn, exec } from 'child_process';
+// import rebuild from './vendor/rebuild';
+// import { spawn, exec } from 'child_process';
 
 const paths = {
     serverScripts: ['src/**/*.js', '!src/public{,/**}'],
@@ -51,14 +51,18 @@ gulp.task('clean-overlayFNT', cleanGlob(['./build/public/views/overlays/fonts/**
 gulp.task('transpile-server', ['clean-server'], () => {
     gulp.src(paths.serverScripts)
         .pipe(babel({ presets: ['es2015-node6'] }))
-        .on('error', (err) => { console.error(err); })
+        .on('error', (err) => {
+            console.error(err);
+        })
         .pipe(gulp.dest('./build/'));
 });
 
 gulp.task('transpile-client', ['clean-client'], () => {
     gulp.src(paths.clientScripts, { base: './src/public' })
         .pipe(babel({ presets: ['es2015'] }))
-        .on('error', (err) => { console.error(err); })
+        .on('error', (err) => {
+            console.error(err);
+        })
         .pipe(gulp.dest('./build/public'));
 });
 

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import API from './API'
+import API from './API';
 
 export default class TwitchAlerts {
     constructor(options) {

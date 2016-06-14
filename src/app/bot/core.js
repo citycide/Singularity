@@ -1,5 +1,3 @@
-/* jshint -W014 */
-
 import jetpack from 'fs-jetpack';
 import EventEmitter from 'events';
 import path from 'path';
@@ -106,8 +104,8 @@ const coreMethods = {
         },
         getPermLevel: (cmd, sub) => {
             return (sub)
-                ? core.data.get('commands', 'permission', { name: cmd })
-                : core.data.get('subcommands', 'permission', { name: sub });
+                ? core.data.get('subcommands', 'permission', { name: sub })
+                : core.data.get('commands', 'permission', { name: cmd });
         },
         setPermLevel: (cmd, level, sub) => {
             if (!this.exists(cmd, sub)) {
@@ -301,7 +299,7 @@ const initialize = (instant = false) => {
                     'module',
                     'parent'
                 ], true);
-            
+
             _loadComponents();
 
             Logger.bot('Bot ready.');
@@ -372,6 +370,6 @@ const _unloadModules = function(botDir) {
 
     loaders.sys = null;
     loaders.user = null;
-    
+
     commandRegistry.unregister(true);
 };

@@ -1,13 +1,11 @@
-/* jshint -W014, -W018 */
-
 const cooldown = {
     // cooldowns['command-name'] = { name, until, scope }
     cooldowns: [],
     get(cmd, sub) {
         if (!sub) {
-            return core.data.get('commands', 'cooldown', { name: cmd });
+            return $.data.get('commands', 'cooldown', { name: cmd });
         } else {
-            return core.data.get('subcommands', 'cooldown', { name: sub });
+            return $.data.get('subcommands', 'cooldown', { name: sub });
         }
     },
     start(cmd, user, sub) {
@@ -18,7 +16,7 @@ const cooldown = {
             sub: sub,
             until: Date.now() + (time * 1000),
             // if globalCooldown is set to true or no user was provided
-            scope: (core.settings.get('globalCooldown') || !user)
+            scope: ($.settings.get('globalCooldown') || !user)
                 // a value of false for cooldown scope means global, ie. all users
                 ? false
                 // handle the case where no user is provided
@@ -42,11 +40,11 @@ const cooldown = {
         return this;
     },
     getDefault() {
-        return core.settings.get('defaultCooldown');
+        return $.settings.get('defaultCooldown');
     },
     isActive(cmd, user, sub) {
         // see above for comments about cooldown scope
-        const scope = (core.settings.get('globalCooldown') || !user)
+        const scope = ($.settings.get('globalCooldown') || !user)
             ? false
             : user || false;
 
@@ -70,7 +68,7 @@ const cooldown = {
     },
     getIndex(cmd, user, sub) {
         // see above for comments about cooldown scope
-        const scope = (core.settings.get('globalCooldown') || !user)
+        const scope = ($.settings.get('globalCooldown') || !user)
             ? false
             : user || false;
 

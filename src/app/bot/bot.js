@@ -19,20 +19,13 @@ const OPTIONS = {
 
 const bot = new tmi.client(OPTIONS);
 
-bot.on('chat', (channel, user, message, self) => {
-    if (self) return;
-    api.messageHandler(user, message, (userObj) => {
-        if (api.isCommand(message)) api.commandHandler(userObj, message);
-    });
-});
-
 const api = {
     isCommand(message) {
         // @TODO change this to allow prefixes of more than 1 character
         return (message.charAt(0) === $.command.getPrefix());
     },
 
-    messageHandler(user, message, fn) {
+    messageHandler(user, message) {
         let _timestamp = moment().valueOf();
         let _mod = false;
         if (user['user-type'] === 'mod') _mod = true;
@@ -46,8 +39,15 @@ const api = {
             time: $.data.get('users', 'time', { name: user['display-name'] }) || 0,
             rank: $.data.get('users', 'rank', { name: user['display-name'] }) || 1
         };
-        if (fn) fn(_user);
+
         db.bot.addUser(_user);
+
+        if (this.isCommand(message)) this.commandHandler(_user, message);
+    },
+
+    whisperHandler(user, message) {
+        // @TODO: handle commands in whisper messages, responses should be whispered
+        // if (this.isCommand(message)) this.commandHandler(user, message);
     },
 
     commandHandler(user, message) {
@@ -94,6 +94,33 @@ const api = {
         return message.split(' ').slice(1).join(' ');
     }
 };
+
+/**
+ * Event listeners
+ */
+bot.on('chat', (channel, user, message, self) => {
+    if (self) return;
+    api.messageHandler(user, message);
+});
+
+bot.on('whisper', api.whisperHandler);
+
+bot.on('mods', (channel, mods) => {
+    if (channel !== $.channel.name) return;
+    if (mods.length) {
+        for (let mod of mods) {
+            console.log(mod);
+        }
+    }
+});
+
+bot.on('action', (channel, user, message, self) => {
+    // @TODO: handle /me (colored) messages
+});
+
+/**
+ * Exports
+ */
 
 export default bot;
 

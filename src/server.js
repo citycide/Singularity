@@ -1,5 +1,3 @@
-'use strict';
-
 import http from 'http';
 import express from 'express';
 import chokidar from 'chokidar';
@@ -14,11 +12,11 @@ global.io = socketio(server);
 // Set up a basic user server if it doesn't exist
 userServer(__dirname);
 
-let PORT;
-let serviceLoader;
-let ROUTES = require('./app/routes')(app);
-let SOCKETS = require('./app/sockets');
+const ROUTES = require('./app/routes')(app);
+const SOCKETS = require('./app/sockets');
+const SERVICES = require('./app/main/features/core/serviceLoader');
 
+let PORT;
 const setPort = function(_port, callback) {
     PORT = _port || 2881;
     callback && callback();
@@ -28,15 +26,15 @@ const start = function() {
     server.listen(PORT, () => {});
 };
 
-serviceLoader = require('./app/main/features/core/serviceLoader');
+/**
+ * File watcher
+ */
 
-/******************************** FILE WATCHER *********************************/
-
-const watcher = chokidar.watch(__dirname + '/app/**/*.js', {
+const watcher = chokidar.watch('./app/**/*.js', {
     persistent: true
 });
 
-watcher.on('change', (_path, stats) => {
+watcher.on('change', (_path) => {
     // let _module = '.' + path.sep + path.relative(__dirname, _path);
     Logger.absurd('File updated, reloading...', `'${_path}'`);
     delete require.cache[_path];

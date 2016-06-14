@@ -1,5 +1,3 @@
-/* jshint -W014 */
-
 const points = {
     makeString(amount) {
         const inputAmount = parseInt(amount);
@@ -13,44 +11,31 @@ const points = {
     },
     getCommandPrice(cmd, sub = null) {
         return (sub)
-            ? core.data.get('subcommands', 'price', { name: cmd })
-            : core.data.get('commands', 'price', { name: cmd });
+            ? $.data.get('subcommands', 'price', { name: cmd })
+            : $.data.get('commands', 'price', { name: cmd });
     },
     setCommandPrice(cmd, price, sub = null) {
         if (sub) {
-            core.data.set('subcommands', { name: cmd, price }, { name: cmd });
+            $.data.set('subcommands', { name: cmd, price }, { name: cmd });
         } else {
-            core.data.set('commands', { name: cmd, price }, { name: cmd });
+            $.data.set('commands', { name: cmd, price }, { name: cmd });
         }
     },
-    getUserPoints(user) {
-        return core.data.get('users', 'points', { name: user });
+    getUserPoints(user, makeString) {
+        if (makeString) {
+            return this.makeString($.data.get('users', 'points', { name: user }));
+        } else {
+            return $.data.get('users', 'points', { name: user });
+        }
     },
     setUserPoints(user, amount) {
-        core.data.set('users', { points: amount }, { name: user });
+        $.data.set('users', { points: amount }, { name: user });
     },
     add(user, amount) {
-        if (amount === 0) return;
-        if (amount < 0) {
-            this.sub(user, amount);
-            return;
-        }
-
-        const current = this.getUserPoints(user) || 0;
-        const newAmount = current + parseInt(amount);
-
-        this.setUserPoints(user, newAmount);
+        $.data.incr('users', 'points', amount, { name: user });
     },
     sub(user, amount) {
-        if (amount === 0) return;
-
-        const current = this.getUserPoints(user);
-        let newAmount = current - Math.abs(amount);
-
-        // do not allow user points to go negative
-        newAmount = Math.max(0, newAmount);
-
-        this.setUserPoints(user, newAmount);
+        $.data.decr('users', 'points', amount, { name: user });
     },
     run() {
         const now = Date.now();
@@ -95,7 +80,7 @@ const points = {
                             bonus = this.settings.getGroupBonus(userDB.permission);
                         }
                     }
-                    
+
                     // this.add(user, payout + bonus);
                     $.data.incr('users', 'points', payout + bonus, { name: user });
                 } else {
@@ -112,16 +97,16 @@ const points = {
     settings: {
         lastPayout: 0,
         lastUserList: [],
-        getPointName(plural = false) {
-            return (!plural)
+        getPointName(singular = false) {
+            return (singular)
                 ? $.settings.get('pointName', 'point')
                 : $.settings.get('pointNamePlural', 'points');
         },
-        setPointName(name, plural = false) {
-            if (plural) {
-                $.settings.set('pointNamePlural', name);
-            } else {
+        setPointName(name, singular = false) {
+            if (singular) {
                 $.settings.set('pointName', name);
+            } else {
+                $.settings.set('pointNamePlural', name);
             }
         },
         getPayoutAmount(offline) {
@@ -165,13 +150,13 @@ const points = {
         },
         getGroupBonus(group) {
             let _storedGroupBonus;
-    
+
             if (typeof group === 'number') {
                 _storedGroupBonus = $.data.get('groups', 'bonus', { level: group });
             } else if (typeof group === 'string') {
                 _storedGroupBonus = $.data.get('groups', 'bonus', { name: group });
             } else return 0;
-    
+
             return (_storedGroupBonus) ? _storedGroupBonus : 0;
         },
         setGroupBonus(group, bonus) {
@@ -198,7 +183,7 @@ $.on('bot:ready', () => {
     $.points = {
         add: points.add.bind(points),
         sub: points.sub.bind(points),
-        get: points.getUserPoints,
+        get: points.getUserPoints.bind(points),
         set: points.setUserPoints,
         str: points.makeString.bind(points),
         getName: points.getPointName,

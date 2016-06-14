@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import winston from 'winston';
 import { argv } from 'yargs';
 import path from 'path';
-import util from 'util';
+// import util from 'util';
 
 import configureApp from './app/main/configureApp';
 import generateBrowserConfig from './app/main/configureBrowser';
@@ -30,13 +30,9 @@ const onError = (error) => {
 
     switch (error.code) {
         case 'EACCES':
-            console.error(`${PORT} requires elevated privileges.`);
-            process.exit(1);
-            break;
+            throw new Error(`${PORT} requires elevated privileges.`);
         case 'EADDRINUSE':
-            console.error(`${PORT} is already in use.`);
-            process.exit(1);
-            break;
+            throw new Error(`${PORT} is already in use.`);
         default:
             throw error;
     }
@@ -137,7 +133,7 @@ const onError = (error) => {
     Logger.transports.file.level = Settings.get('fileLogLevel', defaultFileLogLevel);
 
     app.on('window-all-closed', () => {
-        if (process.platform != 'darwin') {
+        if (process.platform !== 'darwin') {
             app.quit();
         }
     });

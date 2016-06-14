@@ -6,7 +6,8 @@ import util from './main/utils/util';
 import Trilogy from './main/utils/Trilogy.js';
 import _ from 'lodash';
 
-let db = null, botDB = null;
+let db = null;
+let botDB = null;
 
 const errHandler = function(err) {
     if (err) Logger.error(err);
@@ -104,7 +105,8 @@ const data = {
         }, errHandler);
     },
 
-    /**Adds a tip event to the database
+    /**
+     * Adds a tip event to the database
      * @function dbTipsAdd
      * @param username
      * @param [timestamp]
@@ -140,7 +142,7 @@ const data = {
         }
         return response;
     },
-    
+
     /**
      * @TODO make this actually pull & combine the different types of events
      */
@@ -155,7 +157,7 @@ const data = {
         events = events.sort((a, b) => {
             let x = a[2];
             let y = b[2];
-            return y-x;
+            return y - x;
         });
         return events;
     }
@@ -183,7 +185,7 @@ data.bot = {
                 this.set(key, defaultValue);
                 return defaultValue;
             }
-            
+
             if (typeof value === 'object' && value.hasOwnProperty('error')) {
                 Logger.error(value.error);
                 return defaultValue;
@@ -191,18 +193,18 @@ data.bot = {
 
             if (util.str.isBoolean(value)) value = (value === 'true');
             if (util.str.isNumeric(value)) value = parseInt(value);
-            
+
             if (fn) {
                 fn(value);
                 return this;
             }
-            
+
             return value;
         },
         set(key, value) {
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
-            botDB.put('settings', { key, value }, { conflict: 'replace'}, errHandler);
+            botDB.put('settings', { key, value }, { conflict: 'replace' }, errHandler);
             return this;
         },
         confirm(key, value) {
@@ -221,24 +223,24 @@ data.bot = {
                 fn && fn();
                 return undefined;
             }
-            
+
             if (_.isPlainObject(response) && response.hasOwnProperty('error')) {
                 Logger.error(response.error);
                 fn && fn();
                 return undefined;
             }
-            
+
             if (util.str.isBoolean(response)) response = (response === 'true');
             if (util.str.isNumeric(response)) response = parseInt(response);
-            
+
             if (fn) {
                 fn(response);
                 return this;
             }
-            
+
             return response;
         },
-        set(table, what, where = null, options = {}) {
+        set(table, what, where, options = {}) {
             if (typeof table !== 'string') return;
             if (!_.isPlainObject(what)) return;
 
@@ -246,7 +248,7 @@ data.bot = {
 
             let obj = { conflict: 'abort' };
             Object.assign(obj, options);
-            
+
             botDB.put(table, whatWhere, obj, () => {
                 if (obj.conflict === 'abort') {
                     if (_.isPlainObject(where)) {
@@ -254,7 +256,7 @@ data.bot = {
                     }
                 }
             });
-            
+
             return this;
         },
         confirm(table, what, where) {
@@ -266,10 +268,11 @@ data.bot = {
             let obj = { conflict: 'abort' };
 
             botDB.put(table, whatWhere, obj, errHandler);
-            
+
             return this;
         },
         incr(table, what, amount, where) {
+            amount = parseInt(amount);
             if (typeof table !== 'string') return;
             if (typeof what !== 'string') return;
             if (!_.isFinite(amount) || amount === 0) return;
@@ -280,16 +283,17 @@ data.bot = {
             }
 
             let newValue = amount;
-
             this.get(table, what, where, (currentValue) => {
                 if (_.isFinite(currentValue)) {
                     newValue += currentValue;
                 }
                 this.set(table, { [what]: newValue }, where);
             });
+
             return newValue;
         },
         decr(table, what, amount, where, allowNegative) {
+            amount = parseInt(amount);
             if (typeof table !== 'string') return;
             if (typeof what !== 'string') return;
             if (!_.isFinite(amount) || amount === 0) return;
@@ -316,7 +320,7 @@ data.bot = {
              * If a 'where' object is provided, each row
              * MUST meet the parameter in that where object
              * or it will not be incremented.
-             * 
+             *
              * Amounts are properties in the 'what' object
              * and are coerced to positive unlike incr()
              *
@@ -328,15 +332,18 @@ data.bot = {
             if (typeof table !== 'string') return;
             if (!Array.isArray(what)) return;
             if (where && !_.isPlainObject(where)) return;
-            
+
             let newValues = [];
 
             for (let item of what) {
                 for (let [key, value] in Object.entries(item)) {
-                    if (!item.hasOwnProperty(key)) { continue; }
-                    if (!_.isFinite(value)) { continue; }
+                    if (!item.hasOwnProperty(key)) continue;
+
+                    value = parseInt(value);
+                    if (!_.isFinite(value)) continue;
 
                     this.get(table, key, where, (currentValue) => {
+                        currentValue = parseInt(currentValue);
                         let newValue = value;
                         if (_.isFinite(currentValue)) {
                             newValue = currentValue + Math.abs(value);
@@ -348,7 +355,7 @@ data.bot = {
                     });
                 }
             }
-            
+
             return newValues;
         },
         decrBatch(table, what, where = null, allowNegative = false) {
@@ -363,10 +370,13 @@ data.bot = {
 
             for (let item of what) {
                 for (let [key, value] in Object.entries(item)) {
-                    if (!item.hasOwnProperty(key)) { continue; }
-                    if (!_.isFinite(value)) { continue; }
+                    if (!item.hasOwnProperty(key)) continue;
+
+                    value = parseInt(value);
+                    if (!_.isFinite(value)) continue;
 
                     this.get(table, key, where, (currentValue) => {
+                        currentValue = parseInt(currentValue);
                         let newValue = value;
                         if (_.isFinite(currentValue)) {
                             if (allowNegative) {
@@ -445,31 +455,35 @@ module.exports.initDB = function(opts = {}, fn = () => {}) {
         db = new Trilogy(path.resolve(__dirname, '..', 'db', 'singularity.db'));
     } else {
         switch (opts.LOCATION) {
-            case 'home':
+            case 'home': {
                 // app directory in the user home folder
                 jetpack.dir(path.resolve(Settings.get('dataPath'), 'db'));
                 db = new Trilogy(path.resolve(Settings.get('dataPath'), 'db', 'singularity.db'));
                 break;
-            case 'data':
+            }
+            case 'data': {
                 // app directory in the OS data folder
                 jetpack.dir(path.resolve(app.getAppPath(), 'db'));
                 db = new Trilogy(path.resolve(app.getAppPath(), 'db', 'singularity.db'));
                 break;
-            case 'custom':
+            }
+            case 'custom': {
                 // user configured a custom location for the db
                 const dbPath = Settings.get('databaseLocation', path.resolve(app.getAppPath(), 'db'));
                 jetpack.dir(path.resolve(dbPath));
                 db = new Trilogy(path.resolve(dbPath, 'singularity.db'));
                 break;
-            default:
-                throw 'ERR in initDB:: Invalid LOCATION property';
+            }
+            default: {
+                throw new TypeError('ERR in initDB:: Invalid LOCATION property');
+            }
         }
 
         if (db) {
             _initTables();
             fn && fn(data);
         } else {
-            throw 'ERR in initDB:: Database was not initialized.';
+            throw new Error('ERR in initDB:: Database was not initialized.');
         }
     }
 };
@@ -522,6 +536,6 @@ const _initTables = function() {
         { name: 'evtype', defaultValue: 'tip' },
         'amount', 'message'
     ]);
-}
+};
 
 export { data as default };

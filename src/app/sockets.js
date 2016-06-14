@@ -1,6 +1,3 @@
-/*********************************** SOCKET ***********************************/
-'use strict';
-
 import db from './db';
 
 io.on('connection', (socket) => {
@@ -53,11 +50,11 @@ io.on('connection', (socket) => {
     socket.on('test:music', (data) => {
         io.emit('music:test', data);
     });
-
+    /*
     socket.on('getCurrentSong', () => {
         io.emit('setCurrentSong', musicWatcher.song);
     });
-
+    */
     socket.on('alert:complete', () => {
         Transit.emit('alert:complete');
     });

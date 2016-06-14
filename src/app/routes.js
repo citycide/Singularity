@@ -1,6 +1,3 @@
-/*********************************** ROUTES ***********************************/
-'use strict';
-
 import express from 'express';
 import path from 'path';
 import ejs from 'ejs';
@@ -180,7 +177,7 @@ module.exports = (app) => {
 
     app.get('/shell', (req, res) => {
         res.render('shell', {
-            /** 
+            /**
              * forwards the query passed to /shell
              * this is used to dynamically change the src of the webview
              * making /shell a universal window container

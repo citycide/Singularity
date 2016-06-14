@@ -7,7 +7,7 @@ import TwitchAlerts from './TwitchAlerts';
 import Tock from '../../utils/Tock';
 
 const tick = new Tock();
-let twitch, tipeee, streamTip, twitchAlerts, bot;
+let bot, streamTip, tipeee, twitch, twitchAlerts;
 const tips = [];
 
 const listeners = {
@@ -85,7 +85,7 @@ const listeners = {
                 if (!data.donations) return Logger.debug('TwitchAlerts:: No donation data found.');
                 if (tips.length === 0) {
                     data.donations.reverse().map((tip) => {
-                        if (tips.indexOf(tip.id) == -1) {
+                        if (!tips.includes(tip.id)) {
                             tips.push(tip.id);
                         }
                         let t = {
@@ -98,12 +98,14 @@ const listeners = {
                             type: 'tip'
                         };
                         // db.tipsAdd();
+                        return t;
                     });
                 } else {
                     data.donations.reverse().map((tip) => {
-                        if (tips.indexOf(tip.id) == -1) {
+                        let queueTip;
+                        if (!tips.includes(tip.id)) {
                             tips.push(tip.id);
-                            let queueTip = {
+                            queueTip = {
                                 user: {
                                     name: tip.donator.name,
                                     amount: tip.amount_label,
@@ -114,6 +116,7 @@ const listeners = {
                             };
                             Transit.emit('alert:tip:event', queueTip);
                         }
+                        return queueTip;
                     });
                 }
             }).catch((err) => {
@@ -166,7 +169,7 @@ const botConfig = {
     },
     deactivate() {
         if (!bot) return;
-        bot.disconnect(path.resolve(__dirname + '/../../../bot'));
+        bot.disconnect(path.resolve('../../../bot'));
         bot = null;
         Settings.set('botEnabled', false);
     }

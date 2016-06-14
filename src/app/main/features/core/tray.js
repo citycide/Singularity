@@ -1,7 +1,7 @@
-import {app, Menu, Tray, shell} from 'electron';
+import { app, Menu, Tray, shell } from 'electron';
 import path from 'path';
 
-import { showWinOverlay } from './desktopSettings';
+import showWinOverlay from './desktopSettings';
 
 let appIcon = null;
 const mainWindow = WindowManager.getAll('main')[0];
@@ -83,16 +83,18 @@ const setContextMenu = () => {
             ]
         },
         {
-            label: 'Overlay Preview', click: () => {
-            showWinOverlay();
-        }
+            label: 'Overlay Preview',
+            click: () => {
+                showWinOverlay();
+            }
         },
         { type: 'separator' },
         {
-            label: 'Quit', click: () => {
-            global.quitting = true;
-            app.quit();
-        }
+            label: 'Quit',
+            click: () => {
+                global.quitting = true;
+                app.quit();
+            }
         }
     ]);
     appIcon.setContextMenu(contextMenu);
@@ -126,22 +128,24 @@ function toggleMainWindow() {
 appIcon.setToolTip('singularity');
 
 switch (process.platform) {
-    case 'darwin': // <- actually means OS-X
+    case 'darwin':
+        // OS X
         // No toggle action, use the context menu.
         break;
     case 'linux':
-    case 'freebsd': // <- for the hipsters
-    case 'sunos':   // <- in case someone runs this in a museum
+    case 'freebsd':
+    case 'sunos':
         appIcon.on('click', toggleMainWindow);
         break;
-    case 'win32': // <- it's win32 also on 64-bit Windows
+    case 'win32':
+        // Win32 also on 64-bit Windows
         appIcon.on('double-click', toggleMainWindow);
         break;
     default:
-    // impossible case to satisfy Linters
+        // Unreachable case for linting
 }
 
-// DEV: Keep the icon in the global scope or it gets garbage collected........
+// DEV: Keep the icon in the global scope or it gets garbage collected
 global.appIcon = appIcon;
 
 app.on('before-quit', () => {
