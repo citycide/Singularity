@@ -8,15 +8,7 @@
     <style>
         @import url(https://fonts.googleapis.com/css?family=Slabo+27px);
 
-        html, body {
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        #follow-alert {
+        #tip-alert {
             opacity: 0;
             background-color: #03AFF9;
             display: flex;
@@ -27,11 +19,11 @@
             transition: opacity 0.5s;
         }
 
-        #follow-alert.visible {
+        #tip-alert.visible {
             opacity: 1;
         }
 
-        #follow-alert-inner {
+        #tip-alert-inner {
             position: relative;
             margin-left: auto;
             margin-right: auto;
@@ -44,8 +36,8 @@
     </style>
 </head>
 <body>
-    <div id="follow-alert">
-        <div id="follow-alert-inner"></div>
+    <div id="tip-alert">
+        <div id="tip-alert-inner"></div>
     </div>
 
     <!-- socket.io -->
@@ -54,40 +46,35 @@
     <script>
         const socket = io();
         let animating = false;
-        let animationIn = 'fadeInDownBig';
-        let animationOut = 'fadeOutUpBig';
+        let animationIn = 'fadeInUpBig';
+        let animationOut = 'fadeOutDownBig';
 
-        socket.on('alert:follow', function(data) {
-            console.log(`Received alert for ${data.display_name}`);
-            showAlert(data.display_name);
+        socket.on('alert:tip', function(data) {
+            console.log(`Received alert for ${data.name}`);
+            showAlert(data);
         });
 
-        function showAlert(username) {
-            if (!username) {
-                console.log('No username provided for showAlert.');
-                return;
-            }
+        function showAlert(data) {
             if (animating) {
                 console.log('Alert in progress. Trying again in 4 seconds...');
                 setTimeout(function() {
-                    showAlert(username);
+                    showAlert(data);
                 }, 4 * 1000);
                 return;
             }
 
             animating = true;
-            $('#follow-alert-inner').text(`${username} followed!`);
-            $('#follow-alert')
+            $('#tip-alert-inner').text(`${data.name} tipped ${data.amount}!`);
+            $('#tip-alert')
                     .removeClass()
                     .addClass(`${animationIn} animated visible`)
                     .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
                         const timer = setTimeout(function() {
-                            $('#follow-alert')
+                            $('#tip-alert')
                                     .removeClass(`${animationIn}`)
                                     .addClass(`${animationOut}`)
                                     .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
                                         animating = false;
-                                        $('#follow-alert').removeClass('visible');
                                         clearTimeout(timer);
                                     })
                         }, 8 * 1000);

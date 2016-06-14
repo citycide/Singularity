@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>singularity example - follower alerts</title>
+    <title>singularity example - host alerts</title>
     <meta charset="utf-8" />
 
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.1/animate.min.css">
@@ -16,26 +16,30 @@
             padding: 0;
         }
 
-        #follow-alert {
+        #host-alert {
             opacity: 0;
             background-color: #03AFF9;
             display: flex;
             align-items: center;
             width: 800px;
-            height: 100px;
+            height: 125px;
             -webkit-transition: opacity 0.5s;
             transition: opacity 0.5s;
         }
 
-        #follow-alert.visible {
+        #host-alert.visible {
             opacity: 1;
+            -webkit-transition: opacity 0.5s;
+            transition: opacity 0.5s;
         }
 
-        #follow-alert-inner {
+        #host-alert-inner {
             position: relative;
+            white-space: pre-wrap;
             margin-left: auto;
             margin-right: auto;
             color: white;
+            text-align: center;
             font-family: 'Slabo 27px', serif;
             font-size: 38px;
             text-transform: uppercase;
@@ -44,8 +48,8 @@
     </style>
 </head>
 <body>
-    <div id="follow-alert">
-        <div id="follow-alert-inner"></div>
+    <div id="host-alert">
+        <div id="host-alert-inner"></div>
     </div>
 
     <!-- socket.io -->
@@ -57,37 +61,40 @@
         let animationIn = 'fadeInDownBig';
         let animationOut = 'fadeOutUpBig';
 
-        socket.on('alert:follow', function(data) {
-            console.log(`Received alert for ${data.display_name}`);
-            showAlert(data.display_name);
+        socket.on('alert:host', function(user) {
+            console.log(`Received alert for ${user.display_name}`);
+            showAlert(user);
         });
 
-        function showAlert(username) {
-            if (!username) {
-                console.log('No username provided for showAlert.');
-                return;
-            }
+        function showAlert(user) {
             if (animating) {
                 console.log('Alert in progress. Trying again in 4 seconds...');
                 setTimeout(function() {
-                    showAlert(username);
+                    showAlert(user);
                 }, 4 * 1000);
                 return;
             }
-
             animating = true;
-            $('#follow-alert-inner').text(`${username} followed!`);
-            $('#follow-alert')
+
+            let viewers = '';
+            if (user.viewers) {
+                viewers = user.viewers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                $('#host-alert-inner').text(`${user.display_name} is hosting!\n${viewers} viewers`);
+            } else {
+                $('#host-alert-inner').text(`${user.display_name} is hosting!`);
+            }
+
+            $('#host-alert')
                     .removeClass()
                     .addClass(`${animationIn} animated visible`)
                     .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
                         const timer = setTimeout(function() {
-                            $('#follow-alert')
+                            $('#host-alert')
                                     .removeClass(`${animationIn}`)
                                     .addClass(`${animationOut}`)
                                     .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
                                         animating = false;
-                                        $('#follow-alert').removeClass('visible');
+                                        $('#host-alert').removeClass('visible');
                                         clearTimeout(timer);
                                     })
                         }, 8 * 1000);
