@@ -7,7 +7,7 @@ export default {
          * @reference http://stackoverflow.com/a/24457420
          */
         isNumeric(value) {
-            return /^\d+$/.test(value);
+            return (/^\d+$/).test(value);
         },
         /**
          * Check if a string is either of 'true' or 'false'

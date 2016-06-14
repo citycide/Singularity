@@ -76,7 +76,7 @@ Trilogy.prototype.create = function(table, args, ifNotExists = true, callback = 
         let keyString = [];
         let hasNotNull = false;
 
-        if (typeof key !== null && typeof key === 'object') {
+        if (key != null && typeof key === 'object') {
             if (!key.name) {
                 if (this.debug) throw new TypeError();
                 return;
@@ -149,7 +149,7 @@ Trilogy.prototype.put = function(table, data, options = { conflict: ' ' }, callb
     const values = [];
 
     for (let key in data) {
-        if (!data.hasOwnProperty(key)) { continue; }
+        if (!data.hasOwnProperty(key)) continue;
         keys.push(key);
         values.push(data[key]);
     }
@@ -180,10 +180,11 @@ Trilogy.prototype.put = function(table, data, options = { conflict: ' ' }, callb
  * @param {string} limit
  * @returns {*}
  */
-Trilogy.prototype.get = function(table, what = '', where = null, order = null, limit = null) {
+Trilogy.prototype.get = function(table, what = '', where, order, limit) {
     if (!what) {
-        if (this.debug)
+        if (this.debug) {
             throw new TypeError(`Trilogy#get :: 'what' parameter is required.`);
+        }
         return;
     }
 
@@ -200,10 +201,10 @@ Trilogy.prototype.get = function(table, what = '', where = null, order = null, l
     let location = [];
     if (where) {
         for (let key in where) {
-            if (!where.hasOwnProperty(key)) { continue; }
-            if (typeof where[key] !== null && typeof where[key] === 'object') {
+            if (!where.hasOwnProperty(key)) continue;
+            if (where[key] != null && typeof where[key] === 'object') {
                 for (let rule in where[key]) {
-                    if (!where[key].hasOwnProperty(rule)) { continue; }
+                    if (!where[key].hasOwnProperty(rule)) continue;
 
                     let operand = where[key][rule];
 
@@ -224,7 +225,7 @@ Trilogy.prototype.get = function(table, what = '', where = null, order = null, l
     let orderString = '';
     if (order) {
         for (let key in order) {
-            if (!order.hasOwnProperty(key)) { continue; }
+            if (!order.hasOwnProperty(key)) continue;
             orderString = ` ORDER BY ${order[key]} ${key.toUpperCase()}`;
         }
     }
@@ -274,18 +275,19 @@ Trilogy.prototype.get = function(table, what = '', where = null, order = null, l
  * @param {object} where
  * @returns {*}
  */
-Trilogy.prototype.getValue = function(table, what = null, where = null) {
+Trilogy.prototype.getValue = function(table, what, where) {
     const location = [];
 
     if (!table || !what) {
-        if (this.debug)
+        if (this.debug) {
             throw new TypeError(`Trilogy#getValue :: 'table' & 'what' parameters are required.`);
+        }
         return;
     }
 
     if (where) {
         for (let key in where) {
-            if (!where.hasOwnProperty(key)) { continue; }
+            if (!where.hasOwnProperty(key)) continue;
             location.push(`${key} = '${where[key]}'`);
         }
     }
@@ -325,18 +327,19 @@ Trilogy.prototype.getValue = function(table, what = null, where = null) {
  * @param {function} callback
  * @returns {*}
  */
-Trilogy.prototype.del = function(table, where = null, callback = () => {}) {
+Trilogy.prototype.del = function(table, where, callback = () => {}) {
     const location = [];
 
     if (!table || !where) {
-        if (this.debug)
+        if (this.debug) {
             throw new TypeError(`Trilogy#del :: 'table' & 'where' parameters are required.`);
+        }
         return;
     }
 
     if (where) {
         for (let key in where) {
-            if (!where.hasOwnProperty(key)) { continue; }
+            if (!where.hasOwnProperty(key)) continue;
             location.push(`${key} = '${where[key]}'`);
         }
     }
@@ -378,8 +381,9 @@ Trilogy.prototype.del = function(table, where = null, callback = () => {}) {
  */
 Trilogy.prototype.update = function(table, data, where, options = { conflict: ' ' }, callback = () => {}) {
     if (!table || !data || !where) {
-        if (this.debug)
+        if (this.debug) {
             throw new TypeError(`Trilogy#del :: 'table', 'data', & 'where' parameters are required.`);
+        }
         return;
     }
 
@@ -389,14 +393,14 @@ Trilogy.prototype.update = function(table, data, where, options = { conflict: ' 
 
     const sets = [];
     for (let key in data) {
-        if (!data.hasOwnProperty(key)) { continue; }
+        if (!data.hasOwnProperty(key)) continue;
         sets.push(`${key} = '${data[key]}'`);
     }
     const setString = sets.join(', ');
 
     const location = [];
     for (let key in where) {
-        if (!where.hasOwnProperty(key)) { continue; }
+        if (!where.hasOwnProperty(key)) continue;
         location.push(`${key} = '${where[key]}'`);
     }
     const locationString = (location.length > 0)

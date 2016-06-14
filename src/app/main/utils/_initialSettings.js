@@ -1,4 +1,4 @@
-import {app, remote} from 'electron';
+import { app, remote } from 'electron';
 import path from 'path';
 
 const DIR = path.resolve(`${(app ? app.getPath('home') : remote.require('electron').app.getPath('home'))}/singularity`); // eslint-disable-line

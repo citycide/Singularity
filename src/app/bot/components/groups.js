@@ -9,16 +9,16 @@ const groups = {
         // 'user' parameter should always be an object
         // minimum requirements:
         // user = { 'display-name': 'name' };
-        
+
         const username = user['display-name'];
         const userType = user['user-type'];
         if (!username) return;
-        
+
         let defaultGroupID = 5;
 
         if (userType === 'mod') defaultGroupID = 1;
         if ($.users.isAdmin(username)) defaultGroupID = 0;
-    
+
         const _groupID = $.util.num.validate($.data.get('users', 'permission', { name: username }));
         if (!$.util.val.isNullLike(_groupID) && _groupID >= 0 && !$.users.isAdmin(username)) {
             return _groupID;
@@ -39,7 +39,7 @@ $.on('bot:ready', () => {
         getName: groups.getGroupName,
         getLevel: groups.getGroupLevel
     };
-    
+
     if ($.settings.get('groups', 'initial') === 'initial') {
         $.data.set('groups', { name: 'admin', level: 0, bonus: 0 });
         $.data.set('groups', { name: 'moderator', level: 1, bonus: 0 });

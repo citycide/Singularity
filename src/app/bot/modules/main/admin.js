@@ -19,10 +19,11 @@ module.exports.command = (event) => {
                 status = $.command.enable(param1);
             }
             
-            if (status === 404)
+            if (status === 404) {
                 return $.say(event.sender, `That command is not registered.`);
-            if (status === 200)
+            } else if (status === 200) {
                 return $.say(event.sender, `Command '${param1}' enabled.`);
+            }
             
             break;
         case 'disable':
@@ -37,19 +38,26 @@ module.exports.command = (event) => {
                 status = $.command.disable(param1);
             }
             
-            if (status === 404)
+            if (status === 404) {
                 return $.say(event.sender, `That command is not registered.`);
-            if (status === 200)
+            } else if (status === 200) {
                 return $.say(event.sender, `Command '${param1}' disabled.`);
+            }
             
             break;
         case 'permission':
             if (event.args.length < 2) {
                 return $.say(event.sender, `Usage: !command [permission] [command name] [level]`);
             }
+
             status = $.command.setPermLevel(param1, param2);
-            if (status === 404) return $.say(event.sender, `That command is not registered.`);
-            if (status === 200) return $.say(event.sender, `Permission level for '${param1}' set to ${param2}`);
+
+            if (status === 404) {
+                return $.say(event.sender, `That command is not registered.`);
+            } else if (status === 200) {
+                return $.say(event.sender, `Permission level for '${param1}' set to ${param2}`);
+            }
+            
             break;
         default:
             $.say(event.sender, `Usage: !command [enable | disable] [command name]`);

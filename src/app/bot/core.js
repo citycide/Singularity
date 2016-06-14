@@ -299,7 +299,7 @@ const initialize = (instant = false) => {
                     'module',
                     'parent'
                 ], true);
-            
+
             _loadComponents();
 
             Logger.bot('Bot ready.');
@@ -370,6 +370,6 @@ const _unloadModules = function(botDir) {
 
     loaders.sys = null;
     loaders.user = null;
-    
+
     commandRegistry.unregister(true);
 };

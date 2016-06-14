@@ -1,7 +1,6 @@
-'use strict';
-
 import EventEmitter from 'events';
 import io from 'socket.io-client';
+
 const API = require('./api');
 
 class StreamTip extends EventEmitter {
@@ -49,12 +48,12 @@ class StreamTip extends EventEmitter {
                 this.emit('authenticated');
             });
 
-            this.socket.on('newTip', tip => {
+            this.socket.on('newTip', (tip) => {
                 console.log('Received tip.');
                 this.emit('newTip', tip);
             });
 
-            this.socket.on('error', err => {
+            this.socket.on('error', (err) => {
                 if (err === '401::Access Denied::') {
                     this.emit('authenticationFailed');
                 } else if (err === '429::Too Many Requests::') {

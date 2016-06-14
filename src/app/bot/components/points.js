@@ -93,7 +93,7 @@ const points = {
                             bonus = this.settings.getGroupBonus(userDB.permission);
                         }
                     }
-                    
+
                     // this.add(user, payout + bonus);
                     $.data.incr('users', 'points', payout + bonus, { name: user });
                 } else {
@@ -163,13 +163,13 @@ const points = {
         },
         getGroupBonus(group) {
             let _storedGroupBonus;
-    
+
             if (typeof group === 'number') {
                 _storedGroupBonus = $.data.get('groups', 'bonus', { level: group });
             } else if (typeof group === 'string') {
                 _storedGroupBonus = $.data.get('groups', 'bonus', { name: group });
             } else return 0;
-    
+
             return (_storedGroupBonus) ? _storedGroupBonus : 0;
         },
         setGroupBonus(group, bonus) {

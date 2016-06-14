@@ -1,4 +1,3 @@
-import path from 'path';
 import jetpack from 'fs-jetpack';
 
 export default function(rootDir) {

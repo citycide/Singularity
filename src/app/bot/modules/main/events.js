@@ -28,8 +28,9 @@ Transit.on('alert:subscriber', (data) => {
 });
 
 Transit.on('alert:tip', (data) => {
-    if ($.settings.get('tipAlerts', false))
+    if ($.settings.get('tipAlerts', false)) {
         return $.shout(`${data.name} tipped ${data.amount}. Thank you! PogChamp`);
+    }
 });
 
 module.exports.alerts = (event) => {
