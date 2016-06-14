@@ -16,16 +16,16 @@ const points = {
     },
     setCommandPrice(cmd, price, sub = null) {
         if (sub) {
-            core.data.set('subcommands', { name: cmd, price }, { name: cmd });
+            $.data.set('subcommands', { name: cmd, price }, { name: cmd });
         } else {
-            core.data.set('commands', { name: cmd, price }, { name: cmd });
+            $.data.set('commands', { name: cmd, price }, { name: cmd });
         }
     },
     getUserPoints(user) {
         return core.data.get('users', 'points', { name: user });
     },
     setUserPoints(user, amount) {
-        core.data.set('users', { points: amount }, { name: user });
+        $.data.set('users', { points: amount }, { name: user });
     },
     add(user, amount) {
         if (amount === 0) return;
