@@ -1,5 +1,3 @@
-/* jshint -W014 */
-
 const points = {
     makeString(amount) {
         const inputAmount = parseInt(amount);

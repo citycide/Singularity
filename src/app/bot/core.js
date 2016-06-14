@@ -1,5 +1,3 @@
-/* jshint -W014 */
-
 import jetpack from 'fs-jetpack';
 import EventEmitter from 'events';
 import path from 'path';

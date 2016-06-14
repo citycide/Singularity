@@ -1,5 +1,3 @@
-/* jshint -W014, -W018 */
-
 const cooldown = {
     // cooldowns['command-name'] = { name, until, scope }
     cooldowns: [],
