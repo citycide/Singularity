@@ -1,6 +1,3 @@
-/************************************ MUSIC ***********************************/
-'use strict';
-
 import chokidar from 'chokidar';
 import jetpack from 'fs-jetpack';
 import { EventEmitter } from 'events';
