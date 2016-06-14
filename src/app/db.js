@@ -272,6 +272,7 @@ data.bot = {
             return this;
         },
         incr(table, what, amount, where) {
+            amount = parseInt(amount);
             if (typeof table !== 'string') return;
             if (typeof what !== 'string') return;
             if (!_.isFinite(amount) || amount === 0) return;
@@ -292,6 +293,7 @@ data.bot = {
             return newValue;
         },
         decr(table, what, amount, where, allowNegative) {
+            amount = parseInt(amount);
             if (typeof table !== 'string') return;
             if (typeof what !== 'string') return;
             if (!_.isFinite(amount) || amount === 0) return;
@@ -335,10 +337,13 @@ data.bot = {
 
             for (let item of what) {
                 for (let [key, value] in Object.entries(item)) {
-                    if (!item.hasOwnProperty(key)) { continue; }
-                    if (!_.isFinite(value)) { continue; }
+                    if (!item.hasOwnProperty(key)) continue;
+
+                    value = parseInt(value);
+                    if (!_.isFinite(value)) continue;
 
                     this.get(table, key, where, (currentValue) => {
+                        currentValue = parseInt(currentValue);
                         let newValue = value;
                         if (_.isFinite(currentValue)) {
                             newValue = currentValue + Math.abs(value);
@@ -365,10 +370,13 @@ data.bot = {
 
             for (let item of what) {
                 for (let [key, value] in Object.entries(item)) {
-                    if (!item.hasOwnProperty(key)) { continue; }
-                    if (!_.isFinite(value)) { continue; }
+                    if (!item.hasOwnProperty(key)) continue;
+
+                    value = parseInt(value);
+                    if (!_.isFinite(value)) continue;
 
                     this.get(table, key, where, (currentValue) => {
+                        currentValue = parseInt(currentValue);
                         let newValue = value;
                         if (_.isFinite(currentValue)) {
                             if (allowNegative) {
