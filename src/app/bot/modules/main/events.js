@@ -63,6 +63,8 @@ module.exports.alerts = (event) => {
         
         $.say(event.sender,
             `Follows: ${cfg[0]}, Hosts: ${cfg[1]}, Subs: ${cfg[2]}, Tips: ${cfg[3]}`);
+            
+        return;
     }
     
     $.say(event.sender, `Usage: !alerts [follow | host | sub | tip]`);
