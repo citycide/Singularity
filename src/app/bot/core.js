@@ -104,8 +104,8 @@ const coreMethods = {
         },
         getPermLevel: (cmd, sub) => {
             return (sub)
-                ? core.data.get('commands', 'permission', { name: cmd })
-                : core.data.get('subcommands', 'permission', { name: sub });
+                ? core.data.get('subcommands', 'permission', { name: sub })
+                : core.data.get('commands', 'permission', { name: cmd });
         },
         setPermLevel: (cmd, level, sub) => {
             if (!this.exists(cmd, sub)) {

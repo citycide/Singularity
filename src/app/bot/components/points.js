@@ -11,8 +11,8 @@ const points = {
     },
     getCommandPrice(cmd, sub = null) {
         return (sub)
-            ? core.data.get('subcommands', 'price', { name: cmd })
-            : core.data.get('commands', 'price', { name: cmd });
+            ? $.data.get('subcommands', 'price', { name: cmd })
+            : $.data.get('commands', 'price', { name: cmd });
     },
     setCommandPrice(cmd, price, sub = null) {
         if (sub) {
