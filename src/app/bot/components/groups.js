@@ -20,7 +20,7 @@ const groups = {
         if ($.users.isAdmin(username)) defaultGroupID = 0;
 
         const _groupID = $.util.num.validate($.data.get('users', 'permission', { name: username }));
-        if (!$.util.val.isNullLike(_groupID) && _groupID >= 0 && !$.users.isAdmin(username)) {
+        if (!$.util.val.isNullLike(_groupID) && _groupID >= 0) {
             return _groupID;
         } else {
             Logger.trace(`getUserGroup:: assigning default group to ${username} (level ${defaultGroupID})`);
