@@ -1,6 +1,6 @@
 module.exports.alerts = (event) => {
-    const [ action, param1, ...rest ] = event.args;
-    
+    const [action, param1] = event.args;
+
     if (action === 'follow') {
         if (param1 === 'enable') {
             $.settings.set('followAlerts', true);
@@ -9,10 +9,10 @@ module.exports.alerts = (event) => {
             $.settings.set('followAlerts', false);
             $.say(event.sender, `Follow alerts disabled.`);
         } else {
-            const status = $.settings.get('followAlerts', false) ? 'enabled' : 'disabled';
+            const status = $.settings.get('followAlerts', true) ? 'enabled' : 'disabled';
             $.say(event.sender, `Usage: !alerts follow [enable | disable] (currently ${status})`);
         }
-        
+
         return;
     } else if (action === 'host') {
         if (param1 === 'enable') {
@@ -22,10 +22,10 @@ module.exports.alerts = (event) => {
             $.settings.set('hostAlerts', false);
             $.say(event.sender, `Host alerts enabled.`);
         } else {
-            const status = $.settings.get('hostAlerts', false) ? 'enabled' : 'disabled';
+            const status = $.settings.get('hostAlerts', true) ? 'enabled' : 'disabled';
             $.say(event.sender, `Usage: !alerts host [enable | disable] (currently ${status})`);
         }
-        
+
         return;
     } else if (action === 'sub') {
         if (param1 === 'enable') {
@@ -38,7 +38,7 @@ module.exports.alerts = (event) => {
             const status = $.settings.get('subAlerts', false) ? 'enabled' : 'disabled';
             $.say(event.sender, `Usage: !alerts sub [enable | disable] (currently ${status})`);
         }
-        
+
         return;
     } else if (action === 'tip') {
         if (param1 === 'enable') {
@@ -51,7 +51,7 @@ module.exports.alerts = (event) => {
             const status = $.settings.get('tipAlerts', false) ? 'enabled' : 'disabled';
             $.say(event.sender, `Usage: !alerts tip [enable | disable] (currently ${status})`);
         }
-        
+
         return;
     } else if (action === 'settings') {
         const cfg = [
@@ -60,13 +60,13 @@ module.exports.alerts = (event) => {
             $.settings.get('subAlerts', false) ? 'enabled' : 'disabled',
             $.settings.get('tipAlerts', false) ? 'enabled' : 'disabled'
         ];
-        
+
         $.say(event.sender,
             `Follows: ${cfg[0]}, Hosts: ${cfg[1]}, Subs: ${cfg[2]}, Tips: ${cfg[3]}`);
-            
+
         return;
     }
-    
+
     $.say(event.sender, `Usage: !alerts [follow | host | sub | tip]`);
 };
 
@@ -83,6 +83,7 @@ Transit.on('alert:follow', (data) => {
 });
 
 Transit.on('alert:host', (data) => {
+    // eslint-disable-next-line
     const { name: display_name, viewers } = data;
     if ($.settings.get('hostAlerts', true)) {
         if (!events.includes(`${name}:host`)) {
@@ -97,8 +98,8 @@ Transit.on('alert:subscriber', (data) => {
     if ($.settings.get('subAlerts', false)) {
         if (!events.includes(`${data.display_name}:sub`)) {
             events.push(`${data.display_name}:sub`);
-            
-            if (data.hasOwnProperty'months')) {
+
+            if (data.hasOwnProperty('months')) {
                 // Event is a resub
                 return $.shout(`${data.display_name} has been subbed for ${data.months} months!`);
             } else {
