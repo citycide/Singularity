@@ -169,11 +169,11 @@ const data = {
  */
 data.bot = {
     initSettings: function() {
-        this.settings.confirm('prefix', '!')
-            .confirm('defaultCooldown', '30')
-            .confirm('whisperMode', 'false')
-            .confirm('globalCooldown', 'false')
-            .confirm('responseMention', 'false');
+        this.settings.confirm('prefix', '!');
+        this.settings.confirm('defaultCooldown', '30');
+        this.settings.confirm('whisperMode', 'false');
+        this.settings.confirm('globalCooldown', 'false');
+        this.settings.confirm('responseMention', 'false');
     },
 
     settings: {
@@ -205,14 +205,14 @@ data.bot = {
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
             botDB.put('settings', { key, value }, { conflict: 'replace' }, errHandler);
-            return this;
+            return this.get(key);
         },
         confirm(key, value) {
             // Only sets the value if the key does not exist
             if (typeof key !== 'string') return;
             if (typeof value === 'boolean') value = value.toString();
             botDB.put('settings', { key, value }, { conflict: 'ignore' }, errHandler);
-            return this;
+            return this.get(key);
         }
     },
 
@@ -257,7 +257,7 @@ data.bot = {
                 }
             });
 
-            return this;
+            return this.get(table, what, where);
         },
         confirm(table, what, where) {
             if (typeof table !== 'string') return;
@@ -269,7 +269,7 @@ data.bot = {
 
             botDB.put(table, whatWhere, obj, errHandler);
 
-            return this;
+            return this.get(table, what, where);
         },
         incr(table, what, amount, where) {
             amount = parseInt(amount);

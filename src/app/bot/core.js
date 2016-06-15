@@ -128,7 +128,10 @@ const coreMethods = {
             return db.bot.settings.get(key, defaultValue);
         },
         set(key, value) {
-            db.bot.settings.set(key, value);
+            return db.bot.settings.set(key, value);
+        },
+        confirm(key, value) {
+            return db.bot.settings.confirm(key, value);
         }
     },
 
@@ -137,7 +140,10 @@ const coreMethods = {
             return db.bot.data.get(table, what, where);
         },
         set(table, what, where, options) {
-            db.bot.data.set(table, what, where, options);
+            return db.bot.data.set(table, what, where, options);
+        },
+        confirm(table, what, where) {
+            return db.bot.data.confirm(table, what, where);
         },
         incr(table, what, amount, where) {
             return db.bot.data.incr(table, what, amount, where);
