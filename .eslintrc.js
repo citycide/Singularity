@@ -48,7 +48,7 @@ module.exports = {
         "comma-style": [
             "error",
             "last" ],
-        "complexity": [ "error", 20 ],
+        "complexity": [ "warn", 20 ],
         "computed-property-spacing": [
             "error",
             "never" ],

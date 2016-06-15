@@ -14,10 +14,12 @@ module.exports.echo = (event) => {
         $.say(event.sender, `${event.subArgString} ${event.subArgString}`);
         return;
     }
+    
     if (event.args[0] === 'loudly') {
         $.say(event.sender, `${event.subArgString.toUpperCase()}`);
         return;
     }
+    
     $.say(event.sender, event.argString);
 };
 

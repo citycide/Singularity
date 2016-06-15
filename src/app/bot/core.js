@@ -49,7 +49,7 @@ const coreMethods = {
     },
 
     command: {
-        getPrefix() {
+        getPrefix: () => {
             return core.settings.get('prefix', '!');
         },
         getModule(cmd) {
@@ -58,7 +58,7 @@ const coreMethods = {
         getRunner: (cmd) => {
             return core.command.getModule(cmd)[registry[cmd].handler];
         },
-        isEnabled(cmd, sub) {
+        isEnabled: (cmd, sub) => {
             if (!sub) {
                 return core.data.get('commands', 'status', { name: cmd });
             } else {
@@ -77,7 +77,7 @@ const coreMethods = {
         enable(cmd, sub) {
             if (!this.exists(cmd, sub)) {
                 Logger.bot(`ERR in enableCommand:: ${cmd} is not a registered command`);
-                return 404;
+                return false;
             }
 
             if (sub) {
@@ -86,12 +86,12 @@ const coreMethods = {
                 core.data.set('commands', { status: true }, { name: cmd });
             }
 
-            return 200;
+            return true;
         },
         disable(cmd, sub) {
             if (!this.exists(cmd, sub)) {
                 Logger.bot(`ERR in enableCommand:: ${cmd} is not a registered command`);
-                return 404;
+                return false;
             }
 
             if (sub) {
@@ -100,7 +100,7 @@ const coreMethods = {
                 core.data.set('commands', { status: false }, { name: cmd });
             }
 
-            return 200;
+            return true;
         },
         getPermLevel: (cmd, sub) => {
             return (sub)
@@ -110,7 +110,7 @@ const coreMethods = {
         setPermLevel: (cmd, level, sub) => {
             if (!this.exists(cmd, sub)) {
                 Logger.bot(`ERR in setPermLevel:: ${cmd} is not a registered command`);
-                return 404;
+                return false;
             }
 
             if (sub) {
@@ -119,7 +119,7 @@ const coreMethods = {
                 core.data.set('commands', { permission: level }, { name: cmd });
             }
 
-            return 200;
+            return true;
         }
     },
 
@@ -151,7 +151,7 @@ const coreMethods = {
     },
 
     users: {
-        isFollower(user) {
+        isFollower: (user) => {
             let _status = false;
             bot.api({
                 url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${core.channel.name}`,
@@ -171,7 +171,7 @@ const coreMethods = {
             const response = db.bot.data.getRow('users', { name: user });
             return (response) ? true : false;
         },
-        isAdmin(user) {
+        isAdmin: (user) => {
             return (user === core.channel.name || user === core.channel.botName);
         }
     },
@@ -326,7 +326,8 @@ module.exports.disconnect = disconnect;
 module.exports.reconfigure = reconfigure;
 
 /**
- * Private functions*/
+ * Private functions
+ */
 
 const _loadComponents = function() {
     commandRegistry = require('./components/commandRegistry');

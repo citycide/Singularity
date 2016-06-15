@@ -358,7 +358,7 @@ data.bot = {
 
             return newValues;
         },
-        decrBatch(table, what, where = null, allowNegative = false) {
+        decrBatch(table, what, where, allowNegative = false) {
             /**
              * See docs for incrBatch() above.
              */
@@ -400,9 +400,6 @@ data.bot = {
             } else {
                 return response;
             }
-        },
-        setPermissionTest(user, permission) {
-            botDB.update('users', { permission }, { name: user });
         }
     },
 
