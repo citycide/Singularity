@@ -63,18 +63,18 @@ export default class Trilogy {
  * Add a table to the database
  * @param {string} table
  * @param {Array} args
- * @param {boolean} ifNotExists
+ * @param {object} options
  * @param {function} callback
  * @returns {*}
  */
-Trilogy.prototype.create = function(table, args, ifNotExists = true, callback = () => {}) {
+Trilogy.prototype.create = function(table, args, options = {}, callback = () => {}) {
     let query = [];
     let hasUnique = false;
-    let hasPrimary = false;
+    let hasPrimary = options.compositeKey ? true : false;
 
     for (let key of args) {
         let keyString = [];
-        let hasNotNull = false;
+        let hasAutoIncr = false;
 
         if (key != null && typeof key === 'object') {
             if (!key.name) {
@@ -87,23 +87,27 @@ Trilogy.prototype.create = function(table, args, ifNotExists = true, callback = 
             keyString.push(opts.name);
             keyString.push(opts.type.toUpperCase());
 
-            if (opts.hasOwnProperty('primaryKey') && !hasPrimary) {
+            if (!hasPrimary && opts.primaryKey !== undefined) {
                 hasPrimary = true;
-                if (opts.primaryKey !== undefined) keyString.push('PRIMARY KEY');
+                keyString.push('PRIMARY KEY');
+
+                if (opts.type.toUpperCase() === 'INTEGER') {
+                    if (!hasAutoIncr && opts.autoIncrement !== undefined) {
+                        hasAutoIncr = true;
+                        keyString.push('AUTOINCREMENT');
+                    }
+                }
             }
 
-            if (opts.hasOwnProperty('notNull')) {
-                hasNotNull = true;
-                if (opts.notNull !== undefined) keyString.push('NOT NULL');
+            if (opts.notNull !== undefined) {
+                keyString.push('NOT NULL');
             }
 
-            if (opts.hasOwnProperty('defaultValue')) {
-                if (opts.defaultValue !== undefined) keyString.push(`DEFAULT ${key.defaultValue}`);
-            }
+            if (opts.defaultValue !== undefined) keyString.push(`DEFAULT ${key.defaultValue}`);
 
-            if (!hasUnique && opts.hasOwnProperty('unique')) {
+            if (!hasUnique && opts.unique !== undefined) {
                 hasUnique = true;
-                if (opts.unique !== undefined) keyString.push('UNIQUE');
+                keyString.push('UNIQUE');
             }
 
             query.push(keyString.join(' '));
@@ -113,10 +117,14 @@ Trilogy.prototype.create = function(table, args, ifNotExists = true, callback = 
         }
     }
 
+    let primaryKeyString = options.compositeKey
+        ? `, PRIMARY KEY (${options.compositeKey.join(', ')})`
+        : '';
+
     let columnString = query.join(', ');
-    let queryString = (!ifNotExists)
-        ? `CREATE TABLE ${table} (${columnString});`
-        : `CREATE TABLE IF NOT EXISTS ${table} (${columnString});`;
+    let queryString = (!options.ifNotExists)
+        ? `CREATE TABLE ${table} (${columnString}${primaryKeyString});`
+        : `CREATE TABLE IF NOT EXISTS ${table} (${columnString}${primaryKeyString});`;
 
     let _err, _res;
     try {
@@ -151,7 +159,11 @@ Trilogy.prototype.put = function(table, data, options = { conflict: ' ' }, callb
     for (let key in data) {
         if (!data.hasOwnProperty(key)) continue;
         keys.push(key);
-        values.push(data[key]);
+        let value = data[key];
+        if (typeof value === 'string' && value.match(/'/g)) {
+            value = value.replace(/'/g, `''`);
+        }
+        values.push(value);
     }
 
     const queryString = `INSERT${conflictString}INTO ${table} (${keys.join(',')}) VALUES ('${values.join("','")}');`;
@@ -176,8 +188,8 @@ Trilogy.prototype.put = function(table, data, options = { conflict: ' ' }, callb
  * @param {string} table
  * @param {string|Array} what
  * @param {object} where
- * @param {object} order
- * @param {string} limit
+ * @param {object} [order]
+ * @param {string} [limit]
  * @returns {*}
  */
 Trilogy.prototype.get = function(table, what = '', where, order, limit) {
@@ -252,7 +264,11 @@ Trilogy.prototype.get = function(table, what = '', where, order, limit) {
             for (let i = 0; i < values.length; i++) {
                 let line = {};
                 for (let j = 0; j < columns.length; j++) {
-                    line[columns[j]] = values[i][j];
+                    let lineValue = values[i][j];
+                    if (typeof lineValue === 'string' && lineValue.match(/('){2}/g)) {
+                        lineValue = lineValue.replace(/('){2}/g, `'`);
+                    }
+                    line[columns[j]] = lineValue;
                 }
                 results.push(line);
             }
@@ -304,7 +320,11 @@ Trilogy.prototype.getValue = function(table, what, where) {
             for (let i = 0; i < values.length; i++) {
                 const line = {};
                 for (let j = 0; j < columns.length; j++) {
-                    line[columns[j]] = values[i][j];
+                    let lineValue = values[i][j];
+                    if (typeof lineValue === 'string' && lineValue.match(/('){2}/g)) {
+                        lineValue = lineValue.replace(/('){2}/g, `'`);
+                    }
+                    line[columns[j]] = lineValue;
                 }
                 results.push(line);
             }
@@ -337,7 +357,8 @@ Trilogy.prototype.del = function(table, where, callback = () => {}) {
         return;
     }
 
-    if (where) {
+    // eslint-disable-next-line
+    if (where && typeof where != null && typeof where === 'object') {
         for (let key in where) {
             if (!where.hasOwnProperty(key)) continue;
             location.push(`${key} = '${where[key]}'`);
@@ -394,7 +415,11 @@ Trilogy.prototype.update = function(table, data, where, options = { conflict: ' 
     const sets = [];
     for (let key in data) {
         if (!data.hasOwnProperty(key)) continue;
-        sets.push(`${key} = '${data[key]}'`);
+        let value = data[key];
+        if (typeof value === 'string' && value.match(/'/g)) {
+            value = value.replace(/'/g, `''`);
+        }
+        sets.push(`${key} = '${value}'`);
     }
     const setString = sets.join(', ');
 
@@ -422,6 +447,63 @@ Trilogy.prototype.update = function(table, data, where, options = { conflict: ' 
     callback(_err, _res);
 
     return this;
+};
+
+Trilogy.prototype.count = function(table, what, where, options = {}) {
+    let selectArray = null;
+    let selectString = '*';
+    if (!Array.isArray(what)) {
+        if (typeof what === 'string' && what.length > 0) selectArray = what.split(', ');
+    } else {
+        selectString = what.join(', ');
+    }
+
+    if (selectArray) selectString = selectArray.join(', ');
+
+    let location = [];
+    if (where) {
+        for (let key in where) {
+            if (!where.hasOwnProperty(key)) continue;
+            if (where[key] != null && typeof where[key] === 'object') {
+                for (let rule in where[key]) {
+                    if (!where[key].hasOwnProperty(rule)) continue;
+
+                    let operand = where[key][rule];
+
+                    let operandString = this._getOperandString(rule, key, operand);
+                    if (operandString) {
+                        location.push(operandString);
+                    } else {
+                        location.push(`${key} = '${where[key]}'`);
+                    }
+                }
+            } else {
+                location.push(`${key} = '${where[key]}'`);
+            }
+        }
+    }
+    let locationString = location.join(' AND ');
+
+    let distinct = options.distinct ? 'DISTINCT ' : '';
+
+    const queryString = `SELECT COUNT(${distinct}${selectString}) AS count FROM ${table} ${(where) ? 'WHERE' : ''} ${locationString}`;
+    this.sql = queryString;
+
+    try {
+        const statement = this.db.prepare(queryString);
+        const result = statement.getAsObject({});
+        // eslint-disable-next-line
+        if (typeof result != null && typeof result === 'object') {
+            return result.count;
+        } else {
+            return null;
+        }
+    } catch (err) {
+        if (this.debug) {
+            throw err;
+        }
+        return null;
+    }
 };
 
 /** PRIVATE FUNCTIONS **/
@@ -558,6 +640,7 @@ Trilogy.prototype._getOperandString = function(rule, key, operand) {
 Trilogy.prototype._defaultTableKeys = {
     // name: '',
     type: 'TEXT',
+    autoIncrement: undefined,
     primaryKey: undefined,
     unique: undefined,
     notNull: undefined,

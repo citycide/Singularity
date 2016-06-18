@@ -29,12 +29,15 @@ const data = {
         fn();
         return botDB;
     },
-    addTable(name, args, bot = false, ifNotExists = true, fn = errHandler) {
+    addTable(name, args, bot = false, options = {}, fn = errHandler) {
+        const opts = Object.assign({ ifNotExists: true }, options);
+
         if (!bot) {
-            db.create(name, args, ifNotExists, errHandler);
+            db.create(name, args, opts, fn);
         } else {
-            botDB.create(name, args, ifNotExists, errHandler);
+            botDB.create(name, args, opts, fn);
         }
+
         return this;
     },
 
@@ -259,6 +262,18 @@ data.bot = {
 
             return this.get(table, what, where);
         },
+        del(table, where) {
+            if (typeof table !== 'string') return;
+            if (!_.isPlainObject(where)) return;
+
+            let numModified = 0;
+            botDB.del(table, where, (err, num) => {
+                if (err) return errHandler(err);
+                numModified = num;
+            });
+
+            return numModified;
+        },
         confirm(table, what, where) {
             if (typeof table !== 'string') return;
             if (!_.isPlainObject(what)) return;
@@ -400,6 +415,14 @@ data.bot = {
             } else {
                 return response;
             }
+        },
+        countRows(table, what, where, options) {
+            const response = parseInt(botDB.count(table, what, where, options));
+            if (_.isFinite(response)) {
+                return response;
+            } else {
+                Logger.error(`ERR in count:: expected number, received ${typeof response}`);
+            }
         }
     },
 
@@ -438,7 +461,6 @@ data.bot = {
         });
     }
 };
-
 
 /**
  * Creates or accesses singularity.db

@@ -9,19 +9,7 @@ const registerCommand = (cmd, _module, parent = false) => {
         Logger.debug(`Module loaded:: ${_module}`);
     }
 
-    let name = cmd.name.toLowerCase();
-    let handler = (cmd.hasOwnProperty('handler')) ? cmd.handler : name;
-    let cooldown = (cmd.hasOwnProperty('cooldown')) ? cmd.cooldown : 30;
-    let permLevel = (cmd.hasOwnProperty('permLevel')) ? cmd.permLevel : 5;
-    let status = (cmd.hasOwnProperty('status')) ? cmd.status : false;
-    let price = (cmd.hasOwnProperty('price')) ? cmd.price : 0;
-
-    if (commands.hasOwnProperty(name)) {
-        if (commands[name].module === _module) return;
-        Logger.bot(`Duplicate command registration attempted by '${_module}'`);
-        Logger.bot(`'${name}' already registered to '${commands[name].module}'`);
-        return;
-    }
+    let { name, handler, cooldown, permLevel, status, price } = cmd;
 
     if (parent) {
         commands[parent].subcommands[cmd.name] = {
@@ -32,6 +20,13 @@ const registerCommand = (cmd, _module, parent = false) => {
         };
         db.bot.addSubcommand(name, cooldown, permLevel, status, price, _module, parent);
     } else {
+        if (commands.hasOwnProperty(name)) {
+            if (commands[name].module === _module) return;
+            Logger.bot(`Duplicate command registration attempted by '${_module}'`);
+            Logger.bot(`'${name}' already registered to '${commands[name].module}'`);
+            return;
+        }
+
         commands[name] = {
             name,
             handler,
@@ -42,17 +37,11 @@ const registerCommand = (cmd, _module, parent = false) => {
         db.bot.addCommand(name, cooldown, permLevel, status, price, _module);
         Logger.trace(`\`- Command loaded:: '${name}' (${_module})`);
     }
-
-    if (cmd.hasOwnProperty('subcommands')) {
-        for (let subcmd of cmd.subcommands) {
-            registerCommand(subcmd, _module, cmd);
-        }
-    }
 };
 
 const _registerCommand = (name, module, options) => {
     const obj = {
-        name,
+        name: name.toLowerCase(),
         handler: name,
         cooldown: 30,
         permLevel: 5,

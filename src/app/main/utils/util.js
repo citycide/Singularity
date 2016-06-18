@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export default {
     str: {
         /**
@@ -20,9 +22,9 @@ export default {
     },
     num: {
         /**
-         * Coerce a value to a number if possible, or else null
+         * Coerce a value to a number if possible
          * @param {*} value
-         * @returns {number}
+         * @returns {number|null} 'number' if parsed, else null
          */
         validate(value) {
             if (!isNaN(parseInt(value))) {
@@ -30,7 +32,8 @@ export default {
             } else {
                 return null;
             }
-        }
+        },
+        isFinite: _.isFinite
     },
     val: {
         /**

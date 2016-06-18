@@ -169,7 +169,7 @@ const botConfig = {
     },
     deactivate() {
         if (!bot) return;
-        bot.disconnect(path.resolve('../../../bot'));
+        bot.disconnect(path.resolve(__dirname, '../../../bot'));
         bot = null;
         Settings.set('botEnabled', false);
     }
@@ -199,7 +199,7 @@ io.on('connection', (socket) => {
         }
     });
     /** END BOT EVENTS **/
-    
+
     /** BEGIN TIPEEE EVENTS **/
     socket.on('settings:services:tipeee:activate', (data) => {
         Settings.set('tipeeeActive', true);

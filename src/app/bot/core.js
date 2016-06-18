@@ -62,7 +62,7 @@ const coreMethods = {
             if (!sub) {
                 return core.data.get('commands', 'status', { name: cmd });
             } else {
-                return core.data.get('subcommands', 'status', { name: sub });
+                return core.data.get('subcommands', 'status', { name: sub, parent: cmd });
             }
         },
         exists(cmd, sub) {
@@ -142,6 +142,9 @@ const coreMethods = {
         set(table, what, where, options) {
             return db.bot.data.set(table, what, where, options);
         },
+        del(table, where) {
+            return db.bot.data.del(table, where);
+        },
         confirm(table, what, where) {
             return db.bot.data.confirm(table, what, where);
         },
@@ -153,6 +156,12 @@ const coreMethods = {
         },
         getRow(table, where) {
             return db.bot.data.getRow(table, where);
+        },
+        countRows(table, what, where, options) {
+            return db.bot.data.countRows(table, what, where, options);
+        },
+        addTable(name, columns) {
+            db.addTable(name, columns, true);
         }
     },
 
@@ -297,14 +306,14 @@ const initialize = (instant = false) => {
                 'module'
             ], true)
                 .addTable('subcommands', [
-                    { name: 'name', unique: true },
+                    'name',
                     { name: 'cooldown', type: 'int', defaultValue: 30 },
                     { name: 'permission', type: 'int', defaultValue: 5 },
                     { name: 'status', defaultValue: 'false' },
                     { name: 'price', type: 'int', defaultValue: 0 },
                     'module',
                     'parent'
-                ], true);
+                ], true, { compositeKey: ['name', 'module'] });
 
             _loadComponents();
 
