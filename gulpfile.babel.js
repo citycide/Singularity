@@ -10,7 +10,8 @@ const paths = {
     vendorScripts: ['src/public/js/vendor/**/*',
                     'node_modules/keen-ui/dist/min/keen-ui.min.js',
                     'node_modules/vue/dist/vue.js',
-                    'node_modules/vue/dist/vue.min.js'],
+                    'node_modules/vue/dist/vue.min.js',
+                    'node_modules/babel-polyfill/dist/polyfill.min.js'],
     vendorStyles: ['node_modules/keen-ui/dist/min/keen-ui.min.css'],
     views: ['src/public/views/**/*.{ejs,html}'],
     fonts: ['node_modules/font-awesome/fonts/*.{otf,eot,svg,ttf,woff,woff2}',
@@ -50,19 +51,15 @@ gulp.task('clean-overlayFNT', cleanGlob(['./build/public/views/overlays/fonts/**
 
 gulp.task('transpile-server', ['clean-server'], () => {
     gulp.src(paths.serverScripts)
-        .pipe(babel({ presets: ['es2015-node6'] }))
-        .on('error', (err) => {
-            console.error(err);
-        })
+        .pipe(babel({ presets: ['es2015-node6', 'stage-0'] }))
+        .on('error', (err) => console.error(err))
         .pipe(gulp.dest('./build/'));
 });
 
 gulp.task('transpile-client', ['clean-client'], () => {
     gulp.src(paths.clientScripts, { base: './src/public' })
-        .pipe(babel({ presets: ['es2015'] }))
-        .on('error', (err) => {
-            console.error(err);
-        })
+        .pipe(babel({ presets: ['es2015', 'stage-0'] }))
+        .on('error', (err) => console.error(err))
         .pipe(gulp.dest('./build/public'));
 });
 

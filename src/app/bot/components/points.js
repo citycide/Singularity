@@ -181,11 +181,11 @@ $.on('bot:ready', () => {
     Object.assign($.command, exportAPI);
 
     $.points = {
-        add: points.add.bind(points),
-        sub: points.sub.bind(points),
-        get: points.getUserPoints.bind(points),
+        add: ::points.add,
+        sub: ::points.sub,
+        get: ::points.getUserPoints,
         set: points.setUserPoints,
-        str: points.makeString.bind(points),
+        str: ::points.makeString,
         getName: points.getPointName,
         setName: points.setPointName
     };
