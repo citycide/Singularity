@@ -2,23 +2,15 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Twitch Chat</title>
-        <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="../css/vendor/font-awesome.min.css">
+        <link rel="stylesheet" type="text/css" href="/css/vendor/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/fonts/font-awesome.min.css">
         <!-- CSS App -->
-        <link rel="stylesheet" type="text/css" href="../css/style.css">
-        <link rel="stylesheet" type="text/css" href="../css/themes/flat-main.css">
-        <link rel="stylesheet" type="text/css" href="../css/chat.css">
-        <link rel="stylesheet" type="text/css" href="../css/vendor/waves.css" />
-        <script>
-            var isNwjs = false;
-            try {
-                isNwjs = (typeof require('nw.gui') !== 'undefined');
-                console.log('Running in NW.js');
-            } catch(e) {
-                isNwjs = false;
-                console.log('Running in browser');
-            }
-        </script>
+        <link rel="stylesheet" type="text/css" href="/css/style.css">
+        <link rel="stylesheet" type="text/css" href="/css/themes/flat-main.css">
+        <link rel="stylesheet" type="text/css" href="/css/chat.css">
+        <link rel="stylesheet" type="text/css" href="/css/vendor/waves.css" />
+
+        <script src="/js/contextHandler.js"></script>
 	</head>
 	<body class="flat-main">
         <div id="chat-container">
@@ -47,18 +39,19 @@
         </div>
         <!-- ejs -->
         <script>
-            var CHANNEL = {
+            const CHANNEL = {
                 name: '<%= channel %>',
                 token: '<%= token %>'
             };
-            var clientID = '<%= clientID %>';
+            const CLIENT_ID = '<%= clientID %>';
         </script>
-		<script type="text/javascript" src="../js/vendor/jquery.min.js"></script>
-        <script type="text/javascript" src="../js/vendor/bootstrap.min.js"></script>
-        <script type="text/javascript" src="../js/vendor/tmi.js"></script>
-        <script type="text/javascript" src="../js/vendor/moment.min.js"></script>
-        <script type="text/javascript" src="../js/vendor/waves.js"></script>
-		<script type="text/javascript" src="../js/chat.js"></script>
-        <script type="text/javascript" src="../js/vendor/kappa.min.js"></script>
+        <script type="text/javascript" src="/js/vendor/polyfill.min.js"></script>
+		<script type="text/javascript" src="/js/vendor/jquery.min.js"></script>
+        <script type="text/javascript" src="/js/vendor/bootstrap.min.js"></script>
+        <script type="text/javascript" src="/js/vendor/tmi.js"></script>
+        <script type="text/javascript" src="/js/vendor/moment.min.js"></script>
+        <script type="text/javascript" src="/js/vendor/waves.js"></script>
+		<script type="text/javascript" src="/js/chat.js"></script>
+        <script type="text/javascript" src="/js/vendor/kappa.min.js"></script>
 	</body>
 </html>
