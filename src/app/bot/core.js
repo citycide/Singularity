@@ -293,6 +293,10 @@ const initialize = (instant = false) => {
                     { name: 'level', type: 'int', unique: true },
                     'name',
                     { name: 'bonus', type: 'int' }
+                ], true)
+                .addTable('quotes', [
+                    { name: 'id', type: 'integer', primaryKey: true, autoIncrement: true },
+                    'message', 'credit', 'submitter', 'date', 'game'
                 ], true);
 
             db.bot.initSettings();
@@ -354,6 +358,7 @@ const _loadComponents = function() {
     require('./components/time');
     require('./components/groups');
     require('./components/ranks');
+    require('./components/quotes');
 };
 
 const _loadModules = function() {
