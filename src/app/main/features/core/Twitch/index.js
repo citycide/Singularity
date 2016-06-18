@@ -1,6 +1,3 @@
-/*********************************** TWITCH ***********************************/
-'use strict';
-
 import jetpack from 'fs-jetpack';
 import moment from 'moment';
 import tmi from 'tmi.js';
@@ -60,7 +57,7 @@ export default class TwitchClass {
             this.client = new tmi.client(this.TMI_OPTIONS);
             this.client.connect();
             this.client.on('connected', (address, port) => {
-                Logger.info(`Connected to Twitch chat at ${address}:${port}`);
+                Logger.info(`Listening for Twitch events at ${address}:${port}`);
                 this.clientHandler();
             });
         }
@@ -229,37 +226,57 @@ export default class TwitchClass {
 TwitchClass.prototype.pollFollowers = function() {
     Logger.absurd(`Hitting follower endpoint for ${this.CHANNEL.name}...`);
     this.client.api({
-        url: `${this.API.BASE_URL}${this.API.CHANNEL_EP}follows?limit=100&timestamp=` + new Date().getTime(),
+        url: `${this.API.BASE_URL}${this.API.CHANNEL_EP}follows?limit=100&ts=${Date.now()}`,
         method: 'GET',
         headers: {
             'Accept': 'application/vnd.twitchtv.v3+json',
             'Authorization': `OAuth ${this.CHANNEL.token.slice(6)}`,
             'Client-ID': this.CLIENT_ID
         }
-    }, (err, res, body) => {
+    }, (err, res, body = {}) => {
         if (err) {
-            Logger.debug(err);
-            return;
-        }
-        if (res.statusCode != 200) {
-            Logger.debug(`Unknown response code: ${res.statusCode}`);
+            Logger.error(err);
             return;
         }
 
-        try {
-            body = JSON.parse(body);
-        } catch (error) {
-            Logger.debug(error);
+        if (res.statusCode !== 200) {
+            Logger.debug(`pollFollowers:: Unknown response code: ${res.statusCode}`);
             return;
         }
 
-        if (body) {
-            if (body.follows.length > 0) {
-                if (this.followers.length === 0) {
-                    body.follows.reverse().map((follower) => {
-                        if (this.followers.indexOf(follower.user.display_name) == -1) {
-                            this.followers.push(follower.user.display_name);
-                        }
+        if (body.follows.length > 0) {
+            if (this.followers.length === 0) {
+                body.follows.reverse().map((follower) => {
+                    if (this.followers.indexOf(follower.user.display_name) === -1) {
+                        this.followers.push(follower.user.display_name);
+                    }
+                    let s = {
+                        id: follower.user._id,
+                        name: follower.user.display_name,
+                        ts: moment(follower.created_at, moment.ISO_8601).valueOf(),
+                        ev: 'follower',
+                        ntf: follower.notifications
+                    };
+                    db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
+                });
+                this.writeFollower(this.followers[this.followers.length - 1]);
+
+                emitFollowers({ recent: true, all: true });
+            } else {
+                body.follows.reverse().map((follower) => {
+                    if (this.followers.indexOf(follower.user.display_name) === -1) {
+                        this.followers.push(follower.user.display_name);
+                        let queueFollower = {
+                            user: {
+                                _id: follower.user._id,
+                                display_name: follower.user.display_name,
+                                logo: follower.user.logo,
+                                created_at: follower.created_at,
+                                notifications: follower.notifications
+                            },
+                            type: 'follower'
+                        };
+                        this.alertQueue.push(queueFollower);
                         let s = {
                             id: follower.user._id,
                             name: follower.user.display_name,
@@ -268,37 +285,9 @@ TwitchClass.prototype.pollFollowers = function() {
                             ntf: follower.notifications
                         };
                         db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
-                    });
-                    this.writeFollower(this.followers[this.followers.length-1]);
-
-                    emitFollowers({ recent: true, all: true });
-                } else {
-                    body.follows.reverse().map((follower) => {
-                        if (this.followers.indexOf(follower.user.display_name) === -1) {
-                            this.followers.push(follower.user.display_name);
-                            let queueFollower = {
-                                user: {
-                                    _id: follower.user._id,
-                                    display_name: follower.user.display_name,
-                                    logo: follower.user.logo,
-                                    created_at: follower.created_at,
-                                    notifications: follower.notifications
-                                },
-                                type: 'follower'
-                            };
-                            this.alertQueue.push(queueFollower);
-                            let s = {
-                                id: follower.user._id,
-                                name: follower.user.display_name,
-                                ts: moment(follower.created_at, moment.ISO_8601).valueOf(),
-                                ev: 'follower',
-                                ntf: follower.notifications
-                            };
-                            db.dbFollowersAdd(s.id, s.name, s.ts, s.ntf.toString());
-                            this.writeFollower(s.name);
-                        }
-                    });
-                }
+                        this.writeFollower(s.name);
+                    }
+                });
             }
         }
     });
@@ -317,7 +306,7 @@ TwitchClass.prototype.checkQueue = function(attempts = 0) {
     if (this.alertInProgress) {
         if (attempts < 2) {
             Logger.absurd(`checkQueue:: An alert is either in progress or no client has responded with 'alert:complete'`);
-            attempts++;
+            attempts += 1;
             tick.setTimeout('checkQueue', this.checkQueue.bind(this), 5 * 1000, attempts);
         } else {
             Logger.absurd(`checkQueue:: Maximum attempts reached. Unblocking the alert queue...`);
@@ -380,39 +369,32 @@ TwitchClass.prototype.resolveUser = function(username, callback) {
             Authorization: `OAuth ${this.CHANNEL.token.slice(6)}`,
             'Client-ID': this.CLIENT_ID
         }
-    }, (err, res, body) => {
+    }, (err, res, body = {}) => {
         if (err) {
             Logger.error(err);
             return;
         }
 
-        try {
-            body = JSON.parse(body);
-        } catch (error) {
-            Logger.error(error);
+        if (body.error) {
+            const unresolvedUser = {
+                user: {
+                    display_name: username
+                }
+            };
+            callback(unresolvedUser);
             return;
         }
 
-        if (body) {
-            if (body.error) {
-                const unresolvedUser = {
-                    user: {
-                        display_name: username
-                    }
-                };
-                callback(unresolvedUser);
-                return;
-            }
-            const resolvedUser = {
-                user: {
-                    _id: body._id,
-                    display_name: body.display_name,
-                    logo: body.logo
-                },
-                resolved: true
-            };
-            callback(resolvedUser);
-        }
+        const resolvedUser = {
+            user: {
+                _id: body._id,
+                display_name: body.display_name,
+                logo: body.logo
+            },
+            resolved: true
+        };
+
+        callback(resolvedUser);
     });
 };
 

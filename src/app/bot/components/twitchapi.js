@@ -46,17 +46,9 @@ const twitchAPI = {
         let status = null;
         let uptime = 0;
 
-        $.api(opts, (err, res, body) => {
-            if (err) return Logger.error(err);
-
-            if (body) {
-                try {
-                    body = JSON.parse(body);
-                } catch (e) {
-                    Logger.error(e);
-                    return;
-                }
-            } else {
+        $.api(opts, (err, res, body = {}) => {
+            if (err) {
+                Logger.bot(err);
                 return;
             }
 
@@ -79,7 +71,7 @@ const twitchAPI = {
                 uptime
             });
         });
-        
+
         $.tick.setTimeout('getChatUsers', this.getStreamInfo.bind(this), 30 * 1000);
     },
     /**
@@ -95,17 +87,9 @@ const twitchAPI = {
             url: `https://tmi.twitch.tv/group/user/${$.channel.name}/chatters?ts=${new Date().getTime()}`
         }, this.settings.API_OPTIONS);
 
-        $.api(opts, (err, res, body) => {
-            if (err) Logger.bot(err);
-
-            if (body) {
-                try {
-                    body = JSON.parse(body);
-                } catch (e) {
-                    Logger.error(e);
-                    return;
-                }
-            } else {
+        $.api(opts, (err, res, body = {}) => {
+            if (err) {
+                Logger.bot(err);
                 return;
             }
 
@@ -143,10 +127,10 @@ const twitchAPI = {
             }
         });
 
-        
+
         $.users.list = users;
         $.users.count = userCount;
-        
+
         $.tick.setTimeout('getChatUsers', this.getChatUsers.bind(this), 30 * 1000);
 
         return users;
