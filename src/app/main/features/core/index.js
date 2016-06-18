@@ -8,5 +8,6 @@ import './autoUpdater';
 import './websocketAPI';
 import './applicationMenu';
 import './windowTitleInfo';
+import './devtools';
 // import './keyboardShortcuts';
 // import './lastFM';
