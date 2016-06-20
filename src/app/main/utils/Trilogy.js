@@ -230,6 +230,10 @@ Trilogy.prototype.get = function(table, what = '', where, order, limit) {
     if (order) {
         for (let key in order) {
             if (!order.hasOwnProperty(key)) continue;
+            if (key === 'random' && order.random === true) {
+                orderString = ` ORDER BY RANDOM()`;
+                continue;
+            }
             orderString = ` ORDER BY ${order[key]} ${key.toUpperCase()}`;
         }
     }

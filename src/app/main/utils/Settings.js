@@ -1,12 +1,12 @@
 import fs from 'fs';
 import _ from 'lodash';
-import initalSettings from './_initialSettings';
+import initialSettings from './_initialSettings';
 import createJSON from './_jsonCreator';
 
 class Settings {
     constructor(jsonPrefix, wipeOldData) {
         this.PATH = createJSON(`${jsonPrefix || ''}.settings`);
-        this.data = Object.assign({}, initalSettings);
+        this.data = Object.assign({}, initialSettings);
         this.lastSync = 0;
 
         if (fs.existsSync(this.PATH) && !wipeOldData) {
@@ -57,7 +57,7 @@ class Settings {
             userSettings = {};
             Logger.error('Failed to load settings JSON file, giving up and resetting');
         }
-        this.data = _.extend({}, initalSettings, userSettings);
+        this.data = _.extend({}, initialSettings, userSettings);
     }
 
     _save(force) {

@@ -33,7 +33,12 @@ export default {
                 return null;
             }
         },
-        isFinite: _.isFinite
+        isFinite: _.isFinite,
+        random: _.random
+    },
+    arr: {
+        random: _.sample,
+        shuffle: _.shuffle
     },
     val: {
         /**

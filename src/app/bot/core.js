@@ -154,8 +154,8 @@ const coreMethods = {
         decr(table, what, amount, where, allowNegative) {
             return db.bot.data.decr(table, what, amount, where, allowNegative);
         },
-        getRow(table, where) {
-            return db.bot.data.getRow(table, where);
+        getRow(table, where, order) {
+            return db.bot.data.getRow(table, where, order);
         },
         countRows(table, what, where, options) {
             return db.bot.data.countRows(table, what, where, options);
@@ -293,6 +293,7 @@ const initialize = (instant = false) => {
         bot.connect();
 
         db.initBotDB(() => {
+            _loadHelpers();
             _loadTables();
             _loadComponents();
 
@@ -358,6 +359,11 @@ const _loadTables = function() {
         'parent'
     ], true, { compositeKey: ['name', 'module'] });
 };
+
+const _loadHelpers = function() {
+    require('./helpers');
+};
+
 const _loadComponents = function() {
     commandRegistry = require('./components/commandRegistry');
     registry = commandRegistry.default;
