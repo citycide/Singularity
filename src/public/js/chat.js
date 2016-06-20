@@ -114,7 +114,18 @@ function parseTwitchEmotes(message, emotes, self) {
     }
 }
 
-function messageType(username, message) {
+function parseBTTVEmotes(message) {
+    // emoteMap is a key-value object containing:
+    // - BTTV emotes
+    // - any emotes pulled using getEmotes()
+    for (let [k, v] of emoteMap) {
+        const img = `<img class="emoticon" src=${v}>`;
+        message = message.replace(k, img);
+    }
+    return message;
+}
+
+function getMessageType(username, message) {
     if (SETTINGS.bots.includes(username)) return 'bot';
     if (message.charAt(0) === '!') return 'command';
     return 'standard';
@@ -161,17 +172,6 @@ function parseUserBadges(user) {
     return $newLine[0].outerHTML;
 }
 
-function parseBTTVEmotes(message) {
-    // emoteMap is a key-value object containing:
-    // - BTTV emotes
-    // - any emotes pulled using getEmotes()
-    for (let [k, v] of emoteMap) {
-        const img = `<img class="emoticon" src=${v}>`;
-        message = message.replace(k, img);
-    }
-    return message;
-}
-
 function trimChat() {
     totalLines += 1;
     if (totalLines > SETTINGS.maxLines) {
@@ -179,11 +179,20 @@ function trimChat() {
     }
 }
 
+function sendMessage(message) {
+    if (message && message.trim() !== '') {
+        client.say(CHANNEL.name, message).then((data) => {
+        }).catch((err) => {
+            console.log(err);
+        });
+    }
+}
+
 function addMessage(user, message, channel, action, self) {
     let username = user.username;
     username = getDisplayName(username);
 
-    const msgType = messageType(username, message);
+    const msgType = getMessageType(username, message);
     const color = shiftColor(user.color, SETTINGS.background, username);
     const badges = parseUserBadges(user);
 
@@ -194,7 +203,10 @@ function addMessage(user, message, channel, action, self) {
     const colon = action ? ' ' : `<span class='colon'>: </span>`;
     const ts = moment().format('h:mm');
 
-    chatBox.innerHTML += `<div class="${classes}" data-type="${msgType}" data-user="${username}" data-channel="${channel}"><span class="time_stamp">${ts}</span>${badges}<span class="username" style="color: ${color};">${username}</span>${colon}<span class="message"${msgStyle}>${parsedMessage}</span></div>`;
+    chatBox.innerHTML += `<div class="${classes}" data-type="${msgType}" data-user="${username}" ` +
+                         `data-channel="${channel}"><span class="time_stamp">${ts}</span>${badges}` +
+                         `<span class="username" style="color: ${color};">${username}</span>${colon}` +
+                         `<span class="message"${msgStyle}>${parsedMessage}</span></div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
     trimChat();
 }
@@ -208,18 +220,12 @@ function addWhisper(user, message) {
     const colon = `<span class='colon'>: </span>`;
     const ts = moment().format('h:mm');
 
-    chatBox.innerHTML += `<div class="${classes}" data-type="whisper" data-user="${username}"><span class="time_stamp">${ts}</span><span class="username" style="color: ${color};">${username}</span> ${arrow} ${CHANNEL.name}${colon}<span class="message">${parsedMessage}</span></div>`;
+    chatBox.innerHTML += `<div class="${classes}" data-type="whisper" data-user="${username}">` +
+                         `<span class="time_stamp">${ts}</span><span class="username" style="color: ${color};">` +
+                         `${username}</span> ${arrow} ${CHANNEL.name}${colon}<span class="message">` +
+                         `${parsedMessage}</span></div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
     trimChat();
-}
-
-function sendMessage(message) {
-    if (message && message.trim() !== '') {
-        client.say(CHANNEL.name, message).then((data) => {
-        }).catch((err) => {
-            console.log(err);
-        });
-    }
 }
 
 function addSystemMessage(message) {

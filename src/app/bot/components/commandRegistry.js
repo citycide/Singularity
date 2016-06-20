@@ -3,7 +3,7 @@ import db from '../../../app/db';
 let modules = [];
 let commands = {};
 
-const registerCommand = (cmd, _module, parent = false) => {
+const _registerCommand = (cmd, _module, parent = false) => {
     if (!modules.includes(_module)) {
         modules.push(_module);
         Logger.debug(`Module loaded:: ${_module}`);
@@ -23,7 +23,7 @@ const registerCommand = (cmd, _module, parent = false) => {
         if (commands.hasOwnProperty(name)) {
             if (commands[name].module === _module) return;
             Logger.bot(`Duplicate command registration attempted by '${_module}'`);
-            Logger.bot(`'${name}' already registered to '${commands[name].module}'`);
+            Logger.bot(`!${name} already registered to '${commands[name].module}'`);
             return;
         }
 
@@ -39,7 +39,7 @@ const registerCommand = (cmd, _module, parent = false) => {
     }
 };
 
-const _registerCommand = (name, module, options) => {
+const registerCommand = (name, module, options) => {
     const obj = {
         name: name.toLowerCase(),
         handler: name,
@@ -50,12 +50,14 @@ const _registerCommand = (name, module, options) => {
     };
     Object.assign(obj, options);
 
-    registerCommand(obj, module);
+    _registerCommand(obj, module);
 };
 
-const _registerSubcommand = (name, parent, options) => {
+const registerSubcommand = (name, parent, options) => {
+    if (!commands.hasOwnProperty(parent)) return;
+    
     const obj = {
-        name,
+        name: name.toLowerCase(),
         parent,
         cooldown: 30,
         permLevel: 5,
@@ -66,12 +68,12 @@ const _registerSubcommand = (name, parent, options) => {
 
     const parentModule = commands[parent].module;
 
-    registerCommand(obj, parentModule, parent);
+    _registerCommand(obj, parentModule, parent);
 };
 
 $.on('bot:ready', () => {
-    $.addCommand = _registerCommand;
-    $.addSubcommand = _registerSubcommand;
+    $.addCommand = registerCommand;
+    $.addSubcommand = registerSubcommand;
 
     Logger.bot('Listening for commands.');
 });
