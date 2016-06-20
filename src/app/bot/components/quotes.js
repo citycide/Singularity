@@ -12,7 +12,7 @@ const quotes = {
             game: $.stream.game || ''
         }, quote);
 
-        $.data.set('quotes', {
+        $.db.set('quotes', {
             message: sanitizeText(obj.message),
             credit: obj.credit,
             submitter: obj.submitter,
@@ -20,35 +20,35 @@ const quotes = {
             game: obj.game
         });
 
-        const result = $.data.getRow('quotes', obj);
+        const result = $.db.getRow('quotes', obj);
         return result ? result.id : false;
     },
     get(id) {
         if (!_.isFinite(id)) return false;
 
-        const response = $.data.getRow('quotes', { id });
+        const response = $.db.getRow('quotes', { id });
         return _.isPlainObject(response) ? response : null;
     },
     remove(id) {
         if (!_.isFinite(id)) return false;
 
-        $.data.del('quotes', { id });
+        $.db.del('quotes', { id });
 
         return !this.exists(id);
     },
     modify(id, newData) {
         if (!_.isFinite(id) || !_.isPlainObject(newData)) return false;
 
-        $.data.set('quotes', newData, { id });
+        $.db.set('quotes', newData, { id });
 
         return this.exists(id);
     },
     exists(id) {
-        const response = $.data.getRow('quotes', { id });
+        const response = $.db.getRow('quotes', { id });
         return _.isPlainObject(response);
     },
     getCount() {
-        return $.data.countRows('quotes');
+        return $.db.countRows('quotes');
     }
 };
 

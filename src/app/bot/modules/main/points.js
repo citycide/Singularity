@@ -45,18 +45,21 @@ module.exports.points = (event) => {
 
         if ($.settings.get('whisperMode')) {
             $.whisper(event.sender,
-                `You gave ${$.points.str(param2)} to ${param1} (${$.points.get(event.sender, true)} left)`);
+                `You gave ${$.points.str(param2)} to ${param1} ` +
+                `(${$.points.get(event.sender, true)} left)`);
             $.whisper(param1,
-                `${event.sender} gave you ${$.points.str(param2)} (you now have ${$.points.get(event.sender, true)})`);
+                `${event.sender} gave you ${$.points.str(param2)} ` +
+                `(you now have ${$.points.get(event.sender, true)})`);
         } else {
             $.say(event.sender,
-                `You gave ${$.points.str(param2)} to ${param1} (${$.points.get(event.sender, true)} left)`);
+                `You gave ${$.points.str(param2)} to ${param1} ` +
+                `(${$.points.get(event.sender, true)} left)`);
         }
 
         return;
     }
 
-    if ($.users.exists(action)) {
+    if ($.user.exists(action)) {
         return $.say(event.sender, `${action} has ${$.points.get(action, true)}.`);
     } else {
         return $.say(event.sender, `${action} hasn't visited the chat yet.`);
@@ -65,7 +68,8 @@ module.exports.points = (event) => {
 
 (() => {
     $.addCommand('points', './modules/main/points', {
-        cooldown: 0
+        cooldown: 0,
+        status: true
     });
 
     $.addSubcommand('add', 'points', { permLevel: 0 });

@@ -2,14 +2,14 @@ import moment from 'moment';
 
 const time = {
     getUserTime(user) {
-        return $.data.get('users', 'time', { name: user });
+        return $.db.get('users', 'time', { name: user });
     },
     setUserTime(user, time) {
-        $.data.set('users', { time }, { name: user });
+        $.db.set('users', { time }, { name: user });
     },
     run() {
         if ($.stream.isLive || this.settings.getTimeKeeping(true)) {
-            const userList = $.users.list || [];
+            const userList = $.user.list || [];
 
             const nextTime = moment();
             const lastTime = moment(this.settings.lastRun, 'x');
@@ -17,15 +17,15 @@ const time = {
 
             for (let user of userList) {
                 let newTime = 0;
-                
+
                 if (user !== $.channel.botName) {
                     if (this.settings.lastUserList.includes(user)) {
-                        newTime = $.data.incr('users', 'time', timeSince, { name: user });
+                        newTime = $.db.incr('users', 'time', timeSince, { name: user });
 
                         if (this.settings.getAutoRegTime() > 0) {
-                            if (($.data.get('users', 'permission', { name: user }) || 5) > this.settings.getRegLevel()) {
+                            if (($.db.get('users', 'permission', { name: user }) || 5) > this.settings.getRegLevel()) {
                                 if (newTime > this.settings.getAutoRegTime()) {
-                                    $.data.set('users', {
+                                    $.db.set('users', {
                                         permission: this.settings.getRegLevel()
                                     }, { name: user });
                                     $.shout(`${user} just became a regular!`);
@@ -41,13 +41,13 @@ const time = {
             this.settings.lastRun = nextTime.valueOf();
         }
 
-        $.tick.setTimeout('timeKeeping', this.run.bind(this), 60 * 1000);
+        $.tick.setTimeout('timeKeeping', ::this.run, 60 * 1000);
     },
     settings: {
         lastRun: Date.now(),
         lastUserList: [],
         getRegLevel() {
-            return $.data.get('groups', 'level', { name: 'regular' });
+            return $.db.get('groups', 'level', { name: 'regular' });
         },
         getTimeKeeping(offline) {
             if (!offline) {

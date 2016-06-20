@@ -3,9 +3,9 @@ const cooldown = {
     cooldowns: [],
     get(cmd, sub) {
         if (!sub) {
-            return $.data.get('commands', 'cooldown', { name: cmd });
+            return $.db.get('commands', 'cooldown', { name: cmd });
         } else {
-            return $.data.get('subcommands', 'cooldown', { name: sub });
+            return $.db.get('subcommands', 'cooldown', { name: sub });
         }
     },
     start(cmd, user, sub) {

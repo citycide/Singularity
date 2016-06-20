@@ -31,13 +31,13 @@ const api = {
         if (user['user-type'] === 'mod') _mod = true;
         let _user = {
             name: user['display-name'],
-            permission: $.users.getGroup(user),
+            permission: $.user.getGroup(user),
             mod: _mod,
-            following: $.users.isFollower(user['display-name']),
+            following: $.user.isFollower(user['display-name']),
             seen: _timestamp,
             points: $.points.get(user['display-name']) || 0,
-            time: $.data.get('users', 'time', { name: user['display-name'] }) || 0,
-            rank: $.data.get('users', 'rank', { name: user['display-name'] }) || 1
+            time: $.db.get('users', 'time', { name: user['display-name'] }) || 0,
+            rank: $.db.get('users', 'rank', { name: user['display-name'] }) || 1
         };
 
         db.bot.addUser(_user);

@@ -46,10 +46,10 @@ export default class TwitchClass {
             Logger.info('Initializing Twitch API');
             this.chatConnect();
             this.pollFollowers();
-            tick.setInterval('pollFollowers', this.pollFollowers.bind(this), pollInterval);
+            tick.setInterval('pollFollowers', ::this.pollFollowers, pollInterval);
             this.eventHandler();
         }, 5 * 1000);
-        tick.setTimeout('checkQueue', this.checkQueue.bind(this), 10 * 1000);
+        tick.setTimeout('checkQueue', ::this.checkQueue, 10 * 1000);
     }
 
     chatConnect() {
@@ -88,9 +88,8 @@ export default class TwitchClass {
                     };
                     db.dbHostsAdd(null, thisHost.user.display_name, moment().valueOf(), thisHost.user.viewers);
                 }
-                // if (thisHost.user.viewers > 0) {
+
                 this.alertQueue.push(thisHost);
-                // }
             });
         });
 
@@ -307,7 +306,7 @@ TwitchClass.prototype.checkQueue = function(attempts = 0) {
         if (attempts < 2) {
             Logger.absurd(`checkQueue:: An alert is either in progress or no client has responded with 'alert:complete'`);
             attempts += 1;
-            tick.setTimeout('checkQueue', this.checkQueue.bind(this), 5 * 1000, attempts);
+            tick.setTimeout('checkQueue', ::this.checkQueue, 5 * 1000, attempts);
         } else {
             Logger.absurd(`checkQueue:: Maximum attempts reached. Unblocking the alert queue...`);
             this.alertInProgress = false;
@@ -316,12 +315,12 @@ TwitchClass.prototype.checkQueue = function(attempts = 0) {
         return;
     }
     if (!this.alertQueue.length) {
-        tick.setTimeout('checkQueue', this.checkQueue.bind(this), 5 * 1000);
+        tick.setTimeout('checkQueue', ::this.checkQueue, 5 * 1000);
         return;
     }
     let queueItem = this.alertQueue.pop();
     this.actOnQueue(queueItem.user, queueItem.type);
-    tick.setTimeout('checkQueue', this.checkQueue.bind(this), 5 * 1000);
+    tick.setTimeout('checkQueue', ::this.checkQueue, 5 * 1000);
 };
 
 TwitchClass.prototype.actOnQueue = function(data, type) {

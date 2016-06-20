@@ -60,9 +60,9 @@ const coreMethods = {
         },
         isEnabled: (cmd, sub) => {
             if (!sub) {
-                return core.data.get('commands', 'status', { name: cmd });
+                return core.db.get('commands', 'status', { name: cmd });
             } else {
-                return core.data.get('subcommands', 'status', { name: sub, parent: cmd });
+                return core.db.get('subcommands', 'status', { name: sub, parent: cmd });
             }
         },
         exists(cmd, sub) {
@@ -81,9 +81,9 @@ const coreMethods = {
             }
 
             if (sub) {
-                core.data.set('subcommands', { status: true }, { name: sub });
+                core.db.set('subcommands', { status: true }, { name: sub });
             } else {
-                core.data.set('commands', { status: true }, { name: cmd });
+                core.db.set('commands', { status: true }, { name: cmd });
             }
 
             return true;
@@ -95,17 +95,17 @@ const coreMethods = {
             }
 
             if (sub) {
-                core.data.set('subcommands', { status: false }, { name: sub });
+                core.db.set('subcommands', { status: false }, { name: sub });
             } else {
-                core.data.set('commands', { status: false }, { name: cmd });
+                core.db.set('commands', { status: false }, { name: cmd });
             }
 
             return true;
         },
         getPermLevel: (cmd, sub) => {
             return (sub)
-                ? core.data.get('subcommands', 'permission', { name: sub })
-                : core.data.get('commands', 'permission', { name: cmd });
+                ? core.db.get('subcommands', 'permission', { name: sub })
+                : core.db.get('commands', 'permission', { name: cmd });
         },
         setPermLevel: (cmd, level, sub) => {
             if (!this.exists(cmd, sub)) {
@@ -114,9 +114,9 @@ const coreMethods = {
             }
 
             if (sub) {
-                core.data.set('subcommands', { permission: level }, { name: sub });
+                core.db.set('subcommands', { permission: level }, { name: sub });
             } else {
-                core.data.set('commands', { permission: level }, { name: cmd });
+                core.db.set('commands', { permission: level }, { name: cmd });
             }
 
             return true;
@@ -135,7 +135,7 @@ const coreMethods = {
         }
     },
 
-    data: {
+    db: {
         get(table, what, where) {
             return db.bot.data.get(table, what, where);
         },

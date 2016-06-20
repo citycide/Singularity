@@ -128,8 +128,8 @@ const twitchAPI = {
         });
 
 
-        $.users.list = users;
-        $.users.count = userCount;
+        $.user.list = users;
+        $.user.count = userCount;
 
         $.tick.setTimeout('getChatUsers', this.getChatUsers.bind(this), 30 * 1000);
 
@@ -138,10 +138,10 @@ const twitchAPI = {
 };
 
 $.on('bot:ready', () => {
-    $.users.list = [];
-    $.users.count = 0;
+    $.user.list = [];
+    $.user.count = 0;
 
-    $.users.resolve = twitchAPI.resolveUser;
+    $.user.resolve = twitchAPI.resolveUser;
 
     $.stream = Object.assign({}, {
         isLive: false,

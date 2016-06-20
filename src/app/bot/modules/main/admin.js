@@ -96,8 +96,8 @@ module.exports.lastSeen = (event) => {
     let target = event.args[0];
     if (!target) return $.say(event.sender, `Usage: !lastseen [user]`);
 
-    if ($.users.exists(target)) {
-        let ts = $.data.get('users', 'seen', { name: target });
+    if ($.user.exists(target)) {
+        let ts = $.db.get('users', 'seen', { name: target });
         let timeAgo = moment(ts, 'x').fromNow();
 
         $.say(event.sender, `${target} was last seen ${timeAgo}.`);

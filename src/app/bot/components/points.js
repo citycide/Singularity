@@ -11,31 +11,31 @@ const points = {
     },
     getCommandPrice(cmd, sub = null) {
         return (sub)
-            ? $.data.get('subcommands', 'price', { name: cmd })
-            : $.data.get('commands', 'price', { name: cmd });
+            ? $.db.get('subcommands', 'price', { name: cmd })
+            : $.db.get('commands', 'price', { name: cmd });
     },
     setCommandPrice(cmd, price, sub = null) {
         if (sub) {
-            $.data.set('subcommands', { name: cmd, price }, { name: cmd });
+            $.db.set('subcommands', { name: cmd, price }, { name: cmd });
         } else {
-            $.data.set('commands', { name: cmd, price }, { name: cmd });
+            $.db.set('commands', { name: cmd, price }, { name: cmd });
         }
     },
     getUserPoints(user, makeString) {
         if (makeString) {
-            return this.makeString($.data.get('users', 'points', { name: user }));
+            return this.makeString($.db.get('users', 'points', { name: user }));
         } else {
-            return $.data.get('users', 'points', { name: user });
+            return $.db.get('users', 'points', { name: user });
         }
     },
     setUserPoints(user, amount) {
-        $.data.set('users', { points: amount }, { name: user });
+        $.db.set('users', { points: amount }, { name: user });
     },
     add(user, amount) {
-        $.data.incr('users', 'points', amount, { name: user });
+        $.db.incr('users', 'points', amount, { name: user });
     },
     sub(user, amount) {
-        $.data.decr('users', 'points', amount, { name: user });
+        $.db.decr('users', 'points', amount, { name: user });
     },
     run() {
         const now = Date.now();
@@ -63,7 +63,7 @@ const points = {
             }
         }
 
-        const userList = $.users.list || [];
+        const userList = $.user.list || [];
 
         for (let user of userList) {
             let bonus = 0;
@@ -71,7 +71,7 @@ const points = {
             if (user !== $.channel.botName) {
                 if (this.settings.lastUserList.includes(user)) {
 
-                    const userDB = $.data.getRow('users', { name: user });
+                    const userDB = $.db.getRow('users', { name: user });
 
                     if (userDB) {
                         if (this.settings.getRankBonus(userDB.rank)) {
@@ -82,7 +82,7 @@ const points = {
                     }
 
                     // this.add(user, payout + bonus);
-                    $.data.incr('users', 'points', payout + bonus, { name: user });
+                    $.db.incr('users', 'points', payout + bonus, { name: user });
                 } else {
                     this.settings.lastUserList.push(user);
                 }
@@ -92,7 +92,7 @@ const points = {
 
         this.settings.lastPayout = now;
 
-        $.tick.setTimeout('pointPayouts', this.run.bind(this), 60 * 1000);
+        $.tick.setTimeout('pointPayouts', ::this.run, 60 * 1000);
     },
     settings: {
         lastPayout: 0,
@@ -138,7 +138,7 @@ const points = {
             }
         },
         getRankBonus(rank) {
-            const _storedRankBonus = $.data.get('ranks', 'bonus', { name: rank });
+            const _storedRankBonus = $.db.get('ranks', 'bonus', { name: rank });
             if (_storedRankBonus) {
                 return _storedRankBonus;
             } else {
@@ -146,24 +146,24 @@ const points = {
             }
         },
         setRankBonus(rank, bonus) {
-            $.data.set('ranks', { name: rank, bonus }, { name: rank });
+            $.db.set('ranks', { name: rank, bonus }, { name: rank });
         },
         getGroupBonus(group) {
             let _storedGroupBonus;
 
             if (typeof group === 'number') {
-                _storedGroupBonus = $.data.get('groups', 'bonus', { level: group });
+                _storedGroupBonus = $.db.get('groups', 'bonus', { level: group });
             } else if (typeof group === 'string') {
-                _storedGroupBonus = $.data.get('groups', 'bonus', { name: group });
+                _storedGroupBonus = $.db.get('groups', 'bonus', { name: group });
             } else return 0;
 
             return (_storedGroupBonus) ? _storedGroupBonus : 0;
         },
         setGroupBonus(group, bonus) {
             if (typeof group === 'number') {
-                $.data.set('groups', { level: group, bonus }, { level: group });
+                $.db.set('groups', { level: group, bonus }, { level: group });
             } else if (typeof group === 'string') {
-                $.data.set('groups', { name: group, bonus }, { name: group });
+                $.db.set('groups', { name: group, bonus }, { name: group });
             }
         }
     }
