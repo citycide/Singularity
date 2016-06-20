@@ -66,6 +66,11 @@ function sanitizeText(str) {
 $.on('bot:ready', () => {
     $.quote = {};
     Object.assign($.quote, quotes);
+
+    $.db.addTableCustom('quotes', [
+        { name: 'id', type: 'integer', primaryKey: true, autoIncrement: true },
+        'message', 'credit', 'submitter', 'date', 'game'
+    ]);
 });
 
 export default quotes;

@@ -7,6 +7,9 @@ export default class Trilogy {
         this.fileName = fileName;
         this.db = null;
         this.debug = options.debug || false;
+        this.errorListener = typeof options.errorListener === 'function'
+            ? options.errorListener
+            : null;
         this._init();
     }
 
@@ -15,9 +18,7 @@ export default class Trilogy {
             const file = jetpack.read(this.fileName, 'buffer');
             this.db = new SQL.Database(file);
         } catch (err) {
-            if (this.debug) {
-                throw err;
-            }
+            this._errorHandler(err);
             this.db = new SQL.Database();
             this._write();
         }
@@ -29,9 +30,7 @@ export default class Trilogy {
             const buffer = new Buffer(data);
             jetpack.write(this.fileName, buffer);
         } catch (err) {
-            if (this.debug) {
-                throw err;
-            }
+            this._errorHandler(err);
         }
     }
 
@@ -40,9 +39,7 @@ export default class Trilogy {
             this.db.run(query);
             this._write();
         } catch (err) {
-            if (this.debug) {
-                throw err;
-            }
+            this._errorHandler(err);
         }
     }
 
@@ -50,9 +47,7 @@ export default class Trilogy {
         try {
             return this.db.exec(query);
         } catch (err) {
-            if (this.debug) {
-                throw err;
-            }
+            this._errorHandler(err);
         }
     }
 }
@@ -62,23 +57,24 @@ export default class Trilogy {
 /**
  * Add a table to the database
  * @param {string} table
- * @param {Array} args
+ * @param {Array} columns
  * @param {object} options
  * @param {function} callback
  * @returns {*}
  */
-Trilogy.prototype.create = function(table, args, options = {}, callback = () => {}) {
+Trilogy.prototype.create = function(table, columns, options = {}, callback = () => {}) {
     let query = [];
     let hasUnique = false;
     let hasPrimary = options.compositeKey ? true : false;
+    options.ifNotExists = options.hasOwnProperty('ifNotExists') ? options.ifNotExists : true;
 
-    for (let key of args) {
+    for (let key of columns) {
         let keyString = [];
         let hasAutoIncr = false;
 
         if (key != null && typeof key === 'object') {
             if (!key.name) {
-                if (this.debug) throw new TypeError();
+                if (this.debug) throw new TypeError(`Trilogy#create :: Column names are required.`);
                 return;
             }
 
@@ -130,9 +126,7 @@ Trilogy.prototype.create = function(table, args, options = {}, callback = () => 
     try {
         _res = this.run(queryString);
     } catch (err) {
-        if (this.debug) {
-            throw err;
-        }
+        this._errorHandler(err);
         _err = err;
     }
     callback(_err, _res);
@@ -173,9 +167,7 @@ Trilogy.prototype.put = function(table, data, options = { conflict: ' ' }, callb
     try {
         _res = this.run(queryString);
     } catch (err) {
-        if (this.debug) {
-            throw err;
-        }
+        this._errorHandler(err);
         _err = err;
     }
     callback(_err, _res);
@@ -277,9 +269,7 @@ Trilogy.prototype.get = function(table, what = '', where, order, limit) {
             return null;
         }
     } catch (err) {
-        if (this.debug) {
-            throw err;
-        }
+        this._errorHandler(err);
         return null;
     }
 };
@@ -292,14 +282,21 @@ Trilogy.prototype.get = function(table, what = '', where, order, limit) {
  * @returns {*}
  */
 Trilogy.prototype.getValue = function(table, what, where) {
-    const location = [];
-
     if (!table || !what) {
         if (this.debug) {
             throw new TypeError(`Trilogy#getValue :: 'table' & 'what' parameters are required.`);
         }
         return;
     }
+
+    if (typeof what !== 'string') {
+        if (this.debug) {
+            throw new TypeError(`Trilogy#getValue :: 'what' parameter must be of type 'string'.`);
+        }
+        return;
+    }
+
+    const location = [];
 
     if (where) {
         for (let key in where) {
@@ -333,9 +330,7 @@ Trilogy.prototype.getValue = function(table, what, where) {
             return undefined;
         }
     } catch (err) {
-        if (this.debug) {
-            throw err;
-        }
+        this._errorHandler(err);
         return null;
     }
 };
@@ -382,9 +377,7 @@ Trilogy.prototype.del = function(table, where, callback = () => {}) {
         try {
             _res = this._delete(queryString);
         } catch (err) {
-            if (this.debug) {
-                throw err;
-            }
+            this._errorHandler(err);
             return null;
         }
         return _res;
@@ -439,9 +432,7 @@ Trilogy.prototype.update = function(table, data, where, options = { conflict: ' 
     try {
         _res = this.run(queryString);
     } catch (err) {
-        if (this.debug) {
-            throw err;
-        }
+        this._errorHandler(err);
         _err = err;
     }
     callback(_err, _res);
@@ -499,9 +490,7 @@ Trilogy.prototype.count = function(table, what, where, options = {}) {
             return null;
         }
     } catch (err) {
-        if (this.debug) {
-            throw err;
-        }
+        this._errorHandler(err);
         return null;
     }
 };
@@ -529,9 +518,7 @@ Trilogy.prototype._delete = function(query, location) {
         this._write();
         return this.db.getRowsModified();
     } catch (err) {
-        if (this.debug) {
-            throw err;
-        }
+        this._errorHandler(err);
         return null;
     }
 };
@@ -557,9 +544,7 @@ Trilogy.prototype._update = function(query, data) {
         this._write();
         return this.db.getRowsModified();
     } catch (err) {
-        if (this.debug) {
-            throw err;
-        }
+        this._errorHandler(err);
         return null;
     }
 };
@@ -645,4 +630,14 @@ Trilogy.prototype._defaultTableKeys = {
     unique: undefined,
     notNull: undefined,
     defaultValue: undefined
+};
+
+Trilogy.prototype._errorHandler = function(err) {
+    if (!this.debug) return;
+
+    if (this.errorListener) {
+        this.errorListener(err);
+    } else {
+        throw err;
+    }
 };

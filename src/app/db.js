@@ -13,6 +13,16 @@ const errHandler = function(err) {
     if (err) Logger.error(err);
 };
 
+const trilogyErrHandler = function(err) {
+    if (!err) return;
+
+    if (err.message.startsWith('UNIQUE constraint')) {
+        Logger.absurd(err.message);
+    } else {
+        Logger.error(err.stack);
+    }
+};
+
 /**
  * Collection of api methods for main database functions
  * @export default
@@ -24,18 +34,19 @@ const data = {
      * @param {function} fn
      */
     initBotDB(fn = () => {}) {
-        botDB = new Trilogy(path.resolve(__dirname, '..', 'db', 'bot.db'));
+        botDB = new Trilogy(path.resolve(__dirname, '..', 'db', 'bot.db'), {
+            debug: true,
+            errorListener: trilogyErrHandler
+        });
 
         fn();
         return botDB;
     },
     addTable(name, args, bot = false, options = {}, fn = errHandler) {
-        const opts = Object.assign({ ifNotExists: true }, options);
-
         if (!bot) {
-            db.create(name, args, opts, fn);
+            db.create(name, args, options, fn);
         } else {
-            botDB.create(name, args, opts, fn);
+            botDB.create(name, args, options, fn);
         }
 
         return this;
@@ -221,6 +232,8 @@ data.bot = {
 
     data: {
         get(table, what, where, fn) {
+            if (_.isPlainObject(what)) return this.getRow(table, where);
+
             let response = botDB.getValue(table, what, where);
             if (util.val.isNullLike(response)) {
                 fn && fn();
@@ -245,7 +258,7 @@ data.bot = {
         },
         set(table, what, where, options = {}) {
             if (typeof table !== 'string') return;
-            if (!_.isPlainObject(what)) return;
+            if (!_.isPlainObject(what) || !Object.keys(what).length) return;
 
             let whatWhere = Object.assign({}, what, where);
 
@@ -260,7 +273,11 @@ data.bot = {
                 }
             });
 
-            return this.get(table, what, where);
+            if (Object.keys(what).length === 1) {
+                return this.get(table, Object.keys(what)[0], where);
+            } else {
+                return this.getRow(table, Object.keys(whatWhere));
+            }
         },
         del(table, where) {
             if (typeof table !== 'string') return;
@@ -408,8 +425,8 @@ data.bot = {
 
             return newValues;
         },
-        getRow(table, where) {
-            const response = botDB.get(table, '*', where);
+        getRow(table, where, order) {
+            const response = botDB.get(table, '*', where, order);
             if (response && Array.isArray(response)) {
                 return response[0];
             } else {
@@ -421,7 +438,19 @@ data.bot = {
             if (_.isFinite(response)) {
                 return response;
             } else {
-                Logger.error(`ERR in count:: expected number, received ${typeof response}`);
+                Logger.error(`ERR in db#countRows:: expected number, received ${typeof response}`);
+            }
+        },
+        tableExists(table) {
+            const response = parseInt(botDB.count('sqlite_master', 'count(*)', {
+                type: 'table',
+                name: table
+            }));
+
+            if (_.isFinite(response)) {
+                return response > 0;
+            } else {
+                Logger.error(`ERR in db#tableExists:: expected number, received ${typeof response}`);
             }
         }
     },

@@ -1,7 +1,7 @@
 module.exports.alerts = (event) => {
-    const [action, param1] = event.args;
+    const param1 = event.args[1];
 
-    if (action === 'follow') {
+    if (event.subcommand === 'follow') {
         if (param1 === 'enable') {
             $.settings.set('followAlerts', true);
             $.say(event.sender, `Follow alerts enabled.`);
@@ -14,7 +14,9 @@ module.exports.alerts = (event) => {
         }
 
         return;
-    } else if (action === 'host') {
+    }
+
+    if (event.subcommand === 'host') {
         if (param1 === 'enable') {
             $.settings.set('hostAlerts', true);
             $.say(event.sender, `Host alerts enabled.`);
@@ -27,7 +29,9 @@ module.exports.alerts = (event) => {
         }
 
         return;
-    } else if (action === 'sub') {
+    }
+
+    if (event.subcommand === 'sub') {
         if (param1 === 'enable') {
             $.settings.set('subAlerts', true);
             $.say(event.sender, `Subscriber alerts enabled.`);
@@ -40,7 +44,9 @@ module.exports.alerts = (event) => {
         }
 
         return;
-    } else if (action === 'tip') {
+    }
+
+    if (event.subcommand === 'tip') {
         if (param1 === 'enable') {
             $.settings.set('tipAlerts', true);
             $.say(event.sender, `Tip alerts enabled.`);
@@ -53,7 +59,9 @@ module.exports.alerts = (event) => {
         }
 
         return;
-    } else if (action === 'settings') {
+    }
+
+    if (event.subcommand === 'settings') {
         const cfg = [
             $.settings.get('followAlerts', true) ? 'enabled' : 'disabled',
             $.settings.get('hostAlerts', true) ? 'enabled' : 'disabled',

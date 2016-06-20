@@ -160,21 +160,34 @@ const coreMethods = {
         countRows(table, what, where, options) {
             return db.bot.data.countRows(table, what, where, options);
         },
-        addTable(name, columns) {
+        addTable(name) {
+            if (!name || typeof name !== 'string') {
+                Logger.bot(`ERR in core#addTable:: Expected parameter 'name' to be a string, received ${typeof name}`);
+                return;
+            }
+
+            db.addTable(name, ['key', 'value', 'info'], true);
+        },
+        addTableCustom(name, columns) {
+            if (arguments.length < 2 || typeof name !== 'string' || !Array.isArray(columns)) {
+                Logger.bot(`ERR in core#addTableCustom:: wrong arguments.`);
+                return;
+            }
+
             db.addTable(name, columns, true);
         }
     },
 
-    users: {
+    user: {
         isFollower: (user) => {
             let _status = false;
             bot.api({
                 url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${core.channel.name}`,
-                method: "GET",
+                method: 'GET',
                 headers: {
-                    "Accept": "application/vnd.twitchtv.v3+json",
-                    "Authorization": `OAuth ${Settings.get('accessToken').slice(6)}`,
-                    "Client-ID": Settings.get('clientID')
+                    'Accept': 'application/vnd.twitchtv.v3+json',
+                    'Authorization': `OAuth ${Settings.get('accessToken').slice(6)}`,
+                    'Client-ID': Settings.get('clientID')
                 }
             }, (err, res, body) => {
                 if (err) Logger.bot(err);
@@ -215,6 +228,7 @@ const coreMethods = {
             }
 
             // add subcommand argument properties to the event object
+            event.subcommand = subcommand;
             event.subArgs = event.args.slice(1);
             event.subArgString = event.subArgs.join(' ');
         } else {
@@ -271,54 +285,15 @@ global.core = core;
 const initialize = (instant = false) => {
     const delay = instant ? 1 : 5 * 1000;
     setTimeout(() => {
-        if (!Settings.get('botName') || !Settings.get('botAuth')) return Logger.bot('Bot setup is not complete.');
+        if (!Settings.get('botName') || !Settings.get('botAuth')) {
+            return Logger.bot('Bot setup is not complete.');
+        }
+        
         Logger.bot('Initializing bot...');
         bot.connect();
 
         db.initBotDB(() => {
-            db.addTable('settings', [{ name: 'key', unique: true },
-                'value', 'info'
-            ], true)
-                .addTable('users', [
-                    { name: 'name', unique: true },
-                    { name: 'permission', type: 'int' },
-                    { name: 'mod', defaultValue: 'false' },
-                    { name: 'following', defaultValue: 'false' },
-                    { name: 'seen', type: 'int', defaultValue: 0 },
-                    { name: 'points', type: 'int', defaultValue: 0 },
-                    { name: 'time', type: 'int', defaultValue: 0 },
-                    { name: 'rank', type: 'int', defaultValue: 1 }
-                ], true)
-                .addTable('groups', [
-                    { name: 'level', type: 'int', unique: true },
-                    'name',
-                    { name: 'bonus', type: 'int' }
-                ], true)
-                .addTable('quotes', [
-                    { name: 'id', type: 'integer', primaryKey: true, autoIncrement: true },
-                    'message', 'credit', 'submitter', 'date', 'game'
-                ], true);
-
-            db.bot.initSettings();
-
-            db.addTable('commands', [
-                { name: 'name', unique: true },
-                { name: 'cooldown', type: 'int', defaultValue: 30 },
-                { name: 'permission', type: 'int', defaultValue: 5 },
-                { name: 'status', defaultValue: 'false' },
-                { name: 'price', type: 'int', defaultValue: 0 },
-                'module'
-            ], true)
-                .addTable('subcommands', [
-                    'name',
-                    { name: 'cooldown', type: 'int', defaultValue: 30 },
-                    { name: 'permission', type: 'int', defaultValue: 5 },
-                    { name: 'status', defaultValue: 'false' },
-                    { name: 'price', type: 'int', defaultValue: 0 },
-                    'module',
-                    'parent'
-                ], true, { compositeKey: ['name', 'module'] });
-
+            _loadTables();
             _loadComponents();
 
             Logger.bot('Bot ready.');
@@ -348,6 +323,41 @@ module.exports.reconfigure = reconfigure;
  * Private functions
  */
 
+const _loadTables = function() {
+    db.addTable('settings', [{ name: 'key', unique: true },
+        'value', 'info'
+    ], true)
+    .addTable('users', [
+        { name: 'name', unique: true },
+        { name: 'permission', type: 'int' },
+        { name: 'mod', defaultValue: 'false' },
+        { name: 'following', defaultValue: 'false' },
+        { name: 'seen', type: 'int', defaultValue: 0 },
+        { name: 'points', type: 'int', defaultValue: 0 },
+        { name: 'time', type: 'int', defaultValue: 0 },
+        { name: 'rank', type: 'int', defaultValue: 1 }
+    ], true);
+
+    db.bot.initSettings();
+
+    db.addTable('commands', [
+        { name: 'name', unique: true },
+        { name: 'cooldown', type: 'int', defaultValue: 30 },
+        { name: 'permission', type: 'int', defaultValue: 5 },
+        { name: 'status', defaultValue: 'false' },
+        { name: 'price', type: 'int', defaultValue: 0 },
+        'module'
+    ], true)
+    .addTable('subcommands', [
+        'name',
+        { name: 'cooldown', type: 'int', defaultValue: 30 },
+        { name: 'permission', type: 'int', defaultValue: 5 },
+        { name: 'status', defaultValue: 'false' },
+        { name: 'price', type: 'int', defaultValue: 0 },
+        'module',
+        'parent'
+    ], true, { compositeKey: ['name', 'module'] });
+};
 const _loadComponents = function() {
     commandRegistry = require('./components/commandRegistry');
     registry = commandRegistry.default;

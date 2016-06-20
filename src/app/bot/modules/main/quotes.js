@@ -1,19 +1,26 @@
 /**
- * Quotes are saved in the db table 'quotes' with columns:
- * id | message | credit | submitter | date | game
+ * Quotes - add & manage quotes
+ *
+ * @command quote
+ * @usage !quote [subcommands]
+ * @param {object} event
+ *
+ * @source stock module
+ * @author citycide
  */
 
 module.exports.quote = (event) => {
-    const [action, param1] = event.args;
+    const param1 = event.args[1];
     const regex = /~(\w+)/g;
 
     if (!event.args.length) {
         $.say(event.sender, `Usage: !quote [add | remove | edit | help]`);
+        return;
     }
 
-    if (action === 'add') {
+    if (event.subcommand === 'add') {
         if (event.args.length < 3) {
-            $.say(event.sender, `Usage: !quote add Something really wise. (~WhoSaidIt)`);
+            $.say(event.sender, `Usage: !quote add Something really wise. [~username]`);
             return;
         }
 
@@ -21,7 +28,7 @@ module.exports.quote = (event) => {
             submitter: event.sender
         };
 
-        if (event.subArgString.match(regex)) {
+        if (regex.test(event.subArgString)) {
             thisQuote.message = event.subArgString.replace(regex, '').replace(/"/g, '');
             thisQuote.credit = regex.exec(event.subArgString)[1];
         } else {
@@ -39,7 +46,7 @@ module.exports.quote = (event) => {
         return;
     }
 
-    if (action === 'remove') {
+    if (event.subcommand === 'remove') {
         if (!$.util.num.isFinite(parseInt(param1)) || parseInt(param1) < 1) {
             $.say(event.sender, `Usage: !quote remove (number >/= 1)`);
             return;
@@ -55,9 +62,9 @@ module.exports.quote = (event) => {
         return;
     }
 
-    if (action === 'edit') {
+    if (event.subcommand === 'edit') {
         if (!$.util.num.isFinite(parseInt(param1)) || parseInt(param1) < 1) {
-            $.say(event.sender, `Usage: !quote edit (number > 1) [message] [~username]`);
+            $.say(event.sender, `Usage: !quote edit (number >/= 1) [message] [~username]`);
             return;
         }
 
@@ -65,7 +72,7 @@ module.exports.quote = (event) => {
 
         const newQuote = {};
 
-        if (event.subArgString.match(regex)) {
+        if (regex.test(event.subArgString)) {
             newQuote.message = event.subArgs.slice(1).join(' ').replace(regex, '');
             newQuote.credit = regex.exec(event.subArgString)[1];
         } else {
@@ -81,30 +88,27 @@ module.exports.quote = (event) => {
         return;
     }
 
-    if (action === 'help') {
+    if (event.subcommand === 'help') {
         $.say(event.sender, `To save a quote, use '!quote add Something really wise.' ` +
             `To credit who said it, add '~username' with no space.`);
         return;
     }
 
-    if (parseInt(action) && $.quote.exists(parseInt(action))) {
-        const quote = $.quote.get(parseInt(action));
+    (function(a) {
+        if (a) {
+            if (!$.quote.exists(a)) {
+                $.say(event.sender, `Quote #${a} doesn't exist.`);
+                return;
+            }
 
-        /**
-         * quote is now = {
-         *      id: 1,
-         *      message: 'string of wise text',
-         *      credit: 'citycide',
-         *      submitter: 'someuser39',
-         *      date: '06/17/16',
-         *      game: 'Destiny'
-         * }
-         */
+            const quote = $.quote.get(a);
+            const game = quote.game ? ` - ${quote.game}` : '';
 
-        $.shout(`"${quote.message}" - ${quote.credit} (${quote.date})`);
-    } else {
-        $.say(`Usage: !quote [add | remove | edit | help]`);
-    }
+            $.shout(`"${quote.message}" - ${quote.credit} (${quote.date}${game})`);
+        } else {
+            $.say(`Usage: !quote [add | remove | edit | help]`);
+        }
+    }(parseInt(event.args[0])));
 };
 
 (() => {

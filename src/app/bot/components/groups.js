@@ -39,6 +39,12 @@ $.on('bot:ready', () => {
         getName: groups.getGroupName,
         getLevel: groups.getGroupLevel
     };
+    
+    $.db.addTableCustom('groups', [
+        { name: 'level', type: 'int', unique: true },
+        'name',
+        { name: 'bonus', type: 'int' }
+    ]);
 
     if ($.settings.get('groups', 'initial') === 'initial') {
         $.db.set('groups', { name: 'admin', level: 0, bonus: 0 });

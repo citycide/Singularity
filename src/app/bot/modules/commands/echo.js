@@ -1,25 +1,25 @@
 /**
- * ECHO - a simple example command module
- */
-
-/**
- * The bot will simply repeat whatever follows the command
+ * Echo - The bot will simply repeat whatever follows the command
+ *
  * @command echo
  * @usage !echo [message]
- * @commandArgs {string} - the message to repeat
  * @param {object} event
+ *
+ * @source stock module
+ * @author citycide
  */
+
 module.exports.echo = (event) => {
-    if (event.args[0] === 'twice') {
+    if (event.subcommand === 'twice') {
         $.say(event.sender, `${event.subArgString} ${event.subArgString}`);
         return;
     }
-    
-    if (event.args[0] === 'loudly') {
+
+    if (event.subcommand === 'loudly') {
         $.say(event.sender, `${event.subArgString.toUpperCase()}`);
         return;
     }
-    
+
     $.say(event.sender, event.argString);
 };
 

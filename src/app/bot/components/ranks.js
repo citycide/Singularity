@@ -6,6 +6,12 @@ const ranks = {
  * Add methods to the global core object
  **/
 $.on('bot:ready', () => {
+    $.db.addTableCustom('ranks', [
+        { name: 'level', type: 'int', unique: true },
+        'name',
+        { name: 'bonus', type: 'int' }
+    ]);
+
     if ($.settings.get('ranks', 'initial') === 'initial') {
         $.db.set('ranks', { name: 'atari 2600', level: 1, bonus: 0 });
         $.db.set('ranks', { name: 'commodore 64', level: 2, bonus: 1 });
