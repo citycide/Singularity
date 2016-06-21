@@ -160,17 +160,23 @@ const coreMethods = {
         countRows(table, what, where, options) {
             return db.bot.data.countRows(table, what, where, options);
         },
+        exists(table, where) {
+            const response = db.bot.data.getRow(table, where);
+            return util.isObject(response);
+        },
         getModuleConfig(moduleName, key, defaultValue) {
             return db.bot.data.get('extension_settings', 'value', {
+                key,
                 extension: moduleName,
                 type: 'module'
             }, defaultValue);
         },
         setModuleConfig(moduleName, key, value) {
-            return db.bot.data.set('extension_settings', 'value', {
+            return db.bot.data.set('extension_settings', { value }, {
+                key,
                 extension: moduleName,
                 type: 'module'
-            }, value);
+            });
         },
         addTable(name, keyed) {
             if (!name || typeof name !== 'string') {
@@ -304,7 +310,7 @@ const initialize = (instant = false) => {
         if (!Settings.get('botName') || !Settings.get('botAuth')) {
             return Logger.bot('Bot setup is not complete.');
         }
-        
+
         Logger.bot('Initializing bot...');
         bot.connect();
 
@@ -346,7 +352,7 @@ const _loadTables = function() {
     ], true)
     .addTable('extension_settings', [
         'extension', 'type', 'key', 'value', 'info'
-    ], true, { compositeKey: ['extension', 'type'] })
+    ], true, { compositeKey: ['extension', 'type', 'key'] })
     .addTable('users', [
         { name: 'name', unique: true },
         { name: 'permission', type: 'int' },

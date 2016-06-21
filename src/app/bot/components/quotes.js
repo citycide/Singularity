@@ -34,21 +34,14 @@ const quotes = {
 
         $.db.del('quotes', { id });
 
-        return !this.exists(id);
+        return !$.db.exists('quotes', { id });
     },
     modify(id, newData) {
         if (!_.isFinite(id) || !_.isPlainObject(newData)) return false;
 
         $.db.set('quotes', newData, { id });
 
-        return this.exists(id);
-    },
-    exists(id) {
-        const response = $.db.getRow('quotes', { id });
-        return _.isPlainObject(response);
-    },
-    getCount() {
-        return $.db.countRows('quotes');
+        return $.db.exists('quotes', { id });
     }
 };
 

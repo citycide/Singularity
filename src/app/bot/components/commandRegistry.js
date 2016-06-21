@@ -40,6 +40,8 @@ const _registerCommand = (cmd, _module, parent = false) => {
 };
 
 const registerCommand = (name, module, options) => {
+    if (!name || !module) return;
+
     const obj = {
         name: name.toLowerCase(),
         handler: name,
@@ -54,8 +56,8 @@ const registerCommand = (name, module, options) => {
 };
 
 const registerSubcommand = (name, parent, options) => {
-    if (!commands.hasOwnProperty(parent)) return;
-    
+    if (!name || !parent || !commands.hasOwnProperty(parent)) return;
+
     const obj = {
         name: name.toLowerCase(),
         parent,

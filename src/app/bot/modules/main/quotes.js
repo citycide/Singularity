@@ -53,7 +53,7 @@ module.exports.quote = (event) => {
         }
 
         if ($.quote.remove(parseInt(param1))) {
-            const count = $.quote.getCount();
+            const count = $.db.countRows('quotes');
             $.say(event.sender, `Quote removed. ${count} quotes remaining.`);
         } else {
             $.say(event.sender, `Failed to remove quote #${parseInt(param1)}.`);
@@ -96,7 +96,7 @@ module.exports.quote = (event) => {
 
     (function(a) {
         if (a) {
-            if (!$.quote.exists(a)) {
+            if (!$.db.exists('quotes', { id: a })) {
                 $.say(event.sender, `Quote #${a} doesn't exist.`);
                 return;
             }

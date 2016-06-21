@@ -198,7 +198,7 @@ data.bot = {
             }
 
             let value = botDB.getValue('settings', 'value', { key });
-            if (util.isNil(value)) {
+            if (_.isNil(value)) {
                 if (defaultValue) {
                     this.set(key, defaultValue);
                     return defaultValue;
@@ -247,12 +247,16 @@ data.bot = {
             }
 
             let response = botDB.getValue(table, what, where);
-            if (util.isNil(response)) {
+            if (_.isNil(response)) {
                 if (fn) {
-                    fn(this.set(table, what, where));
+                    if (_.isNil(defaultValue)) return this;
+                    const obj = { [what]: defaultValue };
+                    fn(this.set(table, obj, where));
                     return this;
                 } else {
-                    return this.set(table, what, where);
+                    if (_.isNil(defaultValue)) return;
+                    const obj = { [what]: defaultValue };
+                    return this.set(table, obj, where);
                 }
             }
 

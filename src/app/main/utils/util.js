@@ -31,9 +31,6 @@ export default {
      */
 
     num: {
-        validate(value) {
-
-        },
         isFinite: _.isFinite,
         random: _.random
     },

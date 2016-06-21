@@ -72,6 +72,6 @@ module.exports.points = (event) => {
         status: true
     });
 
-    $.addSubcommand('add', 'points', { permLevel: 0 });
-    $.addSubcommand('remove', 'points', { permLevel: 0 });
+    $.addSubcommand('add', 'points', { permLevel: 0, status: true });
+    $.addSubcommand('remove', 'points', { permLevel: 0, status: true });
 })();

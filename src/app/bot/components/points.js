@@ -186,8 +186,8 @@ $.on('bot:ready', () => {
         get: ::points.getUserPoints,
         set: points.setUserPoints,
         str: ::points.makeString,
-        getName: points.getPointName,
-        setName: points.setPointName
+        getName: points.settings.getPointName,
+        setName: points.settings.setPointName
     };
 
     setTimeout(() => {
