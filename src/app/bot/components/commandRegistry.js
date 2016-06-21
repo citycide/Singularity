@@ -35,7 +35,7 @@ const _registerCommand = function(cmd, _module, parent = false) {
         };
 
         db.bot.addCommand(name, cooldown, permLevel, status, price, _module);
-        Logger.trace(`\`- Command loaded:: '${name}' (${_module})`);
+        Logger.absurd(`\`- Command loaded:: '${name}' (${_module})`);
     }
 };
 
@@ -73,7 +73,7 @@ const registerSubcommand = function(name, parent, options) {
     _registerCommand(obj, parentModule, parent);
 };
 
-const registerCustomCommand = function(name, response) {
+const addCustomCommand = function(name, response) {
     if (!name || !response) return false;
     name = name.toLowerCase();
     
@@ -81,38 +81,54 @@ const registerCustomCommand = function(name, response) {
         Logger.bot(`Could not add custom command '${name}'. Name already in use.`);
         return false;
     }
-
-    commands[name] = {
-        name: name.toLowerCase(),
-        custom: true
-    };
     
-    const obj = {
-        name: name.toLowerCase(),
-        cooldown: 30,
-        permLevel: 5,
-        status: true,
-        price: 0,
-        custom: true
-    };
+    _registerCustomCommand(name);
+    _dbInsertCustomCommand(name, response);
 
-    db.bot.addCommand(obj.name, obj.cooldown, obj.permLevel, obj.status, obj.price, 'custom', response);
     Logger.trace(`Added custom command:: '${name}'`);
     
     return true;
 };
 
-const unregisterCustomCommand = function(name) {
+const deleteCustomCommand = function(name) {
     if (!name) return;
     name = name.toLowerCase();
     
     if (commands.hasOwnProperty(name) && commands[name].custom) {
-        delete commands[name];
-        db.bot.data.del('commands', { name, module: 'custom' });
+        _unregisterCustomCommand(name);
+        _dbDeleteCustomCommand(name);
         return true;
     } else {
         Logger.bot(`Could not remove command '${name}'. Doesn't exist or is not custom.`);
         return false;
+    }
+};
+
+const _registerCustomCommand = function(name) {
+    commands[name] = {
+        name,
+        custom: true
+    };
+    Logger.absurd(`Loaded custom command '${name}'.`);
+};
+
+const _unregisterCustomCommand = function(name) {
+    delete commands[name];
+};
+
+const _dbInsertCustomCommand = function(name, response) {
+    db.bot.addCommand(name, 30, 5, true, 0, 'custom', response);
+};
+
+const _dbDeleteCustomCommand = function(name) {
+    db.bot.data.del('commands', { name, module: 'custom' });
+};
+
+const _loadCustomCommands = function() {
+    const arr = db.bot.data.getRows('commands', { module: 'custom' });
+    
+    for (let cmd of arr) {
+        _registerCustomCommand(cmd.name);
     }
 };
 
@@ -126,14 +142,16 @@ const _unregister = function(all) {
 $.on('bot:ready', () => {
     $.addCommand = registerCommand;
     $.addSubcommand = registerSubcommand;
-    $.command.addCustom = registerCustomCommand;
-    $.command.removeCustom = unregisterCustomCommand;
+    $.command.addCustom = addCustomCommand;
+    $.command.removeCustom = deleteCustomCommand;
 
     Logger.bot('Listening for commands.');
 });
 
 export {
     commands as default,
-    registerCustomCommand as addCustomCommand,
+    addCustomCommand as addCustomCommand,
+    deleteCustomCommand as deleteCustomCommand,
+    _loadCustomCommands as loadCustomCommands,
     _unregister as unregister
 };
