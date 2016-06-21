@@ -6,7 +6,7 @@ module.exports.points = (event) => {
     }
 
     if (action === 'add') {
-        if (event.args.length < 3 || !$.util.num.validate(param2)) {
+        if (event.args.length < 3 || !$.util.str.isNumeric(param2)) {
             $.say(event.sender, `Usage: !points add [username] [amount]`);
             return;
         }
@@ -18,7 +18,7 @@ module.exports.points = (event) => {
     }
 
     if (action === 'remove') {
-        if (event.args.length < 3 || !$.util.num.validate(param2)) {
+        if (event.args.length < 3 || !$.util.str.isNumeric(param2)) {
             $.say(event.sender, `Usage: !points remove [username] [amount]`);
             return;
         }
@@ -30,7 +30,7 @@ module.exports.points = (event) => {
     }
 
     if (action === 'gift') {
-        if (event.args.length < 3 || !$.util.num.validate(param2)) {
+        if (event.args.length < 3 || !$.util.str.isNumeric(param2)) {
             $.say(event.sender, `Usage: !points gift [username] [amount]`);
             return;
         }
