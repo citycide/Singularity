@@ -1,9 +1,9 @@
 import moment from 'moment';
 
 module.exports.command = (event) => {
-    const [action, param1, param2] = event.args;
+    const [param1, param2] = event.subArgs;
 
-    if (action === 'enable') {
+    if (event.subcommand === 'enable') {
         if (event.args.length < 2) {
             return $.say(event.sender, `Usage: !command enable [command name]`);
         }
@@ -29,7 +29,7 @@ module.exports.command = (event) => {
         return;
     }
 
-    if (action === 'disable') {
+    if (event.subcommand === 'disable') {
         if (event.args.length < 2) {
             return $.say(event.sender, `Usage: !command disable [command name]`);
         }
@@ -55,7 +55,7 @@ module.exports.command = (event) => {
         return;
     }
 
-    if (action === 'permission') {
+    if (event.subcommand === 'permission') {
         if (event.args.length < 2) {
             return $.say(event.sender, `Usage: !command permission [command name] [level]`);
         }
@@ -69,20 +69,73 @@ module.exports.command = (event) => {
 
         return;
     }
+    
+    if (event.subcommand === 'add') {
+        if (event.subArgs.length < 2) {
+            return $.say(event.sender, `Usage: !command add [command name] [response]`);
+        }
+        
+        if ($.command.exists(param1)) {
+            return $.say(event.sender, `A command by that name already exists.`);
+        }
+        
+        $.command.addCustom(param1, event.subArgString);
+        $.say(event.sender, `Custom command '${param1} added.`);
+        
+        return;
+    }
+    
+    if (event.subcommand === 'remove') {
+        if (!event.subArgs[0]) {
+            return $.say(event.sender, `Usage: !command remove [command name]`);
+        }
+        
+        if (!$.command.exists(param1)) {
+            return $.say(event.sender, `There is no command by the name of '${param1}'.`);
+        }
+        
+        if (!$.command.isCustom(param1)) {
+            return $.say(event.sender, `That command is installed in a module.`);
+        }
+        
+        $.command.removeCustom(param1);
+        $.say(event.sender, `Custom command '${param1} removed.`);
+        
+        return;
+    }
+    
+    if (event.subcommand === 'edit') {
+        if (event.subArgs.length < 2) {
+            return $.say(event.sender, `Usage: !command edit [command name] [response]`);
+        }
+        
+        if (!$.command.exists(param1)) {
+            return $.say(event.sender, `There is no command by the name of '${param1}'.`);
+        }
+        
+        if (!$.command.isCustom(param1)) {
+            return $.say(event.sender, `That command is installed in a module.`);
+        }
+        
+        const newResponse = event.subArgs.slice(1).join(' ');
+        
+        $.db.set('commands', { response: newResponse }, { name: param1, module: 'custom' });
+        $.say(event.sender, `Custom command '${param1} edited.`);
+        
+        return;
+    }
 
-    $.say(event.sender, `Usage: !command [enable | disable | permission]`);
+    $.say(event.sender, `Usage: !command [add | remove | edit | enable | disable | permission]`);
 };
 
 module.exports.whisperMode = (event) => {
-    let action = event.args[0];
-
-    if (action === 'enable') {
+    if (event.subcommand === 'enable') {
         $.settings.set('whisperMode', true);
         $.say(event.sender, 'Whisper mode enabled.');
         return;
     }
 
-    if (action === 'disable') {
+    if (event.subcommand === 'disable') {
         $.settings.set('whisperMode', false);
         $.say(event.sender, 'Whisper mode disabled.');
         return;
@@ -112,12 +165,24 @@ module.exports.lastSeen = (event) => {
         permLevel: 0,
         status: true
     });
+    
+    $.addSubcommand('enable', 'command', { permLevel: 0, status: true });
+    $.addSubcommand('disable', 'command', { permLevel: 0, status: true });
+    $.addSubcommand('permission', 'command', { permLevel: 0, status: true });
+    $.addSubcommand('add', 'command', { permLevel: 0, status: true });
+    $.addSubcommand('remove', 'command', { permLevel: 0, status: true });
+    $.addSubcommand('edit', 'command', { permLevel: 0, status: true });
+    
     $.addCommand('whispermode', './modules/main/admin', {
         handler: 'whisperMode',
         cooldown: 0,
         permLevel: 0,
         status: true
     });
+    
+    $.addSubcommand('enable', 'whispermode', { permLevel: 0, status: true });
+    $.addSubcommand('disable', 'whispermode', { permLevel: 0, status: true });
+    
     $.addCommand('lastseen', './modules/main/admin', {
         handler: 'lastSeen',
         status: true
