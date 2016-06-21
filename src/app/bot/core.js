@@ -417,6 +417,8 @@ const _loadModules = function() {
     userModules();
     loaders.sys = require('require-directory')(module, './modules');
     loaders.user = require('require-directory')(module, Settings.get('userModulePath'));
+    
+    commandRegistry.loadCustomCommands();
 };
 
 const _unloadModules = function(botDir) {
