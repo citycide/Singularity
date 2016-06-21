@@ -455,6 +455,14 @@ data.bot = {
                 return response;
             }
         },
+        getRows(table, where, order) {
+            const response = botDB.get(table, '*', where, order);
+            if (response && Array.isArray(response)) {
+                return response;
+            } else {
+                return [];
+            }
+        },
         countRows(table, what, where, options) {
             const response = parseInt(botDB.count(table, what, where, options));
             if (_.isFinite(response)) {
@@ -477,13 +485,13 @@ data.bot = {
         }
     },
 
-    addCommand(name, cooldown, permission, status, price, module) {
+    addCommand(name, cooldown, permission, status, price, module, response) {
         if (!name || !module) {
             Logger.bot('Failed to add command. Name & module are required.');
             return;
         }
         botDB.put('commands', {
-            name, cooldown, permission, status, price, module
+            name, cooldown, permission, status, price, module, response
         }, { conflict: 'ignore' }, errHandler);
         return this;
     },
