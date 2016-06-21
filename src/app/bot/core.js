@@ -287,11 +287,11 @@ const coreMethods = {
         try {
             if (this.command.isCustom(event.command)) {
                 const response = this.db.get('commands', 'response', { name: event.command, module: 'custom' });
-                this.say(event.sender, this.params(response));
+                this.say(event.sender, this.params(event, response));
             } else {
                 this.command.getRunner(event.command)(event);
             }
-            
+
             this.command.startCooldown(event.command, event.sender, subcommand);
             this.points.sub(event.sender, commandPrice);
         } catch (err) {
@@ -417,7 +417,7 @@ const _loadModules = function() {
     userModules();
     loaders.sys = require('require-directory')(module, './modules');
     loaders.user = require('require-directory')(module, Settings.get('userModulePath'));
-    
+
     commandRegistry.loadCustomCommands();
 };
 

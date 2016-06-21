@@ -485,13 +485,13 @@ data.bot = {
         }
     },
 
-    addCommand(name, cooldown, permission, status, price, module) {
+    addCommand(name, cooldown, permission, status, price, module, response) {
         if (!name || !module) {
             Logger.bot('Failed to add command. Name & module are required.');
             return;
         }
         botDB.put('commands', {
-            name, cooldown, permission, status, price, module
+            name, cooldown, permission, status, price, module, response
         }, { conflict: 'ignore' }, errHandler);
         return this;
     },
