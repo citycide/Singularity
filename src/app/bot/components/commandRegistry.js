@@ -52,7 +52,7 @@ const registerCommand = function(name, module, options) {
     };
     Object.assign(obj, options);
 
-    _registerCommand(obj, response);
+    _registerCommand(obj, module);
 };
 
 const registerSubcommand = function(name, parent, options) {
