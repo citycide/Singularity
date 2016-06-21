@@ -122,7 +122,7 @@ module.exports.command = (event) => {
         const newResponse = event.subArgs.slice(1).join(' ');
 
         $.db.set('commands', { response: newResponse }, { name: param1, module: 'custom' });
-        $.say(event.sender, `Custom command '${param1} edited.`);
+        $.say(event.sender, `Custom command '${param1}' edited.`);
 
         return;
     }
