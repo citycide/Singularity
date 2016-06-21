@@ -63,5 +63,11 @@ export default {
      * @param {*} value
      * @returns {boolean} 'true' if value is null or undefined
      */
-    isNil: _.isNil
+    isNil: _.isNil,
+    /**
+     * Check if a value is a plain object
+     * @param {*} value
+     * @returns {boolean} 'true' if value is an object
+     */
+    isObject: _.isPlainObject
 };
