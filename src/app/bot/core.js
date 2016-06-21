@@ -81,7 +81,7 @@ const coreMethods = {
             }
 
             if (sub) {
-                core.db.set('subcommands', { status: true }, { name: sub });
+                core.db.set('subcommands', { status: true }, { name: sub, parent: cmd });
             } else {
                 core.db.set('commands', { status: true }, { name: cmd });
             }
@@ -95,16 +95,20 @@ const coreMethods = {
             }
 
             if (sub) {
-                core.db.set('subcommands', { status: false }, { name: sub });
+                core.db.set('subcommands', { status: false }, { name: sub, parent: cmd });
             } else {
                 core.db.set('commands', { status: false }, { name: cmd });
             }
 
             return true;
         },
+        isCustom(cmd) {
+            if (!this.exists(cmd)) return false;
+            if (registry[cmd].custom) return true;
+        },
         getPermLevel: (cmd, sub) => {
             return (sub)
-                ? core.db.get('subcommands', 'permission', { name: sub })
+                ? core.db.get('subcommands', 'permission', { name: sub, parent: cmd })
                 : core.db.get('commands', 'permission', { name: cmd });
         },
         setPermLevel: (cmd, level, sub) => {
@@ -114,7 +118,7 @@ const coreMethods = {
             }
 
             if (sub) {
-                core.db.set('subcommands', { permission: level }, { name: sub });
+                core.db.set('subcommands', { permission: level }, { name: sub, parent: cmd });
             } else {
                 core.db.set('commands', { permission: level }, { name: cmd });
             }
@@ -275,12 +279,19 @@ const coreMethods = {
         const userPoints = this.points.get(event.sender);
         if (userPoints < commandPrice) {
             Logger.bot(`${event.sender} does not have enough points to use !${event.command}.`);
-            return this.say(event.sender, `You don't have enough points to use !${event.command}. (costs ${commandPrice}, you have ${userPoints})`);
+            return this.say(event.sender, `You don't have enough points to use !${event.command}. ` +
+                `(costs ${commandPrice}, you have ${userPoints})`);
         }
 
         // Finally, run the (sub)command
         try {
-            this.command.getRunner(event.command)(event);
+            if (this.command.isCustom(event.command)) {
+                const response = this.db.get('commands', 'response', { name: event.command, module: 'custom' });
+                this.say(event.sender, this.params(response));
+            } else {
+                this.command.getRunner(event.command)(event);
+            }
+            
             this.command.startCooldown(event.command, event.sender, subcommand);
             this.points.sub(event.sender, commandPrice);
         } catch (err) {
@@ -372,7 +383,7 @@ const _loadTables = function() {
         { name: 'permission', type: 'int', defaultValue: 5 },
         { name: 'status', defaultValue: 'false' },
         { name: 'price', type: 'int', defaultValue: 0 },
-        'module'
+        'module', 'response'
     ], true)
     .addTable('subcommands', [
         'name',
