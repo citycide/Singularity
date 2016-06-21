@@ -455,6 +455,14 @@ data.bot = {
                 return response;
             }
         },
+        getRows(table, where, order) {
+            const response = botDB.get(table, '*', where, order);
+            if (response && Array.isArray(response)) {
+                return response;
+            } else {
+                return [];
+            }
+        },
         countRows(table, what, where, options) {
             const response = parseInt(botDB.count(table, what, where, options));
             if (_.isFinite(response)) {
