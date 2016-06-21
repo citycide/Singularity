@@ -160,13 +160,29 @@ const coreMethods = {
         countRows(table, what, where, options) {
             return db.bot.data.countRows(table, what, where, options);
         },
-        addTable(name) {
+        getModuleConfig(moduleName, key, defaultValue) {
+            return db.bot.data.get('extension_settings', 'value', {
+                extension: moduleName,
+                type: 'module'
+            }, defaultValue);
+        },
+        setModuleConfig(moduleName, key, value) {
+            return db.bot.data.set('extension_settings', 'value', {
+                extension: moduleName,
+                type: 'module'
+            }, value);
+        },
+        addTable(name, keyed) {
             if (!name || typeof name !== 'string') {
                 Logger.bot(`ERR in core#addTable:: Expected parameter 'name' to be a string, received ${typeof name}`);
                 return;
             }
 
-            db.addTable(name, ['key', 'value', 'info'], true);
+            const columns = keyed
+                ? [{ name: 'id', type: 'integer', primaryKey: true, autoIncrement: true }, 'value', 'info']
+                : ['key', 'value', 'info'];
+
+            db.addTable(name, columns, true);
         },
         addTableCustom(name, columns) {
             if (arguments.length < 2 || typeof name !== 'string' || !Array.isArray(columns)) {
@@ -328,6 +344,9 @@ const _loadTables = function() {
     db.addTable('settings', [{ name: 'key', unique: true },
         'value', 'info'
     ], true)
+    .addTable('extension_settings', [
+        'extension', 'type', 'key', 'value', 'info'
+    ], true, { compositeKey: ['extension', 'type'] })
     .addTable('users', [
         { name: 'name', unique: true },
         { name: 'permission', type: 'int' },
