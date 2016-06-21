@@ -3,7 +3,7 @@ import db from '../../../app/db';
 let modules = [];
 let commands = {};
 
-const _registerCommand = (cmd, _module, parent = false) => {
+const _registerCommand = function(cmd, _module, parent = false) {
     if (!modules.includes(_module)) {
         modules.push(_module);
         Logger.debug(`Module loaded:: ${_module}`);
@@ -39,7 +39,7 @@ const _registerCommand = (cmd, _module, parent = false) => {
     }
 };
 
-const registerCommand = (name, module, options) => {
+const registerCommand = function(name, module, options) {
     if (!name || !module) return;
 
     const obj = {
@@ -52,10 +52,10 @@ const registerCommand = (name, module, options) => {
     };
     Object.assign(obj, options);
 
-    _registerCommand(obj, module);
+    _registerCommand(obj, response);
 };
 
-const registerSubcommand = (name, parent, options) => {
+const registerSubcommand = function(name, parent, options) {
     if (!name || !parent || !commands.hasOwnProperty(parent)) return;
 
     const obj = {
@@ -73,18 +73,50 @@ const registerSubcommand = (name, parent, options) => {
     _registerCommand(obj, parentModule, parent);
 };
 
-$.on('bot:ready', () => {
-    $.addCommand = registerCommand;
-    $.addSubcommand = registerSubcommand;
+const registerCustomCommand = function(name, response) {
+    if (!name || !response) return false;
+    if (commands.hasOwnProperty(name)) {
+        Logger.bot(`Could not add custom command '${name}'. Name already in use.`);
+        return false;
+    }
 
-    Logger.bot('Listening for commands.');
-});
+    commands[name] = {
+        name: name.toLowerCase(),
+        custom: true
+    };
+    
+    const obj = {
+        name: name.toLowerCase(),
+        cooldown: 30,
+        permLevel: 5,
+        status: true,
+        price: 0,
+        custom: true
+    };
 
-export default commands;
+    db.bot.addCommand(obj.name, obj.cooldown, obj.permLevel, obj.status, obj.price, 'custom', response);
+    Logger.trace(`Added custom command:: '${name}'`);
+    
+    return true;
+};
 
-export function unregister(all) {
+const _unregister = function(all) {
     if (all) {
         modules = [];
         commands = {};
     }
 }
+
+$.on('bot:ready', () => {
+    $.addCommand = registerCommand;
+    $.addSubcommand = registerSubcommand;
+    $.command.addCustom = registerCustomCommand;
+
+    Logger.bot('Listening for commands.');
+});
+
+export {
+    commands as default,
+    registerCustomCommand as addCustomCommand,
+    _unregister as unregister
+};
