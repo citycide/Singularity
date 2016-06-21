@@ -75,6 +75,8 @@ const registerSubcommand = function(name, parent, options) {
 
 const registerCustomCommand = function(name, response) {
     if (!name || !response) return false;
+    name = name.toLowerCase();
+    
     if (commands.hasOwnProperty(name)) {
         Logger.bot(`Could not add custom command '${name}'. Name already in use.`);
         return false;
@@ -100,6 +102,20 @@ const registerCustomCommand = function(name, response) {
     return true;
 };
 
+const unregisterCustomCommand = function(name) {
+    if (!name) return;
+    name = name.toLowerCase();
+    
+    if (commands.hasOwnProperty(name) && commands[name].custom) {
+        delete commands[name];
+        db.bot.data.del('commands', { name, module: 'custom' });
+        return true;
+    } else {
+        Logger.bot(`Could not remove command '${name}'. Doesn't exist or is not custom.`);
+        return false;
+    }
+};
+
 const _unregister = function(all) {
     if (all) {
         modules = [];
@@ -111,6 +127,7 @@ $.on('bot:ready', () => {
     $.addCommand = registerCommand;
     $.addSubcommand = registerSubcommand;
     $.command.addCustom = registerCustomCommand;
+    $.command.removeCustom = unregisterCustomCommand;
 
     Logger.bot('Listening for commands.');
 });
