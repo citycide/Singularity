@@ -192,12 +192,19 @@ data.bot = {
 
     settings: {
         get(key, defaultValue, fn) {
-            if (typeof defaultValue === 'function') fn = defaultValue;
+            if (typeof defaultValue === 'function') {
+                fn = defaultValue;
+                defaultValue = undefined;
+            }
 
             let value = botDB.getValue('settings', 'value', { key });
-            if (util.val.isNullLike(value)) {
-                this.set(key, defaultValue);
-                return defaultValue;
+            if (util.isNil(value)) {
+                if (defaultValue) {
+                    this.set(key, defaultValue);
+                    return defaultValue;
+                } else {
+                    return;
+                }
             }
 
             if (typeof value === 'object' && value.hasOwnProperty('error')) {
@@ -206,7 +213,7 @@ data.bot = {
             }
 
             if (util.str.isBoolean(value)) value = (value === 'true');
-            if (util.str.isNumeric(value)) value = parseInt(value);
+            if (util.str.isNumeric(value)) value = util.toNumber(value);
 
             if (fn) {
                 fn(value);
@@ -231,23 +238,34 @@ data.bot = {
     },
 
     data: {
-        get(table, what, where, fn) {
+        get(table, what, where, defaultValue, fn) {
+            if (typeof table !== 'string' || !_.isPlainObject(where)) return;
             if (_.isPlainObject(what)) return this.getRow(table, where);
+            if (typeof defaultValue === 'function') {
+                fn = defaultValue;
+                defaultValue = undefined;
+            }
 
             let response = botDB.getValue(table, what, where);
-            if (util.val.isNullLike(response)) {
-                fn && fn();
-                return undefined;
+            if (util.isNil(response)) {
+                if (fn) {
+                    fn(this.set(table, what, where));
+                    return this;
+                } else {
+                    return this.set(table, what, where);
+                }
             }
 
             if (_.isPlainObject(response) && response.hasOwnProperty('error')) {
                 Logger.error(response.error);
-                fn && fn();
-                return undefined;
+                if (fn) {
+                    fn();
+                    return this;
+                }
             }
 
             if (util.str.isBoolean(response)) response = (response === 'true');
-            if (util.str.isNumeric(response)) response = parseInt(response);
+            if (util.str.isNumeric(response)) response = util.toNumber(response);
 
             if (fn) {
                 fn(response);

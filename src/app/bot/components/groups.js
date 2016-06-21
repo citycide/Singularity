@@ -19,8 +19,8 @@ const groups = {
         if (userType === 'mod') defaultGroupID = 1;
         if ($.user.isAdmin(username)) defaultGroupID = 0;
 
-        const _groupID = $.util.num.validate($.db.get('users', 'permission', { name: username }));
-        if (!$.util.val.isNullLike(_groupID) && _groupID >= 0) {
+        const _groupID = $.db.get('users', 'permission', { name: username });
+        if (!$.util.isNil(_groupID) && _groupID >= 0) {
             return _groupID;
         } else {
             Logger.trace(`getUserGroup:: assigning default group to ${username} (level ${defaultGroupID})`);

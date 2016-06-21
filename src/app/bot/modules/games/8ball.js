@@ -60,10 +60,7 @@ function initResponses() {
     $.addSubcommand('remove', '8ball', { permLevel: 0, status: true });
     $.addSubcommand('edit', '8ball', { permLevel: 0, status: true });
 
-    $.db.addTableCustom('ball', [
-        { name: 'id', type: 'integer', primaryKey: true, autoIncrement: true },
-        'value'
-    ]);
+    $.db.addTable('ball', true);
 
     if (!$.db.countRows('ball')) initResponses();
 })();
