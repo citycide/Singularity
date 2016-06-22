@@ -15,14 +15,14 @@ module.exports.command = (event) => {
                 $.command.enable(pair[0], pair[1]);
                 $.say(event.sender, weave.get('bot:commands:enable:success', param1));
             } else {
-                $.say(event.sender, weave.get('bot:commands:not-registered'));
+                $.say(event.sender, weave.get('bot:commands:does-not-exist'));
             }
         } else {
             if ($.command.exists(param1)) {
                 $.command.enable(param1);
                 $.say(event.sender, weave.get('bot:commands:enable:success', param1));
             } else {
-                $.say(event.sender, weave.get('bot:commands:not-registered'));
+                $.say(event.sender, weave.get('bot:commands:does-not-exist'));
             }
         }
 
@@ -41,14 +41,14 @@ module.exports.command = (event) => {
                 $.command.disable(pair[0], pair[1]);
                 $.say(event.sender, weave.get('bot:commands:disable:success', param1));
             } else {
-                $.say(event.sender, weave.get('bot:commands:not-registered'));
+                $.say(event.sender, weave.get('bot:commands:does-not-exist'));
             }
         } else {
             if ($.command.exists(param1)) {
                 $.command.disable(param1);
                 $.say(event.sender, weave.get('bot:commands:disable:success', param1));
             } else {
-                $.say(event.sender, weave.get('bot:commands:not-registered'));
+                $.say(event.sender, weave.get('bot:commands:does-not-exist'));
             }
         }
 
