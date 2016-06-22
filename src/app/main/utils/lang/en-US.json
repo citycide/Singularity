@@ -12,6 +12,13 @@
   "bot:modules:admin:last-seen:usage": "Usage: !lastseen [user]",
   "bot:modules:admin:last-seen": "{0} was last seen {1}.",
   "bot:modules:admin:last-seen:not-seen": "We haven't seen {0} in chat yet.",
+  
+  "bot:modules:events:alerts:usage": "Usage: !alerts [follow | host | sub | tip]",
+  "bot:modules:events:alerts:follow:usage": "Usage: !alerts follow [enable | disable] (currently {0})",
+  "bot:modules:events:alerts:host:usage": "Usage: !alerts host [enable | disable] (currently {0})",
+  "bot:modules:events:alerts:tip:usage": "Usage: !alerts tip [enable | disable] (currently {0})",
+  "bot:modules:events:alerts:sub:usage": "Usage: !alerts sub [enable | disable] (currently {0})",
+  "bot:modules:events:alerts:settings": "Follows: {0}, Hosts: {1}, Subs: {2}, Tips: {3}",
 
   "bot:commands:add:success": "Custom command '{0}' added.",
   "bot:commands:remove:success": "Custom command '{0}' removed.",
@@ -26,6 +33,26 @@
 
   "bot:settings:whisper-mode:enabled:success": "Whisper mode enabled.",
   "bot:settings:whisper-mode:disabled:success": "Whisper mode disabled.",
+  
+  "bot:settings:alerts-follows:enabled:success": "New follower alerts enabled.",
+  "bot:settings:alerts-follows:disabled:success": "New follower alerts disabled.",
+  "bot:settings:alerts-hosts:enabled:success": "Host alerts enabled.",
+  "bot:settings:alerts-hosts:disabled:success": "Host alerts disabled.",
+  "bot:settings:alerts-tips:enabled:success": "Tip alerts enabled.",
+  "bot:settings:alerts-tips:disabled:success": "Tip alerts disabled.",
+  "bot:settings:alerts-subs:enabled:success": "Subscribption alerts enabled.",
+  "bot:settings:alerts-subs:disabled:success": "Subscription alerts disabled.",
+  
+  "bot:settings:alerts-follows:response-reward": "Thanks for the follow, {0}! +{1}",
+  "bot:settings:alerts-follows:response-no-reward": "Thanks for the follow, {0}!",
+  "bot:settings:alerts-hosts:response-reward": "{0} fired up the host machine for {1} viewers. Thanks! +{2}",
+  "bot:settings:alerts-hosts:response-no-reward": "{0} fired up the host machine for {1} viewers. Thanks!",
+  "bot:settings:alerts-tips:response-reward": "{0} tipped {1}. Thank you! PogChamp +{2}",
+  "bot:settings:alerts-tips:response-no-reward": "{0} tipped {1}. Thank you! PogChamp",
+  "bot:settings:alerts-subs:response-reward": "{0} subscribed! +{1}!",
+  "bot:settings:alerts-subs:response-no-reward": "Thanks for the sub, {0}!",
+  "bot:settings:alerts-resubs:response-reward": "{0} has been subbed for {1} months! +{2}",
+  "bot:settings:alerts-resubs:response-no-reward": "{0} has been subbed for {1} months!",
 
   "common-words:enabled": "enabled",
   "common-words:disabled": "disabled"
