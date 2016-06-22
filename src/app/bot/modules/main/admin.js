@@ -5,7 +5,7 @@ module.exports.command = (event) => {
 
     if (event.subcommand === 'enable') {
         if (event.args.length < 2) {
-            return $.say(event.sender, `Usage: !command enable [command name]`);
+            return $.say(event.sender, weave.get('bot:modules:admin:command:enable:usage'));
         }
 
         if (param1.includes('>')) {
@@ -13,16 +13,16 @@ module.exports.command = (event) => {
 
             if ($.command.exists(pair[0], pair[1])) {
                 $.command.enable(pair[0], pair[1]);
-                $.say(event.sender, `Command '${param1}' enabled.`);
+                $.say(event.sender, weave.get('bot:commands:enable:success', param1));
             } else {
-                $.say(event.sender, `That command is not registered.`);
+                $.say(event.sender, weave.get('bot:commands:not-registered'));
             }
         } else {
             if ($.command.exists(param1)) {
                 $.command.enable(param1);
-                $.say(event.sender, `Command '${param1}' enabled.`);
+                $.say(event.sender, weave.get('bot:commands:enable:success', param1));
             } else {
-                $.say(event.sender, `That command is not registered.`);
+                $.say(event.sender, weave.get('bot:commands:not-registered'));
             }
         }
 
@@ -31,7 +31,7 @@ module.exports.command = (event) => {
 
     if (event.subcommand === 'disable') {
         if (event.args.length < 2) {
-            return $.say(event.sender, `Usage: !command disable [command name]`);
+            return $.say(event.sender, weave.get('bot:modules:admin:command:disable:usage'));
         }
 
         if (param1.includes('>')) {
@@ -39,16 +39,16 @@ module.exports.command = (event) => {
 
             if ($.command.exists(pair[0], pair[1])) {
                 $.command.disable(pair[0], pair[1]);
-                $.say(event.sender, `Command '${param1}' disabled.`);
+                $.say(event.sender, weave.get('bot:commands:disable:success', param1));
             } else {
-                $.say(event.sender, `That command is not registered.`);
+                $.say(event.sender, weave.get('bot:commands:not-registered'));
             }
         } else {
             if ($.command.exists(param1)) {
                 $.command.disable(param1);
-                $.say(event.sender, `Command '${param1}' disabled.`);
+                $.say(event.sender, weave.get('bot:commands:disable:success', param1));
             } else {
-                $.say(event.sender, `That command is not registered.`);
+                $.say(event.sender, weave.get('bot:commands:not-registered'));
             }
         }
 
@@ -57,14 +57,14 @@ module.exports.command = (event) => {
 
     if (event.subcommand === 'permission') {
         if (event.args.length < 2) {
-            return $.say(event.sender, `Usage: !command permission [command name] [level]`);
+            return $.say(event.sender, weave.get('bot:modules:admin:command:permission:usage'));
         }
 
         if ($.command.exists(param1)) {
             $.command.setPermLevel(param1, param2);
-            $.say(event.sender, `Permission level for '${param1}' set to ${param2}`);
+            $.say(event.sender, weave.get('bot:commands:permission:success', param1, param2));
         } else {
-            $.say(event.sender, `That command is not registered.`);
+            $.say(event.sender, weave.get('bot:commands:does-not-exist'));
         }
 
         return;
@@ -72,92 +72,94 @@ module.exports.command = (event) => {
 
     if (event.subcommand === 'add') {
         if (event.subArgs.length < 2) {
-            return $.say(event.sender, `Usage: !command add [command name] [response]`);
+            return $.say(event.sender, weave.get('bot:modules:admin:command:add:usage'));
         }
 
         if ($.command.exists(param1)) {
-            return $.say(event.sender, `A command by that name already exists.`);
+            return $.say(event.sender, weave.get('bot:commands:already-exists'));
         }
 
         const response = event.subArgs.slice(1).join(' ');
 
         $.command.addCustom(param1, response);
-        $.say(event.sender, `Custom command '${param1}' added.`);
+        $.say(event.sender, weave.get('bot:commands:add:success', param1));
 
         return;
     }
 
     if (event.subcommand === 'remove') {
         if (!event.subArgs[0]) {
-            return $.say(event.sender, `Usage: !command remove [command name]`);
+            return $.say(event.sender, weave.get('bot:modules:admin:command:remove:usage'));
         }
 
         if (!$.command.exists(param1)) {
-            return $.say(event.sender, `There is no command by the name of '${param1}'.`);
+            return $.say(event.sender, weave.get('bot:commands:does-not-exist'));
         }
 
         if (!$.command.isCustom(param1)) {
-            return $.say(event.sender, `That command is installed in a module.`);
+            return $.say(event.sender, weave.get('bot:commands:is-module-command'));
         }
 
         $.command.removeCustom(param1);
-        $.say(event.sender, `Custom command '${param1}' removed.`);
+        $.say(event.sender, weave.get('bot:commands:remove:success', param1));
 
         return;
     }
 
     if (event.subcommand === 'edit') {
         if (event.subArgs.length < 2) {
-            return $.say(event.sender, `Usage: !command edit [command name] [response]`);
+            return $.say(event.sender, weave.get('bot:modules:admin:command:edit:usage'));
         }
 
         if (!$.command.exists(param1)) {
-            return $.say(event.sender, `There is no command by the name of '${param1}'.`);
+            return $.say(event.sender, weave.get('bot:commands:does-not-exist'));
         }
 
         if (!$.command.isCustom(param1)) {
-            return $.say(event.sender, `That command is installed in a module.`);
+            return $.say(event.sender, weave.get('bot:commands:is-module-command'));
         }
 
         const newResponse = event.subArgs.slice(1).join(' ');
 
         $.db.set('commands', { response: newResponse }, { name: param1, module: 'custom' });
-        $.say(event.sender, `Custom command '${param1}' modified.`);
+        $.say(event.sender, weave.get('bot:commands:edit:success', param1));
 
         return;
     }
 
-    $.say(event.sender, `Usage: !command [add | remove | edit | enable | disable | permission]`);
+    $.say(event.sender, weave.get('bot:modules:admin:command:usage'));
 };
 
 module.exports.whisperMode = (event) => {
     if (event.subcommand === 'enable') {
         $.settings.set('whisperMode', true);
-        $.say(event.sender, 'Whisper mode enabled.');
+        $.say(event.sender, weave.get('bot:settings:whisper-mode:enabled:success'));
         return;
     }
 
     if (event.subcommand === 'disable') {
         $.settings.set('whisperMode', false);
-        $.say(event.sender, 'Whisper mode disabled.');
+        $.say(event.sender, weave.get('bot:settings:whisper-mode:disabled:success'));
         return;
     }
 
-    const status = $.settings.get('whisperMode') ? 'enabled' : 'disabled';
-    $.say(event.sender, `Usage: !whispermode [enable | disable] (currently ${status}`);
+    const status = $.settings.get('whisperMode')
+        ? weave.get('common-words:enabled')
+        : weave.get('common-words:disabled');
+    $.say(event.sender, weave.get('bot:modules:admin:command:whisper-mode:usage', status));
 };
 
 module.exports.lastSeen = (event) => {
     let target = event.args[0];
-    if (!target) return $.say(event.sender, `Usage: !lastseen [user]`);
+    if (!target) return $.say(event.sender, weave.get('bot:modules:admin:last-seen:usage'));
 
     if ($.user.exists(target)) {
         let ts = $.db.get('users', 'seen', { name: target });
         let timeAgo = moment(ts, 'x').fromNow();
 
-        $.say(event.sender, `${target} was last seen ${timeAgo}.`);
+        $.say(event.sender, weave.get('bot:modules:admin:last-seen', target, timeAgo));
     } else {
-        $.say(event.sender, `We haven't seen ${target} in chat yet.`);
+        $.say(event.sender, weave.get('bot:modules:admin:last-seen:not-seen', target));
     }
 };
 

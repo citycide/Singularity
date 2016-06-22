@@ -5,6 +5,7 @@ const DIR = path.resolve(`${(app ? app.getPath('home') : remote.require('electro
 const logPath = path.resolve(`${DIR}/logs`);
 const serverPath = path.resolve(`${DIR}/server`);
 const modulePath = path.resolve(`${DIR}/modules`);
+const langFile = path.resolve(`${__dirname}/lang/en-US.json`);
 
 export default {
     themeColor: '#03AFF9',
@@ -16,5 +17,6 @@ export default {
     dataPath: DIR,
     botLoggingPath: logPath,
     userServerPath: serverPath,
-    userModulePath: modulePath
+    userModulePath: modulePath,
+    langFile
 };

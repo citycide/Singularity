@@ -14,7 +14,8 @@ module.exports = {
         "Transit": true,
         "WindowManager": true,
         "PlaybackAPI": true,
-        "DEV_MODE": true
+        "DEV_MODE": true,
+        "weave": true
     },
     "extends": "eslint:recommended",
     "parser": "babel-eslint",

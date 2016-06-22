@@ -1,0 +1,32 @@
+{
+  "bot:modules:admin:command:usage": "Usage: !command [add | remove | edit | enable | disable | permission]",
+  "bot:modules:admin:command:enable:usage": "Usage: !command enable [command name]",
+  "bot:modules:admin:command:disable:usage": "Usage: !command disable [command name]",
+  "bot:modules:admin:command:permission:usage": "Usage: !command permission [command name] [level]",
+  "bot:modules:admin:command:add:usage": "Usage: !command add [command name] [response]",
+  "bot:modules:admin:command:remove:usage": "Usage: !command remove [command name]",
+  "bot:modules:admin:command:edit:usage": "Usage: !command edit [command name] [response]",
+
+  "bot:modules:admin:whisper-mode:usage": "Usage: !whispermode [enable | disable] (currently {0})",
+
+  "bot:modules:admin:last-seen:usage": "Usage: !lastseen [user]",
+  "bot:modules:admin:last-seen": "{0} was last seen {1}.",
+  "bot:modules:admin:last-seen:not-seen": "We haven't seen {0} in chat yet.",
+
+  "bot:commands:add:success": "Custom command '{0}' added.",
+  "bot:commands:remove:success": "Custom command '{0}' removed.",
+  "bot:commands:edit:success": "Custom command '{0}' modified.",
+  "bot:commands:enable:success": "Command '{0}' enabled.",
+  "bot:commands:disable:success": "Command '{0}' disabled.",
+  "bot:commands:permission:success": "Permission level for '{0}' set to {1}",
+
+  "bot:commands:does-not-exist": "That command does not exist.",
+  "bot:commands:already-exists": "A command by that name already exists.",
+  "bot:commands:is-module-command": "That command is from an installed module.",
+
+  "bot:settings:whisper-mode:enabled:success": "Whisper mode enabled.",
+  "bot:settings:whisper-mode:disabled:success": "Whisper mode disabled.",
+
+  "common-words:enabled": "enabled",
+  "common-words:disabled": "disabled"
+}

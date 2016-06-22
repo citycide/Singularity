@@ -13,6 +13,7 @@ import SettingsClass from './app/main/utils/Settings';
 import WindowManagerClass from './app/main/utils/WindowManager';
 import PlaybackAPIClass from './app/main/utils/PlaybackAPI';
 import I3IpcHelperClass from './app/main/utils/I3IpcHelper';
+import Weave from './app/main/utils/Weave';
 
 import handleStartupEvent from './squirrel';
 
@@ -94,6 +95,7 @@ const onError = (error) => {
     global.WindowManager = new WindowManagerClass();
     global.Settings = new SettingsClass();
     global.PlaybackAPI = new PlaybackAPIClass();
+    global.weave = new Weave(Settings.get('langFile'));
 
     // Initialize the database
     const initDB = require('./app/db').initDB;

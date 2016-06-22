@@ -12,6 +12,7 @@ const paths = {
                     'node_modules/vue/dist/vue.js',
                     'node_modules/vue/dist/vue.min.js',
                     'node_modules/babel-polyfill/dist/polyfill.min.js'],
+    langFiles: ['src/app/main/utils/lang/**/*.json'],
     vendorStyles: ['node_modules/keen-ui/dist/min/keen-ui.min.css'],
     views: ['src/public/views/**/*.{ejs,html}'],
     fonts: ['node_modules/font-awesome/fonts/*.{otf,eot,svg,ttf,woff,woff2}',
@@ -37,11 +38,11 @@ const cleanGlob = (glob) => {
 gulp.task('clean-server', cleanGlob(['./build/*.js', './build/**/*.js', '!./build/public/**/*']));
 gulp.task('clean-client', cleanGlob(['./build/public/*.js', './build/public/**/*.js', '!./build/public/js/vendor/**/*']));
 gulp.task('clean-vendor', cleanGlob(['./build/js/vendor/**/*.js']));
+gulp.task('clean-langs', cleanGlob(['./build/app/main/utils/lang/**/*.json']));
 gulp.task('clean-views', cleanGlob(['./build/public/views/*.ejs']));
 gulp.task('clean-fonts', cleanGlob(['./build/public/fonts/**/*']));
 gulp.task('clean-images', cleanGlob(['./build/public/images/**/*']));
 gulp.task('clean-styles', cleanGlob(['./build/public/css/**/*.css']));
-// gulp.task('clean-vendor-styles', cleanGlob(['./build/public/css/vendor/**/*.css']));
 gulp.task('clean-assets', cleanGlob(['./build/public/assets/**/*']));
 gulp.task('clean-overlayEJS', cleanGlob(['./build/public/views/overlays/*.ejs']));
 gulp.task('clean-overlayCSS', cleanGlob(['./build/public/views/overlays/css/**/*']));
@@ -61,6 +62,11 @@ gulp.task('transpile-client', ['clean-client'], () => {
         .pipe(babel({ presets: ['es2015', 'stage-0'] }))
         .on('error', (err) => console.error(err))
         .pipe(gulp.dest('./build/public'));
+});
+
+gulp.task('langs', ['clean-langs'], () => {
+    return gulp.src(paths.langFiles)
+        .pipe(gulp.dest('./build/app/main/utils/lang'));
 });
 
 gulp.task('views', ['clean-views'], () => {
@@ -131,6 +137,7 @@ gulp.task('overlay-fonts', ['clean-overlayFNT'], () => {
 gulp.task('watch', ['build'], () => {
     gulp.watch(paths.serverScripts, ['transpile-server']);
     gulp.watch(paths.clientScripts, ['transpile-client']);
+    gulp.watch(paths.langFiles, ['langs']);
     gulp.watch(paths.views, ['views']);
     gulp.watch(paths.images, ['images']);
     gulp.watch(paths.styles, ['styles']);
@@ -140,7 +147,7 @@ gulp.task('watch', ['build'], () => {
 });
 
 gulp.task('default', ['watch', 'transpile-server', 'transpile-client', 'images']);
-gulp.task('clean', ['clean-server', 'clean-client', 'clean-vendor', 'clean-views', 'clean-fonts', 'clean-images', 'clean-styles',
+gulp.task('clean', ['clean-server', 'clean-client', 'clean-vendor', 'clean-langs', 'clean-views', 'clean-fonts', 'clean-images', 'clean-styles',
                     'clean-assets', 'clean-overlayEJS', 'clean-overlayCSS', 'clean-overlaySND', 'clean-overlayFNT', 'clean-overlayIMG']);
-gulp.task('build', ['transpile-server', 'transpile-client', 'views', 'fonts', 'images', 'styles', 'assets', 'vendor-scripts',
+gulp.task('build', ['transpile-server', 'transpile-client', 'langs', 'views', 'fonts', 'images', 'styles', 'assets', 'vendor-scripts',
                     'overlay-views', 'overlay-styles', 'overlay-sounds', 'overlay-fonts', 'overlay-images']);
