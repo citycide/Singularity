@@ -85,12 +85,12 @@ module.exports.alerts = (event) => {
                 : weave.get('common-words:disabled')
         ];
 
-        $.say(event.sender, weave.get('bot:modules:events:alerts:settings', ...cfg);
+        $.say(event.sender, weave.get('bot:modules:events:alerts:settings', ...cfg));
 
         return;
     }
 
-    $.say(event.sender, weave.get('bot:modules:events:alerts:usage');
+    $.say(event.sender, weave.get('bot:modules:events:alerts:usage'));
 };
 
 // Keep an array of events to prevent duplicates
@@ -107,7 +107,7 @@ Transit.on('alert:follow', (data) => {
                     data.display_name, $.points.str(reward));
             } else {
                 $.shout(weave.get('bot:settings:alerts-follows:response-no-reward',
-                    data.display_name))
+                    data.display_name));
             }
         }
     }
