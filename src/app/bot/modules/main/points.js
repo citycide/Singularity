@@ -67,7 +67,7 @@ module.exports.points = (event) => {
 };
 
 (() => {
-    $.addCommand('points', './modules/main/points', {
+    $.addCommand('points', {
         cooldown: 0,
         status: true
     });

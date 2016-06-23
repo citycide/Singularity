@@ -126,7 +126,7 @@ Transit.on('alert:tip', (data) => {
 });
 
 (() => {
-    $.addCommand('alerts', './modules/main/events', {
+    $.addCommand('alerts', {
         permLevel: 0,
         status: true
     });
