@@ -50,7 +50,7 @@ function initResponses() {
 }
 
 (() => {
-    $.addCommand('8ball', './modules/games/8ball', {
+    $.addCommand('8ball', {
         handler: 'magicBall',
         cooldown: 60,
         status: true

@@ -93,7 +93,7 @@ module.exports.coin = (event) => {
 };
 
 (() => {
-    $.addCommand('coin', './modules/games/coin', {
+    $.addCommand('coin', {
         cooldown: 60,
         status: true
     });

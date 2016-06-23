@@ -6,7 +6,6 @@ let commands = {};
 const _registerCommand = function(cmd, _module, parent = false) {
     if (!modules.includes(_module)) {
         modules.push(_module);
-        Logger.debug(`Module loaded:: ${_module}`);
     }
 
     let { name, handler, cooldown, permLevel, status, price } = cmd;
@@ -41,6 +40,8 @@ const _registerCommand = function(cmd, _module, parent = false) {
 
 const registerCommand = function(name, module, options) {
     if (!name || !module) return;
+
+    module = captureStack()[1].getFileName();
 
     const obj = {
         name: name.toLowerCase(),
@@ -137,7 +138,17 @@ const _unregister = function(all) {
         modules = [];
         commands = {};
     }
-}
+};
+
+const captureStack = function() {
+    const _ = Error.prepareStackTrace;
+    Error.prepareStackTrace = function(_, stack) {
+        return stack;
+    };
+    const stack = new Error().stack.slice(1);
+    Error.prepareStackTrace = _;
+    return stack;
+};
 
 $.on('bot:ready', () => {
     $.addCommand = registerCommand;
