@@ -60,7 +60,7 @@ module.exports.couch = (event) => {
 };
 
 (() => {
-    $.addCommand('couch', './modules/commands/couch', {
+    $.addCommand('couch', {
         cooldown: 300,
         status: true
     });

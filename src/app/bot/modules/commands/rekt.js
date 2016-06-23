@@ -176,7 +176,7 @@ function initResponses() {
 }
 
 (() => {
-    $.addCommand('rekt', './modules/commands/rekt', {
+    $.addCommand('rekt', {
         cooldown: 60,
         status: true
     });

@@ -112,7 +112,7 @@ module.exports.quote = (event) => {
 };
 
 (() => {
-    $.addCommand('quote', './modules/main/quotes', {
+    $.addCommand('quote', {
         cooldown: 60,
         status: true
     });

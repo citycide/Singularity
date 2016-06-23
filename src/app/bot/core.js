@@ -1,20 +1,12 @@
-import jetpack from 'fs-jetpack';
 import EventEmitter from 'events';
-import path from 'path';
 import db from '../../app/db';
 import Tock from '../main/utils/Tock';
 import util from '../../app/main/utils/util';
 import { updateAuth, default as bot } from './bot';
-import userModules from '../../app/main/utils/_userModuleSetup';
-import mods from './moduleHandler';
+import modules from './components/moduleHandler';
 
 let commandRegistry = null;
 let registry = null;
-
-const loaders = {
-    sys: null,
-    user: null
-};
 
 const coreMethods = {
     api: bot.api,
@@ -53,9 +45,9 @@ const coreMethods = {
             return core.settings.get('prefix', '!');
         },
         getModule(cmd) {
-            return mods.requireModule(registry[cmd].module);
+            return modules.load(registry[cmd].module);
         },
-        getRunner: (cmd) => {
+        getRunner: cmd => {
             return core.command.getModule(cmd)[registry[cmd].handler];
         },
         isEnabled: (cmd, sub) => {
@@ -205,7 +197,7 @@ const coreMethods = {
     },
 
     user: {
-        isFollower: (user) => {
+        isFollower: user => {
             let _status = false;
             bot.api({
                 url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${core.channel.name}`,
@@ -225,7 +217,7 @@ const coreMethods = {
             const response = db.bot.data.getRow('users', { name: user });
             return (response) ? true : false;
         },
-        isAdmin: (user) => {
+        isAdmin: user => {
             return (user === core.channel.name || user === core.channel.botName);
         }
     },
@@ -333,15 +325,20 @@ const initialize = (instant = false) => {
             Logger.bot('Bot ready.');
             core.emit('bot:ready');
 
-            _loadModules();
+            modules.watcher.start();
+
+            // noinspection JSUnresolvedFunction
+            commandRegistry.loadCustomCommands();
         });
     }, delay);
 };
 
-const disconnect = function(botDir) {
+const disconnect = function() {
     Logger.bot('Deactivating bot...');
+    modules.watcher.stop();
     bot.disconnect();
-    _unloadModules(botDir);
+    modules.unload(null, { all: true });
+    commandRegistry.unregister(true);
     Logger.bot('Deactivated bot.');
 };
 
@@ -411,40 +408,4 @@ const _loadComponents = function() {
     require('./components/groups');
     require('./components/ranks');
     require('./components/quotes');
-};
-
-const _loadModules = function() {
-    userModules();
-    loaders.sys = require('require-directory')(module, './modules');
-    loaders.user = require('require-directory')(module, Settings.get('userModulePath'));
-
-    commandRegistry.loadCustomCommands();
-};
-
-const _unloadModules = function(botDir) {
-    const modules = [];
-    const root = jetpack.cwd(botDir);
-    root.find('./modules', { matching: ['**/*.js'] }).forEach((_path) => {
-        const modulePath = path.resolve(botDir + '/' + _path);
-        if (!modules.includes(modulePath)) {
-            modules.push(modulePath);
-            Logger.debug(`Module unloaded:: ./${path.relative(botDir, modulePath).replace('.js', '').replace(/\\/g, '/')}`);
-        }
-        delete require.cache[require.resolve(modulePath)];
-    });
-
-    const userDir = jetpack.cwd(Settings.get('userModulePath'));
-    userDir.find({ matching: ['**/*.js'] }).forEach((_path) => {
-        const modulePath = path.resolve(userDir + '/' + _path);
-        if (!modules.includes(modulePath)) {
-            modules.push(modulePath);
-            Logger.debug(`Module unloaded:: ${modulePath}`);
-        }
-        delete require.cache[require.resolve(modulePath)];
-    });
-
-    loaders.sys = null;
-    loaders.user = null;
-
-    commandRegistry.unregister(true);
 };

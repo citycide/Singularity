@@ -17,6 +17,7 @@ const OPTIONS = {
     channels: [Settings.get('channel')]
 };
 
+// noinspection JSPotentiallyInvalidConstructorUsage
 const bot = new tmi.client(OPTIONS);
 
 const api = {
@@ -45,7 +46,7 @@ const api = {
         if (this.isCommand(message)) this.commandHandler(_user, message);
     },
 
-    whisperHandler(user, message) {
+    whisperHandler(from, user, message, self) {
         // @TODO: handle commands in whisper messages, responses should be whispered
         // if (this.isCommand(message)) this.commandHandler(user, message);
     },
@@ -64,8 +65,8 @@ const api = {
     },
 
     /**
+     * Get the command keyword from the message string
      * @function getCommand
-     * @description returns the first word following the command prefix
      * @param message
      * @returns {string}
      */
@@ -75,18 +76,18 @@ const api = {
     },
 
     /**
+     * Forms an array from the message string and excluding the command
      * @function getCommandArgs
-     * @description returns an array containing the message's words, excluding the command
      * @param message
-     * @returns {Array.<T>}
+     * @returns {Array}
      */
     getCommandArgs(message) {
         return message.split(' ').slice(1);
     },
 
     /**
+     * Return the message substring following the command
      * @function getCommandArgString
-     * @description returns the message as a string, excluding the command
      * @param message
      * @returns {string}
      */

@@ -39,7 +39,7 @@ module.exports.echo = (event) => {
      *      @property {boolean} status - whether the command is enabled / disabled by default
      *      @property {number} price - the default number of points paid to use the command
      */
-    $.addCommand('echo', './modules/commands/echo', {
+    $.addCommand('echo', {
         status: true,
         price: 2
     });

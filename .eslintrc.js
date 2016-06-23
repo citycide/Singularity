@@ -31,7 +31,7 @@ module.exports = {
         "arrow-body-style": "off",
         "arrow-parens": [
             "error",
-            "always" ],
+            "as-needed" ],
         "arrow-spacing": [
             "error",
             { "after": true,

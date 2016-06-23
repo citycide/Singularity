@@ -164,7 +164,9 @@ module.exports.lastSeen = (event) => {
 };
 
 (() => {
-    $.addCommand('command', './modules/main/admin', {
+    $.log.error('test', 'WRITE IT');
+
+    $.addCommand('command', {
         cooldown: 0,
         permLevel: 0,
         status: true
@@ -177,7 +179,7 @@ module.exports.lastSeen = (event) => {
     $.addSubcommand('remove', 'command', { permLevel: 0, status: true });
     $.addSubcommand('edit', 'command', { permLevel: 0, status: true });
 
-    $.addCommand('whispermode', './modules/main/admin', {
+    $.addCommand('whispermode', {
         handler: 'whisperMode',
         cooldown: 0,
         permLevel: 0,
@@ -187,7 +189,7 @@ module.exports.lastSeen = (event) => {
     $.addSubcommand('enable', 'whispermode', { permLevel: 0, status: true });
     $.addSubcommand('disable', 'whispermode', { permLevel: 0, status: true });
 
-    $.addCommand('lastseen', './modules/main/admin', {
+    $.addCommand('lastseen', {
         handler: 'lastSeen',
         status: true
     });
