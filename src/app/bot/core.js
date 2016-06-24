@@ -298,7 +298,7 @@ class Core extends EventEmitter {
         Object.assign(this, coreMethods);
     }
 }
-const core = new Core();
+let core = new Core();
 
 /**
  * Exports & Globals
@@ -315,6 +315,7 @@ const initialize = (instant = false) => {
         }
 
         Logger.bot('Initializing bot...');
+        if (!core) core = new Core();
         bot.connect();
 
         db.initBotDB(() => {

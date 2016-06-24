@@ -47,7 +47,7 @@ const unload = function(_module, options = {}) {
         for (let [k, v] of files.entries()) {
             delete require.cache[k];
             if (v === 'core') {
-                Logger.debug(`Module unloaded (core):: ${makeRelPath(_module)}`);
+                Logger.debug(`Module unloaded (core):: ${makeRelPath(k)}`);
             } else if (v === 'user') {
                 Logger.debug(`Module unloaded (user):: ${k}`);
             }
@@ -88,6 +88,7 @@ export default {
             if (!this._daemon) return;
 
             this._daemon.close();
+            this._daemon = null;
         },
         _daemon: null,
         _listen() {
