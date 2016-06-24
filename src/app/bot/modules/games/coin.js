@@ -9,7 +9,7 @@
  * @author citycide
  */
 
-module.exports.coin = (event) => {
+module.exports.coin = event => {
     if (!event.args.length) {
         $.say(event.sender, `Usage: !coin (bet amount)`);
         return;

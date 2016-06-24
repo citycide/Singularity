@@ -18,6 +18,9 @@ module.exports = {
         "weave": true
     },
     "extends": "eslint:recommended",
+    "plugins": [
+        "babel"
+    ],
     "parser": "babel-eslint",
     "parserOptions": {
         "sourceType": "module"
@@ -36,6 +39,10 @@ module.exports = {
             "error",
             { "after": true,
               "before": true } ],
+        "babel/generator-star-spacing": [
+            "warn",
+            { "before": false,
+              "after": false } ],
         "block-scoped-var": "error",
         "block-spacing": "error",
         "brace-style": [
@@ -68,7 +75,7 @@ module.exports = {
         "eqeqeq": ["error", "allow-null"],
         "func-names": "off",
         "func-style": "off",
-        "generator-star-spacing": "error",
+        "generator-star-spacing": "off",
         "global-require": "off",
         "guard-for-in": "error",
         "handle-callback-err": "error",

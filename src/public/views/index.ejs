@@ -396,7 +396,8 @@
                                                     </div>
                                                     <div id="collapseChat" class="panel-collapse collapse in">
                                                         <div class="card-body no-padding no-margin-bottom">
-                                                            <webview id='chat_embed' src="//www.twitch.tv/<%= state.user.channel %>/chat" style="height: 675px; width: 100%;" preload="<%- decodeURIComponent(state.bttvInject) %>" partition="persist:twitch" plugins disablewebsecurity></webview>
+                                                            <!--<webview id='chat_embed' src="//www.twitch.tv/<%= state.user.channel %>/chat" style="height: 675px; width: 100%;" preload="<%- decodeURIComponent(state.bttvInject) %>" partition="persist:twitch" plugins disablewebsecurity></webview>-->
+                                                            <iframe id="chat-embed" src="/chat" height="650" width="100%" frameborder="0" scrolling="no"></iframe>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -4,6 +4,6 @@ if (DEV_MODE) {
     require('devtron').install();
 
     installExtension(VUEJS_DEVTOOLS)
-        .then(name => console.log(`Added Extension:  ${name}`))
+        .then(name => {})
         .catch(err => console.log('An error occurred: ', err));
 }

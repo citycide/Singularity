@@ -60,7 +60,7 @@ const params = function(event, text) {
     }
 
     return text;
-}
+};
 
 const tagList = [
     `(age)`,

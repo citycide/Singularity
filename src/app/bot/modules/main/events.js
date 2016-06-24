@@ -1,4 +1,4 @@
-module.exports.alerts = (event) => {
+module.exports.alerts = event => {
     const param1 = event.args[1];
 
     if (event.subcommand === 'follow') {
@@ -96,7 +96,7 @@ module.exports.alerts = (event) => {
 // Keep an array of events to prevent duplicates
 const events = [];
 
-Transit.on('alert:follow', (data) => {
+Transit.on('alert:follow', data => {
     if ($.settings.get('followAlerts', true)) {
         if (!events.includes(`${data.display_name}:follow`)) {
             events.push(`${data.display_name}:follow`);
@@ -104,7 +104,7 @@ Transit.on('alert:follow', (data) => {
 
             if (reward > 0) {
                 $.shout(weave.get('bot:settings:alerts-follows:response-reward',
-                    data.display_name, $.points.str(reward));
+                    data.display_name, $.points.str(reward)));
             } else {
                 $.shout(weave.get('bot:settings:alerts-follows:response-no-reward',
                     data.display_name));
@@ -113,7 +113,7 @@ Transit.on('alert:follow', (data) => {
     }
 });
 
-Transit.on('alert:host', (data) => {
+Transit.on('alert:host', data => {
     if ($.settings.get('hostAlerts', true)) {
         if (!events.includes(`${data.display_name}:host`)) {
             // Only consider hosts duplicates if the viewer count is the same
@@ -122,7 +122,7 @@ Transit.on('alert:host', (data) => {
 
             if (reward > 0) {
                 $.shout(weave.get('bot:settings:alerts-hosts:response-reward',
-                    data.display_name, data.viewers, $.points.str(reward));
+                    data.display_name, data.viewers, $.points.str(reward)));
             } else {
                 $.shout(weave.get('bot:settings:alerts-hosts:response-no-reward',
                     data.display_name, data.viewers));
@@ -131,7 +131,7 @@ Transit.on('alert:host', (data) => {
     }
 });
 
-Transit.on('alert:subscriber', (data) => {
+Transit.on('alert:subscriber', data => {
     if ($.settings.get('subAlerts', false)) {
         if (!events.includes(`${data.display_name}:sub`)) {
             events.push(`${data.display_name}:sub`);
@@ -163,14 +163,14 @@ Transit.on('alert:subscriber', (data) => {
     }
 });
 
-Transit.on('alert:tip', (data) => {
+Transit.on('alert:tip', data => {
     if ($.settings.get('tipAlerts', false)) {
         // Tip alerts are probably not duplicates, so don't check
         const reward = $.settings.get('tipReward', 50);
 
         if (reward > 0) {
             $.shout(weave.get('bot:settings:alerts-tips:response-reward',
-                data.name, data.amount, $.points.str(reward));
+                data.name, data.amount, $.points.str(reward)));
         } else {
             $.shout(weave.get('bot:settings:alerts-tips:response-no-reward',
                 data.name, data.amount));
@@ -179,8 +179,5 @@ Transit.on('alert:tip', (data) => {
 });
 
 (() => {
-    $.addCommand('alerts', {
-        permLevel: 0,
-        status: true
-    });
+    $.addCommand('alerts', { permLevel: 0, status: true });
 })();

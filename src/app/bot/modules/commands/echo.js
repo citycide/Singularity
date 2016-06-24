@@ -9,7 +9,7 @@
  * @author citycide
  */
 
-module.exports.echo = (event) => {
+module.exports.echo = event => {
     if (event.subcommand === 'twice') {
         $.say(event.sender, `${event.subArgString} ${event.subArgString}`);
         return;

@@ -9,7 +9,7 @@
  * @author citycide
  */
 
-module.exports.magicBall = (event) => {
+module.exports.magicBall = event => {
     if (!event.args.length) {
         $.say(event.sender, `You need to ask 8ball a question.`);
         return;

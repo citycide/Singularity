@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-module.exports.command = (event) => {
+module.exports.command = event => {
     const [, param1, param2] = event.args;
 
     if (event.subcommand === 'enable') {
@@ -130,7 +130,7 @@ module.exports.command = (event) => {
     $.say(event.sender, weave.get('bot:modules:admin:command:usage'));
 };
 
-module.exports.whisperMode = (event) => {
+module.exports.whisperMode = event => {
     if (event.subcommand === 'enable') {
         $.settings.set('whisperMode', true);
         $.say(event.sender, weave.get('bot:settings:whisper-mode:enabled:success'));
@@ -149,7 +149,7 @@ module.exports.whisperMode = (event) => {
     $.say(event.sender, weave.get('bot:modules:admin:command:whisper-mode:usage', status));
 };
 
-module.exports.lastSeen = (event) => {
+module.exports.lastSeen = event => {
     let target = event.args[0];
     if (!target) return $.say(event.sender, weave.get('bot:modules:admin:last-seen:usage'));
 
@@ -164,8 +164,6 @@ module.exports.lastSeen = (event) => {
 };
 
 (() => {
-    $.log.error('test', 'WRITE IT');
-
     $.addCommand('command', {
         cooldown: 0,
         permLevel: 0,
@@ -189,8 +187,5 @@ module.exports.lastSeen = (event) => {
     $.addSubcommand('enable', 'whispermode', { permLevel: 0, status: true });
     $.addSubcommand('disable', 'whispermode', { permLevel: 0, status: true });
 
-    $.addCommand('lastseen', {
-        handler: 'lastSeen',
-        status: true
-    });
+    $.addCommand('lastseen', { handler: 'lastSeen', status: true });
 })();

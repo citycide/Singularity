@@ -9,7 +9,7 @@
  * @author citycide
  */
 
-module.exports.couch = (event) => {
+module.exports.couch = event => {
     const multi = $.db.getModuleConfig('couch', 'multiplier', 1);
     const random = $.util.num.random;
     const num = random(1000);

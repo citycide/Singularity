@@ -9,7 +9,7 @@
  * @author citycide
  */
 
-module.exports.quote = (event) => {
+module.exports.quote = event => {
     const param1 = event.args[1];
     const regex = /~(\w+)/g;
 

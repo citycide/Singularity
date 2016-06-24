@@ -1,13 +1,13 @@
 import db from './db';
 
-io.on('connection', (socket) => {
+io.on('connection', socket => {
     Logger.absurd('Client connected.');
 
     socket.on('disconnect', () => {
         Logger.absurd('Client disconnected.');
     });
 
-    socket.on('auth:callback', (data) => {
+    socket.on('auth:callback', data => {
         if (data.token.length > 20) {
             Settings.set('accessToken', data.token);
             Settings.set('channel', data.user);
@@ -31,23 +31,23 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on('test:follower', (user) => {
+    socket.on('test:follower', user => {
         Transit.emit('test:follower', user);
     });
 
-    socket.on('test:host', (data) => {
+    socket.on('test:host', data => {
         Transit.emit('test:host', data);
     });
 
-    socket.on('test:subscriber', (user) => {
+    socket.on('test:subscriber', user => {
         Transit.emit('test:subscriber', user);
     });
 
-    socket.on('test:tip', (data) => {
+    socket.on('test:tip', data => {
         Transit.emit('test:tip', data);
     });
 
-    socket.on('test:music', (data) => {
+    socket.on('test:music', data => {
         io.emit('music:test', data);
     });
     /*

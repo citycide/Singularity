@@ -1,4 +1,4 @@
-module.exports.points = (event) => {
+module.exports.points = event => {
     const [action, param1, param2] = event.args;
 
     if (!action) {

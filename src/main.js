@@ -20,11 +20,9 @@ import handleStartupEvent from './squirrel';
 const pkg = require('../package.json');
 const PORT = pkg.port || 2881;
 
-process.on('uncaughtException', (err) => {
-    console.error(err);
-});
+process.on('uncaughtException', err => console.error(err));
 
-const onError = (error) => {
+const onError = error => {
     if (error.syscall !== 'listen') {
         throw error;
     }
@@ -105,8 +103,8 @@ const onError = (error) => {
     server.setPort(PORT);
     server.start();
 
-    server.on('error', onError);
-    server.on('listening', () => {
+    server.default.on('error', onError);
+    server.default.on('listening', () => {
         Logger.info(`Listening on *:${PORT}`);
         Settings.set('port', PORT);
     });
@@ -147,7 +145,7 @@ const onError = (error) => {
         const position = Settings.get('position');
         let inBounds = false;
         if (position) {
-            screen.getAllDisplays().forEach((display) => {
+            screen.getAllDisplays().forEach(display => {
                 if (position[0] >= display.workArea.x &&
                     position[0] <= display.workArea.x + display.workArea.width &&
                     position[1] >= display.workArea.y &&

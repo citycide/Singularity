@@ -17,13 +17,12 @@ const SOCKETS = require('./app/sockets');
 const SERVICES = require('./app/main/features/core/serviceLoader');
 
 let PORT;
-const setPort = function(_port, callback) {
+const setPort = function(_port) {
     PORT = _port || 2881;
-    callback && callback();
 };
 
-const start = function() {
-    server.listen(PORT, () => {});
+const start = async function() {
+    await server.listen(PORT, () => {});
 };
 
 /**
@@ -34,13 +33,15 @@ const watcher = chokidar.watch('./app/**/*.js', {
     persistent: true
 });
 
-watcher.on('change', (_path) => {
+watcher.on('change', _path => {
     // let _module = '.' + path.sep + path.relative(__dirname, _path);
     Logger.absurd('File updated, reloading...', `'${_path}'`);
     delete require.cache[_path];
 });
 
 // export the server object & init functions for electron
-module.exports = server;
-module.exports.start = start;
-module.exports.setPort = setPort;
+export {
+    server as default,
+    start,
+    setPort
+};

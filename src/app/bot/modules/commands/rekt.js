@@ -9,7 +9,7 @@
  * @author citycide
  */
 
-module.exports.rekt = (event) => {
+module.exports.rekt = event => {
     if (!event.args.length) {
         const response = $.db.getRow('rekt', null, { random: true });
 
