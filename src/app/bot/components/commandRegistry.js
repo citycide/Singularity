@@ -38,10 +38,10 @@ const _registerCommand = function(cmd, _module, parent = false) {
     }
 };
 
-const registerCommand = function(name, module, options) {
-    if (!name || !module) return;
+const registerCommand = function(name, options) {
+    if (!name) return;
 
-    module = captureStack()[1].getFileName();
+    const _module = captureStack()[1].getFileName();
 
     const obj = {
         name: name.toLowerCase(),
@@ -53,7 +53,7 @@ const registerCommand = function(name, module, options) {
     };
     Object.assign(obj, options);
 
-    _registerCommand(obj, module);
+    _registerCommand(obj, _module);
 };
 
 const registerSubcommand = function(name, parent, options) {

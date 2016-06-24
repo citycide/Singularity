@@ -146,7 +146,7 @@ module.exports.whisperMode = event => {
     const status = $.settings.get('whisperMode')
         ? weave.get('common-words:enabled')
         : weave.get('common-words:disabled');
-    $.say(event.sender, weave.get('bot:modules:admin:command:whisper-mode:usage', status));
+    $.say(event.sender, weave.get('bot:modules:admin:whisper-mode:usage', status));
 };
 
 module.exports.lastSeen = event => {
