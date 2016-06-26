@@ -32,6 +32,14 @@ const time = {
                                 }
                             }
                         }
+
+                        if (this.settings.getRankUp()) {
+                            const currentRank = $.db.get('users', 'rank', { name: user });
+                            const nextLevel = $.db.getRow('ranks', { level: currentRank + 1 });
+                            if (newTime > nextLevel.requirement * 3600) {
+                                $.shout(`LEVEL UP! ${user} is now level ${nextLevel.level} (${nextLevel.name})`);
+                            }
+                        }
                     } else {
                         this.settings.lastUserList.push(user);
                     }
@@ -76,6 +84,12 @@ const time = {
         },
         setAutoRegTime(value) {
             $.settings.set('autoPromoteRegularsTime', value);
+        },
+        getRankUp() {
+            return $.settings.get('autoRankUp', true);
+        },
+        setRankUp(bool) {
+            $.settings.set('autoRankUp', bool);
         }
     }
 };
