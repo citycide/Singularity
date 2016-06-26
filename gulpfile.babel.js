@@ -28,7 +28,7 @@ const paths = {
     overlayFNT: ['src/public/views/overlays/fonts/**/*']
 };
 
-const cleanGlob = (glob) => {
+const cleanGlob = glob => {
     return () => {
         return gulp.src(glob, { read: false })
             .pipe(clean({ force: true }));
@@ -53,14 +53,14 @@ gulp.task('clean-overlayFNT', cleanGlob(['./build/public/views/overlays/fonts/**
 gulp.task('transpile-server', ['clean-server'], () => {
     gulp.src(paths.serverScripts)
         .pipe(babel({ presets: ['es2015-node6', 'stage-0'] }))
-        .on('error', (err) => console.error(err))
+        .on('error', err => console.error(err))
         .pipe(gulp.dest('./build/'));
 });
 
 gulp.task('transpile-client', ['clean-client'], () => {
     gulp.src(paths.clientScripts, { base: './src/public' })
         .pipe(babel({ presets: ['es2015', 'stage-0'] }))
-        .on('error', (err) => console.error(err))
+        .on('error', err => console.error(err))
         .pipe(gulp.dest('./build/public'));
 });
 

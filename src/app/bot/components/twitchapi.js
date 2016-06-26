@@ -6,9 +6,9 @@ const twitchAPI = {
         API_OPTIONS: {
             method: 'GET',
             headers: {
-                "Accept": "application/vnd.twitchtv.v3+json",
-                "Authorization": `OAuth ${Settings.get('accessToken').slice(6)}`,
-                "Client-ID": Settings.get('clientID')
+                'Accept': 'application/vnd.twitchtv.v3+json',
+                'Authorization': `OAuth ${Settings.get('accessToken').slice(6)}`,
+                'Client-ID': Settings.get('clientID')
             }
         }
     },
@@ -72,7 +72,7 @@ const twitchAPI = {
             });
         });
 
-        $.tick.setTimeout('getChatUsers', this.getStreamInfo.bind(this), 30 * 1000);
+        $.tick.setTimeout('getChatUsers', ::this.getStreamInfo, 30 * 1000);
     },
     /**
      * @function getChatUsers()
@@ -84,7 +84,7 @@ const twitchAPI = {
         let userCount = 0;
 
         const opts = Object.assign({
-            url: `https://tmi.twitch.tv/group/user/${$.channel.name}/chatters?ts=${new Date().getTime()}`
+            url: `https://tmi.twitch.tv/group/user/${$.channel.name}/chatters?ts=${Date.now()}`
         }, this.settings.API_OPTIONS);
 
         $.api(opts, (err, res, body = {}) => {
@@ -131,7 +131,7 @@ const twitchAPI = {
         $.user.list = users;
         $.user.count = userCount;
 
-        $.tick.setTimeout('getChatUsers', this.getChatUsers.bind(this), 30 * 1000);
+        $.tick.setTimeout('getChatUsers', ::this.getChatUsers, 30 * 1000);
 
         return users;
     }

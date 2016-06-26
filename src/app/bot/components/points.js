@@ -81,7 +81,6 @@ const points = {
                         }
                     }
 
-                    // this.add(user, payout + bonus);
                     $.db.incr('users', 'points', payout + bonus, { name: user });
                 } else {
                     this.settings.lastUserList.push(user);
