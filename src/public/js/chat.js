@@ -1,4 +1,4 @@
-/* global CHANNEL:false, CLIENT_ID:false, irc:false, isElectron:false, moment:false */
+/* global CHANNEL, CLIENT_ID, irc, isElectron, moment, fetch */
 
 /**
  * Credit to MEMECHAT
@@ -33,11 +33,9 @@ const OPTIONS = {
 };
 
 const client = new irc.client(OPTIONS);
-client.connect().then(() => {
-    getEmotesBTTV();
-}).catch((err) => {
-    console.log(err);
-});
+client.connect()
+      .then(() => getEmotesBTTV())
+      .catch(err => console.log(err));
 
 /*
 function injectTests() {
@@ -160,7 +158,7 @@ function parseUserBadges(user) {
         $badge.html('&nbsp;');
         $newLine.append($badge);
     }
-    ["turbo", "subscriber"].forEach((type) => {
+    ["turbo", "subscriber"].forEach(type => {
         if (user[type] === true) {
             const $badge = $('<span></span>');
             $badge.addClass(type);
@@ -181,10 +179,9 @@ function trimChat() {
 
 function sendMessage(message) {
     if (message && message.trim() !== '') {
-        client.say(CHANNEL.name, message).then((data) => {
-        }).catch((err) => {
-            console.log(err);
-        });
+        client.say(CHANNEL.name, message)
+              .then(data => {})
+              .catch(err => console.log(err));
     }
 }
 
@@ -199,14 +196,14 @@ function addMessage(user, message, channel, action, self) {
     const parsedMessage = parseBTTVEmotes(parseTwitchEmotes(message, user.emotes, self));
 
     const classes = action ? 'chat_line action' : 'chat_line';
-    const msgStyle = action ? ` style='color: ${color};'` : '';
+    const msgStyle = action ? `style='color: ${color};'` : '';
     const colon = action ? ' ' : `<span class='colon'>: </span>`;
     const ts = moment().format('h:mm');
 
     chatBox.innerHTML += `<div class="${classes}" data-type="${msgType}" data-user="${username}" ` +
                          `data-channel="${channel}"><span class="time_stamp">${ts}</span>${badges}` +
                          `<span class="username" style="color: ${color};">${username}</span>${colon}` +
-                         `<span class="message"${msgStyle}>${parsedMessage}</span></div>`;
+                         `<span class="message" ${msgStyle}>${parsedMessage}</span></div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
     trimChat();
 }
@@ -253,35 +250,38 @@ function getEmotes(sets = '0') {
     });
 }
 
-function getEmotesBTTV() {
-    $.getJSON(`//api.betterttv.net/2/channels/${CHANNEL.name}`, (res) => {
-        if (res.emotes) {
-            for (let i in res.emotes) {
-                if (!res.emotes.hasOwnProperty(i)) continue;
-                emoteMap.set(res.emotes[i].regex, `//cdn.betterttv.net/emote/${res.emotes[i].id}/1x`);
-            }
-            console.log(`Loaded ${res.emotes.length} BTTV channel emotes.`);
+async function getEmotesBTTV() {
+    const globals = await fetch(`https://api.betterttv.net/2/channels/${CHANNEL.name}`);
+    const json = await globals.json();
+
+    if (json.emotes) {
+        for (let i in json.emotes) {
+            if (!json.emotes.hasOwnProperty(i)) continue;
+            emoteMap.set(json.emotes[i].regex, `//cdn.betterttv.net/emote/${json.emotes[i].id}/1x`);
         }
-    });
-    $.getJSON('//api.betterttv.net/emotes', (res) => {
-        if (res.emotes) {
-            for (let i in res.emotes) {
-                if (!res.emotes.hasOwnProperty(i)) continue;
-                emoteMap.set(res.emotes[i].regex, `${res.emotes[i].url}`);
-            }
-            console.log(`Loaded ${res.emotes.length} BTTV emotes.`);
+        console.log(`Loaded ${json.emotes.length} BTTV channel emotes.`);
+    }
+
+    const channels = await fetch(`https://api.betterttv.net/emotes`);
+    const json2 = await channels.json();
+
+    if (json2.emotes) {
+        for (let i in json2.emotes) {
+            if (!json2.emotes.hasOwnProperty(i)) continue;
+            emoteMap.set(json2.emotes[i].regex, `${json2.emotes[i].url}`);
         }
-    });
+        console.log(`Loaded ${json2.emotes.length} BTTV emotes.`);
+    }
 }
 
 const $btnChat = $('.btn-chat');
 const $chatInput = $('.chat-input');
-$btnChat.click((e) => {
+$btnChat.click(e => {
     e.preventDefault();
     sendMessage($chatInput.val());
     $chatInput.val('');
 });
-$chatInput.keydown((e) => {
+$chatInput.keydown(e => {
     if (e.which === 13) {
         e.preventDefault();
         if ($chatInput.val() !== '') {
@@ -346,27 +346,20 @@ client.on('connected', (address, port) => {
     addSystemMessage(`connected to ${CHANNEL.name}'s chat.`);
 });
 
-client.on('disconnected', (reason) => {
-    addSystemMessage('disconnected');
-});
+client.on('disconnected', reason => addSystemMessage('disconnected'));
+client.on('reconnect', () => addSystemMessage('reconnecting...'));
 
 client.on('logon', () => {
     // addSystemMessage('Logging in...');
 });
 
-client.on('reconnect', () => {
-    addSystemMessage('reconnecting...');
-});
 
 client.on('timeout', (channel, username) => {
     $(`div[data-channel=${channel}][data-user=${username}]`).remove();
 });
 
-client.on('whisper', (user, message) => {
-    addWhisper(user, message);
-});
-
-client.on('emotesets', (sets) => getEmotes(sets));
+client.on('whisper', (user, message) => addWhisper(user, message));
+client.on('emotesets', sets => getEmotes(sets));
 
 function apiGet(url, fn) {
     client.api({
@@ -385,7 +378,7 @@ function apiGet(url, fn) {
 /**
  * Helper functions
  */
-
+/* eslint-disable */
 // From Cristian Sanchez - http://stackoverflow.com/a/3426956
 function hashColor(str) {
     let hash = 0;
@@ -393,8 +386,8 @@ function hashColor(str) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
     const c = (hash & 0x00FFFFFF)
-    .toString(16)
-    .toUpperCase();
+        .toString(16)
+        .toUpperCase();
 
     return '00000'.substring(0, 6 - c.length) + c;
 }
@@ -453,3 +446,4 @@ function shiftColor(color, background, user) {
     }
     return color;
 }
+/* eslint-enable */

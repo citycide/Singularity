@@ -1,8 +1,7 @@
-let isElectron = false;
+let isElectron = true;
 try {
     isElectron = (typeof require('fs') !== 'undefined');
-    console.info('Running in Electron');
 } catch (e) {
     isElectron = false;
-    console.info('Running in browser');
 }
+console.info(isElectron ? 'Running in Electron' : 'Running in browser');

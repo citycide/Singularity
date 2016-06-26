@@ -5,21 +5,15 @@
     <title>singularity - login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Fonts -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css'>
     <!-- CSS Libs -->
-    <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="../fonts/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" href="../css/vendor/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap-switch.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/checkbox3.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/jquery.dataTables.min.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/dataTables.bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="../css/vendor/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/vendor/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/fonts/font-awesome.min.css" />
     <!-- CSS App -->
-    <link rel="stylesheet" type="text/css" href="../css/style.css">
-    <link rel="stylesheet" type="text/css" href="../css/loader.css" />
-    <link rel="stylesheet" type="text/css" href="../css/themes/flat-blue.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/loader.css" />
+    <link rel="stylesheet" type="text/css" href="/css/themes/flat-blue.css">
 
     <script src="../js/contextHandler.js"></script>
 </head>
@@ -97,19 +91,11 @@
     <!-- Electron jQuery fix -->
     <script>window._module = window.module; window.module = undefined;</script>
     <!-- Javascript Libs -->
-    <script type="text/javascript" src="../js/vendor/jquery.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/Chart.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/bootstrap-switch.min.js"></script>
-
-    <script type="text/javascript" src="../js/vendor/jquery.matchHeight-min.js"></script>
-    <script type="text/javascript" src="../js/vendor/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/dataTables.bootstrap.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/select2.full.min.js"></script>
+    <script type="text/javascript" src="/js/vendor/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/vendor/bootstrap.min.js"></script>
     <!-- Javascript -->
-    <script type="text/javascript" src="../js/menubar.js"></script>
-    <script type="text/javascript" src="../js/vendor/TweenMax.min.js"></script>
-    <script type="text/javascript" src="../js/constellation.js"></script>
+    <script type="text/javascript" src="/js/vendor/TweenMax.min.js"></script>
+    <script type="text/javascript" src="/js/constellation.js"></script>
     <script>
         $(window).load(function() {
             setTimeout(function() {
@@ -117,7 +103,7 @@
             }, 200);
         });
 
-        $('.twitch-connect').click(function (e) {
+        $('.twitch-connect').click(function(e) {
             e.preventDefault();
             window.location.href = 'https://api.twitch.tv/kraken/oauth2/authorize?response_type=token' +
                     '&client_id=' + clientID +

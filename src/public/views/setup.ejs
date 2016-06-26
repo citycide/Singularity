@@ -3,13 +3,13 @@
 <head>
   <title>singularity - setup</title>
     <!-- styling -->
-    <link rel="stylesheet" type="text/css" href="../css/vendor/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="../fonts/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" href="../css/style.css" />
-    <link rel="stylesheet" type="text/css" href="../css/loader.css" />
-    <link rel="stylesheet" type="text/css" href="../css/setup.css" />
-    <link rel="stylesheet" type="text/css" href="../css/vendor/waves.css" />
-    <script src="../js/contextHandler.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/vendor/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="/fonts/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/loader.css" />
+    <link rel="stylesheet" type="text/css" href="/css/setup.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vendor/waves.css" />
+    <script src="/js/contextHandler.js"></script>
 </head>
 <body>
     <div class="window-frame-left"></div>
@@ -203,21 +203,20 @@
 
     <!-- ejs -->
     <script>
-        var channel = '<%= channel %>';
-        var clientID = '<%= clientID %>';
+        const channel = '<%= channel %>';
+        const clientID = '<%= clientID %>';
     </script>
     <!-- socket.io -->
     <script src="/socket.io/socket.io.js"></script>
     <!-- Electron jQuery fix -->
     <script>window._module = window.module; window.module = undefined;</script>
     <!-- Javascript Libs -->
-    <script type="text/javascript" src="../js/vendor/jquery.min.js"></script>
-    <script type="text/javascript" src="../js/vendor/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/vendor/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/vendor/bootstrap.min.js"></script>
     <!-- more scripts -->
-    <script src="../js/setup.js"></script>
-    <script src="../js/menubar.js"></script>
-    <script src="../js/vendor/gist-embed.min.js"></script>
-    <script src="../js/vendor/waves.js"></script>
+    <script src="/js/setup.js"></script>
+    <script src="/js/vendor/gist-embed.min.js"></script>
+    <script src="/js/vendor/waves.js"></script>
     <script>
         $('.twitch-connect').click(function(e) {
             e.preventDefault();
