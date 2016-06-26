@@ -174,6 +174,20 @@ const coreMethods = {
                 type: 'module'
             });
         },
+        getComponentConfig(component, key, defaultValue) {
+            return db.bot.data.get('extension_settings', 'value', {
+                key,
+                extension: component,
+                type: 'component'
+            }, defaultValue);
+        },
+        setComponentConfig(component, key, value) {
+            return db.bot.data.set('extension_settings', { value }, {
+                key,
+                extension: component,
+                type: 'component'
+            });
+        },
         addTable(name, keyed) {
             if (!name || typeof name !== 'string') {
                 Logger.bot(`ERR in core#addTable:: Expected parameter 'name' to be a string, received ${typeof name}`);

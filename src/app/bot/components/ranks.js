@@ -11,7 +11,6 @@ const ranks = {
         // user = { 'display-name': 'name' };
 
         const username = user['display-name'];
-        const userType = user['user-type'];
         if (!username) return;
 
         const _rankID = $.db.get('users', 'rank', { name: username });
@@ -20,7 +19,7 @@ const ranks = {
         } else {
             Logger.trace(`getUserRank:: assigning default rank to ${username} (level 1)`);
             $.db.set('users', { permission: 1 }, { name: username });
-            return defaultRankID;
+            return 1;
         }
     },
     settings: {
@@ -33,7 +32,7 @@ const ranks = {
         },
         setAllowPurchases(bool) {
             if (typeof bool !== 'boolean') return;
-            return $.db.setComponentConfig('ranks', 'allowPurchases', bool)
+            return $.db.setComponentConfig('ranks', 'allowPurchases', bool);
         }
     }
 };
