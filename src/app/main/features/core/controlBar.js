@@ -23,15 +23,12 @@ Emitter.on('window:close', (e, windowID) => {
 });
 
 const mainWindow = WindowManager.getAll('main')[0];
-mainWindow.on('close', (e) => {
+mainWindow.on('close', e => {
     if ((Settings.get('minToTray', true) || process.platform === 'darwin') && !global.quitting) {
         if (process.platform !== 'darwin') {
             mainWindow.minimize();
             mainWindow.setSkipTaskbar(true);
         } else {
-            if (PlaybackAPI.isPlaying() && !Settings.get('minToTray', true)) {
-                Emitter.sendToGooglePlayMusic('playback:playPause');
-            }
             mainWindow.hide();
         }
         e.preventDefault();

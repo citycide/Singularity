@@ -1,28 +1,24 @@
 import { app, BrowserWindow, screen } from 'electron';
-import EventEmitter from 'events';
-import winston from 'winston';
 import { argv } from 'yargs';
-import path from 'path';
+import EventEmitter from 'events';
 // import util from 'util';
 
+import handleStartupEvent from './squirrel';
 import configureApp from './app/main/configureApp';
 import generateBrowserConfig from './app/main/configureBrowser';
+import initLogger from './app/main/utils/Logger';
 
 import EmitterClass from './app/main/utils/Emitter';
 import SettingsClass from './app/main/utils/Settings';
 import WindowManagerClass from './app/main/utils/WindowManager';
-import PlaybackAPIClass from './app/main/utils/PlaybackAPI';
-import I3IpcHelperClass from './app/main/utils/I3IpcHelper';
 import Weave from './app/main/utils/Weave';
-
-import handleStartupEvent from './squirrel';
 
 const pkg = require('../package.json');
 const PORT = pkg.port || 2881;
 
 process.on('uncaughtException', err => console.error(err));
 
-const onError = error => {
+function onError(error) {
     if (error.syscall !== 'listen') {
         throw error;
     }
@@ -35,7 +31,7 @@ const onError = error => {
         default:
             throw error;
     }
-};
+}
 
 (() => {
     if (handleStartupEvent()) {
@@ -43,62 +39,23 @@ const onError = error => {
     }
 
     global.DEV_MODE = argv.development || argv.dev;
-
-    // Initialize the logger with default log levels
-    const defaultFileLogLevel = 'info';
-    const defaultConsoleLogLevel = global.DEV_MODE ? 'trace' : 'error';
-    const defaultLogLevels = {
-        levels: {
-            error: 0,
-            warn: 1,
-            info: 2,
-            sys: 2,
-            bot: 2,
-            debug: 3,
-            trace: 4,
-            absurd: 5
-        },
-        colors: {
-            error: 'red',
-            warn: 'yellow',
-            info: 'blue',
-            sys: 'blue',
-            bot: 'green',
-            debug: 'cyan',
-            trace: 'white',
-            absurd: 'grey'
-        }
-    };
-    global.Logger = new (winston.Logger)({
-        transports: [
-            new (winston.transports.File)({
-                filename: path.resolve(app.getPath('userData'), 'singularity.log'),
-                level: defaultFileLogLevel,
-                maxsize: 5000000,
-                maxfiles: 2
-            }),
-            new (winston.transports.Console)({
-                level: defaultConsoleLogLevel
-            })
-        ]
-    });
-    Logger.setLevels(defaultLogLevels.levels);
-    winston.addColors(defaultLogLevels.colors);
-    Logger.info('Starting singularity...');
-
-    // Spin up a global event emitter for core interaction
     global.Transit = new EventEmitter();
-
     global.Emitter = new EmitterClass();
     global.WindowManager = new WindowManagerClass();
     global.Settings = new SettingsClass();
-    global.PlaybackAPI = new PlaybackAPIClass();
     global.weave = new Weave(Settings.get('langFile'));
+
+    const Logger = initLogger();
+
+    Logger.info('Starting singularity...');
+
+    global.Logger = Logger;
 
     // Initialize the database
     const initDB = require('./app/db').initDB;
     initDB({ DEV: global.DEV_MODE, LOCATION: 'home' });
 
+    // Start the server
     const server = require('./server.js');
     server.setPort(PORT);
     server.start();
@@ -112,6 +69,7 @@ const onError = error => {
     configureApp(app);
 
     let mainWindow = null;
+    let child = null;
 
     const shouldQuit = app.makeSingleInstance(() => {
         if (mainWindow) {
@@ -127,10 +85,6 @@ const onError = error => {
         app.quit();
         return;
     }
-
-    // Replace the log level with those from settings.
-    Logger.transports.console.level = Settings.get('consoleLogLevel', defaultConsoleLogLevel);
-    Logger.transports.file.level = Settings.get('fileLogLevel', defaultFileLogLevel);
 
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') {
@@ -177,10 +131,6 @@ const onError = error => {
             mainWindow = null;
             // server.close();
         });
-
-        // setup i3 listener
-        const I3IpcHelper = new I3IpcHelperClass();
-        I3IpcHelper.setupEventListener();
 
         app.on('before-quit', () => {
             Logger.info('Collapsing the singularity...');

@@ -56,21 +56,3 @@ Emitter.on('window:overlay:open', () => {
 Emitter.on('window:color_wheel', () => {
     showColorWheel();
 });
-
-Emitter.on('settings:set', (event, details) => {
-    Settings.set(details.key, details.value);
-    // DEV: React to settings change
-    switch (details.key) {
-        case 'miniAlwaysShowSongInfo':
-            Emitter.sendToGooglePlayMusic('miniAlwaysShowSongInfo', { state: details.value });
-            break;
-        case 'miniAlwaysOnTop':
-            Emitter.sendToGooglePlayMusic('miniAlwaysOnTop', { state: details.value });
-            break;
-        case 'speechRecognition':
-            Emitter.sendToGooglePlayMusic('speech:toggle', { state: details.value });
-            break;
-        default:
-            break;
-    }
-});

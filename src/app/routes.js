@@ -9,14 +9,10 @@ import db from './db';
 import NowPlaying from './main/features/core/NowPlaying';
 
 const music = new NowPlaying(Settings.get('nowPlayingFile'), Settings.get('nowPlayingSep'));
-music.on('music:init', (data) => {
-    io.emit('music:init', data);
-});
-music.on('music:update', (data) => {
-    io.emit('music:update', data);
-});
+music.on('music:init', data => io.emit('music:init', data));
+music.on('music:update', data => io.emit('music:update', data));
 
-module.exports = (app) => {
+module.exports = app => {
     app.use(cookieParser());
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
@@ -28,13 +24,13 @@ module.exports = (app) => {
     };
 
     app.use(session(sessionConfig));
-    app.use(express.static(__dirname + '/../public'));
+    app.use(express.static(path.join(__dirname, '..', 'public')));
 
     // Extend an express static directory to allow for user modules
     // available at localhost:[PORT]/user/server
     app.use('/user/server', express.static(Settings.get('userServerPath')));
 
-    app.set('views', __dirname + '/../public/views');
+    app.set('views', path.join(__dirname, '..', '/public/views'));
 
     app.set('view engine', 'ejs');
 
@@ -88,21 +84,20 @@ module.exports = (app) => {
                         },
                         services: {
                             bot: {
-                                status: Settings.get('botEnabled'),
+                                status: Settings.get('botEnabled', false),
                                 name: Settings.get('botName'),
                                 auth: Settings.get('botAuth')
                             },
-                            tipeee: Settings.get('tipeeeActive'),
-                            twitchAlerts: Settings.get('twitchAlertsActive'),
-                            streamTip: Settings.get('streamTipActive')
+                            tipeee: Settings.get('tipeeeActive', false),
+                            twitchAlerts: Settings.get('twitchAlertsActive', false),
+                            streamTip: Settings.get('streamTipActive', false)
                         },
                         data: {
                             currentSong: music.getCurrent(),
                             followers: db.getRecentFollows(),
                             allFollowers: db.getFollows()
                         },
-                        clientID: Settings.get('clientID'),
-                        bttvInject: encodeURIComponent(path.resolve(`${__dirname}/../inject/bttv.js`))
+                        clientID: Settings.get('clientID')
                     }
                 });
                 Logger.trace('Directing to home page.');
@@ -133,7 +128,7 @@ module.exports = (app) => {
         });
     });
     app.get('/logout', (req, res) => {
-        userLogout((status) => {
+        userLogout(status => {
             if (!status) {
                 Logger.trace('User has been logged out.');
                 res.redirect('/login');
@@ -206,7 +201,7 @@ module.exports = (app) => {
         // res.send('Page not found.', 404);
     });
 
-    const userLogout = (callback) => {
+    const userLogout = callback => {
         Settings.set('isLoggedIn', false);
         Settings.set('tipeeeActive', false);
         Settings.del('accessToken');

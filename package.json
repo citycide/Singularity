@@ -3,10 +3,10 @@
   "description": "Twitch overlay & alert system",
   "version": "0.7.0",
   "main": "build/main.js",
-  "start": "electron . --debug",
+  "start": "electron .",
   "port": 2881,
   "scripts": {
-    "start": "electron . --dev --debug",
+    "start": "electron . --dev",
     "build": "gulp build",
     "clean": "gulp clean",
     "watch": "gulp watch"

@@ -15,18 +15,15 @@ $(() => {
         socket.emit('setup:complete');
     }
 
-    $('.btn-submit').on('click', e => {
-        const formName = $(this).attr('name');
+    $('.btn-submit').on('click', function(e) {
         const tabName = $(this).attr('href');
 
-        if ($('#' + formName)[0].checkValidity()) {
-            e.preventDefault();
-            $(`ul.nav li a[href="${tabName}"]`).parent().removeClass('disabled');
-            $(`ul.nav li a[href="${tabName}"]`).trigger('click');
-        }
+        e.preventDefault();
+        $(`ul.nav li a[href="${tabName}"]`).parent().removeClass('disabled');
+        $(`ul.nav li a[href="${tabName}"]`).trigger('click');
     });
 
-    $('ul.nav li').on('click', e => {
+    $('ul.nav li').on('click', function(e) {
         if ($(this).hasClass('disabled')) {
             e.preventDefault();
             return false;

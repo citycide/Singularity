@@ -1,16 +1,16 @@
 Emitter.on('update:available', () => {
-  $('#confirmUpdate').openModal({
-    dismissible: false,
-  });
+    $('#confirmUpdate').openModal({
+        dismissible: false
+    });
 });
 
 window.addEventListener('load', () => {
-  if (!window.$) return;
-  $('#confirmUpdateButton').click(() => {
-    Emitter.fire('update:trigger');
-  });
+    if (!window.$) return;
+    $('#confirmUpdateButton').click(() => {
+        Emitter.fire('update:trigger');
+    });
 
-  $('#waitUpdateButton').click(() => {
-    Emitter.fire('update:wait');
-  });
+    $('#waitUpdateButton').click(() => {
+        Emitter.fire('update:wait');
+    });
 });

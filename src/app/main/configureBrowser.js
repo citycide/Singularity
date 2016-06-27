@@ -1,7 +1,7 @@
-import {screen} from 'electron';
+import { screen } from 'electron';
 import path from 'path';
 
-export default () => {
+export default function() {
     const screenSize = screen.getPrimaryDisplay().workAreaSize;
     const defaultHeight = screenSize.height * 3 / 4;
     const defaultWidth = screenSize.width * 3 / 4;
@@ -24,4 +24,4 @@ export default () => {
     };
 
     return baseConfig;
-};
+}

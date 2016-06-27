@@ -20,7 +20,7 @@ const listeners = {
             Logger.info('Disconnected from TipeeeStream');
         });
 
-        tipeee.on('donation', (data) => {
+        tipeee.on('donation', data => {
             let thisEvent = {
                 user: {
                     name: data.event.parameters.username,
@@ -53,7 +53,7 @@ const listeners = {
             Logger.debug('The Streamtip service has been rate limited');
         });
 
-        streamTip.on('newTip', (data) => {
+        streamTip.on('newTip', data => {
             let thisEvent = {
                 user: {
                     name: data.username || data.user.display_name || data.user.name,
@@ -66,7 +66,7 @@ const listeners = {
             Transit.emit('alert:tip:event', thisEvent);
         });
 
-        streamTip.on('error', (err) => {
+        streamTip.on('error', err => {
             Logger.trace(err);
             Logger.error(err.message);
         });
@@ -81,10 +81,10 @@ const listeners = {
             Logger.absurd('Checking for TwitchAlerts donations');
             let donations = twitchAlerts.getRecentDonations();
 
-            donations.then((data) => {
+            donations.then(data => {
                 if (!data.donations) return Logger.debug('TwitchAlerts:: No donation data found.');
                 if (tips.length === 0) {
-                    data.donations.reverse().map((tip) => {
+                    data.donations.reverse().map(tip => {
                         if (!tips.includes(tip.id)) {
                             tips.push(tip.id);
                         }
@@ -101,7 +101,7 @@ const listeners = {
                         return t;
                     });
                 } else {
-                    data.donations.reverse().map((tip) => {
+                    data.donations.reverse().map(tip => {
                         let queueTip;
                         if (!tips.includes(tip.id)) {
                             tips.push(tip.id);
@@ -119,9 +119,7 @@ const listeners = {
                         return queueTip;
                     });
                 }
-            }).catch((err) => {
-                Logger.error(err);
-            });
+            }).catch(err => Logger.error(err));
         } else {
             Logger.debug('TwitchAlerts donation polling error');
         }
@@ -175,7 +173,7 @@ const botConfig = {
     }
 };
 
-io.on('connection', (socket) => {
+io.on('connection', socket => {
     /** BEGIN BOT EVENTS **/
     socket.on('settings:services:bot:activate', () => {
         botConfig.activate();
@@ -185,7 +183,7 @@ io.on('connection', (socket) => {
         botConfig.deactivate();
     });
 
-    socket.on('settings:services:bot:configure', (data) => {
+    socket.on('settings:services:bot:configure', data => {
         if (data.name !== Settings.get('botName') && data.auth !== Settings.get('botAuth')) {
             Settings.set('botName', data.name);
             Settings.set('botAuth', data.auth);
@@ -201,7 +199,7 @@ io.on('connection', (socket) => {
     /** END BOT EVENTS **/
 
     /** BEGIN TIPEEE EVENTS **/
-    socket.on('settings:services:tipeee:activate', (data) => {
+    socket.on('settings:services:tipeee:activate', data => {
         Settings.set('tipeeeActive', true);
         Settings.set('tipeeeAccessToken', data);
         if (!tipeee) {
@@ -222,7 +220,7 @@ io.on('connection', (socket) => {
     /** END TIPEEE EVENTS **/
 
     /** BEGIN STREAMTIP EVENTS **/
-    socket.on('settings:services:streamtip:activate', (data) => {
+    socket.on('settings:services:streamtip:activate', data => {
         Settings.set('streamTipActive', true);
         Settings.set('stAccessToken', data);
         if (!streamTip) {
@@ -243,7 +241,7 @@ io.on('connection', (socket) => {
     /** END STREAMTIP EVENTS **/
 
     /** BEGIN TWITCHALERTS EVENTS **/
-    socket.on('settings:services:twitchalerts:activate', (data) => {
+    socket.on('settings:services:twitchalerts:activate', data => {
         Logger.info('Initializing TwitchAlerts donations API');
         Settings.set('twitchAlertsActive', true);
         Settings.set('taAccessToken', data);

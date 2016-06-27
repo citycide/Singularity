@@ -156,7 +156,7 @@ app.on('before-quit', () => {
 
 Emitter.on('audiooutput:list', (event, devices) => {
     audioDeviceMenu = [];
-    devices.forEach((device) => {
+    devices.forEach(device => {
         if (device.kind === 'audiooutput') {
             let label = device.label;
             if (!label) {
@@ -179,7 +179,7 @@ Emitter.on('audiooutput:list', (event, devices) => {
                     Emitter.sendToGooglePlayMusic('audiooutput:set', device.deviceId);
                     Settings.set('audiooutput', label);
                 },
-                checked: (label === Settings.get('audiooutput')),
+                checked: (label === Settings.get('audiooutput'))
             });
         }
     });

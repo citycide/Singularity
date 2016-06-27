@@ -21,14 +21,14 @@ class Emitter {
       if (details && details.fn) {
         remote.getCurrentWebContents().executeJavaScript(details.fn);
       } else {
-        Logger.warn('Function not passed to the execute event');
+        // Logger.warn('Function not passed to the execute event');
       }
     });
 
     ipcRenderer.on('passthrough', (event, details) => {
       const view = document.querySelector('webview');
       if (!view) {
-        Logger.warn('Attempting to pass event through to WebView, but no WebView found', details);
+        // Logger.warn('Attempting to pass event through to WebView, but no WebView found', details);
         return;
       }
       if (details && details.event) {

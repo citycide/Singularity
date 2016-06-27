@@ -76,7 +76,7 @@ const template = [
                 label: 'About',
                 click: () => {
                     Emitter.sendToWindowsOfName('main', 'about');
-                },
+                }
             },
             {
                 label: 'Issues',
@@ -101,7 +101,8 @@ if (process.platform === 'darwin') {
             {
                 label: 'About singularity',
                 role: 'about'
-            },/*
+            },
+            /*
             {
                 label: 'Preferences',
                 accelerator: 'Command+,',
@@ -146,7 +147,7 @@ if (process.platform === 'darwin') {
     );
 }
 
-if (global.DEV_MODE) {
+if (DEV_MODE) {
     template[3].submenu.push(
         {
             type: 'separator'

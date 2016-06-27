@@ -1,4 +1,4 @@
-import {remote} from 'electron';
+import { remote } from 'electron';
 import fs from 'fs';
 import path from 'path';
 

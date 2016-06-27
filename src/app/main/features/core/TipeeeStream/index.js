@@ -8,7 +8,7 @@ class TipeeeStream extends EventEmitter {
         this.key = key;
         this.username = username;
         this.tipeee = null;
-        
+
         // this.API = new API(options.key);
     }
 
@@ -24,7 +24,7 @@ class TipeeeStream extends EventEmitter {
     }
 
     connectDelayed() {
-        setTimeout(this.connect.bind(this), 5 * 1000);
+        setTimeout(::this.connect, 5 * 1000);
     }
 
     disconnect() {
@@ -37,12 +37,12 @@ class TipeeeStream extends EventEmitter {
 
     _listen() {
         if (this.tipeee) {
-            this.tipeee.on('connect', () => {
+            this.tipeee.once('connect', () => {
                 this.emit('connect');
                 this.tipeee.emit('join-room', { room: this.key, username: this.username });
             });
 
-            this.tipeee.on('new-event', (data) => {
+            this.tipeee.on('new-event', data => {
                 switch (data.event.type) {
                     case 'donation':
                         this.emit('donation', data);
