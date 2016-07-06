@@ -40,7 +40,7 @@
   "bot:settings:alerts-hosts:disabled:success": "Host alerts disabled.",
   "bot:settings:alerts-tips:enabled:success": "Tip alerts enabled.",
   "bot:settings:alerts-tips:disabled:success": "Tip alerts disabled.",
-  "bot:settings:alerts-subs:enabled:success": "Subscribption alerts enabled.",
+  "bot:settings:alerts-subs:enabled:success": "Subscription alerts enabled.",
   "bot:settings:alerts-subs:disabled:success": "Subscription alerts disabled.",
   
   "bot:settings:alerts-follows:response-reward": "Thanks for the follow, {0}! +{1}",
