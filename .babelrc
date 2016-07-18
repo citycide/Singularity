@@ -1,0 +1,6 @@
+{
+  "presets": ["electron", "stage-0"],
+  "plugins": ["transform-runtime", "lodash"],
+  "minified": false,
+  "comments": false
+}
