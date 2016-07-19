@@ -31,7 +31,7 @@ export default class Tock {
     }
     
     if (typeof fn !== 'function') {
-      throw new Error('Tock#setInterval :: second argument must be a function.)
+      throw new Error('Tock#setInterval :: second argument must be a function.')
     }
 
     if (this.intervals.has(uid)) this.clearInterval(uid)
