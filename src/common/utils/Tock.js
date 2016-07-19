@@ -1,14 +1,3 @@
-class _Warning extends Error {
-  constructor (message) {
-    super(message)
-    this.name = 'Tock Warning::'
-    Error.captureStackTrace(this, _Warning)
-  }
-}
-
-const argWarning = new _Warning('Wrong number of arguments.')
-const typeWarning = new _Warning('Second argument must be a function.')
-
 export default class Tock {
   constructor () {
     this.timers = new Map()
@@ -16,8 +5,13 @@ export default class Tock {
   }
 
   setTimeout (uid, fn, time, ...args) {
-    if (arguments.length < 3) return process.emitWarning(argWarning)
-    if (typeof fn !== 'function') return process.emitWarning(typeWarning)
+    if (arguments.length < 3) {
+      throw new Error('Tock#setTimeout :: wrong number of arguments.')
+    }
+    
+    if (typeof fn !== 'function') {
+      throw new Error('Tock#setTimeout :: second argument must be a function.)
+    }
 
     if (this.timers.has(uid)) this.clearTimeout(uid)
     const id = setTimeout(fn, time, ...args)
@@ -32,8 +26,13 @@ export default class Tock {
   }
 
   setInterval (uid, fn, interval, ...args) {
-    if (arguments.length < 3) return process.emitWarning(argWarning)
-    if (typeof fn !== 'function') return process.emitWarning(typeWarning)
+    if (arguments.length < 3) {
+      throw new Error('Tock#setInterval :: wrong number of arguments.')
+    }
+    
+    if (typeof fn !== 'function') {
+      throw new Error('Tock#setInterval :: second argument must be a function.)
+    }
 
     if (this.intervals.has(uid)) this.clearInterval(uid)
     const id = setInterval(fn, interval, ...args)
