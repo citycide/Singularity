@@ -10,7 +10,7 @@ export default class Tock {
     }
     
     if (typeof fn !== 'function') {
-      throw new Error('Tock#setTimeout :: second argument must be a function.)
+      throw new Error('Tock#setTimeout :: second argument must be a function.')
     }
 
     if (this.timers.has(uid)) this.clearTimeout(uid)
