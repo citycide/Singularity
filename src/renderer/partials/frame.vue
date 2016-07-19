@@ -28,14 +28,15 @@
       position: fixed;
       z-index: 95;
       top: 0;
-      width: 100%;
-      min-height: 25px;
+      left: 5px;
+      width: calc(100% - 10px);
+      min-height: 30px;
       -webkit-app-region: drag;
 
       .controls {
         float: right;
-        height: 25px;
-        padding: 3px 10px 0 0;
+        height: 30px;
+        padding-right: 10px;
 
         .control-win {
           float: left;
@@ -45,6 +46,7 @@
           padding: 0 5px 0 5px;
           min-width: 30px;
           max-width: 30px;
+          min-height: 20px;
           cursor: pointer;
           text-align: center;
           -webkit-app-region: no-drag;
@@ -54,21 +56,21 @@
           }
 
           &.refresh svg {
-            margin-top: 3px;
+            margin: 1px 0 0 3px;
           }
 
           &.minimize svg {
-            margin-top: 4px;
+            margin: 3px 0 0 3px;
           }
 
           &.maximize i {
-            margin-top: 2px;
+            margin-top: 1px;
             font-size: 18px;
           }
 
           &.close i {
-            margin-top: 2px;
-            font-size: 20px;
+            margin-top: 1px;
+            font-size: 18px;
           }
         }
       }

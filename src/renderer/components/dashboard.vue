@@ -1,6 +1,10 @@
 <style lang="scss">
-  .ui-collapsible-body {
+  .ui-collapsible-body#collapse-chat {
     padding: 0;
+  }
+
+  .ui-textbox-icon {
+    color: rgba(0, 0, 0, 0.75)
   }
 
   .ui-collapsible-header {
@@ -22,18 +26,30 @@
     <stats-bar></stats-bar>
     <div class="columns">
       <div class="column">
-        <ui-collapsible id="one" header="PLACEHOLDER ONE">
-          <div style="background-color: black; height: 300px;"></div>
+        <ui-collapsible id="one" header="STREAM INFO" :open="true" >
+          <ui-textbox
+            name="game" placeholder="No game set on Twitch"
+            icon="videogame_asset" :value="channel.game" hide-label
+            @blurred="" @keydown=""
+          ></ui-textbox>
+          <ui-textbox
+            name="status" placeholder="No status set on Twitch"
+            icon="label" :value="channel.status" hide-label
+            @blurred="" @keydown=""
+          ></ui-textbox>
         </ui-collapsible>
         <ui-collapsible id="two" header="PLACEHOLDER TWO">
-          <div style="background-color: black; height: 300px;"></div>
+          <div style="background-color: #202020; height: 300px;"></div>
+        </ui-collapsible>
+        <ui-collapsible id="three" header="STREAM PREVIEW">
+          <div style="background-color: #202020; height: 300px;"></div>
         </ui-collapsible>
       </div>
       <div class="column is-half">
         <ui-collapsible id="collapse-chat" header="TWITCH CHAT"
                         :open="true">
-          <iframe id="chat_embed" src="https://www.twitch.tv/citycide/chat"
-                   style="height: 675px; width: 100%;"
+          <iframe id="chat_embed" :src="chatSrc()"
+                  style="height: 675px; width: 100%;"
           ></iframe>
         </ui-collapsible>
       </div>
@@ -43,14 +59,25 @@
 
 <script>
   import statsBar from './dashboard/stats-bar'
-  import { UiCollapsible } from 'keen-ui'
+  import { UiCollapsible, UiTextbox } from 'keen-ui'
+  import { mapGetters } from 'vuex'
 
   export default {
     data () {
       return {}
     },
+
+    methods: {
+      chatSrc () {
+        return `https://www.twitch.tv/${this.channel.name}/chat`
+      }
+    },
+
+    computed: mapGetters(['channel']),
+
     components: {
       statsBar,
+      UiTextbox,
       UiCollapsible
     }
   }

@@ -40,7 +40,7 @@
     background-color: #353d47;
     z-index: 5;
     text-align: left;
-    top: 25px;
+    top: 30px;
     left: 5px;
     width: 60px;
     height: 100%;

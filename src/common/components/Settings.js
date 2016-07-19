@@ -1,5 +1,6 @@
 import jetpack from 'fs-jetpack'
 import { chmodSync } from 'fs'
+import { isPlainObject } from 'lodash'
 import initialSettings from './lib/_initialSettings'
 import createJSON from './lib/_jsonCreator'
 
@@ -21,9 +22,14 @@ class Settings {
   }
 
   get (key, defaultValue = null) {
+    if (!arguments.length) {
+      return this.data
+    }
+
     if (!this.coupled) {
       this._load()
     }
+
     return typeof this.data[key] === 'undefined' ? defaultValue : this.data[key]
   }
 
@@ -39,6 +45,13 @@ class Settings {
       delete this.data[key]
       this._save()
     }
+  }
+
+  replace (data) {
+    if (!isPlainObject(data)) return
+
+    this.data = data
+    this._save()
   }
 
   _load (retryCount = 5) {

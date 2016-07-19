@@ -24,7 +24,7 @@
     width: calc(100% - 70px);
     height: 60px;
     left: 65px;
-    top: 25px;
+    top: 30px;
     transition: 0.35s;
     transition-property: left, width;
 

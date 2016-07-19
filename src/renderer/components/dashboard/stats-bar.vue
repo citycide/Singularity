@@ -25,26 +25,26 @@
     <div class="level-item has-text-centered">
       <p class="heading follow-badge" v-el:follow>FOLLOWERS</p>
       <!--<ui-ripple-ink :trigger="$els.follow"></ui-ripple-ink>-->
-      <p class="title">10</p>
+      <p class="title">{{ channel.followers }}</p>
     </div>
     <div class="level-item has-text-centered">
       <p class="heading">VIEWS</p>
-      <p class="title">1,060</p>
+      <p class="title">{{ channel.views }}</p>
     </div>
-    <div class="level-item has-text-centered">
+    <div class="level-item has-text-centered" v-if="channel.partner">
       <p class="heading">SUBSCRIBERS</p>
       <p class="title">23</p>
     </div>
-    <div class="level-item has-text-centered">
+<!--    <div class="level-item has-text-centered">
       <p class="heading">SOMETHING ELSE</p>
       <p class="title">789</p>
-    </div>
+    </div>-->
   </div>
 </template>
 
 <script>
   import { UiRippleInk } from 'keen-ui'
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapActions } from 'vuex'
 
   export default {
     data () {
@@ -52,11 +52,12 @@
     },
 
     ready () {
-      // Vuex module for hitting the Twitch API
-      // this.getUserStats()
+      this.getChannelInfo()
     },
 
-    // computed: mapGetters(['getUserStats']),
+    computed: mapGetters(['channel']),
+
+    methods: mapActions(['getChannelInfo']),
 
     components: {
       UiRippleInk

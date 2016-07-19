@@ -1,4 +1,0 @@
-export default {
-  AUTHENTICATE: 'AUTHENTICATE',
-  LOGOUT: 'LOGOUT'
-}

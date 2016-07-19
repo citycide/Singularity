@@ -1,5 +1,6 @@
 import { remote } from 'electron'
 import url from 'url'
+import Vue from 'vue'
 import types from './types'
 
 import Settings from '../../../common/components/Settings'
@@ -7,21 +8,27 @@ import log from '../../../common/utils/logger'
 import transit from '../../components/js/transit'
 
 const settings = new Settings('app')
+const channelCache = new Settings('twitch')
+const api = {
+  KRAKEN: 'https://api.twitch.tv/kraken'
+}
 
 let authWindow = null
 
 const state = {
   authorized: !!settings.get('twitchToken'),
-  twitchToken: null
+  twitchToken: settings.get('twitchToken'),
+  channel: channelCache.get()
 }
 
 const getters = {
   authorized: state => state.authorized,
-  twitchToken: state => state.twitchToken
+  twitchToken: state => state.twitchToken,
+  channel: state => state.channel
 }
 
 const actions = {
-  authenticate ({ commit }) {
+  authenticate ({ commit, dispatch }) {
     if (authWindow) authWindow.close()
 
     const mainWindow = remote.getGlobal('mainAppWindow')
@@ -73,6 +80,8 @@ const actions = {
         e.preventDefault()
         const token = parsedURL.hash.slice(14, 44)
 
+        dispatch('getChannelInfo')
+
         transit.fire('auth:twitch', token)
         commit(types.AUTHENTICATE, token)
         authWindow.close()
@@ -96,6 +105,16 @@ const actions = {
   logout ({ commit }) {
     settings.del('twitchToken')
     commit(types.LOGOUT)
+  },
+
+  async getChannelInfo ({ commit }) {
+    if (!state.channel.name) return
+
+    const res = await Vue.http.get(`${api.KRAKEN}/channels/${state.channel.name}`, {
+      params: { 'client_id': settings.get('clientID') }
+    })
+
+    if (res.ok && 'data' in res) commit(types.SET_CHANNEL_INFO, res.data)
   }
 }
 
@@ -105,9 +124,13 @@ const mutations = {
     state.twitchToken = token
   },
   [types.LOGOUT] (state) {
-    console.log(state)
     state.authorized = false
     state.twitchToken = null
+  },
+
+  [types.SET_CHANNEL_INFO] (state, payload) {
+    state.channel = payload
+    channelCache.replace(payload)
   }
 }
 
