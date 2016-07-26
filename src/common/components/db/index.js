@@ -147,7 +147,10 @@ const data = {
   },
   async getRecentFollows () {
     const CUTOFF = moment().subtract(60, 'days').valueOf()
-    const response = await db.select('followers', '*', ['timestamp', '>', CUTOFF], ['timestamp', 'desc'])
+    const response = await db.select( 'followers', '*',
+      ['timestamp', '>', CUTOFF],
+      { order: ['timestamp', 'desc'] }
+    )
 
     for (let follow of response) {
       follow.age = moment(follow.timestamp, 'x').fromNow()
@@ -156,7 +159,9 @@ const data = {
     return response
   },
   async getFollows () {
-    const response = await db.select('followers', '*', null, ['timestamp', 'desc'])
+    const response = await db.select('followers', '*', null,
+      { order: ['timestamp', 'desc'] }
+    )
 
     for (let follow of response) {
       follow.age = moment(follow.timestamp, 'x').fromNow(' ')
@@ -167,7 +172,9 @@ const data = {
 
   /**
    * @TODO make this actually pull & combine the different types of events
+   * It also needs to be updated to use the Trilogy module, not raw queries
    */
+  /*
   dbGetEvents () {
     const CUTOFF = moment().subtract(60, 'days').valueOf()
     let followers =
@@ -183,6 +190,7 @@ const data = {
     })
     return events
   }
+  */
 }
 
 /**
