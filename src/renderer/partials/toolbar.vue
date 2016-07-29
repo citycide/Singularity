@@ -50,8 +50,8 @@
         menu: [
           { id: 'profile', text: 'Profile', icon: 'launch' },
           { id: 'channel', text: 'Channel', icon: 'launch' },
-          { type: 'divider' },
           { id: 'logout', text: 'Logout', icon: 'exit_to_app' },
+          { type: 'divider' },
           { id: 'settings', text: 'Settings', icon: 'settings' },
           { id: 'HELP', text: 'Help', icon: 'help' }
         ],
@@ -79,8 +79,13 @@
             )
             break
           case 'logout':
+            this.$store.subscribe(({ type }, state) => {
+              if (type === 'LOGOUT' && !state.user.authorized) {
+                this.$router.go('login')
+              }
+            })
+
             this.logout()
-            this.$router.go('login')
             break
           case 'settings':
             break
