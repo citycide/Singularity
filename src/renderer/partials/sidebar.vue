@@ -8,9 +8,10 @@
     </div>
     <ul class="sidebar-items">
       <li v-for="item in menuItems">
-        <a class="sidebar-item" v-link="{ name: item.link }"
-           @click="toggle(item, $event)"
-           :aria-expanded="isExpanded(item) ? 'true' : 'false'"
+        <a
+          class="sidebar-item" v-link="{ name: item.link }"
+          :aria-expanded="isExpanded(item) ? 'true' : 'false'"
+          @click="toggle(item, $event)"
         >
           <icon class="sidebar-item-icon" :name="item.icon" scale="1.5"></icon>
           <span class="sidebar-item-label is-unselectable">{{ item.label }}</span>
@@ -18,8 +19,9 @@
             <icon name="angle-down"></icon>
           </span>
         </a>
-        <ul v-show="isReady && item.expanded" :class="{ collapse: item.subMenu }"
-            @click="autoClose" transition="menu-expand"
+        <ul
+          v-show="isReady && item.expanded" :class="{ collapse: item.subMenu }"
+          @click="autoClose" transition="menu-expand"
         >
           <li v-for="subItem in item.subMenu">
             <a class="is-unselectable" v-link="{ name: 'sub' }">
