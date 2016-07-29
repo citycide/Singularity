@@ -6,6 +6,7 @@ import Router from 'vue-router'
 import App from './App'
 import routes from './routes'
 import store from './vuex/store'
+import './components/js/context'
 
 Vue.use(Electron)
 Vue.use(Resource)
