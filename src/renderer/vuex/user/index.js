@@ -1,14 +1,14 @@
 import { remote } from 'electron'
+import Levers from 'levers'
 import url from 'url'
 import Vue from 'vue'
 import types from './types'
 
-import Settings from '../../../common/components/Settings'
 import log from '../../../common/utils/logger'
 import transit from '../../components/js/transit'
 
-const settings = new Settings('app')
-const channelCache = new Settings('twitch')
+const settings = new Levers('app')
+const cache = new Levers('twitch')
 const api = {
   KRAKEN: 'https://api.twitch.tv/kraken'
 }
@@ -18,7 +18,7 @@ let authWindow = null
 const state = {
   authorized: !!settings.get('twitchToken'),
   twitchToken: settings.get('twitchToken'),
-  channel: channelCache.get()
+  channel: cache.data
 }
 
 const getters = {
@@ -28,7 +28,7 @@ const getters = {
 }
 
 const actions = {
-  authenticate ({ commit, dispatch }) {
+  authenticate ({ commit }) {
     if (authWindow) authWindow.close()
 
     const mainWindow = remote.getGlobal('mainAppWindow')
@@ -56,7 +56,7 @@ const actions = {
     authWindow.once('ready-to-show', () => authWindow.show())
     authWindow.once('closed', () => { authWindow = null })
 
-    authWindow.webContents.on('will-navigate', (e, u) => {
+    authWindow.webContents.on('will-navigate', async (e, u) => {
       const parsedURL = url.parse(u, true)
       const hn = parsedURL.hostname
 
@@ -78,13 +78,21 @@ const actions = {
 
       if (parsedURL.hash && parsedURL.hash.startsWith('#access_token=')) {
         e.preventDefault()
+
         const token = parsedURL.hash.slice(14, 44)
+        const res = await Vue.http.get(`${api.KRAKEN}?oauth_token=${token}&client_id=${settings.get('clientID')}`)
 
-        dispatch('getChannelInfo')
-
-        transit.fire('auth:twitch', token)
-        commit(types.AUTHENTICATE, token)
         authWindow.close()
+
+        if (res.data.token.valid) {
+          state.channel.name = res.data.token.user_name
+
+          transit.fire('auth:twitch', token)
+          commit(types.AUTHENTICATE, token)
+        } else {
+          // TODO: show an error in the UI
+          log.error(`Invalid Twitch registration`)
+        }
       } else {
         e.preventDefault()
 
@@ -104,15 +112,18 @@ const actions = {
   },
   logout ({ commit }) {
     settings.del('twitchToken')
+    cache.clear()
     commit(types.LOGOUT)
   },
 
   async getChannelInfo ({ commit }) {
-    if (!state.channel.name) return
+    if (!state.authorized || !state.channel.name) return
 
     const res = await Vue.http.get(`${api.KRAKEN}/channels/${state.channel.name}`, {
       params: { 'client_id': settings.get('clientID') }
     })
+
+    cache.data = res.data
 
     if (res.ok && 'data' in res) commit(types.SET_CHANNEL_INFO, res.data)
   }
@@ -126,11 +137,11 @@ const mutations = {
   [types.LOGOUT] (state) {
     state.authorized = false
     state.twitchToken = null
+    state.channel = {}
   },
 
   [types.SET_CHANNEL_INFO] (state, payload) {
     state.channel = payload
-    channelCache.replace(payload)
   }
 }
 

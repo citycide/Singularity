@@ -1,14 +1,14 @@
 import { app, BrowserWindow, screen } from 'electron'
 import { argv } from 'yargs'
+import Levers from 'levers'
 import path from 'path'
 
 import { initDB } from '../common/components/db'
-import Settings from '../common/components/Settings'
 import wm from './components/WindowManager'
 import log from '../common/utils/logger'
+import { initServices } from './services'
+import defaults from './utils/initialSettings'
 
-const window = new Settings('window')
-const settings = new Settings('app')
 const cfg = {
   DEV: argv.development || argv.dev,
   devtools: argv.devtools,
@@ -16,8 +16,12 @@ const cfg = {
   vue: argv.vue
 }
 
-let mainWindow
+if (cfg.DEV) fixAppPaths()
 
+const windows = new Levers('window')
+const settings = new Levers('app', { defaults })
+
+let mainWindow
 function createWindow () {
   const obj = Object.assign({}, wm.windowDefaults, { frame: !cfg.DEV })
 
@@ -27,7 +31,7 @@ function createWindow () {
   require('./components/lib/_persistAppState')
   require('./handlers')
 
-  const position = window.get('position')
+  const position = windows.get('position')
   let inBounds = false
   if (position) {
     screen.getAllDisplays().forEach(display => {
@@ -40,7 +44,7 @@ function createWindow () {
     })
   }
 
-  let size = window.get('size')
+  let size = windows.get('size')
   size = size || [1200, 800]
 
   mainWindow.setSize(...size)
@@ -50,7 +54,7 @@ function createWindow () {
     mainWindow.center()
   }
 
-  if (window.get('maximized', false)) {
+  if (windows.get('maximized', false)) {
     mainWindow.maximize()
   }
 
@@ -92,6 +96,8 @@ function createWindow () {
     LOCATION: settings.get('databaseLocation', 'home')
   })
 
+  initServices()
+
   app.on('ready', createWindow)
 
   app.on('window-all-closed', () => {
@@ -110,3 +116,10 @@ function createWindow () {
     log.info('Collapsing the singularity...')
   })
 }())
+
+function fixAppPaths () {
+  app.setName('singularity')
+
+  const appData = app.getPath('appData')
+  app.setPath('userData', path.join(appData, 'singularity'))
+}

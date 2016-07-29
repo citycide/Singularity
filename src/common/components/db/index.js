@@ -1,29 +1,19 @@
 import { app } from 'electron'
 import jetpack from 'fs-jetpack'
 import Promise from 'bluebird'
+import Trilogy from 'trilogy'
 import moment from 'moment'
+import Levers from 'levers'
 import path from 'path'
 import _ from 'lodash'
 
-import Settings from '../Settings'
-import Trilogy from 'trilogy'
 import log from '../../utils/logger'
 import { str, val } from '../../utils/helpers'
 
-const settings = new Settings('app')
+const settings = new Levers('app')
 
 let db = null
 let botDB
-
-const trilogyErrHandler = function (err) {
-  if (!err) return
-
-  if (err.message.startsWith('UNIQUE constraint')) {
-    log.absurd(err.message)
-  } else {
-    log.error(err.stack)
-  }
-}
 
 /**
  * Collection of api methods for main database functions
@@ -147,7 +137,7 @@ const data = {
   },
   async getRecentFollows () {
     const CUTOFF = moment().subtract(60, 'days').valueOf()
-    const response = await db.select( 'followers', '*',
+    const response = await db.select('followers', '*',
       ['timestamp', '>', CUTOFF],
       { order: ['timestamp', 'desc'] }
     )
@@ -168,7 +158,7 @@ const data = {
     }
 
     return response
-  },
+  }
 
   /**
    * @TODO make this actually pull & combine the different types of events
@@ -453,6 +443,16 @@ function _initTables () {
       'amount', 'message'
     ])
   ])
+}
+
+function trilogyErrHandler (err) {
+  if (!err) return
+
+  if (err.message.startsWith('UNIQUE constraint')) {
+    log.absurd(err.message)
+  } else {
+    log.error(err.stack)
+  }
 }
 
 export { data as default, initDB }

@@ -1,14 +1,15 @@
 import jetpack from 'fs-jetpack'
 import moment from 'moment'
+import Levers from 'levers'
 import tmi from 'tmi.js'
 
 import transit from '../../components/transit'
-import Settings from '../../../common/components/Settings'
-import Tock from '../../../common/utils/Tock'
 import db from '../../../common/components/db'
 import log from '../../../common/utils/logger'
+import Tock from '../../../common/utils/Tock'
 
-const settings = new Settings('app')
+const settings = new Levers('app')
+const channel = new Levers('twitch')
 const tick = new Tock()
 
 export default class TwitchClass {
@@ -18,9 +19,9 @@ export default class TwitchClass {
     this.alertQueue = []
 
     this.CHANNEL = {
-      name: settings.get('channel'),
-      id: settings.get('channelID'),
-      token: settings.get('accessToken')
+      name: channel.get('name'),
+      id: channel.get('_id'),
+      token: settings.get('twitchToken')
     }
     this.CLIENT_ID = settings.get('clientID')
 
@@ -49,6 +50,7 @@ export default class TwitchClass {
   initAPI (pollInterval = 30 * 1000) {
     setTimeout(() => {
       log.info('Initializing Twitch API')
+
       this.chatConnect()
       this.pollFollowers()
       tick.setInterval('pollFollowers', ::this.pollFollowers, pollInterval)
@@ -61,11 +63,13 @@ export default class TwitchClass {
     if (this.CHANNEL.name && this.CHANNEL.token) {
       // eslint-disable-next-line
       this.client = new tmi.client(this.TMI_OPTIONS)
-      this.client.connect()
+
       this.client.on('connected', (address, port) => {
         log.info(`Listening for Twitch events at ${address}:${port}`)
         this.clientHandler()
       })
+
+      this.client.connect()
     }
   }
 
@@ -83,7 +87,10 @@ export default class TwitchClass {
             },
             type: 'host'
           }
-          db.addHost(thisHost.user._id, thisHost.user.display_name, moment().valueOf(), thisHost.user.viewers)
+
+          db.addHost(
+            thisHost.user._id, thisHost.user.display_name, moment().valueOf(), thisHost.user.viewers
+          )
         } else {
           thisHost = {
             user: {
@@ -92,6 +99,7 @@ export default class TwitchClass {
             },
             type: 'host'
           }
+
           db.addHost(null, thisHost.user.display_name, moment().valueOf(), thisHost.user.viewers)
         }
 
@@ -100,10 +108,10 @@ export default class TwitchClass {
     })
 
     this.client.on('subscription', (channel, username) => {
-      let thisSub
+      let sub
       this.resolveUser(username, userObj => {
         if (userObj.resolved) {
-          thisSub = {
+          sub = {
             user: {
               _id: userObj.user._id,
               display_name: userObj.user.display_name,
@@ -111,25 +119,28 @@ export default class TwitchClass {
             },
             type: 'subscriber'
           }
-          db.addSubscriber(thisSub.user._id, thisSub.user.display_name, moment().valueOf(), null)
+
+          db.addSubscriber(sub.user._id, sub.user.display_name, moment().valueOf(), null)
         } else {
-          thisSub = {
+          sub = {
             user: {
               display_name: userObj.user.display_name
             },
             type: 'subscriber'
           }
-          db.addSubscriber(null, thisSub.user.display_name, moment().valueOf(), null)
+
+          db.addSubscriber(null, sub.user.display_name, moment().valueOf(), null)
         }
-        this.alertQueue.push(thisSub)
+
+        this.alertQueue.push(sub)
       })
     })
 
     this.client.on('subanniversary', (channel, username, months) => {
-      let thisResub
+      let resub
       this.resolveUser(username, userObj => {
         if (userObj.resolved) {
-          thisResub = {
+          resub = {
             user: {
               _id: userObj.user._id,
               display_name: userObj.user.display_name,
@@ -138,19 +149,23 @@ export default class TwitchClass {
             },
             type: 'subscriber'
           }
-          db.addSubscriber(thisResub.user._id, thisResub.user.display_name, moment()
-          .valueOf(), thisResub.user.months)
+
+          db.addSubscriber(
+            resub.user._id, resub.user.display_name, moment().valueOf(), resub.user.months
+          )
         } else {
-          thisResub = {
+          resub = {
             user: {
               display_name: userObj.user.display_name,
               months
             },
             type: 'subscriber'
           }
-          db.addSubscriber(null, thisResub.user.display_name, moment().valueOf(), thisResub.user.months)
+
+          db.addSubscriber(null, resub.user.display_name, moment().valueOf(), resub.user.months)
         }
-        this.alertQueue.push(thisResub)
+
+        this.alertQueue.push(resub)
       })
     })
   }
@@ -176,6 +191,7 @@ export default class TwitchClass {
             type: 'follower'
           }
         }
+
         this.alertQueue.push(thisTest)
         this.checkQueue()
       })
@@ -202,6 +218,7 @@ export default class TwitchClass {
             type: 'host'
           }
         }
+
         this.alertQueue.push(thisTest)
         this.checkQueue()
       })
@@ -216,6 +233,7 @@ export default class TwitchClass {
         },
         type: 'tip'
       }
+
       this.alertQueue.push(thisTest)
       this.checkQueue()
     })
@@ -254,9 +272,10 @@ TwitchClass.prototype.pollFollowers = function () {
     if (body.follows.length > 0) {
       if (this.followers.length === 0) {
         body.follows.reverse().map(follower => {
-          if (this.followers.indexOf(follower.user.display_name) === -1) {
+          if (!this.followers.includes(follower.user.display_name)) {
             this.followers.push(follower.user.display_name)
           }
+
           let s = {
             id: follower.user._id,
             name: follower.user.display_name,
@@ -264,15 +283,16 @@ TwitchClass.prototype.pollFollowers = function () {
             ev: 'follower',
             ntf: follower.notifications
           }
+
           db.addFollower(s.id, s.name, s.ts, s.ntf.toString())
         })
-        this.writeFollower(this.followers[this.followers.length - 1])
 
-        emitFollowers({ recent: true, all: true })
+        this.writeFollower(this.followers[this.followers.length - 1])
       } else {
         body.follows.reverse().map(follower => {
-          if (this.followers.indexOf(follower.user.display_name) === -1) {
+          if (!this.followers.includes(follower.user.display_name)) {
             this.followers.push(follower.user.display_name)
+
             let queueFollower = {
               user: {
                 _id: follower.user._id,
@@ -283,7 +303,9 @@ TwitchClass.prototype.pollFollowers = function () {
               },
               type: 'follower'
             }
+
             this.alertQueue.push(queueFollower)
+
             let s = {
               id: follower.user._id,
               name: follower.user.display_name,
@@ -291,6 +313,7 @@ TwitchClass.prototype.pollFollowers = function () {
               ev: 'follower',
               ntf: follower.notifications
             }
+
             db.addFollower(s.id, s.name, s.ts, s.ntf.toString())
             this.writeFollower(s.name)
           }
@@ -320,12 +343,15 @@ TwitchClass.prototype.checkQueue = function (attempts = 0) {
       this.alertInProgress = false
       this.checkQueue()
     }
+
     return
   }
+
   if (!this.alertQueue.length) {
     tick.setTimeout('checkQueue', ::this.checkQueue, 5 * 1000)
     return
   }
+
   let queueItem = this.alertQueue.pop()
   this.actOnQueue(queueItem.user, queueItem.type)
   tick.setTimeout('checkQueue', ::this.checkQueue, 5 * 1000)
@@ -333,6 +359,7 @@ TwitchClass.prototype.checkQueue = function (attempts = 0) {
 
 TwitchClass.prototype.actOnQueue = function (data, type) {
   log.trace('Pushing queue item...')
+
   this.alertInProgress = true
   switch (type) {
     case 'follower':
@@ -384,6 +411,7 @@ TwitchClass.prototype.resolveUser = function (username, callback) {
           display_name: username
         }
       }
+
       callback(unresolvedUser)
       return
     }
@@ -399,18 +427,4 @@ TwitchClass.prototype.resolveUser = function (username, callback) {
 
     callback(resolvedUser)
   })
-}
-
-const emitFollowers = function (opts = {}) {
-  if (opts.recent) {
-    setTimeout(() => {
-      transit.fire('data:res:recentFollowers', db.getRecentFollows())
-    }, 3 * 1000)
-  }
-
-  if (opts.all) {
-    setTimeout(() => {
-      transit.fire('data:res:followers', db.getFollows())
-    }, 3 * 1000)
-  }
 }

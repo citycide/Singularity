@@ -1,7 +1,7 @@
+import Levers from 'levers'
 import wm from '../WindowManager'
-import Settings from '../../../common/components/Settings'
 
-const settings = new Settings('window')
+const settings = new Levers('window')
 const mainWindows = wm.getAll('main')
 const mainWindow = mainWindows[0]
 

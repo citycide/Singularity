@@ -1,8 +1,8 @@
 import { screen } from 'electron'
+import Levers from 'levers'
 // import path from 'path'
-import Settings from '../../../common/components/Settings'
 
-const windowStorage = new Settings('window', { useDefaults: false })
+const windowStorage = new Levers('window')
 
 export default function () {
   const screenSize = screen.getPrimaryDisplay().workAreaSize
