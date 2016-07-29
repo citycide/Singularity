@@ -2,6 +2,8 @@
   #bg-container {
     background-color: #202020;
     position: fixed;
+    width: 100%;
+    height: 100%;
     margin: 0;
     padding: 0;
   }
@@ -34,6 +36,7 @@
     <div id="bg-container">
       <canvas id="star-canvas" width="100%" height="100%"></canvas>
     </div>
+    <div class="bg-curtain" :style="curtain"></div>
     <div class="hero">
       <div class="hero-body">
         <div class="container has-text-centered">
@@ -48,12 +51,22 @@
 </template>
 
 <script>
+  import gsap from 'gsap'
   import { UiButton } from 'keen-ui'
   import { mapGetters, mapActions } from 'vuex'
 
   export default {
     data () {
-      return {}
+      return {
+        curtain: {
+          position: 'fixed',
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#202020',
+          transition: 'opacity .5s',
+          opacity: 1
+        }
+      }
     },
 
     ready () {
@@ -63,8 +76,10 @@
         }
       })
 
-      require('gsap')
-      require('./js/constellation')
+      setTimeout(() => {
+        require('./js/constellation')
+        this.curtain.opacity = 0
+      }, 500)
     },
 
     computed: mapGetters(['authorized']),
