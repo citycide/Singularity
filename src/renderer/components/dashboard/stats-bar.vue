@@ -35,10 +35,6 @@
       <p class="heading">SUBSCRIBERS</p>
       <p class="title">23</p>
     </div>
-<!--    <div class="level-item has-text-centered">
-      <p class="heading">SOMETHING ELSE</p>
-      <p class="title">789</p>
-    </div>-->
   </div>
 </template>
 

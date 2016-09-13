@@ -9,7 +9,7 @@
     <ul class="sidebar-items">
       <li v-for="item in menuItems">
         <a
-          class="sidebar-item" v-link="{ name: item.link }"
+          class="sidebar-item" v-link="{ name: item.link, exact: true }"
           :aria-expanded="isExpanded(item) ? 'true' : 'false'"
           @click="toggle(item, $event)"
         >

@@ -1,11 +1,12 @@
 <template>
   <nav class="toolbar is-unselectable" :class="{ 'sidebar-open': this.sidebarOpen }">
-    <ui-toolbar type="colored" text-color="white" @nav-icon-clicked="sidebarToggle"
-                :nav-icon="this.sidebarOpen ? 'arrow_back' : 'menu'"
+    <ui-toolbar
+      type="colored" text-color="white" @nav-icon-clicked="sidebarToggle"
+      :nav-icon="this.sidebarOpen ? 'arrow_back' : 'menu'"
     >
       <div slot="actions">
         <ui-icon-button
-          type="clear" color="white" icon="star_border"
+          type="clear" color="white" :icon="notificationIcon"
         ></ui-icon-button>
 
         <ui-icon-button
@@ -28,6 +29,14 @@
     transition: 0.35s;
     transition-property: left, width;
 
+    .ui-toolbar {
+      -webkit-app-region: drag;
+
+      &-left, &-right, &-center {
+        -webkit-app-region: no-drag;
+      }
+    }
+
     .ui-toolbar-colored {
       background-color: #039BE5;
       height: 60px;
@@ -37,6 +46,12 @@
       width: calc(100% - 260px);
       left: 255px;
     }
+  }
+
+  .help {
+    display: initial;
+    font-size: initial;
+    margin-top: initial;
   }
 </style>
 
@@ -53,15 +68,20 @@
           { id: 'logout', text: 'Logout', icon: 'exit_to_app' },
           { type: 'divider' },
           { id: 'settings', text: 'Settings', icon: 'settings' },
-          { id: 'HELP', text: 'Help', icon: 'help' }
-        ],
-        user: {
-          channel: 'citycide'
-        }
+          { id: 'about', text: 'About', icon: 'info' },
+          { id: 'help', text: 'Help', icon: 'help' }
+        ]
       }
     },
 
-    computed: mapGetters(['sidebarOpen']),
+    computed: {
+      ...mapGetters(['sidebarOpen', 'channel']),
+
+      notificationIcon () {
+        // eventually changes based on notification count / settings
+        return 'notifications_none'
+      }
+    },
 
     methods: {
       ...mapActions(['sidebarToggle', 'logout']),
@@ -70,12 +90,12 @@
         switch (event.id) {
           case 'profile':
             this.$electron.remote.shell.openExternal(
-              `https://www.twitch.tv/${this.user.channel}`
+              `https://www.twitch.tv/${this.channel.name}/profile`
             )
             break
           case 'channel':
             this.$electron.remote.shell.openExternal(
-              `https://www.twitch.tv/${this.user.channel}/channel`
+              `https://www.twitch.tv/${this.channel.name}`
             )
             break
           case 'logout':
@@ -88,6 +108,7 @@
             this.logout()
             break
           case 'settings':
+            this.$router.go('settings')
             break
           case 'help':
             break

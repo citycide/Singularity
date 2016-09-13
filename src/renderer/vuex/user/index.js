@@ -16,14 +16,14 @@ const api = {
 let authWindow = null
 
 const state = {
-  authorized: !!settings.get('twitchToken'),
-  twitchToken: settings.get('twitchToken'),
+  authorized: !!settings.get('twitch.token'),
+  twitchToken: settings.get('twitch.token'),
   channel: cache.data
 }
 
 const getters = {
   authorized: state => state.authorized,
-  twitchToken: state => state.twitchToken,
+  twitchToken: state => state.twitch.token,
   channel: state => state.channel
 }
 

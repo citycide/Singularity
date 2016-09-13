@@ -15,6 +15,7 @@
 
 <script>
   import transit from '../js/transit'
+  import db, { initDB } from '../../../common/components/db'
 
   export default {
     data () {
@@ -23,8 +24,10 @@
       }
     },
 
-    init () {
-      transit.on('data:res:recentFollowers', data => {
+    async init () {
+      await initDB({ DEV: true })
+
+      db.getRecentFollows().then(data => {
         if (!this.followers.length && Array.isArray(data) && data.length) {
           for (let item of data) {
             this.followers.push(item);

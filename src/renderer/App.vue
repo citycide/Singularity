@@ -13,7 +13,7 @@
   .view-container {
     overflow: auto;
     margin-top: 30px;
-    margin-left: calc(60px + 5px);
+    margin-left: 65px;
     padding: 15px;
     height: calc(100% - 95px);
     width: calc(100% - 70px);
@@ -24,6 +24,13 @@
     margin-left: 5px;
     height: calc(100% - 30px);
     width: calc(100% - 5px);
+  }
+
+  .setup-container {
+    height: calc(100% - 30px);
+    width: calc(100% - 10px);
+    margin-top: 25px;
+    margin-left: 5px;
   }
 </style>
 
@@ -38,14 +45,13 @@
 </style>
 
 <template>
-  <div class="app-container" v-if="authState === 0">
-    <h2>WE NEED SETUP YO</h2>
-  </div>
-  <div class="app-container" v-if="authState === 1">
+  <div class="app-container">
     <window-frame></window-frame>
-    <toolbar></toolbar>
-    <sidebar></sidebar>
-    <div class="view-container is-fluid">
+    <toolbar v-if="showBars"></toolbar>
+    <sidebar v-if="showBars"></sidebar>
+    <div
+      v-if="authState > 0"
+      :class="['view-container', 'is-fluid', { 'frameless': isFrameless }]">
       <router-view
         class="animated"
         transition="fade"
@@ -53,16 +59,9 @@
         keep-alive
       ></router-view>
     </div>
-  </div>
-  <div class="app-container" v-if="authState === 2">
-    <window-frame></window-frame>
-    <div class="view-container is-fluid frameless">
-      <router-view
-        class="animated"
-        transition="fade"
-        transition-mode="out-in"
-        keep-alive
-      ></router-view>
+    <div v-if="authState === 0" class="setup-container">
+      <h2>WE NEED SETUP YO</h2>
+      <!-- this will be the initial setup / onboarding flow -->
     </div>
   </div>
 </template>
@@ -86,8 +85,16 @@
       ...mapGetters(['authorized', 'setupComplete']),
 
       authState () {
-//        if (!this.setupComplete) return 0
+        // if (!this.setupComplete) return 0
         return (this.authorized) ? 1 : 2
+      },
+
+      showBars () {
+        return this.authState === 1
+      },
+
+      isFrameless () {
+        return this.authState === 2
       }
     },
 
