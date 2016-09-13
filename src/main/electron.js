@@ -16,10 +16,10 @@ const cfg = {
   vue: argv.vue
 }
 
-if (cfg.DEV) fixAppPaths()
-
 const windows = new Levers('window')
 const settings = new Levers('app', { defaults })
+
+if (cfg.DEV) fixAppPaths()
 
 let mainWindow
 function createWindow () {

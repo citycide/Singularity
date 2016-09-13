@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import _ from 'lodash'
-import wm from '../components/WindowManager'
+import wm from 'main/components/WindowManager'
 
 class Emitter {
   on (channel, fn) {
