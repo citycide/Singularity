@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import ui from './interface'
 import user from './user'
+import meta from './meta'
 import services from './services'
 
 Vue.use(Vuex)
@@ -14,6 +15,7 @@ export default new Vuex.Store({
   modules: {
     ui,
     user,
+    meta,
     services
   }
 })
