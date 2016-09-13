@@ -28,6 +28,7 @@ module.exports = {
     'babel/func-params-comma-dangle': 1
   },
   globals: {
-    include: false
+    $: true,
+    weave: false
   }
 }

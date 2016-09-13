@@ -6,6 +6,7 @@ import * as twitchAlerts from './TwitchAlerts'
 import * as tipeeeStream from './TipeeeStream'
 import * as streamtip from './Streamtip'
 import * as server from './server'
+import * as bot from './bot'
 
 const settings = new Levers('app')
 const channel = new Levers('twitch')
@@ -17,6 +18,7 @@ function initServices () {
 
   instances.set('twitch', initTwitch())
   instances.set('server', initServer())
+  instances.set('bot', bot.start())
 
   instances.set('twitchAlerts', twitchAlerts.start())
   instances.set('streamtip', streamtip.start())
