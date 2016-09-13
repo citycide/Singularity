@@ -1,7 +1,7 @@
 {
   "name": "singularity",
   "productName": "singularity",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "Twitch overlay, alerts, & bot platform",
   "author": "citycide <thecitycide@gmail.com>",
   "main": "build/main/electron.js",
