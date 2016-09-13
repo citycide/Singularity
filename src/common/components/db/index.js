@@ -1,5 +1,4 @@
-import { app } from 'electron'
-import jetpack from 'fs-jetpack'
+import { app as local, remote } from 'electron'
 import Promise from 'bluebird'
 import Trilogy from 'trilogy'
 import moment from 'moment'
@@ -7,13 +6,15 @@ import Levers from 'levers'
 import path from 'path'
 import _ from 'lodash'
 
-import log from '../../utils/logger'
-import { str, val } from '../../utils/helpers'
+import log from 'common/utils/logger'
+import { str, val } from 'common/utils/helpers'
 
 const settings = new Levers('app')
 
 let db = null
 let botDB
+
+const app = local || remote.app
 
 /**
  * Collection of api methods for main database functions
@@ -24,27 +25,18 @@ const data = {
    * Creates or accesses bot.db when bot is enabled
    * @returns {Promise}
    */
-  initBotDB () {
-    botDB = new Trilogy(path.resolve(__dirname, '..', 'db', 'bot.db'), {
-      debug: true,
-      errorListener: trilogyErrHandler
+  async initBotDB () {
+    const dbPath = settings.get('databaseLocation', path.resolve(app.getAppPath(), 'db'))
+    botDB = new Trilogy(path.resolve(dbPath, 'bot.db'), {
+      // errorListener: trilogyErrHandler
     })
 
-    return Promise.resolve(botDB)
+    return botDB
   },
 
   async addTable (name, args, bot = false, options = {}) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        if (!bot) {
-          return resolve(await db.createTable(name, args, options))
-        } else {
-          return resolve(await botDB.createTable(name, args, options))
-        }
-      } catch (e) {
-        return reject(e)
-      }
-    })
+    const target = bot ? botDB : db
+    return target.createTable(name, args, options)
   },
 
   /**
@@ -189,11 +181,13 @@ const data = {
  */
 data.bot = {
   async initSettings () {
-    await this.settings.confirm('prefix', '!')
-    await this.settings.confirm('defaultCooldown', '30')
-    await this.settings.confirm('whisperMode', 'false')
-    await this.settings.confirm('globalCooldown', 'false')
-    await this.settings.confirm('responseMention', 'false')
+    return Promise.all([
+      this.settings.confirm('prefix', '!'),
+      this.settings.confirm('defaultCooldown', '30'),
+      this.settings.confirm('whisperMode', 'false'),
+      this.settings.confirm('globalCooldown', 'false'),
+      this.settings.confirm('responseMention', 'false')
+    ])
   },
 
   settings: {
@@ -201,25 +195,25 @@ data.bot = {
       let response = await botDB.getValue('settings', 'value', { key })
 
       if (_.isNil(response)) {
-        if (_.isNil(defaultValue)) return Promise.resolve()
+        if (_.isNil(defaultValue)) return
 
         await this.set(key, defaultValue)
-        return Promise.resolve(defaultValue)
+        return defaultValue
       }
 
       if (str.isBoolean(response)) response = (response === 'true')
       if (str.isNumeric(response)) response = val.toNumber(response)
 
-      return Promise.resolve(response)
+      return response
     },
     async set (key, value) {
       await botDB.insert('settings', { key, value }, { conflict: 'replace' })
-      return Promise.resolve(await this.get(key))
+      return this.get(key)
     },
     async confirm (key, value) {
       // Only sets the value if the key does not exist
       await botDB.insert('settings', { key, value }, { conflict: 'ignore' })
-      return Promise.resolve(await this.get(key))
+      return this.get(key)
     }
   },
 
@@ -230,17 +224,17 @@ data.bot = {
       let response = await botDB.getValue(table, what, where)
 
       if (_.isNil(response)) {
-        if (_.isNil(defaultValue)) return Promise.resolve()
+        if (_.isNil(defaultValue)) return
 
         const obj = { [what]: defaultValue }
 
-        return Promise.resolve(await this.set(table, obj, where))
+        return this.set(table, obj, where)
       }
 
       if (str.isBoolean(response)) response = (response === 'true')
       if (str.isNumeric(response)) response = val.toNumber(response)
 
-      return Promise.resolve(response)
+      return response
     },
     async set (table, what, where, options = {}) {
       const whatWhere = Object.assign({}, what, where)
@@ -250,19 +244,19 @@ data.bot = {
         await botDB.insert(table, whatWhere, options)
       } catch (e) {
         if (e.message.startsWith('UNIQUE constraint')) {
-          if (obj.conflict !== 'abort') return Promise.reject(e)
+          if (obj.conflict !== 'abort') throw e
           await botDB.update(table, what, where)
         }
       }
 
       if (Object.keys(what).length === 1) {
-        return Promise.resolve(await this.get(table, Object.keys(what)[0], where))
+        return this.get(table, Object.keys(what)[0], where)
       } else {
-        return Promise.resolve(await this.getRow(table, whatWhere))
+        return this.getRow(table, whatWhere)
       }
     },
     async del (table, where) {
-      return Promise.resolve(await botDB.del(table, where))
+      return botDB.del(table, where)
     },
     async confirm (table, what, where) {
       const whatWhere = Object.assign({}, what, where)
@@ -270,65 +264,72 @@ data.bot = {
 
       await botDB.insert(table, whatWhere, obj)
 
-      return Promise.resolve(await this.get(table, what, where))
+      return this.get(table, what, where)
     },
     async incr (table, what, amount, where) {
-      if (!_.isFinite(amount) || amount === 0) return Promise.reject()
-      if (!_.isPlainObject(where)) return Promise.reject()
-      if (amount < 0) {
-        return Promise.resolve(await this.decr(table, what, amount, where))
+      if (!_.isFinite(amount) || amount === 0) {
+        throw new Error(`Invalid amount: ${amount}`)
       }
 
-      await botDB.increment(table, what, amount, where)
+      if (!_.isPlainObject(where)) {
+        throw new Error(`'where' must be an Object`)
+      }
 
-      return Promise.resolve(await botDB.getValue(table, what, where))
+      if (amount < 0) return this.decr(table, what, amount, where)
+
+      await botDB.increment(table, what, amount, where)
+      return botDB.getValue(table, what, where)
     },
     async decr (table, what, amount, where, allowNegative) {
-      if (!_.isFinite(amount) || amount === 0) return Promise.reject()
-      if (!_.isPlainObject(where)) return Promise.reject()
+      if (!_.isFinite(amount) || amount === 0) {
+        throw new Error(`Invalid amount: ${amount}`)
+      }
+
+      if (!_.isPlainObject(where)) {
+        throw new Error(`'where' must be an Object`)
+      }
 
       await botDB.decrement(table, what, amount, where, allowNegative)
-
-      return Promise.resolve(await botDB.getValue(table, what, where))
+      return botDB.getValue(table, what, where)
     },
     async getRow (table, where, order) {
-      return Promise.resolve(await botDB.first(table, where, order))
+      return botDB.first(table, where, order)
     },
     async getRows (table, where, order) {
-      return Promise.resolve(await botDB.select(table, where, order))
+      return botDB.select(table, where, order)
     },
     async countRows (table, what, where, options) {
-      return Promise.resolve(await botDB.count(table, what, where, options))
+      return botDB.count(table, what, where, options)
     },
     async tableExists (table) {
-      return Promise.resolve(await botDB.hasTable(table))
+      return botDB.hasTable(table)
     }
   },
 
   async addCommand (name, cooldown, permission, status, price, module, response) {
     if (!name || !module) {
       log.bot('Failed to add command. Name & module are required.')
-      return Promise.reject()
+      return
     }
 
     await botDB.insert('commands', {
-      name, cooldown, permission, status, price, module, response
+      name, cooldown, permission, status: status.toString(), price, module, response
     }, { conflict: 'ignore' })
 
-    return Promise.resolve(this)
+    return this
   },
 
   async addSubcommand (name, cooldown, permission, status, price, module, parent) {
     if (!name || !module || !parent) {
       log.bot('Failed to add command. Name, module, & parent are required.')
-      return Promise.reject()
+      return
     }
 
     await botDB.insert('subcommands', {
       name, cooldown, permission, status, price, module, parent
     }, { conflict: 'ignore' })
 
-    return Promise.resolve(this)
+    return this
   },
 
   async addUser (user) {
@@ -346,7 +347,7 @@ data.bot = {
       }
     }
 
-    return Promise.resolve(this)
+    return this
   }
 }
 
@@ -354,51 +355,30 @@ data.bot = {
  * Creates or accesses singularity.db
  */
 function initDB (opts = {}) {
-  if (opts.DEV) {
-    /**
-     * Store the database in the project root directory
-     */
-    // jetpack.dir(path.resolve(__dirname, '..', '..', '..', 'db'))
-    db = new Trilogy(path.resolve(__dirname, '..', '..', '..', 'singularity.db'))
-  } else {
+  let filePath = path.resolve(app.getAppPath(), 'build', 'singularity.db')
+  if (!opts.DEV) {
     switch (opts.LOCATION) {
       case 'home':
-        // app directory in the user home folder
-        jetpack.dir(path.resolve(settings.get('dataPath'), 'db'))
-        db = new Trilogy(path.resolve(settings.get('dataPath'), 'db', 'singularity.db'))
+        filePath = path.resolve(settings.get('dataPath'), 'db', 'singularity.db')
         break
       case 'data':
-        // app directory in the OS data folder
-        jetpack.dir(path.resolve(app.getAppPath(), 'db'))
-        db = new Trilogy(path.resolve(app.getAppPath(), 'db', 'singularity.db'))
+        filePath = path.resolve(app.getAppPath(), 'db', 'singularity.db')
         break
       case 'custom':
-        // user configured a custom location for the db
-        const dbPath = settings.get('databaseLocation', path.resolve(app.getAppPath(), 'db'))
-        jetpack.dir(path.resolve(dbPath))
-        db = new Trilogy(path.resolve(dbPath, 'singularity.db'))
+        const defaultPath = path.resolve(app.getAppPath(), 'db')
+        const dbPath = settings.get('databaseLocation', defaultPath)
+        filePath = path.resolve(dbPath, 'singularity.db')
         break
       default:
         throw new TypeError('ERR in initDB :: Invalid LOCATION property')
     }
   }
 
-  return new Promise((resolve, reject) => {
-    if (db) {
-      _initTables()
-        .then(() => resolve('Database & tables ready'))
-        .catch(e => reject(e))
-    } else {
-      reject('ERR in initDB :: Database was not initialized.')
-    }
-  })
+  db = new Trilogy(filePath)
+  return initTables()
 }
 
-function _initTables () {
-  /**
-   * Creates a table of followers with columns:
-   * twitchid | username | timestamp | evtype
-   */
+function initTables () {
   return Promise.all([
     data.addTable('followers', [
       { name: 'twitchid', type: 'integer', primary: true },
@@ -408,10 +388,6 @@ function _initTables () {
       { name: 'notifications', defaultTo: false }
     ]),
 
-    /**
-     * Creates a table of subscribers with columns:
-     * twitchid | username | timestamp | evtype | months
-     */
     data.addTable('subscribers', [
       { name: 'twitchid', type: 'integer', primary: true },
       { name: 'username', notNull: true },
@@ -420,10 +396,6 @@ function _initTables () {
       { name: 'months', type: 'integer', defaultTo: 0 }
     ]),
 
-    /**
-     * Creates a table of host events with columns:
-     * twitchid | username | timestamp | evtype | viewers
-     */
     data.addTable('hosts', [
       { name: 'twitchid', type: 'integer', notNull: true },
       { name: 'username', notNull: true },
@@ -432,10 +404,6 @@ function _initTables () {
       { name: 'viewers', type: 'integer', defaultTo: 0 }
     ]),
 
-    /**
-     * Creates a table of tip events with columns:
-     * username | timestamp | evtype | amount | message
-     */
     data.addTable('tips', [
       { name: 'username', notNull: true },
       { name: 'timestamp', type: 'integer' },
@@ -445,14 +413,19 @@ function _initTables () {
   ])
 }
 
+/*
 function trilogyErrHandler (err) {
   if (!err) return
+  const indexErr = /^index\s[\S]+\salready exists$/i
 
   if (err.message.startsWith('UNIQUE constraint')) {
     log.absurd(err.message)
+  } else if (indexErr.test(err.message)) {
+    log.absurd(err.message)
   } else {
-    log.error(err.stack)
+    log.error(err.message)
   }
 }
+*/
 
 export { data as default, initDB }

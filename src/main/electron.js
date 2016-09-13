@@ -29,7 +29,7 @@ function createWindow () {
   global.mainAppWindow = mainWindow
   global.mainWindowID = wm.add(mainWindow, 'main')
   require('./components/lib/_persistAppState')
-  require('./handlers')
+  require('./handlers/windowControls')
 
   const position = windows.get('position')
   let inBounds = false
@@ -90,8 +90,7 @@ function createWindow () {
 
   log.info('Starting singularity...')
 
-  // for some reason awaiting `initDB` prevents electron's ready event
-  /* await */ initDB({
+  await initDB({
     DEV: cfg.DEV,
     LOCATION: settings.get('databaseLocation', 'home')
   })
