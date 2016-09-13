@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>singularity example - follower alerts</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.1/animate.min.css">
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Slabo+27px);
+
+        #tip-alert {
+            opacity: 0;
+            background-color: #03AFF9;
+            display: flex;
+            align-items: center;
+            width: 800px;
+            height: 100px;
+            -webkit-transition: opacity 0.5s;
+            transition: opacity 0.5s;
+        }
+
+        #tip-alert.visible {
+            opacity: 1;
+        }
+
+        #tip-alert-inner {
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+            color: white;
+            font-family: 'Slabo 27px', serif;
+            font-size: 38px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="tip-alert">
+        <div id="tip-alert-inner"></div>
+    </div>
+
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+    <script>
+        const socket = io();
+        let animating = false;
+        let animationIn = 'fadeInUpBig';
+        let animationOut = 'fadeOutDownBig';
+
+        socket.on('alert:tip', function(data) {
+            console.log(`Received alert for ${data.name}`);
+            showAlert(data);
+        });
+
+        function showAlert(data) {
+            if (animating) {
+                console.log('Alert in progress. Trying again in 4 seconds...');
+                setTimeout(function() {
+                    showAlert(data);
+                }, 4 * 1000);
+                return;
+            }
+
+            animating = true;
+            $('#tip-alert-inner').text(`${data.name} tipped ${data.amount}!`);
+            $('#tip-alert')
+                    .removeClass()
+                    .addClass(`${animationIn} animated visible`)
+                    .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                        const timer = setTimeout(function() {
+                            $('#tip-alert')
+                                    .removeClass(`${animationIn}`)
+                                    .addClass(`${animationOut}`)
+                                    .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                                        animating = false;
+                                        clearTimeout(timer);
+                                    })
+                        }, 8 * 1000);
+                    });
+        }
+    </script>
+</body>
+</html>

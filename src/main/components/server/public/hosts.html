@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>singularity example - host alerts</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.1/animate.min.css">
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Slabo+27px);
+
+        html, body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #host-alert {
+            opacity: 0;
+            background-color: #03AFF9;
+            display: flex;
+            align-items: center;
+            width: 800px;
+            height: 125px;
+            -webkit-transition: opacity 0.5s;
+            transition: opacity 0.5s;
+        }
+
+        #host-alert.visible {
+            opacity: 1;
+            -webkit-transition: opacity 0.5s;
+            transition: opacity 0.5s;
+        }
+
+        #host-alert-inner {
+            position: relative;
+            white-space: pre-wrap;
+            margin-left: auto;
+            margin-right: auto;
+            color: white;
+            text-align: center;
+            font-family: 'Slabo 27px', serif;
+            font-size: 38px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="host-alert">
+        <div id="host-alert-inner"></div>
+    </div>
+
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+    <script>
+        const socket = io();
+        let animating = false;
+        let animationIn = 'fadeInDownBig';
+        let animationOut = 'fadeOutUpBig';
+
+        socket.on('alert:host', function(user) {
+            console.log(`Received alert for ${user.display_name}`);
+            showAlert(user);
+        });
+
+        function showAlert(user) {
+            if (animating) {
+                console.log('Alert in progress. Trying again in 4 seconds...');
+                setTimeout(function() {
+                    showAlert(user);
+                }, 4 * 1000);
+                return;
+            }
+            animating = true;
+
+            let viewers = '';
+            if (user.viewers) {
+                viewers = user.viewers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                $('#host-alert-inner').text(`${user.display_name} is hosting!\n${viewers} viewers`);
+            } else {
+                $('#host-alert-inner').text(`${user.display_name} is hosting!`);
+            }
+
+            $('#host-alert')
+                    .removeClass()
+                    .addClass(`${animationIn} animated visible`)
+                    .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                        const timer = setTimeout(function() {
+                            $('#host-alert')
+                                    .removeClass(`${animationIn}`)
+                                    .addClass(`${animationOut}`)
+                                    .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                                        animating = false;
+                                        $('#host-alert').removeClass('visible');
+                                        clearTimeout(timer);
+                                    })
+                        }, 8 * 1000);
+                    });
+        }
+    </script>
+</body>
+</html>

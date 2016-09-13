@@ -3,10 +3,10 @@ import moment from 'moment'
 import Levers from 'levers'
 import tmi from 'tmi.js'
 
-import transit from '../../components/transit'
-import db from '../../../common/components/db'
-import log from '../../../common/utils/logger'
-import Tock from '../../../common/utils/Tock'
+import transit from 'main/components/transit'
+import db from 'common/components/db'
+import log from 'common/utils/logger'
+import Tock from 'common/utils/Tock'
 
 const settings = new Levers('app')
 const channel = new Levers('twitch')
@@ -21,25 +21,11 @@ export default class TwitchClass {
     this.CHANNEL = {
       name: channel.get('name'),
       id: channel.get('_id'),
-      token: settings.get('twitchToken')
+      token: settings.get('twitch.token')
     }
     this.CLIENT_ID = settings.get('clientID')
 
     this.client = null
-    this.TMI_OPTIONS = {
-      options: {
-        debug: false
-      },
-      connection: {
-        reconnect: true,
-        cluster: 'aws'
-      },
-      identity: {
-        username: this.CHANNEL.name,
-        password: this.CHANNEL.token
-      },
-      channels: [this.CHANNEL.name]
-    }
 
     this.API = {
       BASE_URL: 'https://api.twitch.tv/kraken',
@@ -62,7 +48,20 @@ export default class TwitchClass {
   chatConnect () {
     if (this.CHANNEL.name && this.CHANNEL.token) {
       // eslint-disable-next-line
-      this.client = new tmi.client(this.TMI_OPTIONS)
+      this.client = new tmi.client({
+        options: {
+          debug: false
+        },
+        connection: {
+          reconnect: true,
+          cluster: 'aws'
+        },
+        identity: {
+          username: this.CHANNEL.name,
+          password: this.CHANNEL.token
+        },
+        channels: [this.CHANNEL.name]
+      })
 
       this.client.on('connected', (address, port) => {
         log.info(`Listening for Twitch events at ${address}:${port}`)

@@ -1,63 +1,82 @@
-import EventEmitter from 'events'
-import socket from 'socket.io-client'
-// import API from './api'
+import moment from 'moment'
+import Levers from 'levers'
 
-class TipeeeStream extends EventEmitter {
-  constructor (key, username) {
-    super()
-    this.key = key
-    this.username = username
-    this.tipeee = null
+import TipeeeStream from './lib'
+import transit from 'main/components/transit'
+import log from 'common/utils/logger'
 
-    // this.API = new API(options.key)
-  }
+const settings = new Levers('app')
+const channel = new Levers('twitch')
 
-  connect () {
-    if (this.key && this.username) {
-      this.tipeee = socket.connect('https://sso.tipeeestream.com:4242', {
-        forceNew: true
-      })
-      this._listen()
-    } else {
-      console.log('TipeeeStream needs auth.')
-    }
-  }
+const isEnabled = () => settings.get('tipeee.active')
 
-  connectDelayed () {
-    setTimeout(::this.connect, 5 * 1000)
-  }
+function start (instant) {
+  if (!isEnabled()) return {}
 
-  disconnect () {
-    if (this.tipeee) {
-      this.tipeee.close()
-      this.tipeee = null
-    }
-    this.emit('disconnect')
-  }
+  const instance = new TipeeeStream(
+    settings.get('tipeee.token'), channel.get('name')
+  )
 
-  _listen () {
-    if (this.tipeee) {
-      this.tipeee.once('connect', () => {
-        this.emit('connect')
-        this.tipeee.emit('join-room', { room: this.key, username: this.username })
-      })
+  instance[instant ? 'connect' : 'connectDelayed']()
+  listen(instance)
 
-      this.tipeee.on('new-event', data => {
-        switch (data.event.type) {
-          case 'donation':
-            this.emit('donation', data)
-            break
-          default:
-            this.emit('unknown', data)
-            break
-        }
-      })
-    } else {
-      this.connect()
-    }
+  return {
+    instance,
+    stop: stop.bind(undefined, instance)
   }
 }
 
-// TipeeeStream.API = API
+function stop (instance) {
+  if (!instance) return
+  instance.removeAllListeners()
+  instance.disconnect()
+}
 
-export default TipeeeStream
+function listen (instance) {
+  instance.on('connect', () => {
+    log.info('Connected to TipeeeStream')
+  })
+
+  instance.on('disconnect', () => {
+    log.info('Disconnected from TipeeeStream')
+  })
+
+  instance.on('donation', data => {
+    transit.emit('alert:tip:event', {
+      user: {
+        name: data.event.parameters.username,
+        amount: data.event.formattedAmount,
+        message: data.event.parameters.formattedMessage,
+        messageRaw: data.event.parameters.message,
+        timestamp: moment(data.event.created_at).valueOf()
+      },
+      type: 'tip'
+    })
+  })
+
+  return instance.removeAllListeners
+}
+
+function activate (data) {
+  log.info('Enabling TipeeeStream service')
+  settings.set('tipeee.active', true)
+  settings.set('tipeee.token', data)
+
+  start(true)
+}
+
+function deactivate () {
+  stop()
+
+  log.info('Disabling TipeeeStream service')
+  settings.set('tipeee.active', false)
+  settings.del('tipeee.token')
+}
+
+export {
+  start,
+  stop,
+  isEnabled,
+  activate,
+  deactivate
+}

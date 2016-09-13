@@ -3,7 +3,7 @@ import io from 'socket.io-client'
 
 const API = require('./api')
 
-class StreamTip extends EventEmitter {
+class Streamtip extends EventEmitter {
   constructor (clientID, accessToken) {
     super()
     this.clientID = clientID || '5506393c0a1cfab303c6b12a'
@@ -22,7 +22,7 @@ class StreamTip extends EventEmitter {
       })
       this._listen()
     } else {
-      console.log('The StreamTip service needs authorization.')
+      console.log('The Streamtip service needs authorization.')
     }
   }
 
@@ -71,5 +71,5 @@ class StreamTip extends EventEmitter {
   }
 }
 
-StreamTip.API = API
-export default StreamTip
+Streamtip.API = API
+export default Streamtip

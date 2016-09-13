@@ -1,40 +1,28 @@
-import request from 'request'
-import extend from 'extend'
+import axios from 'axios'
 
 const BASE_URL = 'https://api.tipeeestream.com/'
 const VERSION = 'v1.0/'
 
-class API {
+export default class API {
   constructor (key) {
     this.key = key
   }
 
-  get (url, options, callback) {
-    if (!callback) {
-      callback = options
-      options = {}
-    }
+  get (url, options = {}) {
+    const defaults = { method: 'get' }
+    const opts = Object.assign({}, defaults, options)
 
-    const defaults = { method: 'GET' }
-    options = extend(true, defaults, options)
-
-    return this._request(url, options, callback)
+    return this._request(url, opts)
   }
 
-  _request (url, options, callback) {
+  _request (url, options = {}) {
     const defaults = {
-      uri: `${BASE_URL}${VERSION}${url}`,
-      headers: { 'apiKey': this.key },
-      json: true,
-      strictSSL: true
+      url: `${BASE_URL}${VERSION}${url}`,
+      headers: { 'apiKey': this.key }
     }
 
-    options = extend(true, defaults, options)
+    const opts = Object.assign({}, defaults, options)
 
-    return request(options, (err, res, body) => {
-      callback(err, res, body)
-    })
+    return axios.get(url, opts)
   }
 }
-
-export default API

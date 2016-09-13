@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>singularity example - follower alerts</title>
+    <meta charset="utf-8" />
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.1/animate.min.css">
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Slabo+27px);
+
+        #follow-alert {
+            opacity: 0;
+            background-color: #03AFF9;
+            display: flex;
+            align-items: center;
+            width: 800px;
+            height: 100px;
+            -webkit-transition: opacity 0.5s;
+            transition: opacity 0.5s;
+        }
+
+        #follow-alert.visible {
+            opacity: 1;
+        }
+
+        #follow-alert-inner {
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+            color: white;
+            font-family: 'Slabo 27px', serif;
+            font-size: 38px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="follow-alert">
+        <div id="follow-alert-inner"></div>
+    </div>
+
+    <!-- socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+    <script>
+        const socket = io();
+        let animating = false;
+        let animationIn = 'slideInDown';
+        let animationOut = 'slideOutUp';
+
+        socket.on('alert:follow', function(data) {
+            console.log(`Received alert for ${data.display_name}`);
+            showAlert(data.display_name);
+        });
+
+        function showAlert(username) {
+            if (!username) {
+                console.log('No username provided for showAlert.');
+                return;
+            }
+            if (animating) {
+                console.log('Alert in progress. Trying again in 4 seconds...');
+                setTimeout(function() {
+                    showAlert(username);
+                }, 4 * 1000);
+                return;
+            }
+
+            animating = true;
+            $('#follow-alert-inner').text(`${username} followed!`);
+            $('#follow-alert')
+                    .removeClass()
+                    .addClass(`${animationIn} animated visible`)
+                    .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                        const timer = setTimeout(function() {
+                            $('#follow-alert')
+                                    .removeClass(`${animationIn}`)
+                                    .addClass(`${animationOut}`)
+                                    .on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function() {
+                                        animating = false;
+                                        clearTimeout(timer);
+                                    })
+                        }, 8 * 1000);
+                    });
+        }
+    </script>
+</body>
+</html>
