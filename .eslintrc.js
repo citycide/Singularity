@@ -15,7 +15,6 @@ module.exports = {
   ],
   rules: {
     quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
-    'generator-star-spacing': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'babel/generator-star-spacing': ['error', { 'before': true, 'after': true }],
     'babel/new-cap': 1,

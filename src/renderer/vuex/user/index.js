@@ -87,7 +87,9 @@ const actions = {
         if (res.data.token.valid) {
           state.channel.name = res.data.token.user_name
 
-          transit.fire('auth:twitch', token)
+          // transit.fire('auth:twitch', token)
+          settings.set('twitch.token', token)
+          log.debug(`User authorized with token: ${token}`)
           commit(types.AUTHENTICATE, token)
         } else {
           // TODO: show an error in the UI

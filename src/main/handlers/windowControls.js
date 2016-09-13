@@ -1,5 +1,5 @@
-import ipcMain from '../utils/ipcMain'
-import wm from '../components/WindowManager'
+import ipcMain from 'main/utils/ipcMain'
+import wm from 'main/components/WindowManager'
 
 ipcMain.on('window:refresh', (e, windowID) => {
   wm.getByInternalID(windowID).reload()
