@@ -1,6 +1,4 @@
-/**
- * @class Tock
- */
+
 export default class Tock {
   /**
    * Create a new `Tock` instance
@@ -19,8 +17,6 @@ export default class Tock {
    * same `uid` will clear the previous timeout before
    * setting the new one.
    *
-   * @memberof Tock
-   * @instance
    * @param {*} [uid] - unique identifier, anything but a function
    * @param {function} fn
    * @param {number} [time=1] - defaults to 1ms
@@ -59,8 +55,6 @@ export default class Tock {
    * [Tock's setTimeout method]{@link Tock#setTimeout} must
    * previously have been called with the `uid` parameter
    *
-   * @memberof Tock
-   * @instance
    * @param {*} uid
    */
   clearTimeout (uid) {
@@ -79,8 +73,6 @@ export default class Tock {
    * same `uid` will clear the previous interval before
    * setting the new one.
    *
-   * @memberof Tock
-   * @instance
    * @param {*} [uid] - unique identifier, anything but a function
    * @param {function} fn
    * @param {number} [interval=1000] - defaults to 1s
@@ -119,8 +111,6 @@ export default class Tock {
    * [Tock's setInterval method]{@link Tock#setInterval} must
    * previously have been called with the `uid` parameter
    *
-   * @memberof Tock
-   * @instance
    * @param {*} uid
    */
   clearInterval (uid) {

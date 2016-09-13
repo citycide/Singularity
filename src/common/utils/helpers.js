@@ -34,7 +34,15 @@ export const val = {
   }
 }
 
+export async function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 export default {
   str,
-  val
+  val,
+  num: {
+    random: _.random
+  },
+  sleep
 }

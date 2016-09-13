@@ -1,14 +1,15 @@
 import { app, remote } from 'electron'
+import { argv } from 'yargs'
 import winston from 'winston'
+import Levers from 'levers'
 import path from 'path'
-import Settings from '../components/Settings'
 
-const settings = new Settings('app', { useDefaults: true })
+const settings = new Levers('app')
 
 function initLogger () {
   const defaultSettings = {
     fileLevel: 'info',
-    consoleLevel: settings.get('devMode', false) ? 'trace' : 'error',
+    consoleLevel: argv.dev ? 'trace' : 'error',
     levels: {
       error: 0,
       warn: 1,
