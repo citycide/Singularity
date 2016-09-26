@@ -5,7 +5,7 @@ import Vue from 'vue'
 import types from './types'
 
 import log from '../../../common/utils/logger'
-import transit from '../../components/js/transit'
+// import transit from '../../components/js/transit'
 
 const settings = new Levers('app')
 const cache = new Levers('twitch')

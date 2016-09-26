@@ -13,7 +13,7 @@
   </table>
 </template>
 
-<script>
+<script type="babel">
   import transit from '../js/transit'
   import db, { initDB } from '../../../common/components/db'
 

@@ -44,5 +44,8 @@ export default {
   num: {
     random: _.random
   },
+  arr: {
+    random: _.sample
+  },
   sleep
 }

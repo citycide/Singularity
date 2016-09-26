@@ -1,5 +1,4 @@
 import { app as local, remote } from 'electron'
-import Promise from 'bluebird'
 import Trilogy from 'trilogy'
 import moment from 'moment'
 import Levers from 'levers'
@@ -16,18 +15,11 @@ let botDB
 
 const app = local || remote.app
 
-/**
- * Collection of api methods for main database functions
- * @export default
- */
 const data = {
-  /**
-   * Creates or accesses bot.db when bot is enabled
-   * @returns {Promise}
-   */
   async initBotDB () {
     const dbPath = settings.get('databaseLocation', path.resolve(app.getAppPath(), 'db'))
     botDB = new Trilogy(path.resolve(dbPath, 'bot.db'), {
+      // verbose: q => console.log(q)
       // errorListener: trilogyErrHandler
     })
 
@@ -39,13 +31,6 @@ const data = {
     return target.createTable(name, args, options)
   },
 
-  /**
-   * Adds a follower to the database, or updates one that already exists
-   * @param id
-   * @param username
-   * @param [timestamp]
-   * @param [notifications]
-   */
   async addFollower (id, username, timestamp, notifications) {
     if (!id || !username) {
       log.error('Failed to add or update follower. ID & username are required.')
@@ -60,13 +45,6 @@ const data = {
     }, { conflict: 'replace' })
   },
 
-  /**
-   * Adds a subscriber to the database, or updates one that already exists
-   * @param id
-   * @param username
-   * @param [timestamp]
-   * @param [months]
-   */
   async addSubscriber (id, username, timestamp, months) {
     let evtype = 'subscriber'
 
@@ -86,13 +64,6 @@ const data = {
     }, { conflict: 'replace' })
   },
 
-  /**
-   * Adds a host event to the database
-   * @param id
-   * @param username
-   * @param [timestamp]
-   * @param [viewers]
-   */
   async addHost (id, username, timestamp, viewers) {
     if (!username || !viewers) {
       log.error('Failed to add host. Username & viewers are required.')
@@ -107,13 +78,6 @@ const data = {
     })
   },
 
-  /**
-   * Adds a tip event to the database
-   * @param username
-   * @param [timestamp]
-   * @param amount
-   * @param [message='']
-   */
   async addTip (username, timestamp, amount, message = '') {
     if (!username || !amount) {
       log.error('Failed to add tip. Name & amount are required.')
@@ -127,6 +91,7 @@ const data = {
       message
     })
   },
+
   async getRecentFollows () {
     const CUTOFF = moment().subtract(60, 'days').valueOf()
     const response = await db.select('followers', '*',
@@ -134,22 +99,21 @@ const data = {
       { order: ['timestamp', 'desc'] }
     )
 
-    for (let follow of response) {
+    return response.map(follow => {
       follow.age = moment(follow.timestamp, 'x').fromNow()
-    }
-
-    return response
+      return follow
+    })
   },
+
   async getFollows () {
     const response = await db.select('followers', '*', null,
       { order: ['timestamp', 'desc'] }
     )
 
-    for (let follow of response) {
+    return response.map(follow => {
       follow.age = moment(follow.timestamp, 'x').fromNow(' ')
-    }
-
-    return response
+      return follow
+    })
   }
 
   /**
@@ -175,10 +139,6 @@ const data = {
   */
 }
 
-/**
- * Collection of api methods related to the bot database
- * @export default.bot
- */
 data.bot = {
   async initSettings () {
     return Promise.all([
@@ -219,7 +179,7 @@ data.bot = {
 
   data: {
     async get (table, what, where, defaultValue) {
-      if (_.isPlainObject(what)) return await this.getRow(table, where)
+      if (_.isPlainObject(what)) return this.getRow(table, where)
 
       let response = await botDB.getValue(table, what, where)
 
@@ -248,6 +208,8 @@ data.bot = {
           await botDB.update(table, what, where)
         }
       }
+
+      if (!where) return
 
       if (Object.keys(what).length === 1) {
         return this.get(table, Object.keys(what)[0], where)
@@ -298,6 +260,9 @@ data.bot = {
     async getRows (table, where, order) {
       return botDB.select(table, where, order)
     },
+    async getRandomRow (table) {
+      return botDB.first(table, {}, { random: true })
+    },
     async countRows (table, what, where, options) {
       return botDB.count(table, what, where, options)
     },
@@ -313,7 +278,7 @@ data.bot = {
     }
 
     await botDB.insert('commands', {
-      name, cooldown, permission, status: status.toString(), price, module, response
+      name, cooldown, permission, status, price, module, response
     }, { conflict: 'ignore' })
 
     return this
@@ -355,19 +320,19 @@ data.bot = {
  * Creates or accesses singularity.db
  */
 function initDB (opts = {}) {
-  let filePath = path.resolve(app.getAppPath(), 'build', 'singularity.db')
+  let filePath = path.join(app.getAppPath(), 'db', 'singularity.db')
   if (!opts.DEV) {
     switch (opts.LOCATION) {
       case 'home':
-        filePath = path.resolve(settings.get('dataPath'), 'db', 'singularity.db')
+        filePath = path.join(settings.get('paths.data'), 'db', 'singularity.db')
         break
       case 'data':
-        filePath = path.resolve(app.getAppPath(), 'db', 'singularity.db')
+        filePath = path.join(app.getAppPath(), 'db', 'singularity.db')
         break
       case 'custom':
-        const defaultPath = path.resolve(app.getAppPath(), 'db')
-        const dbPath = settings.get('databaseLocation', defaultPath)
-        filePath = path.resolve(dbPath, 'singularity.db')
+        const defaultPath = path.join(app.getAppPath(), 'db')
+        const dbPath = settings.get('paths.database', defaultPath)
+        filePath = path.join(dbPath, 'singularity.db')
         break
       default:
         throw new TypeError('ERR in initDB :: Invalid LOCATION property')

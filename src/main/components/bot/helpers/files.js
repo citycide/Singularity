@@ -14,8 +14,7 @@ const file = {
     if (!file) return
 
     if (append) {
-      data += os.EOL
-      jetpack.append(sanitize(file), data)
+      jetpack.append(sanitize(file), data + os.EOL)
     } else {
       jetpack.write(sanitize(file), data)
     }
@@ -29,7 +28,7 @@ const file = {
 function sanitize (file) {
   if (!file.endsWith('.txt')) file += '.txt'
   if (file.startsWith('/')) file = file.slice(1)
-  return path.resolve(settings.get('botLoggingPath'), file)
+  return path.join(settings.get('paths.botLogging'), file)
 }
 
 export default file

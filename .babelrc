@@ -1,12 +1,17 @@
 {
-  "presets": ["electron"],
+  "presets": [
+    ["modern-async", {
+      "fast-async": {
+        "runtimePattern": "(?:electron|main)\\.js"
+      },
+      "electron": true
+    }]
+  ],
   "plugins": [
-    "transform-async-to-generator",
     "lodash",
     ["module-resolver", {
       "root": ["./src"]
     }]
   ],
-  "minified": false,
   "comments": false
 }

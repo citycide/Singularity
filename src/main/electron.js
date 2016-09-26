@@ -4,10 +4,10 @@ import Levers from 'levers'
 import path from 'path'
 
 import { initDB } from '../common/components/db'
-import wm from './components/WindowManager'
+import wm from './components/window-manager'
 import log from '../common/utils/logger'
 import { initServices } from './services'
-import defaults from './utils/initialSettings'
+import defaults from './utils/initial-settings'
 
 const cfg = {
   DEV: argv.development || argv.dev,
@@ -23,13 +23,13 @@ if (cfg.DEV) fixAppPaths()
 
 let mainWindow
 function createWindow () {
-  const obj = Object.assign({}, wm.windowDefaults, { frame: !cfg.DEV })
+  const obj = Object.assign({}, wm.windowDefaults)
 
   mainWindow = new BrowserWindow(obj)
   global.mainAppWindow = mainWindow
   global.mainWindowID = wm.add(mainWindow, 'main')
-  require('./components/lib/_persistAppState')
-  require('./handlers/windowControls')
+  require('./components/lib/persist-app-state')
+  require('./handlers/window-controls')
 
   const position = windows.get('position')
   let inBounds = false
@@ -122,3 +122,5 @@ function fixAppPaths () {
   const appData = app.getPath('appData')
   app.setPath('userData', path.join(appData, 'singularity'))
 }
+
+process.on('unhandledRejection', err => console.error(err))

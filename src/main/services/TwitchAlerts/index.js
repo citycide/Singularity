@@ -5,7 +5,7 @@ import TwitchAlerts from './lib'
 import { sleep } from 'common/utils/helpers'
 import transit from 'main/components/transit'
 import log from 'common/utils/logger'
-import Tock from 'common/utils/Tock'
+import Tock from 'common/utils/tock'
 
 const settings = new Levers('app')
 const tick = new Tock()

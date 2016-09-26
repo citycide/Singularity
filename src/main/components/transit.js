@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import ipcMain from '../utils/ipcMain'
+import ipcMain from '../utils/ipc-main'
 
 class Transit extends EventEmitter {
   on (channel, fn, bus = false) {

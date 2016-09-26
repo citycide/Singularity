@@ -48,7 +48,7 @@ const logTypes = {
   }
 })()
 
-const captureStack = function () {
+function captureStack () {
   const _ = Error.prepareStackTrace
   Error.prepareStackTrace = function (_, stack) {
     return stack

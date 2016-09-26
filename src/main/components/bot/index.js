@@ -2,27 +2,27 @@ import EventEmitter from 'events'
 import Levers from 'levers'
 import { isPlainObject } from 'lodash'
 
-import Tock from 'common/utils/Tock'
+import Tock from 'common/utils/tock'
 import db from 'common/components/db'
 import util from 'common/utils/helpers'
 import log from 'common/utils/logger'
 
-import modules from './components/moduleHandler'
+import extensions from './extension-loader'
 import bot from './bot'
 
 const settings = new Levers('app')
 const twitch = new Levers('twitch')
+
+const channel = {
+  name: twitch.get('name'),
+  botName: settings.get('bot.name')
+}
 
 let commandRegistry = null
 let registry = null
 
 async function dbExists (table, where) {
   return isPlainObject(await db.bot.data.getRow(table, where))
-}
-
-const channel = {
-  name: twitch.get('name'),
-  botName: settings.get('bot.name')
 }
 
 async function say (user, message) {
@@ -42,8 +42,8 @@ async function say (user, message) {
 
 const whisper = (user, message) => bot.whisper(user, message)
 const shout = message => bot.say(channel.name, message)
-const getPrefix = async () => await db.bot.settings.get('prefix', '!')
-const getModule = cmd => modules.load(registry[cmd].module)
+const getPrefix = () => db.bot.settings.get('prefix', '!')
+const getModule = cmd => extensions.loadModule(registry[cmd].module)
 const getRunner = cmd => getModule(cmd)[registry[cmd].handler]
 
 async function commandIsEnabled (cmd, sub) {
@@ -54,7 +54,7 @@ async function commandIsEnabled (cmd, sub) {
   }
 }
 
-function commandExists (cmd, sub) {
+async function commandExists (cmd, sub) {
   if (!registry.hasOwnProperty(cmd)) return false
 
   if (!sub) {
@@ -65,7 +65,7 @@ function commandExists (cmd, sub) {
 }
 
 async function commandEnable (cmd, sub) {
-  if (!commandExists(cmd, sub)) {
+  if (!await commandExists(cmd, sub)) {
     log.bot(`ERR in enableCommand:: ${cmd} is not a registered command`)
     return false
   }
@@ -80,7 +80,7 @@ async function commandEnable (cmd, sub) {
 }
 
 async function commandDisable (cmd, sub) {
-  if (!commandExists(cmd, sub)) {
+  if (!await commandExists(cmd, sub)) {
     log.bot(`ERR in disableCommand:: ${cmd} is not a registered command`)
     return false
   }
@@ -94,8 +94,8 @@ async function commandDisable (cmd, sub) {
   return true
 }
 
-function commandIsCustom (cmd) {
-  if (!commandExists(cmd)) return false
+async function commandIsCustom (cmd) {
+  if (!await commandExists(cmd)) return false
   return registry[cmd].custom
 }
 
@@ -106,7 +106,7 @@ async function commandGetPermLevel (cmd, sub) {
 }
 
 async function commandSetPermLevel (cmd, level, sub) {
-  if (!commandExists(cmd, sub)) {
+  if (!await commandExists(cmd, sub)) {
     log.bot(`ERR in setPermLevel:: ${cmd} is not a registered command`)
     return false
   }
@@ -216,6 +216,7 @@ const coreMethods = {
     incr: db.bot.data.incr,
     decr: db.bot.data.decr,
     getRow: db.bot.data.getRow,
+    getRandomRow: db.bot.data.getRandomRow,
     countRows: db.bot.data.countRows,
     exists: dbExists,
     getModuleConfig,
@@ -227,7 +228,7 @@ const coreMethods = {
   },
 
   user: {
-    isFollower (user) {
+    async isFollower (user) {
       let _status = false
       bot.api({
         url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${channel.name}`,
@@ -238,7 +239,11 @@ const coreMethods = {
           'Client-ID': settings.get('clientID')
         }
       }, (err, res, body) => {
-        if (err) log.bot(err)
+        if (err) {
+          log.bot(err)
+          return
+        }
+
         _status = (body.status !== 404)
       })
 
@@ -249,29 +254,30 @@ const coreMethods = {
       return isPlainObject(await db.bot.data.getRow('users', { name: user }))
     },
 
-    isAdmin (user) {
+    async isAdmin (user) {
+      // refactor to pull from some kind of Map or from the database
       return (user === channel.name || user === channel.botName)
     }
   },
 
   async runCommand (event) {
     // Check if the specified command is registered
-    if (!commandExists(event.command)) {
+    if (!await commandExists(event.command)) {
       log.bot(`'${event.command}' is not a registered command`)
       return
     }
 
     // Check if the specified command is enabled
-    if (!commandIsEnabled(event.command)) {
+    if (!await commandIsEnabled(event.command)) {
       log.bot(`'${event.command}' is installed but is not enabled`)
       return
     }
 
     // Check if the first argument is a subcommand
     let subcommand = event.args[0] || undefined
-    if (subcommand && commandExists(event.command, subcommand)) {
+    if (subcommand && await commandExists(event.command, subcommand)) {
       // if it is, check if the subcommand is enabled
-      if (!commandIsEnabled(event.command, subcommand)) {
+      if (!await commandIsEnabled(event.command, subcommand)) {
         log.bot(`'${event.command} ${subcommand}' is installed but is not enabled`)
         subcommand = undefined
         return
@@ -308,7 +314,7 @@ const coreMethods = {
     }
 
     // Finally, run the (sub)command
-    if (commandIsCustom(event.command)) {
+    if (await commandIsCustom(event.command)) {
       try {
         const response = await db.bot.data.get('commands', 'response', {
           name: event.command, module: 'custom'
@@ -316,10 +322,11 @@ const coreMethods = {
         say(event.sender, this.params(event, response))
       } catch (e) {
         log.error(e)
+        throw e
       }
     } else {
       try {
-        getRunner(event.command)(event)
+        getRunner(event.command)(event, this)
 
         this.command
             .startCooldown(event.command, event.sender, subcommand)
@@ -332,6 +339,7 @@ const coreMethods = {
             .catch(e => log.error(e))
       } catch (e) {
         log.error(e)
+        throw e
       }
     }
   }
@@ -341,12 +349,12 @@ class Core extends EventEmitter {
   constructor () {
     super()
     Object.assign(this, coreMethods)
+    this.setMaxListeners(30)
   }
 }
 let core = new Core()
 
 global.$ = core
-global.core = core
 
 export async function initialize (instant) {
   if (!settings.get('bot.name') || !settings.get('bot.auth')) {
@@ -363,21 +371,18 @@ export async function initialize (instant) {
 
   await loadHelpers()
   await loadTables()
-  await loadComponents()
+
+  extensions.registerAll()
 
   log.bot('Bot ready.')
   core.emit('bot:ready')
-
-  modules.watcher.start()
 
   commandRegistry.loadCustomCommands()
 }
 
 export function disconnect () {
   log.bot('Deactivating bot...')
-  modules.watcher.stop()
   bot.disconnect()
-  modules.unload(null, { all: true })
   commandRegistry.unregister(true)
   log.bot('Deactivated bot.')
 }
@@ -392,7 +397,9 @@ async function loadTables () {
   const arr = ['settings', 'extension_settings', 'users', 'commands', 'subcommands']
 
   const obj = await arr.reduce(async (p, c) => {
-    return { ...await p, [c]: await db.bot.data.tableExists(c) }
+    return Object.assign({}, p, {
+      [c]: await db.bot.data.tableExists(c)
+    })
   }, {})
 
   if (!obj['settings']) {
@@ -403,6 +410,7 @@ async function loadTables () {
       ], true)
     } catch (e) {
       log.error(e.message)
+      throw e
     }
   }
 
@@ -413,6 +421,7 @@ async function loadTables () {
       ], true, { compositeKey: ['extension', 'type', 'key'] })
     } catch (e) {
       log.error(e)
+      throw e
     }
   }
 
@@ -430,6 +439,7 @@ async function loadTables () {
       ], true)
     } catch (e) {
       log.error(e)
+      throw e
     }
   }
 
@@ -447,6 +457,7 @@ async function loadTables () {
       ], true)
     } catch (e) {
       log.error(e)
+      throw e
     }
   }
 
@@ -463,27 +474,14 @@ async function loadTables () {
       ], true, { compositeKey: ['name', 'module'] })
     } catch (e) {
       log.error(e)
+      throw e
     }
   }
-
-  return Promise.resolve()
 }
 
-function loadHelpers () {
-  require('./helpers')
-  return Promise.resolve()
-}
-
-function loadComponents () {
-  commandRegistry = require('./components/commandRegistry')
+async function loadHelpers () {
+  commandRegistry = require('./command-registry')
   registry = commandRegistry.default
 
-  require('./components/twitchapi')
-  require('./components/cooldown')
-  require('./components/points')
-  require('./components/time')
-  require('./components/groups')
-  require('./components/ranks')
-  require('./components/quotes')
-  return Promise.resolve()
+  require('./helpers')
 }

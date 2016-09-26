@@ -28,9 +28,19 @@ const bot = new Client({
   channels: [channel.get('name')]
 })
 
-const isCommand = async message => message.charAt(0) === await $.command.getPrefix()
+const getPrefixLength = async () => (await $.command.getPrefix()).length || 1
+
+const isCommand = async message => {
+  const prefixLength = await getPrefixLength()
+  return (
+    message.substr(0, prefixLength) === await $.command.getPrefix() &&
+    message.length > prefixLength &&
+    message.charAt(prefixLength) !== ' '
+  )
+}
+
 const getCommand = async message => {
-  const prefixLength = await $.command.getPrefix().length || 1
+  const prefixLength = await getPrefixLength()
   return message.slice(prefixLength).split(' ', 1)[0].toLowerCase()
 }
 

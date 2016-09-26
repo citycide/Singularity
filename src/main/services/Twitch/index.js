@@ -6,7 +6,7 @@ import tmi from 'tmi.js'
 import transit from 'main/components/transit'
 import db from 'common/components/db'
 import log from 'common/utils/logger'
-import Tock from 'common/utils/Tock'
+import Tock from 'common/utils/tock'
 
 const settings = new Levers('app')
 const channel = new Levers('twitch')
@@ -323,7 +323,7 @@ TwitchClass.prototype.pollFollowers = function () {
 }
 
 TwitchClass.prototype.writeFollower = function (followerName) {
-  let followerFile = `${settings.get('dataPath')}/text/latestfollower.txt`
+  let followerFile = `${settings.get('paths.data')}/text/latestfollower.txt`
   if (jetpack.read(followerFile) !== followerName) {
     jetpack.file(followerFile, {
       content: followerName
