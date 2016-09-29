@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "appEngine": ">=0.1.0",
   "files": {
-    "module": "",
-    "component": "./cooldown.js",
+    "module": "./cooldown-module.js",
+    "component": "./cooldown-component.js",
     "interface": ""
   },
   "author": "citycide <thecitycide@gmail.com>",

@@ -20,7 +20,7 @@ export async function quote (e, $) {
     return
   }
 
-  if (e.subcommand === 'add') {
+  if ($.is(e.subcommand, 'add')) {
     if (e.args.length < 3) {
       $.say(e.sender, `Usage: !quote add Something really wise. [~username]`)
       return
@@ -48,7 +48,7 @@ export async function quote (e, $) {
     return
   }
 
-  if (e.subcommand === 'remove') {
+  if ($.is(e.subcommand, 'remove')) {
     if (!isFinite(parseInt(param1)) || parseInt(param1) < 1) {
       $.say(e.sender, `Usage: !quote remove (number >/= 1)`)
       return
@@ -64,7 +64,7 @@ export async function quote (e, $) {
     return
   }
 
-  if (e.subcommand === 'edit') {
+  if ($.is(e.subcommand, 'edit')) {
     if (!isFinite(parseInt(param1)) || parseInt(param1) < 1) {
       $.say(e.sender, `Usage: !quote edit (number >/= 1) [message] [~username]`)
       return
@@ -90,7 +90,7 @@ export async function quote (e, $) {
     return
   }
 
-  if (e.subcommand === 'help') {
+  if ($.is(e.subcommand, 'help')) {
     $.say(e.sender, `To save a quote, use '!quote add Something really wise.' ` +
             `To credit who said it, add '~username' with no space.`)
     return
@@ -113,13 +113,10 @@ export async function quote (e, $) {
 }
 
 export default function ($) {
-  $.addCommand('quote', {
-    cooldown: 60,
-    status: true
-  })
+  $.addCommand('quote', { cooldown: 60 })
 
-  $.addSubcommand('add', 'quote', { status: true })
-  $.addSubcommand('remove', 'quote', { permLevel: 0, status: true })
-  $.addSubcommand('edit', 'quote', { permLevel: 0, status: true })
-  $.addSubcommand('help', 'quote', { status: true })
+  $.addSubcommand('help', 'quote')
+  $.addSubcommand('add', 'quote')
+  $.addSubcommand('remove', 'quote', { permLevel: 1 })
+  $.addSubcommand('edit', 'quote', { permLevel: 1 })
 }

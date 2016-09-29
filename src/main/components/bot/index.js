@@ -1,11 +1,10 @@
 import EventEmitter from 'events'
 import Levers from 'levers'
-import { isPlainObject } from 'lodash'
 
 import Tock from 'common/utils/tock'
 import db from 'common/components/db'
-import util from 'common/utils/helpers'
 import log from 'common/utils/logger'
+import { is, to, sleep } from 'common/utils/helpers'
 
 import extensions from './extension-loader'
 import bot from './bot'
@@ -22,7 +21,7 @@ let commandRegistry = null
 let registry = null
 
 async function dbExists (table, where) {
-  return isPlainObject(await db.bot.data.getRow(table, where))
+  return is.object(await db.bot.data.getRow(table, where))
 }
 
 async function say (user, message) {
@@ -50,7 +49,13 @@ async function commandIsEnabled (cmd, sub) {
   if (!sub) {
     return await db.bot.data.get('commands', 'status', { name: cmd })
   } else {
-    return await db.bot.data.get('subcommands', 'status', { name: sub, parent: cmd })
+    const res = await db.bot.data.get('subcommands', 'status', { name: sub, parent: cmd })
+
+    if (is(res, 'inherit')) {
+      return await db.bot.data.get('commands', 'status', { name: cmd })
+    } else {
+      return res
+    }
   }
 }
 
@@ -100,9 +105,17 @@ async function commandIsCustom (cmd) {
 }
 
 async function commandGetPermLevel (cmd, sub) {
-  return (sub)
-    ? await db.bot.data.get('subcommands', 'permission', { name: sub, parent: cmd })
-    : await db.bot.data.get('commands', 'permission', { name: cmd })
+  if (!sub) {
+    return await db.bot.data.get('commands', 'permission', { name: cmd })
+  } else {
+    const res = await db.bot.data.get('subcommands', 'permission', { name: sub, parent: cmd })
+
+    if (is(res, -1)) {
+      return await db.bot.data.get('commands', 'permission', { name: cmd })
+    } else {
+      return res
+    }
+  }
 }
 
 async function commandSetPermLevel (cmd, level, sub) {
@@ -111,10 +124,15 @@ async function commandSetPermLevel (cmd, level, sub) {
     return false
   }
 
-  if (sub) {
-    await db.bot.data.set('subcommands', { permission: level }, { name: sub, parent: cmd })
-  } else {
+  if (!sub) {
     await db.bot.data.set('commands', { permission: level }, { name: cmd })
+  } else {
+    if (is(level, -1)) {
+      const res = await db.bot.data.get('commands', 'permission', { name: cmd })
+      await db.bot.data.set('subcommands', { permission: res }, { name: sub, parent: cmd })
+    } else {
+      await db.bot.data.set('subcommands', { permission: level }, { name: sub, parent: cmd })
+    }
   }
 
   return true
@@ -181,7 +199,9 @@ async function addTableCustom (name, columns) {
 const coreMethods = {
   api: bot.api,
   tick: new Tock(),
-  util,
+  sleep,
+  is,
+  to,
 
   channel,
 
@@ -251,7 +271,7 @@ const coreMethods = {
     },
 
     async exists (user) {
-      return isPlainObject(await db.bot.data.getRow('users', { name: user }))
+      return is.object(await db.bot.data.getRow('users', { name: user }))
     },
 
     async isAdmin (user) {
@@ -319,7 +339,11 @@ const coreMethods = {
         const response = await db.bot.data.get('commands', 'response', {
           name: event.command, module: 'custom'
         })
+
         say(event.sender, this.params(event, response))
+
+        this.command.startCooldown(event.command, event.sender)
+        this.points.sub(event.sender, commandPrice)
       } catch (e) {
         log.error(e)
         throw e
@@ -328,15 +352,8 @@ const coreMethods = {
       try {
         getRunner(event.command)(event, this)
 
-        this.command
-            .startCooldown(event.command, event.sender, subcommand)
-            .catch(e => log.error(e))
-
-        if (!commandPrice) return
-
-        this.points
-            .sub(event.sender, commandPrice)
-            .catch(e => log.error(e))
+        this.command.startCooldown(event.command, event.sender, subcommand)
+        if (commandPrice) this.points.sub(event.sender, commandPrice)
       } catch (e) {
         log.error(e)
         throw e
@@ -361,7 +378,7 @@ export async function initialize (instant) {
     return log.bot('Bot setup is not complete.')
   }
 
-  await util.sleep(instant ? 1 : 5000)
+  await sleep(instant ? 1 : 5000)
 
   log.bot('Initializing bot...')
   if (!core) core = new Core()

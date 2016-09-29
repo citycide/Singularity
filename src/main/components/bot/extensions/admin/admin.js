@@ -166,26 +166,24 @@ export async function lastSeen (e, $) {
 export default function ($) {
   $.addCommand('command', {
     cooldown: 0,
-    permLevel: 0,
-    status: true
+    permLevel: 1
   })
 
-  $.addSubcommand('enable', 'command', { permLevel: 0, status: true })
-  $.addSubcommand('disable', 'command', { permLevel: 0, status: true })
-  $.addSubcommand('permission', 'command', { permLevel: 0, status: true })
-  $.addSubcommand('add', 'command', { permLevel: 0, status: true })
-  $.addSubcommand('remove', 'command', { permLevel: 0, status: true })
-  $.addSubcommand('edit', 'command', { permLevel: 0, status: true })
+  $.addSubcommand('enable', 'command')
+  $.addSubcommand('disable', 'command')
+  $.addSubcommand('permission', 'command')
+  $.addSubcommand('add', 'command')
+  $.addSubcommand('remove', 'command')
+  $.addSubcommand('edit', 'command')
 
   $.addCommand('whispermode', {
     handler: 'whisperMode',
     cooldown: 0,
-    permLevel: 0,
-    status: true
+    permLevel: 0
   })
 
-  $.addSubcommand('enable', 'whispermode', { permLevel: 0, status: true })
-  $.addSubcommand('disable', 'whispermode', { permLevel: 0, status: true })
+  $.addSubcommand('enable', 'whispermode')
+  $.addSubcommand('disable', 'whispermode')
 
-  $.addCommand('lastseen', { handler: 'lastSeen', status: true })
+  $.addCommand('lastseen', { handler: 'lastSeen' })
 }

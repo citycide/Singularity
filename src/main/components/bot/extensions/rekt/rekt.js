@@ -173,14 +173,11 @@ async function initResponses ($) {
 }
 
 export default async function ($) {
-  $.addCommand('rekt', {
-    cooldown: 60,
-    status: true
-  })
+  $.addCommand('rekt', { cooldown: 60 })
 
-  $.addSubcommand('add', 'rekt', { permLevel: 0, status: true })
-  $.addSubcommand('remove', 'rekt', { permLevel: 0, status: true })
-  $.addSubcommand('edit', 'rekt', { permLevel: 0, status: true })
+  $.addSubcommand('add', 'rekt', { permLevel: 1 })
+  $.addSubcommand('remove', 'rekt', { permLevel: 1 })
+  $.addSubcommand('edit', 'rekt', { permLevel: 1 })
 
   await $.db.addTable('rekt', true)
 

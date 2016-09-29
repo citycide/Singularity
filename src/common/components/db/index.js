@@ -3,10 +3,9 @@ import Trilogy from 'trilogy'
 import moment from 'moment'
 import Levers from 'levers'
 import path from 'path'
-import _ from 'lodash'
 
 import log from 'common/utils/logger'
-import { str, val } from 'common/utils/helpers'
+import { is, to } from 'common/utils/helpers'
 
 const settings = new Levers('app')
 
@@ -154,15 +153,14 @@ data.bot = {
     async get (key, defaultValue) {
       let response = await botDB.getValue('settings', 'value', { key })
 
-      if (_.isNil(response)) {
-        if (_.isNil(defaultValue)) return
+      if (is.nil(response)) {
+        if (is.nil(defaultValue)) return
 
         await this.set(key, defaultValue)
         return defaultValue
       }
 
-      if (str.isBoolean(response)) response = (response === 'true')
-      if (str.isNumeric(response)) response = val.toNumber(response)
+      if (is.numeric(response)) response = to.number(response)
 
       return response
     },
@@ -179,20 +177,19 @@ data.bot = {
 
   data: {
     async get (table, what, where, defaultValue) {
-      if (_.isPlainObject(what)) return this.getRow(table, where)
+      if (is.object(what)) return this.getRow(table, where)
 
       let response = await botDB.getValue(table, what, where)
 
-      if (_.isNil(response)) {
-        if (_.isNil(defaultValue)) return
+      if (is.nil(response)) {
+        if (is.nil(defaultValue)) return
 
         const obj = { [what]: defaultValue }
 
         return this.set(table, obj, where)
       }
 
-      if (str.isBoolean(response)) response = (response === 'true')
-      if (str.isNumeric(response)) response = val.toNumber(response)
+      if (is.numeric(response)) response = to.number(response)
 
       return response
     },
@@ -229,11 +226,11 @@ data.bot = {
       return this.get(table, what, where)
     },
     async incr (table, what, amount, where) {
-      if (!_.isFinite(amount) || amount === 0) {
+      if (!is.finite(amount) || amount === 0) {
         throw new Error(`Invalid amount: ${amount}`)
       }
 
-      if (!_.isPlainObject(where)) {
+      if (!is.object(where)) {
         throw new Error(`'where' must be an Object`)
       }
 
@@ -243,11 +240,11 @@ data.bot = {
       return botDB.getValue(table, what, where)
     },
     async decr (table, what, amount, where, allowNegative) {
-      if (!_.isFinite(amount) || amount === 0) {
+      if (!is.finite(amount) || amount === 0) {
         throw new Error(`Invalid amount: ${amount}`)
       }
 
-      if (!_.isPlainObject(where)) {
+      if (!is.object(where)) {
         throw new Error(`'where' must be an Object`)
       }
 

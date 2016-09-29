@@ -13,17 +13,29 @@ const points = {
   },
 
   async getCommandPrice (cmd, sub = null) {
-    return (sub)
-      ? await $.db.get('subcommands', 'price', { name: cmd })
-      : await $.db.get('commands', 'price', { name: cmd })
+    if (!sub) {
+      return await $.db.get('commands', 'price', { name: cmd })
+    } else {
+      const res = await $.db.get('subcommands', 'price', { name: cmd })
+
+      if (res === -1) {
+        return await $.db.get('commands', 'price', { name: cmd })
+      } else {
+        return res
+      }
+    }
   },
 
   async setCommandPrice (cmd, price, sub = null) {
-    const cost = parseInt(price)
-    if (sub) {
-      await $.db.set('subcommands', { name: cmd, price: cost }, { name: cmd })
+    if (!sub) {
+      await $.db.set('commands', { name: cmd, price }, { name: cmd })
     } else {
-      await $.db.set('commands', { name: cmd, price: cost }, { name: cmd })
+      if (price === -1) {
+        const res = await $.db.get('commands', 'price', { name: cmd })
+        await $.db.set('subcommands', { name: cmd, price: res }, { name: cmd })
+      } else {
+        await $.db.set('subcommands', { name: cmd, price }, { name: cmd })
+      }
     }
   },
 
@@ -52,8 +64,9 @@ const points = {
 
   async run () {
     const now = Date.now()
-    const nextLivePayout = this.lastPayout + (await this.settings.getPayoutInterval() * 60 * 1000)
-    const nextOfflinePayout = this.lastPayout + (await this.settings.getPayoutInterval(true) * 60 * 1000)
+    const lastPayout = $.cache.get('lastPayout', 0)
+    const nextLivePayout = lastPayout + (await this.settings.getPayoutInterval() * 60 * 1000)
+    const nextOfflinePayout = lastPayout + (await this.settings.getPayoutInterval(true) * 60 * 1000)
     let payout = 0
 
     if ($.stream.isLive) {
@@ -79,13 +92,11 @@ const points = {
     }
 
     const userList = $.user.list || []
+    const lastUserList = $.cache.get('lastUserList', [])
 
     await Promise.map(userList, async user => {
       if (user === $.channel.botName) return
-      if (!_.includes(this.settings.lastUserList, user)) {
-        this.settings.lastUserList.push(user)
-        return
-      }
+      if (!_.includes(lastUserList, user)) return
 
       const res = await $.db.getRow('users', { name: user })
 
@@ -97,13 +108,11 @@ const points = {
       await $.db.incr('users', 'points', payout + bonus, { name: user })
     })
 
-    this.settings.lastPayout = now
+    $.cache.set('lastUserList', userList)
+    $.cache.set('lastPayout', now)
   },
 
   settings: {
-    lastPayout: 0,
-    lastUserList: [],
-
     async getPointName (singular = false) {
       return (singular)
         ? await $.settings.get('pointName', 'point')
@@ -206,7 +215,7 @@ export default async function ($) {
     setName: points.settings.setPointName
   }
 
-  await $.util.sleep(1000)
+  await $.sleep(1000)
   points.run()
   $.tick.setInterval('pointPayouts', ::points.run, 60 * 1000)
 }

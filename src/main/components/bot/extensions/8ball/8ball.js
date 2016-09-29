@@ -14,7 +14,7 @@ export async function magicBall (e, $) {
     return
   }
 
-  if (e.argString === `I'm Ron Burgundy?`) {
+  if ($.is(e.argString, `I'm Ron Burgundy?`)) {
     $.shout(`Damnit, who typed a question mark on the teleprompter?`)
     return
   }
@@ -49,13 +49,12 @@ async function initResponses ($) {
 export default async function ($) {
   $.addCommand('8ball', {
     handler: 'magicBall',
-    cooldown: 60,
-    status: true
+    cooldown: 60
   })
 
-  $.addSubcommand('add', '8ball', { permLevel: 0, status: true })
-  $.addSubcommand('remove', '8ball', { permLevel: 0, status: true })
-  $.addSubcommand('edit', '8ball', { permLevel: 0, status: true })
+  $.addSubcommand('add', '8ball', { permLevel: 1 })
+  $.addSubcommand('remove', '8ball', { permLevel: 1 })
+  $.addSubcommand('edit', '8ball', { permLevel: 1 })
 
   await $.db.addTable('ball', true)
 

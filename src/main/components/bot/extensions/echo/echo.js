@@ -9,28 +9,28 @@
  * @command echo
  * @usage !echo [loudly|twice] (message)
  */
-export function echo (e, bot) {
+export function echo (e, $) {
   if (!e.argString) return
 
-  if (e.subcommand === 'twice') {
-    bot.say(e.sender, `${e.subArgString} ${e.subArgString}`)
+  if ($.is(e.subcommand, 'twice')) {
+    $.say(e.sender, `${e.subArgString} ${e.subArgString}`)
     return
   }
 
-  if (e.subcommand === 'loudly') {
-    bot.say(e.sender, `${e.subArgString.toUpperCase()}`)
+  if ($.is(e.subcommand, 'loudly')) {
+    $.say(e.sender, `${e.subArgString.toUpperCase()}`)
     return
   }
 
-  bot.say(e.sender, e.argString)
+  $.say(e.sender, e.argString)
 }
 
 /**
  * Register the module & its commands with the core
  */
-export default function (bot) {
+export default function ($) {
   /**
-   * bot.addCommand
+   * $.addCommand
    * @param {string} name - what must be typed in chat to run the command
    * @param {object} [options] - override the defaults when registering the command
    *   @param {string} [options.handler] - name of the exported function that runs the command
@@ -40,16 +40,13 @@ export default function (bot) {
    *   @param {boolean} [options.status] - whether the command is enabled / disabled by default
    */
 
-  bot.addCommand('echo', {
-    status: true,
-    price: 2
-  })
+  $.addCommand('echo', { price: 2 })
 
   /**
-   * bot.addSubcommand
+   * $.addSubcommand
    * @param {string} name - what must be typed in chat following the parent command
    * @param {string} parent - the parent command
-   * @param {object} [options] - same as the options for bot.addCommand
+   * @param {object} [options] - same as the options for $.addCommand
    *
    * Pattern:
    * [command prefix][parent command] [subcommand] [...arguments]
@@ -59,13 +56,6 @@ export default function (bot) {
    * -> hello hello
    */
 
-  bot.addSubcommand('twice', 'echo', {
-    status: true,
-    cooldown: 10
-  })
-
-  bot.addSubcommand('loudly', 'echo', {
-    status: true,
-    cooldown: 10
-  })
+  $.addSubcommand('twice', 'echo', { cooldown: 10 })
+  $.addSubcommand('loudly', 'echo', { cooldown: 10 })
 }

@@ -1,3 +1,4 @@
+import callsites from 'callsites'
 import db from 'common/components/db'
 import log from '../../../common/utils/logger'
 
@@ -40,17 +41,16 @@ const _registerCommand = async function (cmd, _module, parent = false) {
 const registerCommand = function (name, options) {
   if (!name) return
 
-  const _module = captureStack()[1].getFileName()
+  const _module = callsites()[1].getFileName()
 
-  const obj = {
+  const obj = Object.assign({
     name: name.toLowerCase(),
     handler: name,
     cooldown: 30,
     permLevel: 5,
-    status: false,
+    status: true,
     price: 0
-  }
-  Object.assign(obj, options)
+  }, options)
 
   _registerCommand(obj, _module)
 }
@@ -58,19 +58,18 @@ const registerCommand = function (name, options) {
 const registerSubcommand = function (name, parent, options) {
   if (!name || !parent || !commands.hasOwnProperty(parent)) return
 
-  const obj = {
+  const opts = Object.assign({
     name: name.toLowerCase(),
     parent,
-    cooldown: 30,
-    permLevel: 5,
-    status: false,
-    price: 0
-  }
-  Object.assign(obj, options)
+    cooldown: -1,
+    permLevel: -1,
+    status: 'inherit',
+    price: -1
+  }, options)
 
   const parentModule = commands[parent].module
 
-  _registerCommand(obj, parentModule, parent)
+  _registerCommand(opts, parentModule, parent)
 }
 
 const addCustomCommand = function (name, response) {
@@ -137,16 +136,6 @@ const _unregister = function (all) {
     modules = []
     commands = {}
   }
-}
-
-const captureStack = function () {
-  const _ = Error.prepareStackTrace
-  Error.prepareStackTrace = function (_, stack) {
-    return stack
-  }
-  const stack = new Error().stack.slice(1)
-  Error.prepareStackTrace = _
-  return stack
 }
 
 $.on('bot:ready', () => {

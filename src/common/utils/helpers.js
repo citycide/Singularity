@@ -1,37 +1,61 @@
 import _ from 'lodash'
 
-export const str = {
-  /**
-   * Check if a string is numeric
-   * @param {string} value
-   * @returns {boolean}
-   */
-  isNumeric (value) {
-    if (_.isFinite(value)) return true
-    if (!_.isString(value)) return false
-    return (/^((?:\d+)?\.?(?:\d+)?)$/).test(value)
-  },
+export function is (value, compare) {
+  return _.isEqual(value, compare)
+}
 
-  /**
-   * Check if a string is either of 'true' or 'false'
-   * @param {string} value
-   * @returns {boolean}
-   */
-  isBoolean (value) {
-    return (value === 'true' || value === 'false')
+export function to (value) {
+  return _.toString(value)
+}
+
+Object.assign(is, {
+  string: _.isString,
+  number: _.isNumber,
+  finite: _.isFinite,
+  object: _.isPlainObject,
+  array: _.isArray,
+  boolean: _.isBoolean,
+  nil: _.isNil,
+  empty: _.isEmpty,
+  numeric: isNumeric,
+  inRange: _.inRange,
+  lt: _.lt,
+  lte: _.lte,
+  gt: _.gt,
+  gte: _.gte
+})
+
+Object.assign(to, {
+  number: toNumber,
+  clamp: _.clamp,
+  random: toRandom,
+  string: _.toString,
+  range: _.range,
+  boolean: toBoolean
+})
+
+function isNumeric (value) {
+  if (_.isFinite(value)) return true
+  if (!_.isString(value)) return false
+  return (/^((?:\d+)?\.?(?:\d+)?)$/).test(value)
+}
+
+function toRandom (value, upper) {
+  if (_.isPlainObject(value) || _.isArray(value)) {
+    return _.sample(value)
+  } else {
+    return _.random(value, upper)
   }
 }
 
-export const val = {
-  /**
-   * Coerce a value to a number if possible, else return 0
-   * @param {*} value
-   * @param {boolean} [round] - rounds to an integer if true
-   * @returns {number}
-   */
-  toNumber (value, round) {
-    return round ? _.toInteger(value) : _.toFinite(value)
-  }
+function toBoolean (value) {
+  if (!value) return false
+  if (value === true || value === false) return value
+  return value === 'true'
+}
+
+function toNumber (value, round) {
+  return round ? _.toInteger(value) : _.toFinite(value)
 }
 
 export async function sleep (ms) {
@@ -39,13 +63,7 @@ export async function sleep (ms) {
 }
 
 export default {
-  str,
-  val,
-  num: {
-    random: _.random
-  },
-  arr: {
-    random: _.sample
-  },
+  is,
+  to,
   sleep
 }

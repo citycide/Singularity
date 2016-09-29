@@ -18,8 +18,8 @@ export async function coin (e, $) {
   const reward = await $.db.getModuleConfig('coin', 'reward', 1)
   const maxBet = await $.db.getModuleConfig('coin', 'maxBet', 50)
 
-  if ($.util.str.isNumeric(e.args[0])) {
-    const betAmount = parseInt(e.args[0])
+  if ($.is.numeric(e.args[0])) {
+    const betAmount = $.to.number(e.args[0])
     const userPoints = await $.points.get(e.sender)
 
     if (betAmount > maxBet) {
@@ -34,7 +34,7 @@ export async function coin (e, $) {
       return
     }
 
-    const result = $.util.num.random(1000) < 500
+    const result = $.to.random(1000) < 500
 
     if (result) {
       const result = betAmount * reward
@@ -49,13 +49,13 @@ export async function coin (e, $) {
     return
   }
 
-  if (e.subcommand === 'risk') {
-    if (!e.subArgs[0] || !$.util.str.isNumeric(e.subArgs[0])) {
+  if ($.is(e.subcommand, 'risk')) {
+    if (!e.subArgs[0] || !$.is.numeric(e.subArgs[0])) {
       $.say(e.sender, `Usage: !coin risk (multiplier) » currently set to ${risk}`)
       return
     }
 
-    const newRisk = $.util.val.toNumber(e.subArgs[0])
+    const newRisk = $.to.number(e.subArgs[0])
     await $.db.setModuleConfig('coin', 'risk', newRisk)
 
     $.say(e.sender, `Risk multiplier for !coin updated to ${await $.points.str(newRisk)}.`)
@@ -63,13 +63,13 @@ export async function coin (e, $) {
     return
   }
 
-  if (e.subcommand === 'reward') {
-    if (!e.subArgs[0] || !$.util.str.isNumeric(e.subArgs[0])) {
+  if ($.is(e.subcommand, 'reward')) {
+    if (!e.subArgs[0] || !$.is.numeric(e.subArgs[0])) {
       $.say(e.sender, `Usage: !coin reward (multiplier) » currently set to ${reward}`)
       return
     }
 
-    const newReward = $.util.val.toNumber(e.subArgs[0])
+    const newReward = $.to.number(e.subArgs[0])
     await $.db.setModuleConfig('coin', 'reward', newReward)
 
     $.say(e.sender, `Reward multiplier for !coin updated to ${$.points.str(newReward)}.`)
@@ -77,13 +77,13 @@ export async function coin (e, $) {
     return
   }
 
-  if (e.subcommand === 'max') {
-    if (!e.subArgs[0] || !$.util.str.isNumeric(e.subArgs[0])) {
+  if ($.is(e.subcommand, 'max')) {
+    if (!e.subArgs[0] || !$.is.numeric(e.subArgs[0])) {
       $.say(e.sender, `Usage: !coin max (number) » currently set to ${maxBet}`)
       return
     }
 
-    const newMax = $.util.val.toNumber(e.subArgs[0], true)
+    const newMax = $.to.number(e.subArgs[0], true)
     await $.db.setModuleConfig('coin', 'maxBet', newMax)
 
     $.say(e.sender, `Max bet for !coin updated to ${await $.points.str(newMax)}.`)
@@ -92,11 +92,10 @@ export async function coin (e, $) {
 
 export default function ($) {
   $.addCommand('coin', {
-    cooldown: 60,
-    status: true
+    cooldown: 60
   })
 
-  $.addSubcommand('risk', 'coin', { permLevel: 0, status: true })
-  $.addSubcommand('reward', 'coin', { permLevel: 0, status: true })
-  $.addSubcommand('max', 'coin', { permLevel: 0, status: true })
+  $.addSubcommand('risk', 'coin', { permLevel: 1 })
+  $.addSubcommand('reward', 'coin', { permLevel: 1 })
+  $.addSubcommand('max', 'coin', { permLevel: 1 })
 }

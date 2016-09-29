@@ -13,17 +13,16 @@ const time = {
   async run () {
     if ($.stream.isLive || await this.settings.getTimeKeeping(true)) {
       const userList = $.user.list || []
+      const lastUserList = $.cache.get('lastUserList', [])
+      const lastRun = $.cache.get('lastRun', Date.now())
 
       const nextTime = moment()
-      const lastTime = moment(this.settings.lastRun, 'x')
+      const lastTime = moment(lastRun, 'x')
       const timeSince = nextTime.diff(lastTime, 'seconds')
 
       await Promise.map(userList, async user => {
         if (user === $.channel.botName) return
-        if (!_.includes(this.settings.lastUserList, user)) {
-          this.settings.lastUserList.push(user)
-          return
-        }
+        if (!_.includes(lastUserList, user)) return
 
         const newTime = await $.db.incr('users', 'time', timeSince, { name: user })
         const autoReg = await this.settings.getAutoRegTime()
@@ -52,15 +51,13 @@ const time = {
         }
       })
 
-      this.settings.lastRun = nextTime.valueOf()
+      $.cache.set('lastUserList', userList)
+      $.cache.set('lastRun', nextTime.valueOf())
     }
 
     $.tick.setTimeout('timeKeeping', ::this.run, 60 * 1000)
   },
   settings: {
-    lastRun: Date.now(),
-    lastUserList: [],
-
     async getRegLevel () {
       return $.db.get('groups', 'level', { name: 'regular' })
     },
@@ -109,6 +106,6 @@ const time = {
 }
 
 export default async function ($) {
-  await $.util.sleep(5000)
+  await $.sleep(5000)
   time.run()
 }

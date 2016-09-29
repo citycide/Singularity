@@ -10,7 +10,7 @@ const params = function (event, text) {
   }
 
   if ((/\(random\)/g).test(text)) {
-    text = text.replace(/\(random\)/g, $.util.arr.random($.user.list) || $.channel.name)
+    text = text.replace(/\(random\)/g, $.to.random($.user.list) || $.channel.name)
   }
 
   if ((/\(pointname\)/g).test(text)) {
@@ -18,7 +18,7 @@ const params = function (event, text) {
   }
 
   if ((/\(#\)/g).test(text)) {
-    text = text.replace(/\(#\)/g, $.util.num.random(100))
+    text = text.replace(/\(#\)/g, $.to.random(100))
   }
 
   if ((/\(uptime\)/g).test(text)) {

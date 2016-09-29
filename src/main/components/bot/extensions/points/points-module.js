@@ -5,8 +5,8 @@ export async function points (e, $) {
     return $.say(e.sender, `You have ${await $.points.get(e.sender, true)}.`)
   }
 
-  if (action === 'add') {
-    if (e.args.length < 3 || !$.util.str.isNumeric(param2)) {
+  if ($.is(e.subcommand, 'add')) {
+    if (e.args.length < 3 || !$.is.numeric(param2)) {
       $.say(e.sender, `Usage: !points add [username] [amount]`)
       return
     }
@@ -17,8 +17,8 @@ export async function points (e, $) {
     return
   }
 
-  if (action === 'remove') {
-    if (e.args.length < 3 || !$.util.str.isNumeric(param2)) {
+  if ($.is(e.subcommand, 'remove')) {
+    if (e.args.length < 3 || !$.is.numeric(param2)) {
       $.say(e.sender, `Usage: !points remove [username] [amount]`)
       return
     }
@@ -29,13 +29,13 @@ export async function points (e, $) {
     return
   }
 
-  if (action === 'gift') {
-    if (e.args.length < 3 || !$.util.str.isNumeric(param2)) {
+  if ($.is(e.subcommand, 'gift')) {
+    if (e.args.length < 3 || !$.is.numeric(param2)) {
       $.say(e.sender, `Usage: !points gift [username] [amount]`)
       return
     }
 
-    if ($.points.get(e.sender) < parseInt(param2)) {
+    if ($.points.get(e.sender) < $.to.number(param2, true)) {
       $.say(e.sender, `You only have ${await $.points.get(e.sender, true)}.`)
       return
     }
@@ -67,11 +67,7 @@ export async function points (e, $) {
 }
 
 export default async function ($) {
-  $.addCommand('points', {
-    cooldown: 0,
-    status: true
-  })
-
-  $.addSubcommand('add', 'points', { permLevel: 0, status: true })
-  $.addSubcommand('remove', 'points', { permLevel: 0, status: true })
+  $.addCommand('points')
+  $.addSubcommand('add', 'points', { permLevel: 1 })
+  $.addSubcommand('remove', 'points', { permLevel: 1 })
 }

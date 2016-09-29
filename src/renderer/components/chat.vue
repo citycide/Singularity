@@ -147,7 +147,7 @@
   // import getBTTVEmotes from './chat/lib/emotes/BTTV'
   // import getFFZEmotes from './chat/lib/emotes/FFZ'
 
-  import testMessages from './chat/lib/test-messages'
+  // import testMessages from './chat/lib/test-messages'
 
   export default {
     data () {
@@ -281,7 +281,7 @@
 
         chat.on('whisper', (user, message) => this.addWhisper(user, message))
         chat.once('emotesets', async sets => {
-          this.messages = testMessages
+          // this.messages = testMessages
           // this.emotes.twitch = await getTwitchEmoteList(sets)
         })
       }

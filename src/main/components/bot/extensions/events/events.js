@@ -3,7 +3,7 @@ import transit from 'main/components/transit'
 export async function alerts (e, $) {
   const param1 = e.args[1]
 
-  if (e.subcommand === 'follow') {
+  if ($.is('follow')) {
     if (param1 === 'enable') {
       await $.settings.set('followAlerts', true)
       $.say(e.sender, weave.get('bot:settings:alerts-follows:enabled:success'))
@@ -20,7 +20,7 @@ export async function alerts (e, $) {
     return
   }
 
-  if (e.subcommand === 'host') {
+  if ($.is('host')) {
     if (param1 === 'enable') {
       await $.settings.set('hostAlerts', true)
       $.say(e.sender, weave.get('bot:settings:alerts-hosts:enabled:success'))
@@ -37,7 +37,7 @@ export async function alerts (e, $) {
     return
   }
 
-  if (e.subcommand === 'sub') {
+  if ($.is('sub')) {
     if (param1 === 'enable') {
       await $.settings.set('subAlerts', true)
       $.say(e.sender, weave.get('bot:settings:alerts-subs:enabled:success'))
@@ -54,7 +54,7 @@ export async function alerts (e, $) {
     return
   }
 
-  if (e.subcommand === 'tip') {
+  if ($.is('tip')) {
     if (param1 === 'enable') {
       await $.settings.set('tipAlerts', true)
       $.say(e.sender, weave.get('bot:settings:alerts-tips:enabled:success'))
@@ -71,7 +71,7 @@ export async function alerts (e, $) {
     return
   }
 
-  if (e.subcommand === 'settings') {
+  if ($.is('settings')) {
     const cfg = [
       await $.settings.get('followAlerts', true)
         ? weave.get('common-words:enabled')
@@ -181,5 +181,5 @@ transit.on('alert:tip', async data => {
 })
 
 export default function ($) {
-  $.addCommand('alerts', { permLevel: 0, status: true })
+  $.addCommand('alerts', { permLevel: 0 })
 }
