@@ -10,19 +10,52 @@ async function parseBTTVEmotes (messageTree) {
 
     _.each(await getBTTVEmoteList(), (e, k) => {
       const escaped = _.escapeRegExp(k)
-      const rgxString = `(?:^| +)${escaped}(?=(?: |$))(?!(?:[^<]*>))`
+      const rgxString = `(.+)?(?:^| )${escaped}(?: |$)(.+)?`
       const rgx = new RegExp(rgxString, 'g')
+      const [, before, target, after] = rgx.exec(o.value) || []
 
-      // this replaces the value...
-      // but still need to split the nodes somehow
-      o.value = o.value.replace(rgx, '')
+      if (!target) return
+
+      if (!before && !after) {
+        o = {
+          raw: o.value,
+          type: 'emote',
+          value: `http://cdn.betterttv.net/emote/${e}/1x`
+        }
+      } else if (!before) {
+        o = [{
+          raw: o.value,
+          type: 'emote',
+          value: `http://cdn.betterttv.net/emote/${e}/1x`
+        }, {
+          type: 'text',
+          value: after
+        }]
+      } else if (!after) {
+        o = [{
+          raw: o.value,
+          type: 'emote',
+          value: `http://cdn.betterttv.net/emote/${e}/1x`
+        }, {
+          raw: o.value,
+          type: 'emote',
+          value: `http://cdn.betterttv.net/emote/${e}/1x`
+        }]
+      } else if (before && after) {
+        o = [{
+          type: 'text',
+          value: before
+        }, {
+          raw: target,
+          type: 'emote',
+          value: `http://cdn.betterttv.net/emote/${e}/1x`
+        }, {
+          type: 'text',
+          value: after
+        }]
+      }
     })
 
-    // modify the node as needed
-    // if there's more than just the emote in the node,
-    // we need to split it up into multiple nodes
-
-    console.log(o)
     return o
   }))
 }
