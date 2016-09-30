@@ -3,6 +3,7 @@
 .vscode
 node_modules
 build
+db
 /singularity.bat
 /singularity.lnk
 /jsconfig.json
