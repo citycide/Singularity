@@ -22,7 +22,8 @@ Object.assign(is, {
   lt: _.lt,
   lte: _.lte,
   gt: _.gt,
-  gte: _.gte
+  gte: _.gte,
+  oneOf: _.includes
 })
 
 Object.assign(to, {

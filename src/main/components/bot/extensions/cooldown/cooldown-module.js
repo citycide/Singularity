@@ -1,5 +1,5 @@
 export async function cooldown (e, $) {
-  if (e.subcommand === 'get') {
+  if ($.is(e.subcommand, 'get')) {
     const [cmd, sub = ''] = e.subArgs
     const subStr = sub ? ' ' + sub : ''
 
@@ -9,14 +9,14 @@ export async function cooldown (e, $) {
 
     const cool = await $.command.getCooldown(cmd, sub)
 
-    if (typeof cool !== 'number') {
+    if (!$.is.finite(cool)) {
       return $.say(e.sender, `'!${cmd}${subStr}' has no cooldown.`)
     }
 
     return $.say(e.sender, `Cooldown for '!${cmd}${subStr}' is set to ${cool} seconds.`)
   }
 
-  if (e.subcommand === 'set') {
+  if ($.is(e.subcommand, 'set')) {
     const [cmd, sub, val] = e.subArgs
 
     if (!cmd) {
@@ -28,7 +28,7 @@ export async function cooldown (e, $) {
         // provided a command and cooldown value only
         const num = parseInt(sub)
 
-        if (typeof num !== 'number') {
+        if ($.is.finite(num)) {
           return $.say(e.sender, 'Usage: !cooldown set (command) [subcommand] (# seconds)')
         }
 
@@ -42,7 +42,7 @@ export async function cooldown (e, $) {
         // provided a command, subcommand, and cooldown value
         const subNum = parseInt(val)
 
-        if (typeof subNum !== 'number') {
+        if (!$.is.finite(subNum)) {
           return $.say(e.sender, 'Usage: !cooldown set (command) [subcommand] (# seconds)')
         }
 
@@ -59,6 +59,10 @@ export async function cooldown (e, $) {
 
   if ($.is(e.subcommand, 'admin')) {
     const [status] = e.subArgs
+
+    if (!$.is.oneOf(['enabled', 'disabled'], status)) {
+      return $.say(e.sender, `Usage: !cooldown admin (enabled|disabled)`)
+    }
 
     const bool = $.is(status, 'enabled')
     $.db.setComponentConfig('cooldown', 'includeAdmins', bool)
