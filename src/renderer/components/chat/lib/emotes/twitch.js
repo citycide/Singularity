@@ -16,7 +16,7 @@ function parseTwitchEmotes (message, emotes) {
   return _.flatMap(mapped, ([start, end, id], i) => {
     const emote = {
       type: 'emote',
-      raw: message.slice(start, end + 1),
+      raw: message.slice(start - 1, end),
       value: `https://static-cdn.jtvnw.net/emoticons/v1/${id}/1.0`
     }
 
