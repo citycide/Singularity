@@ -1,63 +1,23 @@
 import _ from 'lodash'
 import axios from 'axios'
 import Levers from 'levers'
+import recurse from './recurser'
 
 const twitch = new Levers('twitch')
 
 async function parseBTTVEmotes (messageTree) {
-  return Promise.all(_.map(messageTree, async o => {
-    if (o.type !== 'text') return o
+  const tree = _.cloneDeep(messageTree)
+  _.each(tree, async (o, i) => {
+    if (o.type !== 'text') return
 
     _.each(await getBTTVEmoteList(), (e, k) => {
-      const escaped = _.escapeRegExp(k)
-      const rgxString = `(.+)?(?:^| )${escaped}(?: |$)(.+)?`
-      const rgx = new RegExp(rgxString, 'g')
-      const [, before, target, after] = rgx.exec(o.value) || []
-
-      if (!target) return
-
-      if (!before && !after) {
-        o = {
-          raw: o.value,
-          type: 'emote',
-          value: `http://cdn.betterttv.net/emote/${e}/1x`
-        }
-      } else if (!before) {
-        o = [{
-          raw: o.value,
-          type: 'emote',
-          value: `http://cdn.betterttv.net/emote/${e}/1x`
-        }, {
-          type: 'text',
-          value: after
-        }]
-      } else if (!after) {
-        o = [{
-          raw: o.value,
-          type: 'emote',
-          value: `http://cdn.betterttv.net/emote/${e}/1x`
-        }, {
-          raw: o.value,
-          type: 'emote',
-          value: `http://cdn.betterttv.net/emote/${e}/1x`
-        }]
-      } else if (before && after) {
-        o = [{
-          type: 'text',
-          value: before
-        }, {
-          raw: target,
-          type: 'emote',
-          value: `http://cdn.betterttv.net/emote/${e}/1x`
-        }, {
-          type: 'text',
-          value: after
-        }]
-      }
+      const [items = [], loc, del] = recurse(o, i, e, k, 'bttv')
+      if (!items.length) return
+      tree.splice(loc, del, ...items)
     })
+  })
 
-    return o
-  }))
+  return tree
 }
 
 async function getBTTVEmotes () {
