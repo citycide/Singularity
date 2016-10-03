@@ -8,13 +8,13 @@ const settings = new Levers('app')
 const state = {
   tipeeeEnabled: settings.get('tipeee.active'),
   streamtipEnabled: settings.get('streamtip.active'),
-  twitchAlertsEnabled: settings.get('twitchAlerts.active')
+  streamlabsEnabled: settings.get('streamlabs.active')
 }
 
 const getters = {
   tipeeeEnabled: state => state.tipeeeEnabled,
   streamtipEnabled: state => state.streamtipEnabled,
-  twitchAlertsEnabled: state => state.twitchAlertsEnabled
+  streamlabsEnabled: state => state.streamlabsEnabled
 }
 
 const actions = {

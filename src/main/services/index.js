@@ -2,7 +2,7 @@ import Levers from 'levers'
 
 import './events'
 import Twitch from './Twitch'
-import * as twitchAlerts from './TwitchAlerts'
+import * as streamlabs from './Streamlabs'
 import * as tipeeeStream from './TipeeeStream'
 import * as streamtip from './Streamtip'
 import * as server from './server'
@@ -20,7 +20,7 @@ function initServices () {
   instances.set('server', initServer())
   instances.set('bot', bot.start())
 
-  instances.set('twitchAlerts', twitchAlerts.start())
+  instances.set('streamlabs', streamlabs.start())
   instances.set('streamtip', streamtip.start())
   instances.set('tipeee', tipeeeStream.start())
 }

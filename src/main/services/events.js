@@ -4,7 +4,7 @@ import { instances, getInstance } from './index'
 
 const services = [
   { name: 'tipeee', file: './TipeeeStream' },
-  { name: 'twitchAlerts', file: './TwitchAlerts' },
+  { name: 'streamlabs', file: './Streamlabs' },
   { name: 'streamtip', file: './Streamtip' },
   { name: 'server', file: './server' },
   { name: 'bot', file: './bot' }

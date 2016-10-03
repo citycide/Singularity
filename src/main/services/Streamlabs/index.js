@@ -1,7 +1,7 @@
 import moment from 'moment'
 import Levers from 'levers'
 
-import TwitchAlerts from './lib'
+import Streamlabs from './lib'
 import { sleep } from 'common/utils/helpers'
 import transit from 'main/components/transit'
 import log from 'common/utils/logger'
@@ -10,15 +10,15 @@ import Tock from 'common/utils/tock'
 const settings = new Levers('app')
 const tick = new Tock()
 
-const isEnabled = () => settings.get('twitchAlerts.active')
+const isEnabled = () => settings.get('streamlabs.active')
 const tips = []
 
 async function start (instant) {
   if (!isEnabled()) return {}
 
-  log.info('Initializing TwitchAlerts donations API')
+  log.info('Initializing Streamlabs donations API')
 
-  const instance = new TwitchAlerts({ token: settings.get('twitchAlerts.token') })
+  const instance = new Streamlabs({ token: settings.get('streamlabs.token') })
 
   if (instant) {
     listen(instance)
@@ -34,18 +34,18 @@ async function start (instant) {
 }
 
 function stop () {
-  tick.clearInterval('pollTwitchAlerts')
+  tick.clearInterval('pollStreamlabs')
 }
 
 function listen (instance) {
   interval(instance)
-  tick.setInterval('pollTwitchAlerts', interval.bind(undefined, instance), 60 * 1000)
+  tick.setInterval('pollStreamlabs', interval.bind(undefined, instance), 60 * 1000)
 }
 
 function activate (data) {
-  log.info('Enabling TwitchAlerts service')
-  settings.set('twitchAlerts.active', true)
-  settings.set('twitchAlerts.token', data)
+  log.info('Enabling Streamlabs service')
+  settings.set('streamlabs.active', true)
+  settings.set('streamlabs.token', data)
 
   start(true)
 }
@@ -53,9 +53,9 @@ function activate (data) {
 function deactivate () {
   stop()
 
-  log.info('Disabling TwitchAlerts service')
-  settings.set('twitchAlerts.active', false)
-  settings.del('twitchAlerts.token')
+  log.info('Disabling Streamlabs service')
+  settings.set('streamlabs.active', false)
+  settings.del('streamlabs.token')
 }
 
 async function interval (instance) {
@@ -63,7 +63,7 @@ async function interval (instance) {
     const data = await instance.getRecentDonations()
 
     if (!data.donations) {
-      return log.debug('TwitchAlerts:: No donation data found.')
+      return log.debug('Streamlabs:: No donation data found.')
     }
 
     handleResponse(data.donations)

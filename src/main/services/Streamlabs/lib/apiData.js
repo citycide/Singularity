@@ -8,7 +8,7 @@ export default {
 
   API: {
     v1: {
-      base: 'http://www.twitchalerts.com/api/',
+      base: 'http://www.streamlabs.com/api/',
       endpoints: [
         {
           name: 'donations',

@@ -93,56 +93,56 @@
         </div>
       </ui-tab>
 
-      <ui-tab header="TwitchAlerts">
-        <div v-if="!twitchAlertsEnabled">
-          <vs-wizard :current-index.sync="twitchAlerts.currentStep">
+      <ui-tab header="Streamlabs">
+        <div v-if="!streamlabsEnabled">
+          <vs-wizard :current-index.sync="streamlabs.currentStep">
             <vs-wizard-step
               title="INSERT COIN" description="Get your API key"
-              :progress="twitchAlerts.one.progress" :valid="twitchAlerts.one.valid"
+              :progress="streamlabs.one.progress" :valid="streamlabs.one.valid"
             ></vs-wizard-step>
             <vs-wizard-step
               title="KEY TO THE KINGDOM" description="We're going to need that"
-              :progress="twitchAlerts.two.progress" :valid="twitchAlerts.two.valid"
+              :progress="streamlabs.two.progress" :valid="streamlabs.two.valid"
             ></vs-wizard-step>
           </vs-wizard>
 
-          <div class="twitchAlerts-step-one has-text-centered" v-if="twitchAlerts.currentStep === 0">
+          <div class="streamlabs-step-one has-text-centered" v-if="streamlabs.currentStep === 0">
             <div class="step-body">
               <p>
                 <strong>singularity</strong> supports tip alerts through Streamlabs.
                 To activate this feature, you'll need to get your API Access Token.
-                Please click the link below to open TwitchAlerts' dashboard in a new
+                Please click the link below to open Streamlabs' dashboard in a new
                 window where you can copy the API Access Token. Then come back here to submit it.
               </p>
             </div>
-            <div class="twitchAlerts-image">
+            <div class="streamlabs-image">
               <!--<img src="/images/streamtip-setup.png" class="tipeee-img-responsive">-->
             </div>
             <div class="step-footer">
               <ui-button
-                @click.stop.prevent="openLink('twitchAlerts')"
+                @click.stop.prevent="openLink('streamlabs')"
                 color="primary" icon="open_in_new" icon-right
-              >GO TO TWITCHALERTS</ui-button>
+              >GO TO STREAMLABS</ui-button>
             </div>
           </div>
-          <div class="twitchAlerts-step-two has-text-centered" v-if="twitchAlerts.currentStep === 1">
+          <div class="streamlabs-step-two has-text-centered" v-if="streamlabs.currentStep === 1">
             <div class="step-body">
               <p>
-                Enter the API key you just grabbed from TwitchAlerts below,
+                Enter the API key you just grabbed from Streamlabs below,
                 then click <strong>SUBMIT</strong>.
               </p>
 
               <ui-textbox
                 name="API Key" icon="vpn_key" type="text"
-                :value.sync="twitchAlerts.token" placeholder="TwitchAlerts API Key"
-                help-text="Enter your TwitchAlerts API Key here."
+                :value.sync="streamlabs.token" placeholder="Streamlabs API Key"
+                help-text="Enter your Streamlabs API Key here."
                 validation-rules="required|min:35|max:45"
               ></ui-textbox>
             </div>
 
             <div class="step-footer">
               <ui-button
-                @click.stop.prevent="enable('twitchAlerts')"
+                @click.stop.prevent="enable('streamlabs')"
                 color="primary" icon="check" icon-right
               >SUBMIT</ui-button>
             </div>
@@ -151,13 +151,13 @@
         <div v-else>
           <div class="step-body deactivation">
             <p>
-              TwitchAlerts has already been enabled.
+              Streamlabs has already been enabled.
               If you want to disable it, click the button below.
             </p>
           </div>
           <div class="step-footer">
             <ui-button
-              @click="twitchAlerts.showDeactModal = true" color="warning"
+              @click="streamlabs.showDeactModal = true" color="warning"
             >DEACTIVATE</ui-button>
           </div>
         </div>
@@ -192,7 +192,7 @@
               <ui-button
                 @click.stop.prevent="openLink('streamtip')"
                 color="primary" icon="open_in_new" icon-right
-              >GO TO TWITCHALERTS</ui-button>
+              >GO TO STREAMLABS</ui-button>
             </div>
           </div>
           <div class="streamtip-step-two has-text-centered" v-if="streamtip.currentStep === 1">
@@ -241,9 +241,9 @@
       through the setup process again. Are you sure?
     </ui-confirm>
     <ui-confirm
-      header="Deactivate TwitchAlerts?" @confirmed="disable('twitchAlerts')" @denied=""
-      :show.sync="twitchAlerts.showDeactModal" close-on-confirm
-    > If you deactivate TwitchAlerts, you'll need to go
+      header="Deactivate Streamlabs?" @confirmed="disable('streamlabs')" @denied=""
+      :show.sync="streamlabs.showDeactModal" close-on-confirm
+    > If you deactivate Streamlabs, you'll need to go
       through the setup process again. Are you sure?
     </ui-confirm>
     <ui-confirm
@@ -303,7 +303,7 @@
           url: 'https://streamtip.com/account'
         },
 
-        twitchAlerts: {
+        streamlabs: {
           currentStep: 0,
           showDeactModal: false,
           one: {
@@ -314,7 +314,7 @@
             progress: 0,
             valid: false
           },
-          url: 'https://www.twitchalerts.com/dashboard/api-settings'
+          url: 'https://streamlabs.com/dashboard/api-settings'
         }
       }
     },
@@ -337,7 +337,7 @@
       }
     },
 
-    computed: mapGetters(['tipeeeEnabled', 'streamtipEnabled', 'twitchAlertsEnabled']),
+    computed: mapGetters(['tipeeeEnabled', 'streamtipEnabled', 'streamlabsEnabled']),
 
     components: {
       UiButton,

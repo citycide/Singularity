@@ -1,7 +1,7 @@
 import { defaults } from 'lodash'
 import API from './API'
 
-export default class TwitchAlerts {
+export default class Streamlabs {
   constructor (options) {
     this.options = options || {}
     this.token = this.options.token || ''
