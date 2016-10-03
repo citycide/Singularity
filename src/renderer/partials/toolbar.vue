@@ -57,7 +57,7 @@
 
 <script>
   import { UiToolbar, UiIconButton } from 'keen-ui'
-  import { mapGetters, mapActions, mapMutations } from 'vuex'
+  import { mapGetters, mapActions } from 'vuex'
 
   export default {
     data () {
@@ -84,7 +84,7 @@
     },
 
     methods: {
-      ...mapActions(['sidebarToggle', 'logout']),
+      ...mapActions(['sidebarToggle', 'logout', 'toggleModal']),
 
       menuHandler (event) {
         switch (event.id) {
@@ -110,7 +110,11 @@
           case 'settings':
             this.$router.go('settings')
             break
+          case 'about':
+            this.toggleModal('about')
+            break
           case 'help':
+            this.toggleModal('help')
             break
         }
       }

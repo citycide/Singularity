@@ -2,11 +2,15 @@ import types from './types'
 
 const state = {
   sidebarOpen: false,
+  modalAbout: false,
+  modalHelp: false,
   setupComplete: false
 }
 
 const getters = {
   sidebarOpen: state => state.sidebarOpen,
+  modalAbout: state => state.modalAbout,
+  modalHelp: state => state.modalHelp,
   setupComplete: state => state.setupComplete
 }
 
@@ -16,6 +20,9 @@ const actions = {
   },
   setupFinished ({ commit }) {
     commit(types.SETUP_FINISHED)
+  },
+  toggleModal ({ commit }, type) {
+    commit(types[`MODAL_TOGGLE_${type.toUpperCase()}`])
   }
 }
 
@@ -32,6 +39,13 @@ const mutations = {
 
   [types.SETUP_FINISHED] (state) {
     state.setupComplete = true
+  },
+
+  [types.MODAL_TOGGLE_ABOUT] (state) {
+    state.modalAbout = !state.modalAbout
+  },
+  [types.MODAL_TOGGLE_HELP] (state) {
+    state.modalHelp = !state.modalHelp
   }
 }
 
