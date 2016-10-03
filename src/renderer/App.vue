@@ -32,6 +32,24 @@
     margin-top: 25px;
     margin-left: 5px;
   }
+
+  .loading-curtain {
+    background-color: #039BE5;
+    position: fixed;
+    z-index: 9;
+    width: 100%;
+    height: 100%;
+
+    .ui-progress-circular {
+      background-color: #fff;
+      border-radius: 100px;
+      position: fixed;
+      z-index: 10;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
 </style>
 
 <style scoped>
@@ -47,8 +65,15 @@
 <template>
   <div class="app-container">
     <window-frame></window-frame>
+    <div v-if="loading" class="loading-curtain" transition="fade">
+      <ui-progress-circular
+        color="multi-color" :size="100" :stroke="3" :show="loading"
+      ></ui-progress-circular>
+    </div>
     <toolbar v-if="showBars"></toolbar>
     <sidebar v-if="showBars"></sidebar>
+    <about-modal></about-modal>
+    <help-modal></help-modal>
     <div
       v-if="authState > 0"
       :class="['view-container', 'is-fluid', { 'frameless': isFrameless }]">
@@ -68,17 +93,27 @@
 
 <script>
   import { mapGetters } from 'vuex'
+  import { UiProgressCircular } from 'keen-ui'
 
   import windowFrame from './partials/frame'
   import toolbar from './partials/toolbar'
   import sidebar from './partials/sidebar'
+  import aboutModal from './partials/modals/about'
+  import helpModal from './partials/modals/help'
   import store from './vuex/store'
 
   export default {
     store,
 
     data () {
-      return {}
+      return {
+        loading: true
+      }
+    },
+
+    ready () {
+      // hide the preloader
+      setTimeout(() => { this.loading = false }, 200)
     },
 
     computed: {
@@ -99,7 +134,10 @@
     },
 
     components: {
+      UiProgressCircular,
       windowFrame,
+      aboutModal,
+      helpModal,
       toolbar,
       sidebar
     }
