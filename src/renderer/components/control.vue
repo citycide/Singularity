@@ -75,7 +75,7 @@
             </div>
             <div class="media-content">
               <div class="content">
-                <strong>CURRENT SONG</strong><br>
+                <span class="strong">CURRENT SONG</span><br>
                 {{ music.current }}
               </div>
             </div>

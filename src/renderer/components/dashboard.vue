@@ -54,7 +54,7 @@
         <ui-collapsible id="one" header="STREAM INFO" :open="true" >
           <div slot="header" class="group inline">
             <ui-icon icon="edit"></ui-icon>
-            <strong>STREAM</strong> INFO
+            <span class="strong-white">STREAM</span> INFO
           </div>
           <ui-textbox
             name="game" placeholder="No game set on Twitch"
@@ -71,7 +71,7 @@
           <ui-collapsible id="collapse-followers":open="true">
             <div slot="header" class="group inline">
               <ui-icon icon="av_timer"></ui-icon>
-              <strong>RECENT</strong> FOLLOWERS
+              <span class="strong-white">RECENT</pan> FOLLOWERS
             </div>
             <follower-table @expand="resizeFollowers"></follower-table>
           </ui-collapsible>
@@ -79,7 +79,7 @@
         <ui-collapsible id="three">
           <div slot="header" class="group inline">
             <ui-icon icon="videocam"></ui-icon>
-            <strong>STREAM</strong> PREVIEW
+            <span class="strong-white">STREAM</span> PREVIEW
           </div>
           <div style="background-color: #202020; height: 300px;"></div>
         </ui-collapsible>
@@ -88,7 +88,7 @@
         <ui-collapsible id="collapse-chat" :open="true">
           <div slot="header" class="group inline">
             <ui-icon icon="question_answer"></ui-icon>
-            <strong>TWITCH</strong> CHAT
+            <span class="strong-white">TWITCH</span> CHAT
           </div>
           <chat style="height: 630px;"></chat>
         </ui-collapsible>

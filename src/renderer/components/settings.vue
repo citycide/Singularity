@@ -109,7 +109,7 @@
           <div class="twitchAlerts-step-one has-text-centered" v-if="twitchAlerts.currentStep === 0">
             <div class="step-body">
               <p>
-                <strong>singularity</strong> supports tip alerts through TwitchAlerts.
+                <strong>singularity</strong> supports tip alerts through Streamlabs.
                 To activate this feature, you'll need to get your API Access Token.
                 Please click the link below to open TwitchAlerts' dashboard in a new
                 window where you can copy the API Access Token. Then come back here to submit it.

@@ -4,7 +4,7 @@
   }
 
   .chat-wrapper {
-    background-color: #363636 !important;
+    background-color: #363636;
     overflow: hidden;
     top: 0;
     margin: 0;

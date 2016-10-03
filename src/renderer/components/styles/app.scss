@@ -16,8 +16,14 @@ html, body {
   margin-top: initial;
 }
 
-strong {
+.strong {
+  color: #222324;
+  font-weight: 700;
+}
+
+.strong-white {
   color: #fff;
+  font-weight: 700;
 }
 
 ::-webkit-scrollbar {
