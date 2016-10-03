@@ -5,7 +5,7 @@ import Vue from 'vue'
 import types from './types'
 
 import log from '../../../common/utils/logger'
-// import transit from '../../components/js/transit'
+import transit from '../../components/js/transit'
 
 const settings = new Levers('app')
 const cache = new Levers('twitch')
@@ -87,8 +87,8 @@ const actions = {
         if (res.data.token.valid) {
           state.channel.name = res.data.token.user_name
 
-          // transit.fire('auth:twitch', token)
           settings.set('twitch.token', token)
+          transit.fire('services:all:start')
           log.debug(`User authorized with token: ${token}`)
           commit(types.AUTHENTICATE, token)
         } else {
@@ -113,7 +113,8 @@ const actions = {
     authWindow.loadURL(authURL)
   },
   logout ({ commit }) {
-    settings.del('twitchToken')
+    settings.del('twitch.token')
+    transit.fire('services:all:stop')
     cache.clear()
     commit(types.LOGOUT)
   },
