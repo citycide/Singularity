@@ -4,6 +4,7 @@
 node_modules
 build
 db
+npm-debug.log
 /singularity.bat
 /singularity.lnk
 /jsconfig.json
