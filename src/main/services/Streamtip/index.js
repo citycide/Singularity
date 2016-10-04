@@ -59,7 +59,7 @@ function listen (instance) {
       },
       type: 'tip'
     }
-    transit.emit('alert:tip:event', thisEvent)
+    transit.emit('alert:tip:event', thisEvent, 'all')
   })
 
   instance.on('error', err => {
