@@ -17,7 +17,7 @@ services.forEach(({ name, file }) => {
 
     const { activate } = require(file)
     activate(data)
-  }, 'ipc')
+  })
 
   transit.on(`service:${name}:disable`, () => {
     const instance = getInstance(name)
@@ -27,8 +27,8 @@ services.forEach(({ name, file }) => {
     const { deactivate } = require(file)
     deactivate()
     instances.delete(name)
-  }, 'ipc')
+  })
 })
 
-transit.on('service:all:start', () => initServices, 'ipc')
-transit.on('service:all:stop', () => instances.forEach(v => v.stop()), 'ipc')
+transit.on('service:all:start', () => initServices)
+transit.on('service:all:stop', () => instances.forEach(v => v.stop()))
