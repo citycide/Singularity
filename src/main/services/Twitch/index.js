@@ -170,7 +170,7 @@ export default class TwitchClass {
   }
 
   eventHandler () {
-    transit.on('alert:follower', username => {
+    transit.on('alert:follower:test', username => {
       let thisTest
       this.resolveUser(username, userObj => {
         if (userObj.resolved) {
@@ -196,7 +196,7 @@ export default class TwitchClass {
       })
     })
 
-    transit.on('alert:host', hostObj => {
+    transit.on('alert:host:test', hostObj => {
       let thisTest
       this.resolveUser(hostObj.user.display_name, userObj => {
         if (userObj.resolved) {
@@ -223,7 +223,7 @@ export default class TwitchClass {
       })
     })
 
-    transit.on('alert:tip', data => {
+    transit.on('alert:tip:test', data => {
       let thisTest = {
         user: {
           name: data.user.name,
