@@ -1,10 +1,13 @@
+import Levers from 'levers'
 import types from './types'
+
+const app = new Levers('app')
 
 const state = {
   sidebarOpen: false,
   modalAbout: false,
   modalHelp: false,
-  setupComplete: false
+  setupComplete: app.get('setupComplete', false)
 }
 
 const getters = {
@@ -19,6 +22,7 @@ const actions = {
     commit(types.SIDEBAR_TOGGLE)
   },
   setupFinished ({ commit }) {
+    app.set('setupComplete', true)
     commit(types.SETUP_FINISHED)
   },
   toggleModal ({ commit }, type) {

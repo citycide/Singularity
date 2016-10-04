@@ -27,16 +27,17 @@
   }
 
   .setup-container {
+    overflow: auto;
+    padding: 0;
+    margin: 28px 0 0 5px;
     height: calc(100% - 30px);
     width: calc(100% - 10px);
-    margin-top: 25px;
-    margin-left: 5px;
   }
 
   .loading-curtain {
     background-color: #039BE5;
     position: fixed;
-    z-index: 9;
+    z-index: 29;
     width: 100%;
     height: 100%;
 
@@ -44,7 +45,7 @@
       background-color: #fff;
       border-radius: 100px;
       position: fixed;
-      z-index: 10;
+      z-index: 30;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -76,7 +77,8 @@
     <help-modal></help-modal>
     <div
       v-if="authState > 0"
-      :class="['view-container', 'is-fluid', { 'frameless': isFrameless }]">
+      :class="['view-container', 'is-fluid', { 'frameless': isFrameless }]"
+    >
       <router-view
         class="animated"
         transition="fade"
@@ -84,9 +86,8 @@
         keep-alive
       ></router-view>
     </div>
-    <div v-if="authState === 0" class="setup-container">
-      <h2>WE NEED SETUP YO</h2>
-      <!-- this will be the initial setup / onboarding flow -->
+    <div v-if="authState === 0" class="setup-container is-fluid" >
+      <setup></setup>
     </div>
   </div>
 </template>
@@ -95,6 +96,7 @@
   import { mapGetters } from 'vuex'
   import { UiProgressCircular } from 'keen-ui'
 
+  import setup from './components/setup'
   import windowFrame from './partials/frame'
   import toolbar from './partials/toolbar'
   import sidebar from './partials/sidebar'
@@ -120,7 +122,7 @@
       ...mapGetters(['authorized', 'setupComplete']),
 
       authState () {
-        // if (!this.setupComplete) return 0
+        if (!this.setupComplete) return 0
         return (this.authorized) ? 1 : 2
       },
 
@@ -139,7 +141,8 @@
       aboutModal,
       helpModal,
       toolbar,
-      sidebar
+      sidebar,
+      setup
     }
   }
 </script>
