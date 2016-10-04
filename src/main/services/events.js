@@ -1,6 +1,6 @@
 import { isEmpty } from 'lodash'
 import transit from 'main/components/transit'
-import { instances, getInstance } from './index'
+import { instances, getInstance, initServices } from './index'
 
 const services = [
   { name: 'tipeee', file: './TipeeeStream' },
@@ -10,7 +10,7 @@ const services = [
   { name: 'bot', file: './bot' }
 ]
 
-services.map(({ name, file }) => {
+services.forEach(({ name, file }) => {
   transit.on(`service:${name}:enable`, (e, data) => {
     const instance = getInstance(name)
     if (instance || !isEmpty(instance)) return
@@ -29,3 +29,6 @@ services.map(({ name, file }) => {
     instances.delete(name)
   }, 'ipc')
 })
+
+transit.on('service:all:start', initServices, 'ipc')
+transit.on('service:all:stop', () => instances.forEach(v => v.stop()), 'ipc')
