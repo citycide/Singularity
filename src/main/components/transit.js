@@ -1,15 +1,20 @@
 import { EventEmitter } from 'events'
+import { io } from './server'
 import ipcMain from '../utils/ipc-main'
 
 class Transit extends EventEmitter {
-  on (channel, fn, bus = false) {
+  on (channel, fn, bus) {
     switch (bus) {
-      case true:
+      case 'all':
         super.on(channel, fn)
         ipcMain.on(channel, fn)
+        io.on('connection' socket => socket.on(channel, fn))
         break
-      case false:
+      case 'main':
         super.on(channel, fn)
+        break
+      case 'io':
+        io.once('connection' socket => socket.on(channel, fn))
         break
       case 'ipc':
       default:
@@ -17,14 +22,18 @@ class Transit extends EventEmitter {
     }
   }
 
-  once (channel, fn, bus = false) {
+  once (channel, fn, bus) {
     switch (bus) {
-      case true:
+      case 'all':
         super.once(channel, fn)
         ipcMain.once(channel, fn)
+        io.once('connection' socket => socket.once(channel, fn))
         break
-      case false:
+      case 'main':
         super.once(channel, fn)
+        break
+      case 'io':
+        io.once('connection' socket => socket.once(channel, fn))
         break
       case 'ipc':
       default:
@@ -32,14 +41,18 @@ class Transit extends EventEmitter {
     }
   }
 
-  emit (channel, data, bus = false) {
+  emit (channel, data, bus) {
     switch (bus) {
-      case true:
+      case 'all':
         super.emit(channel, data)
         ipcMain.sendToAll(channel, data)
+        io.emit(channel, data)
         break
-      case false:
+      case 'main':
         super.emit(channel, data)
+        break
+      case 'io':
+        io.emit(channel, data)
         break
       case 'ipc':
       default:
