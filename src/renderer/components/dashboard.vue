@@ -1,6 +1,7 @@
 <style lang="scss">
   .ui-collapsible-body {
-    &#collapse-chat, &#collapse-followers {
+    &#collapse-chat, &#collapse-followers,
+    &#collapse-video {
       padding: 0;
     }
 
@@ -51,7 +52,7 @@
     <stats-bar></stats-bar>
     <div class="columns">
       <div class="column">
-        <ui-collapsible id="one" header="STREAM INFO" :open="true" >
+        <ui-collapsible id="collapse-stream-info" header="STREAM INFO" :open="true" >
           <div slot="header" class="group inline">
             <ui-icon icon="edit"></ui-icon>
             <span class="strong-white">STREAM</span> INFO
@@ -68,20 +69,23 @@
           ></ui-textbox>
         </ui-collapsible>
         <div class="collapse-followers-container">
-          <ui-collapsible id="collapse-followers":open="true">
+          <ui-collapsible id="collapse-followers" :open="true">
             <div slot="header" class="group inline">
               <ui-icon icon="av_timer"></ui-icon>
-              <span class="strong-white">RECENT</pan> FOLLOWERS
+              <span class="strong-white">RECENT</span> FOLLOWERS
             </div>
             <follower-table @expand="resizeFollowers"></follower-table>
           </ui-collapsible>
         </div>
-        <ui-collapsible id="three">
+        <ui-collapsible id="collapse-video" :open.sync="videoExpanded">
           <div slot="header" class="group inline">
             <ui-icon icon="videocam"></ui-icon>
             <span class="strong-white">STREAM</span> PREVIEW
           </div>
-          <div style="background-color: #202020; height: 300px;"></div>
+          <iframe
+            :src="videoURL" height="240" width="100%"
+            frameborder="0" scrolling="no" allowfullscreen
+          ></iframe>
         </ui-collapsible>
       </div>
       <div class="column is-half">
@@ -107,7 +111,9 @@
 
   export default {
     data () {
-      return {}
+      return {
+        videoExpanded: false
+      }
     },
 
     methods: {
@@ -124,7 +130,13 @@
     },
 
     computed: {
-      ...mapGetters(['channel'])
+      ...mapGetters(['channel']),
+
+      videoURL () {
+        return this.videoExpanded
+          ? `http://player.twitch.tv/?channel=${this.channel.name}&muted`
+          : ''
+      }
     },
 
     components: {
