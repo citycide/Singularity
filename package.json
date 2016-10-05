@@ -72,12 +72,10 @@
     "eslint-plugin-standard": "^2.0.0",
     "gulp": "gulpjs/gulp#4.0",
     "gulp-babel": "^6.1.2",
-    "gulp-pug": "^3.0.3",
     "gulp-sass": "^2.3.2",
     "gulp-vueify": "0.0.3",
     "node-sass": "^3.8.0",
     "node-sass-module-importer": "^0.1.0",
-    "pug": "^2.0.0-beta3",
     "vueify-insert-css": "^1.0.0"
   }
 }

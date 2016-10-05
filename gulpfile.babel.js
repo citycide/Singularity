@@ -3,7 +3,6 @@ import gulp from 'gulp'
 import babel from 'gulp-babel'
 import vueify from 'gulp-vueify'
 import sass from 'gulp-sass'
-import pug from 'gulp-pug'
 import jetpack from 'fs-jetpack'
 import importer from 'node-sass-module-importer'
 
@@ -38,8 +37,8 @@ function mainServer () {
 const buildRenderer = gulp.parallel(
   rendererJS,
   rendererVue,
-  rendererPug,
   rendererSass,
+  rendererHTML,
   rendererAssets,
   rendererVendor
 )
@@ -58,17 +57,16 @@ function rendererVue () {
     .pipe(gulp.dest('./build/renderer'))
 }
 
-function rendererPug () {
-  return gulp
-    .src('./src/renderer/**/*.pug')
-    .pipe(pug())
-    .pipe(gulp.dest('./build/renderer'))
-}
-
 function rendererSass () {
   return gulp
     .src('./src/renderer/**/*.scss')
     .pipe(sass({ importer }))
+    .pipe(gulp.dest('./build/renderer'))
+}
+
+function rendererHTML () {
+  return gulp
+    .src('./src/renderer/**/*.html')
     .pipe(gulp.dest('./build/renderer'))
 }
 
@@ -96,11 +94,11 @@ function watchAll () {
     cleanMain, buildMain
   ))
 
-  gulp.watch('./src/common/**/*.{js,vue,pug}', gulp.series(
+  gulp.watch('./src/common/**/*.js', gulp.series(
     cleanCommon, buildCommon
   ))
 
-  gulp.watch('./src/renderer/**/*.{js,vue,pug,scss}', gulp.series(
+  gulp.watch('./src/renderer/**/*.{js,vue,html,scss}', gulp.series(
     cleanRenderer, buildRenderer
   ))
 }
