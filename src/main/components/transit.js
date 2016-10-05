@@ -8,13 +8,13 @@ class Transit extends EventEmitter {
       case 'all':
         super.on(channel, fn)
         ipcMain.on(channel, fn)
-        io.on('connection' socket => socket.on(channel, fn))
+        io.on('connection', socket => socket.on(channel, fn))
         break
       case 'main':
         super.on(channel, fn)
         break
       case 'io':
-        io.once('connection' socket => socket.on(channel, fn))
+        io.once('connection', socket => socket.on(channel, fn))
         break
       case 'ipc':
       default:
@@ -27,13 +27,13 @@ class Transit extends EventEmitter {
       case 'all':
         super.once(channel, fn)
         ipcMain.once(channel, fn)
-        io.once('connection' socket => socket.once(channel, fn))
+        io.once('connection', socket => socket.once(channel, fn))
         break
       case 'main':
         super.once(channel, fn)
         break
       case 'io':
-        io.once('connection' socket => socket.once(channel, fn))
+        io.once('connection', socket => socket.once(channel, fn))
         break
       case 'ipc':
       default:
