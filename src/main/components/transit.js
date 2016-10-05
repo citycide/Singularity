@@ -7,7 +7,7 @@ class Transit extends EventEmitter {
     switch (bus) {
       case 'all':
         super.on(channel, fn)
-        ipcMain.on(channel, fn)
+        ipcMain.on(channel, (e, ...a) => fn(...a))
         io.on('connection', socket => socket.on(channel, fn))
         break
       case 'main':
@@ -18,7 +18,7 @@ class Transit extends EventEmitter {
         break
       case 'ipc':
       default:
-        ipcMain.on(channel, fn)
+        ipcMain.on(channel, (e, ...a) => fn(...a))
     }
   }
 
@@ -26,7 +26,7 @@ class Transit extends EventEmitter {
     switch (bus) {
       case 'all':
         super.once(channel, fn)
-        ipcMain.once(channel, fn)
+        ipcMain.once(channel, (e, ...a) => fn(...a))
         io.once('connection', socket => socket.once(channel, fn))
         break
       case 'main':
@@ -37,7 +37,7 @@ class Transit extends EventEmitter {
         break
       case 'ipc':
       default:
-        ipcMain.once(channel, fn)
+        ipcMain.once(channel, (e, ...a) => fn(...a))
     }
   }
 
@@ -72,7 +72,9 @@ class Transit extends EventEmitter {
   }
 
   /**
-   * Explicitly listens to events from the renderer process
+   * Explicitly listens to events from the renderer process.
+   * This is the only way to receive the `event` argument,
+   * since using the transit#on method drops it from the callback.
    * @param {string} channel
    * @param {function} fn
    */
