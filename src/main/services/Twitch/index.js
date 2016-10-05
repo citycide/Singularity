@@ -1,7 +1,7 @@
 import jetpack from 'fs-jetpack'
 import moment from 'moment'
 import Levers from 'levers'
-import tmi from 'tmi.js'
+import { client as Client } from 'tmi.js'
 
 import transit from 'main/components/transit'
 import db from 'common/components/db'
@@ -47,8 +47,7 @@ export default class TwitchClass {
 
   chatConnect () {
     if (this.CHANNEL.name && this.CHANNEL.token) {
-      // eslint-disable-next-line
-      this.client = new tmi.client({
+      this.client = new Client({
         options: {
           debug: false
         },
