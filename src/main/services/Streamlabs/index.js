@@ -74,7 +74,7 @@ async function interval (instance) {
 
 function handleResponse (donations) {
   if (!tips.length) {
-    donations.reverse().map(tip => {
+    donations.reverse().forEach(tip => {
       if (!tips.includes(tip.id)) tips.push(tip.id)
 
       // eslint-disable-next-line
@@ -91,7 +91,7 @@ function handleResponse (donations) {
       // db.addTip()
     })
   } else {
-    donations.reverse().map(tip => {
+    donations.reverse().forEach(tip => {
       if (!tips.includes(tip.id)) {
         tips.push(tip.id)
 
@@ -103,7 +103,7 @@ function handleResponse (donations) {
             timestamp: tip.created_at
           },
           type: 'tip'
-        })
+        }, 'all')
       }
     })
   }

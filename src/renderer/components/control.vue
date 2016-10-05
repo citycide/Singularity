@@ -42,9 +42,7 @@
             ></ui-textbox>
             <ui-button
               @click.stop.prevent="sendFollow" color="primary" class="is-pulled-right"
-            >
-              SEND
-            </ui-button>
+            >SEND</ui-button>
           </form>
         </ui-collapsible>
         <ui-collapsible id="control-subscriber" header="SUBSCRIBER" :open="true">
@@ -61,9 +59,7 @@
             ></ui-textbox>
             <ui-button
               @click.stop.prevent="sendSub" color="primary" class="is-pulled-right"
-            >
-              SEND
-            </ui-button>
+            >SEND</ui-button>
           </form>
         </ui-collapsible>
         <ui-collapsible id="control-now-playing" header="NOW PLAYING" :open="true">
@@ -94,9 +90,7 @@
             ></ui-textbox>
             <ui-button
               @click.stop.prevent="sendSong(false)" color="primary" class="is-pulled-right"
-            >
-              SEND
-            </ui-button>
+            >SEND</ui-button>
           </form>
         </ui-collapsible>
       </div>
@@ -115,9 +109,7 @@
             ></ui-textbox>
             <ui-button
               @click.stop.prevent="sendHost" color="primary" class="is-pulled-right"
-            >
-              SEND
-            </ui-button>
+            >SEND</ui-button>
           </form>
         </ui-collapsible>
         <ui-collapsible id="control-tip" header="TIP" :open="true">
@@ -138,9 +130,7 @@
             ></ui-textbox>
             <ui-button
               @click.stop.prevent="sendTip" color="primary" class="is-pulled-right"
-            >
-              SEND
-            </ui-button>
+            >SEND</ui-button>
           </form>
         </ui-collapsible>
       </div>
@@ -152,6 +142,8 @@
   import { UiButton, UiIconButton, UiCollapsible, UiTextbox } from 'keen-ui'
   import { mapGetters } from 'vuex'
   import icon from 'vue-awesome'
+  
+  import transit from './js/transit'
 
   export default {
     data () {
@@ -160,19 +152,45 @@
 
     methods: {
       sendFollow (event, username) {
-        console.log(username ? username : this.follow.name)
+        const name = username ? username : this.follow.name
+        transit.fire('alert:follow:test', name)
       },
       sendHost () {
-        console.log(this.host.name)
+        transit.fire('alert:host:test', {
+          user: {
+            display_name: this.host.name
+          },
+          viewers: this.host.viewers
+        })
       },
       sendSub () {
-        console.log(this.sub.name)
+        if (!this.sub.months) {
+          transit.fire('alert:sub:test', this.sub.name)
+        } else {
+          transit.fire('alert:resub:test', {
+            user: {
+              display_name: this.sub.name
+            },
+            months: this.sub.months
+          })
+        }
       },
       sendTip () {
-        console.log(this.tip.name)
+        const formattedAmount = '$' + this.tip.amount
+          .toFixed(2)
+          .replace(/(\d)(?=(\d{3})+\.)/g, '$1,')
+
+        transit.fire('alert:tip:test', {
+          user: {
+            name: this.tip.name
+          },
+          amount: formattedAmount,
+          message: this.tip.message
+        })
       },
       sendSong (current) {
-        console.log(current ? this.music.current : this.music.test)
+        const song = current ? this.music.current : this.music.test
+        transit.fire('alert:music:test', song)
       }
     },
 

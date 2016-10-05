@@ -170,7 +170,7 @@ export default class TwitchClass {
   }
 
   eventHandler () {
-    transit.on('test:follower', username => {
+    transit.on('alert:follower:test', username => {
       let thisTest
       this.resolveUser(username, userObj => {
         if (userObj.resolved) {
@@ -196,7 +196,7 @@ export default class TwitchClass {
       })
     })
 
-    transit.on('test:host', hostObj => {
+    transit.on('alert:host:test', hostObj => {
       let thisTest
       this.resolveUser(hostObj.user.display_name, userObj => {
         if (userObj.resolved) {
@@ -223,7 +223,7 @@ export default class TwitchClass {
       })
     })
 
-    transit.on('test:tip', data => {
+    transit.on('alert:tip:test', data => {
       let thisTest = {
         user: {
           name: data.user.name,
@@ -363,26 +363,26 @@ TwitchClass.prototype.actOnQueue = function (data, type) {
   switch (type) {
     case 'follower':
       log.trace('Queue item is a follower event.')
-      transit.fire('alert:follow', data)
-      transit.fire('alert:follow:event', {
+      transit.emit('alert:follow', data, 'all')
+      transit.emit('alert:follow:event', {
         twitchid: data._id,
         username: data.display_name,
         timestamp: moment(data.created_at, 'x').fromNow(),
         evtype: 'follower',
         notifications: data.notifications
-      })
+      }, 'all')
       break
     case 'host':
       log.trace('Queue item is a host event.')
-      transit.fire('alert:host', data)
+      transit.emit('alert:host', data, 'all')
       break
     case 'subscriber':
       log.trace('Queue item is a subscriber event.')
-      transit.fire('alert:subscriber', data)
+      transit.emit('alert:subscriber', data, 'all')
       break
     case 'tip':
       log.trace('Queue item is a tip event.')
-      transit.fire('alert:tip', data)
+      transit.emit('alert:tip', data, 'all')
       break
     default:
       log.debug(`ERR in actOnQueue:: Queue item is of unknown type '${type}'`)

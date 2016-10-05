@@ -51,7 +51,7 @@ function listen (instance) {
         timestamp: moment(data.event.created_at).valueOf()
       },
       type: 'tip'
-    })
+    }, 'all')
   })
 
   return instance.removeAllListeners
