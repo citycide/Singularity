@@ -170,7 +170,7 @@ export default class TwitchClass {
   }
 
   eventHandler () {
-    transit.on('alert:follower:test', username => {
+    transit.on('alert:follow:test', username => {
       let thisTest
       this.resolveUser(username, userObj => {
         if (userObj.resolved) {
