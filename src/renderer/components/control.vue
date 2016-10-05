@@ -122,7 +122,7 @@
             <ui-textbox
               name="tip amount" icon="attach_money" type="number" step="0.01"
               v-bind:value.sync="tip.amount" validation-rules="required|min:1"
-              help-text="Enter the number of viewers"
+              help-text="Enter the tip amount"
             ></ui-textbox>
             <ui-textbox
               name="tip message" icon="message" type="text"
@@ -142,7 +142,7 @@
   import { UiButton, UiIconButton, UiCollapsible, UiTextbox } from 'keen-ui'
   import { mapGetters } from 'vuex'
   import icon from 'vue-awesome'
-  
+
   import transit from './js/transit'
 
   export default {
