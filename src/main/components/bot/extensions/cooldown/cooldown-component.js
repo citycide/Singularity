@@ -88,7 +88,7 @@ const cooldown = {
 
     const cooldowns = $.cache.get('cooldowns', [])
 
-    const active = _.find(cooldowns, v => v.name === cmd && v.scope === scope && v.sub === sub)
+    const active = _.find(cooldowns, { name: cmd, scope, sub })
 
     if (!active) return false
 
@@ -121,7 +121,7 @@ const cooldown = {
 
     const cooldowns = $.cache.get('cooldowns', [])
 
-    return _.findIndex(cooldowns, v => v.name === cmd && v.scope === scope && v.sub === sub)
+    return _.findIndex(cooldowns, { name: cmd, scope, sub })
   }
 }
 
