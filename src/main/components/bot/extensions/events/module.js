@@ -133,6 +133,11 @@ async function followHandler (data) {
 }
 
 function listen () {
+  transit.removeListener('alert:follow', followHandler)
+  transit.removeListener('alert:host', hostHandler)
+  transit.removeListener('alert:subscriber', subHandler)
+  transit.removeListener('alert:tip', tipHandler)
+
   transit.on('alert:follow', followHandler)
   transit.on('alert:host', hostHandler)
   transit.on('alert:subsciber', subHandler)
