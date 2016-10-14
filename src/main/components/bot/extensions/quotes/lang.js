@@ -14,6 +14,7 @@ export default function ($) {
   $.weave.set('edit.failure', 'Failed to edit quote #{0}.')
   
   $.weave.set('response', `"{0}" - {1} ({2}{3})`)
+  $.weave.set('response.not-found', 'Quote #{0} does not exist.')
   
   $.weave.set('help',
     `To save a quote, use '!quote add Something really wise.' ` +
