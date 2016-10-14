@@ -10,5 +10,5 @@ export default function ($) {
   $.weave.set('gift.not-enough-points', 'You only have {0}.')
   $.weave.set('gift.success.sender', 'You gave {0} to {1} » {2} remaining')
   $.weave.set('gift.success.recipient', '{0} gave you {1} » you now have {2}')
-  $.weave.set('gift.success.shout', '{1} gave {1} to {2} » {3} remaining')
+  $.weave.set('gift.success.shout', '{0} gave {1} to {2} » {3} remaining')
 }
