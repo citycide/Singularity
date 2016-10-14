@@ -15,7 +15,7 @@ export async function rekt (e, $) {
     if (response) {
       $.say(e.sender, $.params(e, response.value))
     } else {
-      $.say(e.sender, `I'm not going to dignify that with a response.`)
+      $.say(e.sender, $.weave('not-found'))
     }
 
     return
@@ -23,7 +23,7 @@ export async function rekt (e, $) {
 
   if ($.is(e.subcommand, 'add')) {
     if (!e.subArgs[0]) {
-      $.say(e.sender, `Usage: !rekt add (message)`)
+      $.say(e.sender, $.weave('add.usage'))
       return
     }
 
@@ -33,9 +33,9 @@ export async function rekt (e, $) {
     const id = res ? res.id : false
 
     if (id) {
-      $.say(e.sender, `rekt response added as #${id}.`)
+      $.say(e.sender, $.weave('add.success', id))
     } else {
-      $.say(e.sender, `Failed to add rekt response.`)
+      $.say(e.sender, $.weave('add.failure'))
     }
 
     return
@@ -43,16 +43,21 @@ export async function rekt (e, $) {
 
   if ($.is(e.subcommand, 'remove')) {
     if (!e.subArgs[0]) {
-      $.say(e.sender, `Usage: !rekt remove (number >/= 1)`)
+      $.say(e.sender, $.weave('remove.usage'))
+      return
+    }
+
+    if (!await $.db.exists('rekt', { id: e.subArgs[0] })) {
+      $.say(e.sender, $.weave('not-found', e.subArgs[0]))
       return
     }
 
     const id = parseInt(e.subArgs[0])
     if (await $.db.del('rekt', { id })) {
       const count = $.db.countRows('rekt')
-      $.say(e.sender, `rekt response removed. ${count} responses remaining.`)
+      $.say(e.sender, $.weave('remove.success', count))
     } else {
-      $.say(e.sender, `Failed to remove rekt response #${id}.`)
+      $.say(e.sender, $.weave('remove.failure', id))
     }
 
     return
@@ -60,12 +65,12 @@ export async function rekt (e, $) {
 
   if ($.is(e.subcommand, 'edit')) {
     if (!e.subArgs.length < 2) {
-      $.say(e.sender, `Usage: !rekt edit (number >/= 1) (message)`)
+      $.say(e.sender, $.weave('edit.usage'))
       return
     }
 
     if (!await $.db.exists('rekt', { id: e.subArgs[0] })) {
-      $.say(e.sender, `There is no !rekt response with ID #${e.subArgs[0]}.`)
+      $.say(e.sender, $.weave('not-found', e.subArgs[0]))
       return
     }
 
@@ -73,9 +78,9 @@ export async function rekt (e, $) {
     const value = e.subArgs.slice(1).join(' ')
 
     if (await $.db.set('rekt', { value }, { id })) {
-      $.say(e.sender, `rekt response #${id} modified.`)
+      $.say(e.sender, $.weave('edit.success', id))
     } else {
-      $.say(e.sender, `Failed to edit rekt response #${id}.`)
+      $.say(e.sender, $.weave('edit.failure', id))
     }
   }
 }
