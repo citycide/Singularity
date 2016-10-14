@@ -30,5 +30,5 @@ services.forEach(({ name, file }) => {
   })
 })
 
-transit.on('service:all:start', () => initServices)
+transit.on('service:all:start', () => initServices())
 transit.on('service:all:stop', () => instances.forEach(v => v.stop()))
