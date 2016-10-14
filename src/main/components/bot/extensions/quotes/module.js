@@ -9,20 +9,19 @@
  * @author citycide
  */
 
-import { isFinite } from 'lodash'
-
 export async function quote (e, $) {
   const param1 = e.args[1]
+  const parsed = parseInt(param1)
   const regex = /~(\w+)/g
 
   if (!e.args.length) {
-    $.say(e.sender, `Usage: !quote [add | remove | edit | help]`)
+    $.say(e.sender, $.weave('usage'))
     return
   }
 
   if ($.is(e.subcommand, 'add')) {
     if (e.args.length < 3) {
-      $.say(e.sender, `Usage: !quote add Something really wise. [~username]`)
+      $.say(e.sender, $.weave('add.usage'))
       return
     }
 
@@ -40,33 +39,33 @@ export async function quote (e, $) {
     const quoteID = await $.quote.add(thisQuote)
 
     if (quoteID) {
-      $.say(e.sender, `Quote added as #${quoteID}`)
+      $.say(e.sender, $.weave('add.succes', quoteID))
     } else {
-      $.say(e.sender, `Failed to add quote.`)
+      $.say(e.sender, $.weave('add.failure'))
     }
 
     return
   }
 
   if ($.is(e.subcommand, 'remove')) {
-    if (!isFinite(parseInt(param1)) || parseInt(param1) < 1) {
-      $.say(e.sender, `Usage: !quote remove (number >/= 1)`)
+    if (!$.is.number(parsed) || parsed < 1) {
+      $.say(e.sender, $.weave('remove.usage'))
       return
     }
 
-    if ($.quote.remove(parseInt(param1))) {
+    if (await $.quote.remove(parsed)) {
       const count = await $.db.countRows('quotes')
-      $.say(e.sender, `Quote removed. ${count} quotes remaining.`)
+      $.say(e.sender, $.weave('remove.success', count))
     } else {
-      $.say(e.sender, `Failed to remove quote #${parseInt(param1)}.`)
+      $.say(e.sender, $.weave('remove.failure', param1))
     }
 
     return
   }
 
   if ($.is(e.subcommand, 'edit')) {
-    if (!isFinite(parseInt(param1)) || parseInt(param1) < 1) {
-      $.say(e.sender, `Usage: !quote edit (number >/= 1) [message] [~username]`)
+    if (!$.is.number(parsed) || parsed < 1) {
+      $.say(e.sender, $.weave('edit.usage'))
       return
     }
 
@@ -81,34 +80,32 @@ export async function quote (e, $) {
       newQuote.message = e.subArgs.slice(1).join(' ')
     }
 
-    if (await $.quote.modify(parseInt(param1), newQuote)) {
-      $.say(e.sender, `Quote #${param1} modified.`)
+    if (await $.quote.modify(parsed, newQuote)) {
+      $.say(e.sender, $.weave('edit.success', param1))
     } else {
-      $.say(e.sender, `Failed to edit quote #${param1}`)
+      $.say(e.sender, $.weave('edit.failure', param1))
     }
 
     return
   }
 
   if ($.is(e.subcommand, 'help')) {
-    $.say(e.sender, `To save a quote, use '!quote add Something really wise.' ` +
-            `To credit who said it, add '~username' with no space.`)
+    $.say(e.sender, $.weave('help'))
     return
   }
 
   const id = parseInt(e.args[0])
   if (id) {
     if (!await $.db.exists('quotes', { id })) {
-      $.say(e.sender, `Quote #${id} doesn't exist.`)
+      $.say(e.sender, $.weave('response.not-found', id))
       return
     }
 
     const quote = await $.quote.get(id)
     const game = quote.game ? ` - ${quote.game}` : ''
-
-    $.shout(`"${quote.message}" - ${quote.credit} (${quote.date}${game})`)
+    $.shout($.weave('response', quote.message, quote.credit, quote.date, game))
   } else {
-    $.say(`Usage: !quote [add | remove | edit | help]`)
+    $.say(e.sender, $.weave('usage'))
   }
 }
 
