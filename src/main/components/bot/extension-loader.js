@@ -41,9 +41,8 @@ function register (extPath) {
     unloadModule(extPath, name)
   }
 
-  validate(extPath, manifest, err => {
-    if (err) return log.error(err)
-  })
+  const { valid, reason } = validate(extPath, manifest)
+  if (!valid) return log.bot(reason)
 
   _.set(extRegistry, name, {
     manifest: extPath,
@@ -52,14 +51,20 @@ function register (extPath) {
     interface: manifest.interface
   })
 
-  const current = ext.get('extensions', [])
-  if (!current.includes(extPath)) ext.set('extensions', [extPath, ...current])
+  const current = ext.get('installed', {})
+  if (!_.has(current, [extPath])) {
+    const updated = _.set(current, [extPath], {
+      firstRun: true,
+      installDate: Date.now()
+    })
+    ext.set('installed', updated)
+  }
 
   log.trace(`Extension registered:: ${name} v${version}`)
   initialize(extPath, manifest)
 }
 
-function validate (extPath, manifest, fn) {
+function validate (extPath, manifest) {
   const {
     name,
     version,
@@ -70,7 +75,12 @@ function validate (extPath, manifest, fn) {
 
   const extDir = dirname(extPath)
 
-  if (!name) return fn(`No name provided for extension at ${extPath}`)
+  if (!name) {
+    return {
+      valid: false,
+      reason: `No name provided for extension at ${extPath}`
+    }
+  }
 
   if (!valid(version)) {
     log.warn(
@@ -82,10 +92,11 @@ function validate (extPath, manifest, fn) {
 
   // check that the app & extension have compatible versions
   if (!satisfies(app.getVersion(), appEngine)) {
-    return fn(
-      `Extension ${name} requires singularity ${appEngine}. ` +
-      `You have v${app.getVersion()}.`
-    )
+    return {
+      valid: false,
+      reason: `Extension ${name} requires singularity ${appEngine}. ` +
+              `You have v${app.getVersion()}.`
+    }
   }
 
   // check that any `files` referenced exist
@@ -94,19 +105,21 @@ function validate (extPath, manifest, fn) {
     files.component && fileExists(extDir, files.component),
     files.interface && fileExists(extDir, files.interface)
   ].filter(isNilOrEmpty), Boolean)) {
-    return fn(
-      `Extension ${name} references files that don't exist. ` +
-      `Contact author: ${author}`
-    )
+    return {
+      valid: false,
+      reason: `Extension ${name} references files that don't exist. ` +
+              `Contact author: ${author}`
+    }
   }
 
-  fn()
+  return { valid: true }
 }
 
 // Run the setup function in all present extension elements
 function initialize (extPath, manifest) {
   const { name, version, files } = manifest
   const extDir = dirname(extPath)
+  const current = ext.get('installed', {})
 
   if (files.interface) {
     try {
@@ -144,6 +157,8 @@ function initialize (extPath, manifest) {
       log.debug(`Module loaded:: ${name} v${version}`)
     })
   }
+
+  ext.set('installed', _.set(current, [extPath, 'firstRun'], false))
 }
 
 // called each time a command from the module is run
