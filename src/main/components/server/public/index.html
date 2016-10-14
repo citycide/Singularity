@@ -27,6 +27,13 @@
             -webkit-transform: translate(-50%, 0);
             z-index: 200;
         }
+        #subscriber-alert-area {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          -webkit-transform: translate(-50%, 0);
+          z-index: 200;
+        }
         #host-alert-area {
             position: absolute;
             top: 0;
@@ -116,6 +123,9 @@
     <div id="overlayWrapper">
         <div id="follower-alert-area">
             <iframe src="/overlay/followers.html" frameborder="0" scrolling="no" width="800" height="200"></iframe>
+        </div>
+        <div id="subscriber-alert-area">
+          <iframe src="/overlay/subscribers.html" frameborder="0" scrolling="no" width="800" height="200"></iframe>
         </div>
         <div id="host-alert-area">
             <iframe src="/overlay/hosts.html" frameborder="0" scrolling="no" width="800" height="150"></iframe>
