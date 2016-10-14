@@ -5,24 +5,29 @@ import os from 'os'
 
 const settings = new Levers('app')
 
-const file = {
-  read (file, json) {
-    if (!file) return
-    return jetpack.read(sanitize(file), json ? 'json' : undefined)
-  },
-  write (file, data, append) {
-    if (!file) return
+export function read (file, json) {
+  if (!file) return false
+  return jetpack.read(sanitize(file), json ? 'json' : undefined)
+}
 
-    if (append) {
-      jetpack.append(sanitize(file), data + os.EOL)
-    } else {
-      jetpack.write(sanitize(file), data)
-    }
-  },
-  exists (file) {
-    if (!file) return
-    return jetpack.exists(sanitize(file))
+export function write (file, data, append) {
+  if (!file) return false
+
+  if (append) {
+    jetpack.append(sanitize(file), data + os.EOL)
+  } else {
+    jetpack.write(sanitize(file), data)
   }
+}
+
+export function exists (file) {
+  if (!file) return false
+  return jetpack.exists(sanitize(file)) === 'file'
+}
+
+export function isDirectory (file) {
+  if (!file) return false
+  return jetpack.exists(sanitize(file)) === 'dir'
 }
 
 function sanitize (file) {
@@ -31,6 +36,9 @@ function sanitize (file) {
   return path.join(settings.get('paths.botLogging'), file)
 }
 
-export default file
-
-$.file = file
+$.file = {
+  read,
+  write,
+  exists,
+  isDirectory
+}
