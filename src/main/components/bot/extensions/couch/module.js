@@ -35,10 +35,10 @@ export async function couch (e, $) {
     }
 
     if (payout === 0) {
-      $.say(e.sender, `You didn't find any ${await $.points.getName()} in the couch this time.`)
+      $.say(e.sender, $.weave('did-not-find', await $.points.getName()))
     } else {
       await $.points.add(e.sender, payout)
-      $.say(e.sender, `You found ${await $.points.str(payout)} in the couch.`)
+      $.say(e.sender, $.weave('found-points', await $.points.str(payout)))
     }
 
     return
@@ -46,21 +46,18 @@ export async function couch (e, $) {
 
   if ($.is(e.subcommand, 'multi')) {
     if (!e.subArgs[0] || !$.is.numeric(e.subArgs[0])) {
-      $.say(e.sender, `Usage: !couch multi (multiplier) » currently set to ${multi}`)
+      $.say(e.sender, $.weave('multi.usage', multi))
       return
     }
 
     const newMulti = $.to.number(e.subArgs[0])
 
     await $.db.setModuleConfig('couch', 'multiplier', newMulti)
-    $.say(e.sender, `!couch multiplier set to ${newMulti}`)
+    $.say(e.sender, $.weave.('multi.success', newMulti))
   }
 }
 
 export default function ($) {
-  $.addCommand('couch', {
-    cooldown: 300
-  })
-
+  $.addCommand('couch', { cooldown: 300 })
   $.addSubcommand('multi', 'couch', { permLevel: 1 })
 }
