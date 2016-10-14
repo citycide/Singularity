@@ -236,6 +236,60 @@ export default class TwitchClass {
       this.checkQueue()
     })
 
+    transit.on('alert:sub:test', data => {
+      let thisTest
+      this.resolveUser(data, userObj => {
+        if (userObj.resolved) {
+          thisTest = {
+            user: {
+              _id: userObj.user._id,
+              display_name: userObj.user.display_name,
+              logo: userObj.user.logo
+            },
+            type: 'subscriber'
+          }
+        } else {
+          thisTest = {
+            user: {
+              display_name: userObj.user.display_name
+            },
+            type: 'subscriber'
+          }
+        }
+
+        this.alertQueue.push(thisTest)
+        this.checkQueue()
+      })
+    })
+
+    transit.on('alert:resub:test', subObj => {
+      let thisTest
+      this.resolveUser(subObj.user.display_name, userObj => {
+        if (userObj.resolved) {
+          thisTest = {
+            user: {
+              _id: userObj.user._id,
+              display_name: userObj.user.display_name,
+              logo: userObj.user.logo,
+              months: subObj.months
+            },
+            type: 'subscriber'
+          }
+        } else {
+          thisTest = {
+            user: {
+              display_name: userObj.user.display_name,
+              months: subObj.months
+            },
+            type: 'subscriber'
+          }
+        }
+
+        this.alertQueue.push(thisTest)
+        this.checkQueue()
+      })
+    })
+
     transit.on('alert:tip:event', data => {
       this.alertQueue.push(data)
     })
