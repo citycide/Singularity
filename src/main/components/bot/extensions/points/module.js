@@ -2,67 +2,68 @@ export async function points (e, $) {
   const [action, param1, param2] = e.args
 
   if (!action) {
-    return $.say(e.sender, `You have ${await $.points.get(e.sender, true)}.`)
+    return $.say(e.sender, $.weave('response', e.sender, await $.points.get(e.sender, true)))
   }
 
   if ($.is(e.subcommand, 'add')) {
     if (e.args.length < 3 || !$.is.numeric(param2)) {
-      $.say(e.sender, `Usage: !points add [username] [amount]`)
+      $.say(e.sender, $.weave('add.usage'))
       return
     }
 
     await $.points.add(param1, param2)
-    $.say(e.sender, `${param1} now has ${await $.points.get(param1, true)}.`)
+    $.say(e.sender, $.weave('change.success', param1, await $.points.get(param1, true)))
 
     return
   }
 
   if ($.is(e.subcommand, 'remove')) {
     if (e.args.length < 3 || !$.is.numeric(param2)) {
-      $.say(e.sender, `Usage: !points remove [username] [amount]`)
+      $.say(e.sender, $.weave('remove.usage'))
       return
     }
 
     await $.points.sub(param1, param2)
-    $.say(e.sender, `${param1} now has ${await $.points.get(param1, true)}.`)
+    $.say(e.sender, $.weave('change.success', param1, await $.points.get(param1, true)))
 
     return
   }
 
   if ($.is(e.subcommand, 'gift')) {
     if (e.args.length < 3 || !$.is.numeric(param2)) {
-      $.say(e.sender, `Usage: !points gift [username] [amount]`)
+      $.say(e.sender, $.weave('gift.usage'))
       return
     }
 
     if ($.points.get(e.sender) < $.to.number(param2, true)) {
-      $.say(e.sender, `You only have ${await $.points.get(e.sender, true)}.`)
+      $.say(e.sender, $.weave('gift.not-enough-points', await $.points.get(e.sender, true)))
       return
     }
 
     await $.points.sub(e.sender, param2)
     await $.points.add(param1, param2)
 
+    const str = $.points.str(param2)
     if ($.settings.get('whisperMode')) {
-      $.whisper(e.sender,
-        `You gave ${$.points.str(param2)} to ${param1} ` +
-        `(${await $.points.get(e.sender, true)} left)`)
-      $.whisper(param1,
-        `${e.sender} gave you ${$.points.str(param2)} ` +
-        `(you now have ${await $.points.get(e.sender, true)})`)
+      $.whisper(e.sender, $.weave(
+        'gift.success.sender', str, param1, await $.points.get(e.sender, true)
+      ))
+      $.whisper(param1, $.weave(
+        'gift.success.recipient', e.sender, str, await $.points.get(param1, true)
+      ))
     } else {
-      $.say(e.sender,
-        `You gave ${$.points.str(param2)} to ${param1} ` +
-        `(${await $.points.get(e.sender, true)} left)`)
+      $.shout($.weave(
+        'gift.success.shout', e.sender, str, param1, await $.points.get(e.sender, true)
+      ))
     }
 
     return
   }
 
   if (await $.user.exists(action)) {
-    return $.say(e.sender, `${action} has ${await $.points.get(action, true)}.`)
+    return $.say(e.sender, $.weave('response', action, await $.points.get(action, true)))
   } else {
-    return $.say(e.sender, `${action} hasn't visited the chat yet.`)
+    return $.say(e.sender, $.weave('response.not-found', action))
   }
 }
 
