@@ -10,7 +10,7 @@ export function to (value) {
 
 Object.assign(is, {
   string: _.isString,
-  number: _.isNumber,
+  number: isNumber,
   finite: _.isFinite,
   object: _.isPlainObject,
   array: _.isArray,
@@ -35,6 +35,10 @@ Object.assign(to, {
   boolean: toBoolean
 })
 
+function isNumber (value, rounded = true) {
+  return rounded ? _.isSafeInteger(value) : _.isFinite(value)
+}
+
 function isNumeric (value) {
   if (_.isFinite(value)) return true
   if (!_.isString(value)) return false
@@ -55,8 +59,8 @@ function toBoolean (value) {
   return value === 'true'
 }
 
-function toNumber (value, round) {
-  return round ? _.toInteger(value) : _.toFinite(value)
+function toNumber (value, round = true) {
+  return round ? _.toSafeInteger(value) : _.toFinite(value)
 }
 
 export async function sleep (ms) {
