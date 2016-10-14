@@ -21,7 +21,7 @@ export async function rekt (e, $) {
     return
   }
 
-  if (e.subcommand === 'add') {
+  if ($.is(e.subcommand, 'add')) {
     if (!e.subArgs[0]) {
       $.say(e.sender, `Usage: !rekt add (message)`)
       return
@@ -41,7 +41,7 @@ export async function rekt (e, $) {
     return
   }
 
-  if (e.subcommand === 'remove') {
+  if ($.is(e.subcommand, 'remove')) {
     if (!e.subArgs[0]) {
       $.say(e.sender, `Usage: !rekt remove (number >/= 1)`)
       return
@@ -58,7 +58,7 @@ export async function rekt (e, $) {
     return
   }
 
-  if (e.subcommand === 'edit') {
+  if ($.is(e.subcommand, 'edit')) {
     if (!e.subArgs.length < 2) {
       $.say(e.sender, `Usage: !rekt edit (number >/= 1) (message)`)
       return

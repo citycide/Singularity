@@ -9,11 +9,6 @@
  */
 
 export async function coin (e, $) {
-  if (!e.args.length) {
-    $.say(e.sender, `Usage: !coin (bet amount)`)
-    return
-  }
-
   const risk = await $.db.getModuleConfig('coin', 'risk', 1)
   const reward = await $.db.getModuleConfig('coin', 'reward', 1)
   const maxBet = await $.db.getModuleConfig('coin', 'maxBet', 50)
@@ -23,14 +18,16 @@ export async function coin (e, $) {
     const userPoints = await $.points.get(e.sender)
 
     if (betAmount > maxBet) {
-      $.say(e.sender, `The max bet for !coin is ${await $.points.str(maxBet)}.
-        Try again with a smaller bet.`)
+      $.say(e.sender, $.weave('error.bet-over-max', await $.points.str(maxBet)))
       return
     }
 
     if (betAmount > userPoints * risk) {
-      $.say(e.sender, `You don't have enough ${await $.points.getName()} FeelsBadMan
-        (${await $.points.get(e.sender, true)} available, risk multiplier of ${risk})`)
+      $.say(e.sender, $.weave(
+        'error.not-enough-points',
+        await $.points.getName(),
+        await $.points.get(e.sender, true), risk)
+      )
       return
     }
 
@@ -39,11 +36,11 @@ export async function coin (e, $) {
     if (result) {
       const result = betAmount * reward
       await $.points.add(e.sender, result)
-      $.say(e.sender, `You won ${await $.points.str(result)} from the coin flip! PogChamp`)
+      $.say(e.sender, $.weave('flip.win', await $.points.str(result)))
     } else {
       const result = betAmount * risk
       await $.points.sub(e.sender, result)
-      $.say(e.sender, `You lost ${await $.points.str(result)} from the coin flip! BibleThump`)
+      $.say(e.sender, $.weave('flip.loss', await $.points.str(result)))
     }
 
     return
@@ -51,50 +48,50 @@ export async function coin (e, $) {
 
   if ($.is(e.subcommand, 'risk')) {
     if (!e.subArgs[0] || !$.is.numeric(e.subArgs[0])) {
-      $.say(e.sender, `Usage: !coin risk (multiplier) » currently set to ${risk}`)
+      $.say(e.sender, $.weave('risk.usage', risk))
       return
     }
 
     const newRisk = $.to.number(e.subArgs[0])
     await $.db.setModuleConfig('coin', 'risk', newRisk)
 
-    $.say(e.sender, `Risk multiplier for !coin updated to ${await $.points.str(newRisk)}.`)
+    $.say(e.sender, $.weave('risk.success', await $.points.str(newRisk)))
 
     return
   }
 
   if ($.is(e.subcommand, 'reward')) {
     if (!e.subArgs[0] || !$.is.numeric(e.subArgs[0])) {
-      $.say(e.sender, `Usage: !coin reward (multiplier) » currently set to ${reward}`)
+      $.say(e.sender, $.weave('reward.usage', reward))
       return
     }
 
     const newReward = $.to.number(e.subArgs[0])
     await $.db.setModuleConfig('coin', 'reward', newReward)
 
-    $.say(e.sender, `Reward multiplier for !coin updated to ${$.points.str(newReward)}.`)
+    $.say(e.sender, $.weave('reward.success', await $.points.str(newReward)))
 
     return
   }
 
   if ($.is(e.subcommand, 'max')) {
     if (!e.subArgs[0] || !$.is.numeric(e.subArgs[0])) {
-      $.say(e.sender, `Usage: !coin max (number) » currently set to ${maxBet}`)
+      $.say(e.sender, $.weave('max.usage', maxBet))
       return
     }
 
     const newMax = $.to.number(e.subArgs[0], true)
     await $.db.setModuleConfig('coin', 'maxBet', newMax)
 
-    $.say(e.sender, `Max bet for !coin updated to ${await $.points.str(newMax)}.`)
+    $.say(e.sender, $.weave('max.success', await $.points.str(newMax)))
+    return
   }
+
+  $.say(e.sender, $.weave('usage'))
 }
 
 export default function ($) {
-  $.addCommand('coin', {
-    cooldown: 60
-  })
-
+  $.addCommand('coin', { cooldown: 60 })
   $.addSubcommand('risk', 'coin', { permLevel: 1 })
   $.addSubcommand('reward', 'coin', { permLevel: 1 })
   $.addSubcommand('max', 'coin', { permLevel: 1 })

@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "appEngine": ">=0.1.0",
   "files": {
-    "module": "./cooldown-module.js",
-    "component": "./cooldown-component.js",
-    "interface": ""
+    "module": "./module.js",
+    "component": "./component.js",
+    "interface": "",
+    "language": "./lang.js"
   },
   "author": "citycide <thecitycide@gmail.com>",
   "homepage": "github.com/citycide/singularity"

@@ -5,7 +5,7 @@ export async function command (e, $) {
 
   if (e.subcommand === 'enable') {
     if (e.args.length < 2) {
-      return $.say(e.sender, weave.get('bot:modules:admin:command:enable:usage'))
+      return $.say(e.sender, $.weave('command.enable-usage'))
     }
 
     if (param1.includes('>')) {
@@ -13,25 +13,25 @@ export async function command (e, $) {
 
       if (await $.command.exists(pair[0], pair[1])) {
         await $.command.enable(pair[0], pair[1])
-        $.say(e.sender, weave.get('bot:commands:enable:success', param1))
+        $.say(e.sender, $.weave.core('commands.enable-success', param1))
       } else {
-        $.say(e.sender, weave.get('bot:commands:does-not-exist'))
+        $.say(e.sender, $.weave.core('commands.does-not-exist'))
       }
     } else {
       if (await $.command.exists(param1)) {
         await $.command.enable(param1)
-        $.say(e.sender, weave.get('bot:commands:enable:success', param1))
+        $.say(e.sender, $.weave.core('commands.enable-success', param1))
       } else {
-        $.say(e.sender, weave.get('bot:commands:does-not-exist'))
+        $.say(e.sender, $.weave.core('commands.does-not-exist'))
       }
     }
 
     return
   }
 
-  if (e.subcommand === 'disable') {
+  if ($.is(e.subcommand, 'disable')) {
     if (e.args.length < 2) {
-      return $.say(e.sender, weave.get('bot:modules:admin:command:disable:usage'))
+      return $.say(e.sender, $.weave('command.disable-usage'))
     }
 
     if (param1.includes('>')) {
@@ -39,127 +39,127 @@ export async function command (e, $) {
 
       if (await $.command.exists(pair[0], pair[1])) {
         await $.command.disable(pair[0], pair[1])
-        $.say(e.sender, weave.get('bot:commands:disable:success', param1))
+        $.say(e.sender, $.weave.core('commands.disable-success', param1))
       } else {
-        $.say(e.sender, weave.get('bot:commands:does-not-exist'))
+        $.say(e.sender, $.weave.core('commands.does-not-exist'))
       }
     } else {
       if (await $.command.exists(param1)) {
         await $.command.disable(param1)
-        $.say(e.sender, weave.get('bot:commands:disable:success', param1))
+        $.say(e.sender, $.weave.core('commands.disable-success', param1))
       } else {
-        $.say(e.sender, weave.get('bot:commands:does-not-exist'))
+        $.say(e.sender, $.weave.core('commands.does-not-exist'))
       }
     }
 
     return
   }
 
-  if (e.subcommand === 'permission') {
+  if ($.is(e.subcommand, 'permission')) {
     if (e.args.length < 2) {
-      return $.say(e.sender, weave.get('bot:modules:admin:command:permission:usage'))
+      return $.say(e.sender, $.weave('command.permission-usage'))
     }
 
     if (await $.command.exists(param1)) {
       await $.command.setPermLevel(param1, param2)
-      $.say(e.sender, weave.get('bot:commands:permission:success', param1, param2))
+      $.say(e.sender, $.weave.core('commands.permission-success', param1, param2))
     } else {
-      $.say(e.sender, weave.get('bot:commands:does-not-exist'))
+      $.say(e.sender, $.weave.core('commands.does-not-exist'))
     }
 
     return
   }
 
-  if (e.subcommand === 'add') {
+  if ($.is(e.subcommand, 'add')) {
     if (e.subArgs.length < 2) {
-      return $.say(e.sender, weave.get('bot:modules:admin:command:add:usage'))
+      return $.say(e.sender, $.weave('command.add-usage'))
     }
 
     if (await $.command.exists(param1)) {
-      return $.say(e.sender, weave.get('bot:commands:already-exists'))
+      return $.say(e.sender, $.weave.core('commands.already-exists'))
     }
 
     const response = e.subArgs.slice(1).join(' ')
 
     await $.command.addCustom(param1, response)
-    $.say(e.sender, weave.get('bot:commands:add:success', param1))
+    $.say(e.sender, $.weave.core('commands.add-success', param1))
 
     return
   }
 
-  if (e.subcommand === 'remove') {
+  if ($.is(e.subcommand, 'remove')) {
     if (!e.subArgs[0]) {
-      return $.say(e.sender, weave.get('bot:modules:admin:command:remove:usage'))
+      return $.say(e.sender, $.weave('command.remove-usage'))
     }
 
     if (!await $.command.exists(param1)) {
-      return $.say(e.sender, weave.get('bot:commands:does-not-exist'))
+      return $.say(e.sender, $.weave.core('commands.does-not-exist'))
     }
 
     if (!await $.command.isCustom(param1)) {
-      return $.say(e.sender, weave.get('bot:commands:is-module-command'))
+      return $.say(e.sender, $.weave.core('commands.is-extension-command'))
     }
 
     await $.command.removeCustom(param1)
-    $.say(e.sender, weave.get('bot:commands:remove:success', param1))
+    $.say(e.sender, $.weave.core('commands.remove-success', param1))
 
     return
   }
 
-  if (e.subcommand === 'edit') {
+  if ($.is(e.subcommand, 'edit')) {
     if (e.subArgs.length < 2) {
-      return $.say(e.sender, weave.get('bot:modules:admin:command:edit:usage'))
+      return $.say(e.sender, $.weave('command.edit-usage'))
     }
 
     if (!await $.command.exists(param1)) {
-      return $.say(e.sender, weave.get('bot:commands:does-not-exist'))
+      return $.say(e.sender, $.weave.core('commands.does-not-exist'))
     }
 
     if (!await $.command.isCustom(param1)) {
-      return $.say(e.sender, weave.get('bot:commands:is-module-command'))
+      return $.say(e.sender, $.weave.core('commands.is-extension-command'))
     }
 
     const newResponse = e.subArgs.slice(1).join(' ')
 
     await $.db.set('commands', { response: newResponse }, { name: param1, module: 'custom' })
-    $.say(e.sender, weave.get('bot:commands:edit:success', param1))
+    $.say(e.sender, $.weave.core('commands.edit-success', param1))
 
     return
   }
 
-  $.say(e.sender, weave.get('bot:modules:admin:command:usage'))
+  $.say(e.sender, $.weave('command.usage'))
 }
 
 export async function whisperMode (e, $) {
-  if (e.subcommand === 'enable') {
+  if ($.is(e.subcommand, 'enable')) {
     await $.settings.set('whisperMode', true)
-    $.say(e.sender, weave.get('bot:settings:whisper-mode:enabled:success'))
+    $.say(e.sender, $.weave.core('settings.whisper-mode.enabled-success'))
     return
   }
 
-  if (e.subcommand === 'disable') {
+  if ($.is(e.subcommand, 'disable')) {
     await $.settings.set('whisperMode', false)
-    $.say(e.sender, weave.get('bot:settings:whisper-mode:disabled:success'))
+    $.say(e.sender, $.weave.core('settings.whisper-mode.disabled-success'))
     return
   }
 
   const status = await $.settings.get('whisperMode')
-        ? weave.get('common-words:enabled')
-        : weave.get('common-words:disabled')
-  $.say(e.sender, weave.get('bot:modules:admin:whisper-mode:usage', status))
+        ? $.weave.core('common-words.enabled')
+        : $.weave.core('common-words.disabled')
+  $.say(e.sender, $.weave('whisper-mode.usage', status))
 }
 
 export async function lastSeen (e, $) {
   let target = e.args[0]
-  if (!target) return $.say(e.sender, weave.get('bot:modules:admin:last-seen:usage'))
+  if (!target) return $.say(e.sender, $.weave('last-seen.usage'))
 
   if (await $.user.exists(target)) {
     let ts = await $.db.get('users', 'seen', { name: target })
     let timeAgo = moment(ts, 'x').fromNow()
 
-    $.say(e.sender, weave.get('bot:modules:admin:last-seen', target, timeAgo))
+    $.say(e.sender, $.weave('last-seen.response', target, timeAgo))
   } else {
-    $.say(e.sender, weave.get('bot:modules:admin:last-seen:not-seen', target))
+    $.say(e.sender, $.weave('last-seen.not-seen', target))
   }
 }
 

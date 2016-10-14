@@ -82,10 +82,18 @@ function rendererVendor () {
     .pipe(gulp.dest('./build/renderer'))
 }
 
-function buildCommon () {
+const buildCommon = gulp.parallel(commonJS, commonJSON)
+
+function commonJS () {
   return gulp
     .src('./src/common/**/*.js')
     .pipe(babel())
+    .pipe(gulp.dest('./build/common'))
+}
+
+function commonJSON () {
+  return gulp
+    .src('./src/common/**/*.json')
     .pipe(gulp.dest('./build/common'))
 }
 
@@ -94,7 +102,7 @@ function watchAll () {
     cleanMain, buildMain
   ))
 
-  gulp.watch('./src/common/**/*.js', gulp.series(
+  gulp.watch('./src/common/**/*.{js,json}', gulp.series(
     cleanCommon, buildCommon
   ))
 

@@ -31,17 +31,20 @@ const cooldown = {
   },
 
   async start (cmd, user, sub) {
-    const [needAdmin, isAdmin] = await Promise.all([
-      $.db.getComponentConfig('cooldown', 'includeAdmins', true),
+    const [includeAdmins, isAdmin] = await Promise.all([
+      $.db.getComponentConfig('cooldown', 'includeAdmins', false),
       $.user.isAdmin(user)
     ])
 
-    if (needAdmin && !isAdmin) return
+    if (!includeAdmins && isAdmin) return
 
     // if this command has no default specified, use the bot default
     const [cmdTime, fallback] = await Promise.all([this.get(cmd, sub), this.getDefault()])
     const time = typeof cmdTime === 'number' ? cmdTime : fallback
     const cooldowns = $.cache.get('cooldowns', [])
+
+    console.log(includeAdmins, isAdmin)
+    console.log(`starting cooldown for ${user} : ${cmd} - ${sub}`)
 
     $.cache.set('cooldowns', [{
       name: cmd,
@@ -94,12 +97,12 @@ const cooldown = {
 
     const timeLeft = active.until - Date.now()
     if (timeLeft > 0) {
-      const [needAdmin, isAdmin] = await Promise.all([
-        $.db.getComponentConfig('cooldown', 'includeAdmins', true),
+      const [includeAdmins, isAdmin] = await Promise.all([
+        $.db.getComponentConfig('cooldown', 'includeAdmins', false),
         $.user.isAdmin(user)
       ])
 
-      if (needAdmin && !isAdmin) return false
+      if (!includeAdmins && isAdmin) return false
 
       // return the number of seconds left if > 0
       return parseInt(timeLeft / 1000)

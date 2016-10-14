@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "appEngine": ">=0.1.0",
   "files": {
-    "module": "./coin.js",
+    "module": "./module.js",
     "component": "",
-    "interface": ""
+    "interface": "",
+    "language": "./lang.js"
   },
   "author": "citycide <thecitycide@gmail.com>",
   "homepage": "github.com/citycide/singularity"

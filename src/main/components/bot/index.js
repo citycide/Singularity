@@ -4,6 +4,7 @@ import Levers from 'levers'
 import Tock from 'common/utils/tock'
 import db from 'common/components/db'
 import log from 'common/utils/logger'
+import weave from 'common/components/weave'
 import { is, to, sleep } from 'common/utils/helpers'
 
 import extensions from './extension-loader'
@@ -199,6 +200,7 @@ async function addTableCustom (name, columns) {
 const coreMethods = {
   api: bot.api,
   tick: new Tock(),
+  weave,
   sleep,
   is,
   to,

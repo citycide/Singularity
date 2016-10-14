@@ -117,6 +117,14 @@ function initialize (extPath, manifest) {
     }
   }
 
+  if (files.language) {
+    try {
+      require(resolve(extDir, files.language)).default($)
+    } catch (e) {
+      log.error(`Failed to initialize language files of ${name} :: ${e.message}`)
+    }
+  }
+
   if (files.component) {
     try {
       require(resolve(extDir, files.component)).default($)

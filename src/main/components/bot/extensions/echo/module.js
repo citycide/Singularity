@@ -22,6 +22,11 @@ export function echo (e, $) {
     return
   }
 
+  if ($.is(e.subcommand, 'weave')) {
+    $.say($.weave('weave', e.sender, e.subArgString, 'fool'))
+    return
+  }
+
   $.say(e.sender, e.argString)
 }
 
@@ -58,4 +63,5 @@ export default function ($) {
 
   $.addSubcommand('twice', 'echo', { cooldown: 10 })
   $.addSubcommand('loudly', 'echo', { cooldown: 10 })
+  $.addSubcommand('weave', 'echo')
 }

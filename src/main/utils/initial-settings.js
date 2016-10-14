@@ -19,6 +19,9 @@ export default {
     botLogging,
     userServer,
     extensions,
-    translation
+    languages: {
+      current: translation,
+      default: translation
+    }
   }
 }

@@ -4,8 +4,9 @@
   "appEngine": ">=0.1.0",
   "files": {
     "module": "",
-    "component": "./groups.js",
-    "interface": ""
+    "component": "./component.js",
+    "interface": "",
+    "language": ""
   },
   "author": "citycide <thecitycide@gmail.com>",
   "homepage": "github.com/citycide/singularity"

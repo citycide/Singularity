@@ -4,7 +4,7 @@ export async function cooldown (e, $) {
     const subStr = sub ? ' ' + sub : ''
 
     if (!cmd) {
-      return $.say(e.sender, 'Usage: !cooldown get (command) [subcommand]')
+      return $.say(e.sender, $.weave('get.usage'))
     }
 
     const cool = await $.command.getCooldown(cmd, sub)
@@ -13,14 +13,14 @@ export async function cooldown (e, $) {
       return $.say(e.sender, `'!${cmd}${subStr}' has no cooldown.`)
     }
 
-    return $.say(e.sender, `Cooldown for '!${cmd}${subStr}' is set to ${cool} seconds.`)
+    return $.say(e.sender, $.weave('get.response', cmd, sub, cool))
   }
 
   if ($.is(e.subcommand, 'set')) {
     const [cmd, sub, val] = e.subArgs
 
     if (!cmd) {
-      return $.say(e.sender, 'Usage: !cooldown set (command) [subcommand] (# seconds)')
+      return $.say(e.sender, $.weave('set.usage'))
     }
 
     switch (e.subArgs.length) {
@@ -29,31 +29,31 @@ export async function cooldown (e, $) {
         const num = parseInt(sub)
 
         if ($.is.finite(num)) {
-          return $.say(e.sender, 'Usage: !cooldown set (command) [subcommand] (# seconds)')
+          return $.say(e.sender, $.weave('set.usage'))
         }
 
         if (!await $.command.exists(cmd)) {
-          return $.say(e.sender, `Command '!${cmd}' doesn't exist.`)
+          return $.say(e.sender, $.weave.core('commands.does-not-exist'))
         }
 
         await $.command.setCooldown(cmd, num)
-        return $.say(e.sender, `Cooldown for '${cmd}' set to ${num} seconds.`)
+        return $.say(e.sender, $.weave('set.success', cmd, num))
       case 3:
         // provided a command, subcommand, and cooldown value
         const subNum = parseInt(val)
 
         if (!$.is.finite(subNum)) {
-          return $.say(e.sender, 'Usage: !cooldown set (command) [subcommand] (# seconds)')
+          return $.say(e.sender, $.weave('set.usage'))
         }
 
         if (!await $.command.exists(cmd, sub)) {
-          return $.say(e.sender, `Command '!${cmd} ${sub}' doesn't exist.`)
+          return $.say(e.sender, $.weave.core('commands.does-not-exist'))
         }
 
         await $.command.setCooldown(cmd, subNum, sub)
-        return $.say(e.sender, `Cooldown for '${cmd} ${sub}' set to ${subNum} seconds.`)
+        return $.say(e.sender, $.weave('set.success-sub', cmd, sub, subNum))
       default:
-        return $.say(e.sender, 'Usage: !cooldown set (command) [subcommand] (# seconds)')
+        return $.say(e.sender, $.weave('set.usage'))
     }
   }
 
@@ -61,17 +61,17 @@ export async function cooldown (e, $) {
     const [status] = e.subArgs
 
     if (!$.is.oneOf(['enabled', 'disabled'], status)) {
-      return $.say(e.sender, `Usage: !cooldown admin (enabled|disabled)`)
+      return $.say(e.sender, $.weave('admin.usage'))
     }
 
     const bool = $.is(status, 'enabled')
     $.db.setComponentConfig('cooldown', 'includeAdmins', bool)
-    $.say(e.sender, `Cooldowns will now be ${bool ? 'enabled' : 'disabled'} for administrators.`)
+    $.say(e.sender, $.weave('admin.response', bool ? 'enabled' : 'disabled'))
     return
   }
 
   if (!e.subcommand) {
-    $.say(e.sender, `Usage: !cooldown (get|set)`)
+    $.say(e.sender, $.weave('usage'))
   }
 }
 
