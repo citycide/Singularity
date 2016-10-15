@@ -32,15 +32,15 @@ export async function coin (e, $) {
     }
 
     const result = $.to.random(1000) < 500
+    const outcome = result ? betAmount * reward : betAmount * risk
+    const str = await $.points.str(outcome)
 
     if (result) {
-      const result = betAmount * reward
-      await $.points.add(e.sender, result)
-      $.say(e.sender, $.weave('flip.win', await $.points.str(result)))
+      await $.points.add(e.sender, outcome)
+      $.say(e.sender, $.weave('flip.win', str))
     } else {
-      const result = betAmount * risk
-      await $.points.sub(e.sender, result)
-      $.say(e.sender, $.weave('flip.loss', await $.points.str(result)))
+      await $.points.sub(e.sender, outcome)
+      $.say(e.sender, $.weave('flip.loss', str))
     }
 
     return
