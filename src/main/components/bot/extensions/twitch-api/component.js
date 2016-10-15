@@ -3,7 +3,6 @@ import axios from 'axios'
 import moment from 'moment'
 import Levers from 'levers'
 import 'moment-duration-format'
-import log from 'common/utils/logger'
 import db from 'common/components/db'
 
 const settings = new Levers('app')
@@ -27,7 +26,7 @@ const twitchAPI = {
     const game = _.get(res, 'stream.game')
     const status = _.get(res, 'stream.channel.status')
     const createdTime = moment(_.get(res, 'stream.created_at')).valueOf()
-    const timeSince = moment().valueOf() - createdTime
+    const timeSince = Date.now() - createdTime
 
     const uptime = moment
       .duration(timeSince, 'milliseconds')
@@ -42,16 +41,12 @@ const twitchAPI = {
 
     $.tick.setTimeout('getStreamInfo', ::this.getStreamInfo, 30 * 1000)
   },
-  /**
-   * @function getChatUsers()
-   * @description updates the viewer list
-   * @returns {Array}
-   **/
+
   async getChatUsers () {
     const baseURL = 'https://tmi.twitch.tv/group/user/'
-    const { data } = await axios(
-      `${baseURL}${$.channel.name}/chatters?ts=${Date.now()}`, apiHeaders
-    )
+    const data = await this.api({
+      url: `${baseURL}${$.channel.name}/chatters?ts=${Date.now()}`
+    })
 
     const promises = _.flatMap(data.chatters, (chatters, group) => {
       return _.map(chatters, async chatter => {
@@ -66,7 +61,7 @@ const twitchAPI = {
           permission,
           mod: permission <= 1,
           following,
-          seen: moment().valueOf(),
+          seen: Date.now(),
           points: 0,
           time: 0,
           rank: 1
@@ -86,13 +81,23 @@ const twitchAPI = {
     return users
   },
 
-  async api (endpoint) {
+  async api (endpoint, notKraken) {
+    if (notKraken) {
+      try {
+        const opts = endpoint.opts || apiHeaders
+        return (await axios(endpoint.url, opts)).data
+      } catch (e) {
+        $.log.error(e.message)
+        return {}
+      }
+    }
+
     try {
       return (await axios(kraken + endpoint, {
         headers: { 'Client-ID': settings.get('clientID') }
       })).data
     } catch (e) {
-      log.error(e.message)
+      $.log.error(e.message)
       return {}
     }
   }

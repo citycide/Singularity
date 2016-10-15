@@ -378,11 +378,8 @@ function initTables () {
 /*
 function trilogyErrHandler (err) {
   if (!err) return
-  const indexErr = /^index\s[\S]+\salready exists$/i
 
   if (err.message.startsWith('UNIQUE constraint')) {
-    log.absurd(err.message)
-  } else if (indexErr.test(err.message)) {
     log.absurd(err.message)
   } else {
     log.error(err.message)

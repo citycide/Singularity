@@ -80,7 +80,7 @@ export async function coin (e, $) {
       return
     }
 
-    const newMax = $.to.number(e.subArgs[0], true)
+    const newMax = $.to.number(e.subArgs[0])
     await $.db.setModuleConfig('coin', 'maxBet', newMax)
 
     $.say(e.sender, $.weave('max.success', await $.points.str(newMax)))

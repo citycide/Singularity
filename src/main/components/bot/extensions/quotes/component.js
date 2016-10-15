@@ -1,9 +1,8 @@
-import _ from 'lodash'
 import moment from 'moment'
 
 const quotes = {
   async add (quote) {
-    if (!_.isPlainObject(quote) || !quote.hasOwnProperty('message')) return false
+    if (!$.is.object(quote) || !quote.hasOwnProperty('message')) return false
 
     const obj = Object.assign({}, {
       credit: $.channel.name,
@@ -24,20 +23,20 @@ const quotes = {
     return result ? result.id : false
   },
   async get (id) {
-    if (!_.isFinite(id)) return false
+    if (!$.is.number(id)) return false
 
     const response = await $.db.getRow('quotes', { id })
-    return _.isPlainObject(response) ? response : null
+    return $.is.object(response) ? response : null
   },
   async remove (id) {
-    if (!_.isFinite(id)) return false
+    if (!$.is.number(id)) return false
 
     await $.db.del('quotes', { id })
 
     return !await $.db.exists('quotes', { id })
   },
   async modify (id, newData) {
-    if (!_.isFinite(id) || !_.isPlainObject(newData)) return false
+    if (!$.is.number(id) || !$.is.object(newData)) return false
 
     await $.db.set('quotes', newData, { id })
 
