@@ -1,6 +1,7 @@
-import EventEmitter from 'events'
+import EventEmitter from 'eventemitter2'
 import Levers from 'levers'
 
+import transit from '../transit'
 import Tock from 'common/utils/tock'
 import db from 'common/components/db'
 import log from 'common/utils/logger'
@@ -369,9 +370,25 @@ class Core extends EventEmitter {
     super()
     Object.assign(this, coreMethods)
     this.setMaxListeners(30)
+
+    // forward events from the app emitter
+    transit.onAny((...args) => this.emit(...args))
+  }
+
+  /**
+   * Override `EventEmitter#on` to add the ability to
+   * prevent adding the same exact listener twice.
+   *
+   * @param channel
+   * @param fn
+   * @param single
+   */
+  on (channel, fn, single = true) {
+    if (single) this.off(channel, fn)
+    super.on(channel, fn)
   }
 }
-let core = new Core()
+const core = new Core()
 
 global.$ = core
 
@@ -383,7 +400,6 @@ export async function initialize (instant) {
   await sleep(instant ? 1 : 5000)
 
   log.bot('Initializing bot...')
-  if (!core) core = new Core()
   bot.connect()
 
   await db.initBotDB()

@@ -1,8 +1,18 @@
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter2'
 import { io } from './server'
 import ipcMain from '../utils/ipc-main'
 
 class Transit extends EventEmitter {
+  constructor () {
+    super()
+    Object.assign(this, {
+      wildcard: true,
+      delimiter: ':',
+      newListener: false,
+      maxListeners: 20
+    })
+  }
+
   on (channel, fn, bus) {
     switch (bus) {
       case 'all':

@@ -111,16 +111,11 @@ export async function alerts (e, $) {
   $.say(e.sender, $.weave('alerts.usage'))
 }
 
-function listen () {
-  transit.removeListener('alert:follow', followHandler)
-  transit.removeListener('alert:host', hostHandler)
-  transit.removeListener('alert:subscriber', subHandler)
-  transit.removeListener('alert:tip', tipHandler)
-
-  transit.on('alert:follow', followHandler)
-  transit.on('alert:host', hostHandler)
-  transit.on('alert:subsciber', subHandler)
-  transit.on('alert:tip', tipHandler)
+function listen ($) {
+  $.on('alert:follow', followHandler)
+  $.on('alert:host', hostHandler)
+  $.on('alert:subsciber', subHandler)
+  $.on('alert:tip', tipHandler)
 }
 
 async function followHandler (data) {
@@ -233,5 +228,5 @@ async function tipHandler (data) {
 
 export default function ($) {
   $.addCommand('alerts', { permLevel: 0 })
-  listen()
+  listen($)
 }
