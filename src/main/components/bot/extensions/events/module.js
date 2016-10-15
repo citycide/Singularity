@@ -19,7 +19,7 @@ export async function alerts (e, $) {
       : $.weave.core('common-words.disabled')
 
     await $.settings.set('followAlerts', bool)
-    $.say(e.sender, $.weave(`alerts.follows-${type}.success`))
+    $.say(e.sender, $.weave(`alerts.follows.${type}.success`))
 
     return
   }
@@ -40,7 +40,7 @@ export async function alerts (e, $) {
       : $.weave.core('common-words.disabled')
 
     await $.settings.set('hostAlerts', bool)
-    $.say(e.sender, $.weave(`alerts.host-${type}.success`))
+    $.say(e.sender, $.weave(`alerts.host.${type}.success`))
 
     return
   }
@@ -61,7 +61,7 @@ export async function alerts (e, $) {
       : $.weave.core('common-words.disabled')
 
     await $.settings.set('subAlerts', bool)
-    $.say(e.sender, $.weave(`alerts.sub-${type}.success`))
+    $.say(e.sender, $.weave(`alerts.sub.${type}.success`))
 
     return
   }
@@ -82,7 +82,7 @@ export async function alerts (e, $) {
       : $.weave.core('common-words.disabled')
 
     await $.settings.set('tipAlerts', bool)
-    $.say(e.sender, $.weave(`alerts.tip-${type}.success`))
+    $.say(e.sender, $.weave(`alerts.tip.${type}.success`))
 
     return
   }
@@ -111,27 +111,6 @@ export async function alerts (e, $) {
   $.say(e.sender, $.weave('alerts.usage'))
 }
 
-async function followHandler (data) {
-  const events = $.cache.get('events', [])
-
-  if (await $.settings.get('followAlerts', true)) {
-    if (!events.includes(`${data.display_name}:follow`)) {
-      events.push(`${data.display_name}:follow`)
-      const reward = await $.settings.get('followReward', 50)
-
-      if (reward > 0) {
-        $.shout($.weave.core('alerts.follows.response-reward',
-          data.display_name, await $.points.str(reward)))
-      } else {
-        $.shout($.weave.core('alerts.follows.response-no-reward',
-          data.display_name))
-      }
-
-      $.cache.set('events', events)
-    }
-  }
-}
-
 function listen () {
   transit.removeListener('alert:follow', followHandler)
   transit.removeListener('alert:host', hostHandler)
@@ -144,6 +123,29 @@ function listen () {
   transit.on('alert:tip', tipHandler)
 }
 
+async function followHandler (data) {
+  const events = $.cache.get('events', [])
+
+  if (await $.settings.get('followAlerts', true)) {
+    if (!events.includes(`${data.display_name}:follow`)) {
+      events.push(`${data.display_name}:follow`)
+      const reward = await $.settings.get('followReward', 50)
+
+      if (reward > 0) {
+        $.shout($.weave(
+          'alerts.follows.response-reward',
+          data.display_name,
+          await $.points.str(reward)
+        ))
+      } else {
+        $.shout($.weave('alerts.follows.response-no-reward', data.display_name))
+      }
+
+      $.cache.set('events', events)
+    }
+  }
+}
+
 async function hostHandler (data) {
   const events = $.cache.get('events', [])
 
@@ -154,11 +156,14 @@ async function hostHandler (data) {
       const reward = await $.settings.get('hostReward', 50)
 
       if (reward > 0) {
-        $.shout($.weave.core('bot:settings:alerts-hosts:response-reward',
-                    data.display_name, data.viewers, await $.points.str(reward)))
+        $.shout($.weave(
+          'alerts.host.response-reward',
+          data.display_name,
+          data.viewers,
+          await $.points.str(reward)
+        ))
       } else {
-        $.shout($.weave.core('bot:settings:alerts-hosts:response-no-reward',
-                    data.display_name, data.viewers))
+        $.shout($.weave('alerts.host.response-no-reward', data.display_name, data.viewers))
       }
 
       $.cache.set('events', events)
@@ -178,20 +183,27 @@ async function subHandler (data) {
       if (data.hasOwnProperty('months')) {
         // Event is a resub
         if (reward > 0) {
-          response = $.weave.core('bot:settings:alerts-resubs:response-reward',
-                        data.display_name, data.months, await $.points.str(reward))
+          response = $.weave(
+            'alerts.sub.resub-reward',
+            data.display_name,
+            data.months,
+            await $.points.str(reward)
+          )
         } else {
-          response = $.weave.core('bot:settings:alerts-resubs:response-no-reward',
-                        data.display_name, data.months)
+          response = $.weave(
+            'alerts.sub.resub-no-reward',
+            data.display_name,
+            data.months
+          )
         }
       } else {
         // Event is a new subscription
         if (reward > 0) {
-          response = $.weave.core('bot:settings:alerts-subs:response-reward',
-                        data.display_name, await $.points.str(reward))
+          response = $.weave(
+            'alerts.sub.response-reward', data.display_name, await $.points.str(reward)
+          )
         } else {
-          response = $.weave.core('bot:settings:alerts-subs:response-no-reward',
-                        data.display_name)
+          response = $.weave('alerts.sub.response-no-reward', data.display_name)
         }
       }
 
@@ -207,11 +219,14 @@ async function tipHandler (data) {
     const reward = await $.settings.get('tipReward', 50)
 
     if (reward > 0) {
-      $.shout($.weave.core('bot:settings:alerts-tips:response-reward',
-                data.name, data.amount, await $.points.str(reward)))
+      $.shout($.weave(
+        'alerts.tip.response-reward',
+        data.name,
+        data.amount,
+        await $.points.str(reward)
+      ))
     } else {
-      $.shout($.weave.core('bot:settings:alerts-tips:response-no-reward',
-                data.name, data.amount))
+      $.shout($.weave('alerts.tip.response-no-reward', data.name, data.amount))
     }
   }
 }

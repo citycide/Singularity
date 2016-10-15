@@ -6,7 +6,7 @@
     "module": "./module.js",
     "component": "",
     "interface": "",
-    "language": ""
+    "language": "./lang.js"
   },
   "author": "citycide <thecitycide@gmail.com>",
   "homepage": "github.com/citycide/singularity"

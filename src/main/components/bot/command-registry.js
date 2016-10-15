@@ -1,6 +1,6 @@
 import callsites from 'callsites'
 import db from 'common/components/db'
-import log from '../../../common/utils/logger'
+import log from 'common/utils/logger'
 
 let modules = []
 let commands = {}
@@ -125,10 +125,7 @@ const _dbDeleteCustomCommand = async function (name) {
 
 const _loadCustomCommands = async function () {
   const arr = await db.bot.data.getRows('commands', { module: 'custom' })
-
-  for (let cmd of arr) {
-    _registerCustomCommand(cmd.name)
-  }
+  arr.map(({ name }) => _registerCustomCommand(name))
 }
 
 const _unregister = function (all) {
