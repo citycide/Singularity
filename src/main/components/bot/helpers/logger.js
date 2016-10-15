@@ -50,7 +50,7 @@ Object.keys(logTypes).map(type => {
     $.file.write(outPath, line, true)
     appLog.bot(line)
   }
-}
+})
 
 export default log
 

@@ -53,7 +53,7 @@ export async function couch (e, $) {
     const newMulti = $.to.number(e.subArgs[0])
 
     await $.db.setModuleConfig('couch', 'multiplier', newMulti)
-    $.say(e.sender, $.weave.('multi.success', newMulti))
+    $.say(e.sender, $.weave('multi.success', newMulti))
   }
 }
 
