@@ -63,7 +63,7 @@ async function canAffordCommand (user, command, subcommand) {
     getUserPoints(user)
   ])
   
-  return points > price
+  return [points > price, points, price]
 }
 
 async function run () {
