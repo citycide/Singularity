@@ -1,3 +1,13 @@
+async function add (user, amount) {
+  const inputAmount = parseInt(amount)
+  await $.db.incr('users', 'points', inputAmount, { name: user })
+}
+
+async function sub (user, amount) {
+  const inputAmount = parseInt(amount)
+  await $.db.decr('users', 'points', inputAmount, { name: user })
+}
+
 async function makeString (amount) {
   const inputAmount = parseInt(amount)
   if (inputAmount === 1) {
@@ -6,33 +16,6 @@ async function makeString (amount) {
   } else {
     // plural
     return `${inputAmount} ${await getPointName()}`
-  }
-}
-
-async function getCommandPrice (cmd, sub = null) {
-  if (!sub) {
-    return await $.db.get('commands', 'price', { name: cmd })
-  } else {
-    const res = await $.db.get('subcommands', 'price', { name: cmd })
-
-    if (res === -1) {
-      return await $.db.get('commands', 'price', { name: cmd })
-    } else {
-      return res
-    }
-  }
-}
-
-async function setCommandPrice (cmd, price, sub = null) {
-  if (!sub) {
-    await $.db.set('commands', { name: cmd, price }, { name: cmd })
-  } else {
-    if (price === -1) {
-      const res = await $.db.get('commands', 'price', { name: cmd })
-      await $.db.set('subcommands', { name: cmd, price: res }, { name: cmd })
-    } else {
-      await $.db.set('subcommands', { name: cmd, price }, { name: cmd })
-    }
   }
 }
 
@@ -47,14 +30,40 @@ async function setUserPoints (user, amount) {
   await $.db.set('users', { points: inputAmount }, { name: user })
 }
 
-async function add (user, amount) {
-  const inputAmount = parseInt(amount)
-  await $.db.incr('users', 'points', inputAmount, { name: user })
+async function getCommandPrice (cmd, sub) {
+  if (!sub) {
+    return await $.db.get('commands', 'price', { name: cmd })
+  } else {
+    const res = await $.db.get('subcommands', 'price', { name: cmd })
+
+    if (res === -1) {
+      return await $.db.get('commands', 'price', { name: cmd })
+    } else {
+      return res
+    }
+  }
 }
 
-async function sub (user, amount) {
-  const inputAmount = parseInt(amount)
-  await $.db.decr('users', 'points', inputAmount, { name: user })
+async function setCommandPrice (cmd, price, sub) {
+  if (!sub) {
+    await $.db.set('commands', { name: cmd, price }, { name: cmd })
+  } else {
+    if (price === -1) {
+      const res = await $.db.get('commands', 'price', { name: cmd })
+      await $.db.set('subcommands', { name: cmd, price: res }, { name: cmd })
+    } else {
+      await $.db.set('subcommands', { name: cmd, price }, { name: cmd })
+    }
+  }
+}
+
+async function canAffordCommand (user, command, subcommand) {
+  const [price, points] = await Promise.all([
+    getCommandPrice(command, subcommand),
+    getUserPoints(user)
+  ])
+  
+  return points > price
 }
 
 async function run () {
@@ -189,6 +198,8 @@ export default async function ($) {
     getName: getPointName,
     setName: setPointName
   }
+  
+  $.user.canAffordCommand = canAffordCommand
 
   await $.sleep(1000)
   run()
