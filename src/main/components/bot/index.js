@@ -328,12 +328,22 @@ const coreMethods = {
     }
 
     // Check that the user has enough points to use the (sub)command
-    const commandPrice = await this.command.getPrice(event.command, subcommand)
-    const userPoints = await this.points.get(event.sender)
-    if (userPoints < commandPrice) {
-      log.bot(`${event.sender} does not have enough points to use !${event.command}.`)
-      return say(event.sender, `You don't have enough points to use !${event.command}. ` +
-        `(costs ${commandPrice}, you have ${userPoints})`)
+    // TODO: core module state, to enable something like this:
+    // const pointsEnabled = await this.ext.isEnabled('points')
+    const pointsEnabled = true
+    const [canAfford, userPoints, commandPrice] = await this.user.canAffordCommand(
+      event.sender, event.command, subcommand
+    )
+
+    if (pointsEnabled && !canAfford) {
+      this.log(`${event.sender} does not have enough points to use !${event.command}.`)
+      say(
+        event.sender,
+        `You don't have enough points to use !${event.command}. ` +
+        `» costs ${commandPrice}, you have ${userPoints}`
+      )
+      
+      return
     }
 
     // Finally, run the (sub)command
@@ -343,23 +353,21 @@ const coreMethods = {
           name: event.command, module: 'custom'
         })
 
-        say(event.sender, this.params(event, response))
+        say(event.sender, await this.params(event, response))
 
         this.command.startCooldown(event.command, event.sender)
-        this.points.sub(event.sender, commandPrice)
+        if (pointsEnabled && commandPrice) this.points.sub(event.sender, commandPrice)
       } catch (e) {
-        log.error(e)
-        throw e
+        this.log.error(e.message)
       }
     } else {
       try {
         getRunner(event.command)(event, this)
 
         this.command.startCooldown(event.command, event.sender, subcommand)
-        if (commandPrice) this.points.sub(event.sender, commandPrice)
+        if (pointsEnabled && commandPrice) this.points.sub(event.sender, commandPrice)
       } catch (e) {
-        log.error(e)
-        throw e
+        this.log.error(e.message)
       }
     }
   }
@@ -367,9 +375,14 @@ const coreMethods = {
 
 class Core extends EventEmitter {
   constructor () {
-    super()
+    super({
+      wildcard: true,
+      delimiter: ':',
+      newListener: false,
+      maxListeners: 30
+    })
+
     Object.assign(this, coreMethods)
-    this.setMaxListeners(30)
 
     // forward events from the app emitter
     transit.onAny((...args) => this.emit(...args))
