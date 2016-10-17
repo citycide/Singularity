@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-async makeString (amount) {
+async function makeString (amount) {
   const inputAmount = parseInt(amount)
   if (inputAmount === 1) {
     // singular
@@ -11,7 +11,7 @@ async makeString (amount) {
   }
 }
 
-async getCommandPrice (cmd, sub = null) {
+async function getCommandPrice (cmd, sub = null) {
   if (!sub) {
     return await $.db.get('commands', 'price', { name: cmd })
   } else {
@@ -25,7 +25,7 @@ async getCommandPrice (cmd, sub = null) {
   }
 }
 
-async setCommandPrice (cmd, price, sub = null) {
+async function setCommandPrice (cmd, price, sub = null) {
   if (!sub) {
     await $.db.set('commands', { name: cmd, price }, { name: cmd })
   } else {
@@ -38,28 +38,28 @@ async setCommandPrice (cmd, price, sub = null) {
   }
 }
 
-async getUserPoints (user, makeString) {
+async function getUserPoints (user, makeString) {
   return (makeString)
     ? await makeString(await $.db.get('users', 'points', { name: user }))
     : await $.db.get('users', 'points', { name: user })
 }
 
-async setUserPoints (user, amount) {
+async function setUserPoints (user, amount) {
   const inputAmount = parseInt(amount)
   await $.db.set('users', { points: inputAmount }, { name: user })
 }
 
-async add (user, amount) {
+async function add (user, amount) {
   const inputAmount = parseInt(amount)
   await $.db.incr('users', 'points', inputAmount, { name: user })
 }
 
-async sub (user, amount) {
+async function sub (user, amount) {
   const inputAmount = parseInt(amount)
   await $.db.decr('users', 'points', inputAmount, { name: user })
 }
 
-async run () {
+async function run () {
   let payout = 0
   const now = Date.now()
   const lastPayout = $.cache.get('lastPayout', 0)
@@ -106,54 +106,54 @@ async run () {
   $.cache.set('lastPayout', now)
 }
 
-async getPointName (singular = false) {
+async function getPointName (singular = false) {
   return (singular)
     ? await $.settings.get('pointName', 'point')
     : await $.settings.get('pointNamePlural', 'points')
 }
 
-async setPointName (name, singular) {
+async function setPointName (name, singular) {
   return (singular)
     ? await $.settings.set('pointName', name)
     : await $.settings.set('pointNamePlural', name)
 }
 
-async getPayoutAmount (offline) {
+async function getPayoutAmount (offline) {
   return (!offline)
     ? await $.settings.get('pointsPayoutLive', 6)
     : await $.settings.get('pointsPayoutOffline', -1)
 }
 
-async setPayoutAmount (amount, offline) {
+async function setPayoutAmount (amount, offline) {
   const amt = parseInt(amount)
   return (!offline)
     ? await $.settings.set('pointsPayoutLive', amt)
     : await $.settings.set('pointsPayoutOffline', amt)
 }
 
-async getPayoutInterval (offline) {
+async function getPayoutInterval (offline) {
   return (!offline)
     ? await $.settings.get('pointsIntervalLive', 5)
     : await $.settings.get('pointsIntervalOffline', -1)
 }
 
-async setPayoutInterval (time, offline) {
+async function setPayoutInterval (time, offline) {
   const _time = parseInt(time)
   return (!offline) {
     ? await $.settings.set('pointsIntervalLive', _time)
     : await $.settings.set('pointsIntervalOffline', _time)
 }
 
-async getRankBonus (rank) {
+async function getRankBonus (rank) {
   const storedRankBonus = await $.db.get('ranks', 'bonus', { name: rank })
   return ($.is.number(storedRankBonus)) ? storedRankBonus : 0
 }
 
-async setRankBonus (rank, bonus) {
+async function setRankBonus (rank, bonus) {
   await $.db.set('ranks', { name: rank, bonus }, { name: rank })
 }
 
-async getGroupBonus (group) {
+async function getGroupBonus (group) {
   let storedGroupBonus
 
   if ($.is.number(group)) {
@@ -165,7 +165,7 @@ async getGroupBonus (group) {
   return _storedGroupBonus || 0
 }
 
-async setGroupBonus (group, bonus) {
+async function setGroupBonus (group, bonus) {
   if ($.is.number(group)) {
     await $.db.set('groups', { level: group, bonus }, { level: group })
   } else if ($.is.string(group)) {
@@ -183,16 +183,16 @@ export default async function ($) {
   })
 
   $.points = {
-    add: ::add,
-    sub: ::sub,
-    get: ::getUserPoints,
+    add,
+    sub,
+    str: makeString,
+    get: getUserPoints,
     set: setUserPoints,
-    str: ::makeString,
     getName: getPointName,
     setName: setPointName
   }
 
   await $.sleep(1000)
   run()
-  $.tick.setInterval('pointPayouts', ::run, 60 * 1000)
+  $.tick.setInterval('pointPayouts', run, 60 * 1000)
 }
