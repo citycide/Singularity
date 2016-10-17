@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 async function makeString (amount) {
   const inputAmount = parseInt(amount)
   if (inputAmount === 1) {
@@ -92,7 +90,7 @@ async function run () {
 
   await Promise.map(userList, async user => {
     if (user === $.channel.botName) return
-    if (!_.includes(lastUserList, user)) return
+    if (!lastUserList.includes(user)) return
 
     const res = await $.db.getRow('users', { name: user })
 
