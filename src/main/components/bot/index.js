@@ -198,6 +198,17 @@ async function addTableCustom (name, columns) {
   await db.addTable(name, columns, true)
 }
 
+function getSubcommand (event) {
+  const { command, args: [query] } = event
+  if (!query || !await commandExists(command)) return [undefined, {}]
+
+  return [query, {
+    subcommand: query,
+    subArgs = event.args.slice(1),
+    subArgString = event.subArgs.join(' ')
+  }]
+}
+
 const coreMethods = {
   api: bot.api,
   tick: new Tock(),
@@ -284,47 +295,42 @@ const coreMethods = {
   },
 
   async runCommand (event) {
+    const { command, sender, groupID } = event
+    
     // Check if the specified command is registered
-    if (!await commandExists(event.command)) {
-      log.bot(`'${event.command}' is not a registered command`)
+    if (!await commandExists(command)) {
+      log.bot(`'${command}' is not a registered command`)
       return
     }
+    
+    const [subcommand, subEvent] = getSubcommand(event)
+    
+    // add subcommand properties to the event object
+    if (subcommand) Object.assign(event, subEvent)
 
-    // Check if the specified command is enabled
-    if (!await commandIsEnabled(event.command)) {
-      log.bot(`'${event.command}' is installed but is not enabled`)
+    // Check if the specified (sub)command is enabled
+    if (!await commandIsEnabled(command, subcommand)) {
+      this.log.event(
+        `'${command}${subcommand ? ' ' + subcommand : ''}' is installed but is not enabled`
+      )
       return
-    }
-
-    // Check if the first argument is a subcommand
-    let subcommand = event.args[0] || undefined
-    if (subcommand && await commandExists(event.command, subcommand)) {
-      // if it is, check if the subcommand is enabled
-      if (!await commandIsEnabled(event.command, subcommand)) {
-        log.bot(`'${event.command} ${subcommand}' is installed but is not enabled`)
-        subcommand = undefined
-        return
-      }
-
-      // add subcommand argument properties to the event object
-      event.subcommand = subcommand
-      event.subArgs = event.args.slice(1)
-      event.subArgString = event.subArgs.join(' ')
-    } else {
-      subcommand = undefined
     }
 
     // Check if the specified (sub)command is on cooldown for this user (or globally depending on settings)
-    const cooldownActive = await this.command.isOnCooldown(event.command, event.sender, subcommand)
+    // const cooldownsEnabled = await this.ext.isEnabled('cooldown')
+    const cooldownsEnabled = true
+    const cooldownActive = await this.command.isOnCooldown(command, sender, subcommand)
     if (cooldownActive) {
-      log.bot(`'${event.command}' is on cooldown for ${event.sender} (${cooldownActive} seconds)`)
-      return say(event.sender, `You need to wait ${cooldownActive} seconds to use !${event.command} again.`)
+      this.log.event(`'${command}' is on cooldown for ${sender} » ${cooldownActive} seconds`)
+      say(event.sender, `You need to wait ${cooldownActive} seconds to use !${command} again.`)
+      return
     }
 
     // Check that the user has sufficient privileges to use the (sub)command
-    if (event.groupID > await commandGetPermLevel(event.command, subcommand)) {
-      log.bot(`${event.sender} does not have sufficient permissions to use !${event.command}`)
-      return say(event.sender, `You don't have what it takes to use !${event.command}.`)
+    if (groupID > await commandGetPermLevel(command, subcommand)) {
+      this.log.event(`${sender} does not have sufficient permissions to use !${command}`)
+      say(sender, `You don't have what it takes to use !${command}.`)
+      return
     }
 
     // Check that the user has enough points to use the (sub)command
@@ -332,14 +338,14 @@ const coreMethods = {
     // const pointsEnabled = await this.ext.isEnabled('points')
     const pointsEnabled = true
     const [canAfford, userPoints, commandPrice] = await this.user.canAffordCommand(
-      event.sender, event.command, subcommand
+      sender, command, subcommand
     )
 
     if (pointsEnabled && !canAfford) {
-      this.log(`${event.sender} does not have enough points to use !${event.command}.`)
+      this.log(`${sender} does not have enough points to use !${command}.`)
       say(
-        event.sender,
-        `You don't have enough points to use !${event.command}. ` +
+        sender,
+        `You don't have enough points to use !${command}. ` +
         `» costs ${commandPrice}, you have ${userPoints}`
       )
       
@@ -347,29 +353,32 @@ const coreMethods = {
     }
 
     // Finally, run the (sub)command
-    if (await commandIsCustom(event.command)) {
+    if (await commandIsCustom(command)) {
       try {
         const response = await db.bot.data.get('commands', 'response', {
-          name: event.command, module: 'custom'
+          name: command, module: 'custom'
         })
 
         say(event.sender, await this.params(event, response))
 
-        this.command.startCooldown(event.command, event.sender)
-        if (pointsEnabled && commandPrice) this.points.sub(event.sender, commandPrice)
+        if (cooldownsEnabled) this.command.startCooldown(command, sender)
+        if (pointsEnabled && commandPrice) this.points.sub(sender, commandPrice)
       } catch (e) {
         this.log.error(e.message)
       }
     } else {
       try {
-        getRunner(event.command)(event, this)
+        getRunner(command)(event, this)
 
-        this.command.startCooldown(event.command, event.sender, subcommand)
-        if (pointsEnabled && commandPrice) this.points.sub(event.sender, commandPrice)
+        if (cooldownsEnabled) this.command.startCooldown(command, sender, subcommand)
+        if (pointsEnabled && commandPrice) this.points.sub(sender, commandPrice)
       } catch (e) {
         this.log.error(e.message)
       }
     }
+    
+    // Fire the command event over the emitter
+    this.emit(`bot:command:${command}${subcommand ? ':' + subcommand : ''}`, event)
   }
 }
 
@@ -416,7 +425,6 @@ export async function initialize (instant) {
   bot.connect()
 
   await db.initBotDB()
-
   await loadHelpers()
   await loadTables()
 
