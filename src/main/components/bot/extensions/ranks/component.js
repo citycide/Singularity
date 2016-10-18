@@ -1,50 +1,46 @@
-import { isNil } from 'lodash'
-import log from 'common/utils/logger'
+async function getName (level) {
+  return $.db.get('ranks', 'name', { level })
+}
 
-// eslint-disable-next-line
-const ranks = {
-  async getRankName (level) {
-    return await $.db.get('ranks', 'name', { level })
-  },
-  async getRankLevel (name) {
-    return parseInt(await $.db.get('ranks', 'level', { name }))
-  },
-  async getUserRank (user = {}) {
-    // 'user' parameter should always be an object
-    // minimum requirements:
-    // user = { 'display-name': 'name' }
+async function getLevel (name) {
+  return parseInt(await $.db.get('ranks', 'level', { name }))
+}
 
-    const username = user['display-name']
-    if (!username) return
+async function getUserRank (user) {
+  const username = $.is.string(user) ? user : user['display-name']
+  if (!username) return
 
-    const _rankID = await $.db.get('users', 'rank', { name: username })
-    if (!isNil(_rankID) && _rankID >= 1) {
-      return _rankID
-    } else {
-      log.trace(`getUserRank:: assigning default rank to ${username} (level 1)`)
-      await $.db.set('users', { permission: 1 }, { name: username })
-      return 1
-    }
-  },
-  settings: {
-    async getAllowPurchases () {
-      if (await $.db.getComponentConfig('points', 'enabled', true)) {
-        return await $.db.getComponentConfig('ranks', 'allowPurchases', true)
-      } else {
-        return false
-      }
-    },
-    async setAllowPurchases (bool) {
-      if (typeof bool !== 'boolean') return
-      return await $.db.setComponentConfig('ranks', 'allowPurchases', bool)
-    }
+  const _rankID = await $.db.get('users', 'rank', { name: username })
+  if (_rankID >= 1) return _rankID
+
+  $.log.debug(`getUserRank:: assigning default rank to ${username} (level 1)`)
+  await $.db.set('users', { permission: 1 }, { name: username })
+  return 1
+}
+
+async function getAllowPurchases () {
+  if (await $.db.getComponentConfig('points', 'enabled', true)) {
+    return $.db.getComponentConfig('ranks', 'allowPurchases', true)
+  } else {
+    return false
   }
+}
+
+async function setAllowPurchases (bool) {
+  if ($.is.boolean(bool)) return
+  return $.db.setComponentConfig('ranks', 'allowPurchases', bool)
 }
 
 /**
  * Add methods to the global core object
  **/
 export default async function ($) {
+  $.user.getRank = getUserRank
+  $.ranks = {
+    getName,
+    getLevel
+  }
+  
   await $.db.addTableCustom('ranks', [
     { name: 'level', type: 'integer', unique: 'inline' },
     'name',
@@ -71,7 +67,12 @@ export default async function ($) {
         $.db.setComponentConfig('ranks', 'state', 'default')
       ])
     } catch (e) {
+      $.log('notice',
+        'An error occurred while setting default user ranks.' +
+        'Check the error log for more info.'
+      )
       $.log.error(`Error setting default user ranks :: ${e.message}`)
+      return
     }
 
     $.log('notice', 'Done. Default user ranks initialized.')
