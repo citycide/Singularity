@@ -302,7 +302,7 @@ const coreMethods = {
     // const cooldownsEnabled = await this.ext.isEnabled('cooldown')
     const cooldownsEnabled = true
     const cooldownActive = await this.command.isOnCooldown(command, sender, subcommand)
-    if (cooldownActive) {
+    if (cooldownsEnabled && cooldownActive) {
       this.log.event(`'${command}' is on cooldown for ${sender} » ${cooldownActive} seconds`)
       say(event.sender, `You need to wait ${cooldownActive} seconds to use !${command} again.`)
       return
@@ -432,89 +432,53 @@ export function reconfigure (name, auth) {
 */
 
 async function loadTables () {
-  const arr = ['settings', 'extension_settings', 'users', 'commands', 'subcommands']
+  try {
+    await db.addTable('settings', [
+      { name: 'key', primary: true },
+      'value', 'info'
+    ], true)
 
-  const obj = await arr.reduce(async (p, c) => {
-    return Object.assign({}, p, {
-      [c]: await db.bot.data.tableExists(c)
-    })
-  }, {})
-
-  if (!obj['settings']) {
-    try {
-      await db.addTable('settings', [
-        { name: 'key', primary: true },
-        'value', 'info'
-      ], true)
-    } catch (e) {
-      log.error(e.message)
-      throw e
-    }
+    await db.bot.initSettings()
+  } catch (e) {
+    log.error(e.message)
+    throw e
   }
 
-  if (!obj['extension_settings']) {
-    try {
-      await db.addTable('extension_settings', [
-        'extension', 'type', 'key', 'value', 'info'
-      ], true, { compositeKey: ['extension', 'type', 'key'] })
-    } catch (e) {
-      log.error(e)
-      throw e
-    }
-  }
+  await Promise.all([
+    db.addTable('extension_settings', [
+      'extension', 'type', 'key', 'value', 'info'
+    ], true, { compositeKey: ['extension', 'type', 'key'] }),
 
-  if (!obj['users']) {
-    try {
-      await db.addTable('users', [
-        { name: 'name', unique: 'inline' },
-        { name: 'permission', type: 'integer' },
-        { name: 'mod', defaultTo: 'false' },
-        { name: 'following', defaultTo: 'false' },
-        { name: 'seen', type: 'integer', defaultTo: 0 },
-        { name: 'points', type: 'integer', defaultTo: 0 },
-        { name: 'time', type: 'integer', defaultTo: 0 },
-        { name: 'rank', type: 'integer', defaultTo: 1 }
-      ], true)
-    } catch (e) {
-      log.error(e)
-      throw e
-    }
-  }
+    db.addTable('users', [
+      { name: 'name', unique: 'inline' },
+      { name: 'permission', type: 'integer' },
+      { name: 'mod', defaultTo: 'false' },
+      { name: 'following', defaultTo: 'false' },
+      { name: 'seen', type: 'integer', defaultTo: 0 },
+      { name: 'points', type: 'integer', defaultTo: 0 },
+      { name: 'time', type: 'integer', defaultTo: 0 },
+      { name: 'rank', type: 'integer', defaultTo: 1 }
+    ], true),
 
-  await db.bot.initSettings().catch(e => log.error(e.message))
+    db.addTable('commands', [
+      { name: 'name', unique: 'inline' },
+      { name: 'cooldown', type: 'integer', defaultTo: 30 },
+      { name: 'permission', type: 'integer', defaultTo: 5 },
+      { name: 'status', defaultTo: 'false' },
+      { name: 'price', type: 'integer', defaultTo: 0 },
+      'module', 'response'
+    ], true),
 
-  if (!obj['commands']) {
-    try {
-      await db.addTable('commands', [
-        { name: 'name', unique: 'inline' },
-        { name: 'cooldown', type: 'integer', defaultTo: 30 },
-        { name: 'permission', type: 'integer', defaultTo: 5 },
-        { name: 'status', defaultTo: 'false' },
-        { name: 'price', type: 'integer', defaultTo: 0 },
-        'module', 'response'
-      ], true)
-    } catch (e) {
-      log.error(e)
-      throw e
-    }
-  }
-
-  if (!obj['subcommands']) {
-    try {
-      await db.addTable('subcommands', [
-        'name',
-        { name: 'cooldown', type: 'integer', defaultTo: 30 },
-        { name: 'permission', type: 'integer', defaultTo: 5 },
-        { name: 'status', defaultTo: 'false' },
-        { name: 'price', type: 'integer', defaultTo: 0 },
-        'module',
-        'parent'
-      ], true, { compositeKey: ['name', 'module'] })
-    } catch (e) {
-      log.error(e)
-      throw e
-    }
-  }
+    db.addTable('subcommands', [
+      'name',
+      { name: 'cooldown', type: 'integer', defaultTo: 30 },
+      { name: 'permission', type: 'integer', defaultTo: 5 },
+      { name: 'status', defaultTo: 'false' },
+      { name: 'price', type: 'integer', defaultTo: 0 },
+      'module',
+      'parent'
+    ], true, { compositeKey: ['name', 'module'] })
+  ])
 }
 
 async function loadHelpers () {
