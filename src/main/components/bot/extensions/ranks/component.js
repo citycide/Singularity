@@ -8,7 +8,6 @@ async function getLevel (name) {
 
 async function getUserRank (user) {
   const username = $.is.string(user) ? user : user['display-name']
-  if (!username) return
 
   const _rankID = await $.db.get('users', 'rank', { name: username })
   if (_rankID >= 1) return _rankID
