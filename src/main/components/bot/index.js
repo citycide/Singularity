@@ -198,19 +198,18 @@ async function addTableCustom (name, columns) {
   await db.addTable(name, columns, true)
 }
 
-function getSubcommand (event) {
+async function getSubcommand (event) {
   const { command, args: [query] } = event
   if (!query || !await commandExists(command)) return [undefined, {}]
 
   return [query, {
     subcommand: query,
-    subArgs = event.args.slice(1),
-    subArgString = event.subArgs.join(' ')
+    subArgs: event.args.slice(1),
+    subArgString: event.subArgs.join(' ')
   }]
 }
 
 const coreMethods = {
-  api: bot.api,
   tick: new Tock(),
   weave,
   sleep,
@@ -263,48 +262,31 @@ const coreMethods = {
 
   user: {
     async isFollower (user) {
-      let _status = false
-      bot.api({
-        url: `https://api.twitch.tv/kraken/users/${user}/follows/channels/${channel.name}`,
-        method: 'GET',
-        headers: {
-          'Accept': 'application/vnd.twitchtv.v3+json',
-          'Authorization': `OAuth ${settings.get('twitch.token').slice(6)}`,
-          'Client-ID': settings.get('clientID')
-        }
-      }, (err, res, body) => {
-        if (err) {
-          log.bot(err)
-          return
-        }
-
-        _status = (body.status !== 404)
-      })
-
-      return _status
+      const data = this.api(`users/${user}/follows/channels/${channel.name}`)
+      return is.object(data.channel)
     },
 
     async exists (user) {
-      return is.object(await db.bot.data.getRow('users', { name: user }))
+      return dbExists('users', { name: user })
     },
 
     async isAdmin (user) {
       // refactor to pull from some kind of Map or from the database
-      return (user === channel.name || user === channel.botName)
+      return is.oneOf([channel.name, channel.botName], user)
     }
   },
 
   async runCommand (event) {
     const { command, sender, groupID } = event
-    
+
     // Check if the specified command is registered
     if (!await commandExists(command)) {
       log.bot(`'${command}' is not a registered command`)
       return
     }
-    
-    const [subcommand, subEvent] = getSubcommand(event)
-    
+
+    const [subcommand, subEvent] = await getSubcommand(event)
+
     // add subcommand properties to the event object
     if (subcommand) Object.assign(event, subEvent)
 
@@ -348,7 +330,7 @@ const coreMethods = {
         `You don't have enough points to use !${command}. ` +
         `» costs ${commandPrice}, you have ${userPoints}`
       )
-      
+
       return
     }
 
@@ -376,7 +358,7 @@ const coreMethods = {
         this.log.error(e.message)
       }
     }
-    
+
     // Fire the command event over the emitter
     this.emit(`bot:command:${command}${subcommand ? ':' + subcommand : ''}`, event)
   }
