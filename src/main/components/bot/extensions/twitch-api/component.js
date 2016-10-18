@@ -3,7 +3,6 @@ import axios from 'axios'
 import moment from 'moment'
 import Levers from 'levers'
 import 'moment-duration-format'
-import log from 'common/utils/logger'
 import db from 'common/components/db'
 
 const settings = new Levers('app')
@@ -57,7 +56,7 @@ async function getChatUsers () {
 
   const promises = _.flatMap(data.chatters, (chatters, group) => {
     return _.map(chatters, async chatter => {
-      if (await $.db.getRow('users', { name: chatter })) return chatter
+      if (await $.db.exists('users', { name: chatter })) return chatter
 
       const following = await $.user.isFollower(chatter)
       let permission = group === 'moderators' ? 1 : 5
