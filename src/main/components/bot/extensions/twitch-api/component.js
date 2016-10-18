@@ -49,9 +49,9 @@ const twitchAPI = {
    **/
   async getChatUsers () {
     const baseURL = 'https://tmi.twitch.tv/group/user/'
-    const { data } = await axios(
-      `${baseURL}${$.channel.name}/chatters?ts=${Date.now()}`, apiHeaders
-    )
+    const { data } = await this.api({
+      url: `${baseURL}${$.channel.name}/chatters?ts=${Date.now()}`
+    })
 
     const promises = _.flatMap(data.chatters, (chatters, group) => {
       return _.map(chatters, async chatter => {
@@ -87,6 +87,17 @@ const twitchAPI = {
   },
 
   async api (endpoint) {
+    if ($.is.object(endpoint)) {
+      try {
+        return (await axios(
+          endpoint.url, Object.assign({}, apiHeaders, endpoint.opts)
+        )).data
+      } catch (e) {
+        log.error(e.message)
+        return e
+      }
+    }
+
     try {
       return (await axios(kraken + endpoint, {
         headers: { 'Client-ID': settings.get('clientID') }
