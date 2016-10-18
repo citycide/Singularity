@@ -1,46 +1,35 @@
-import { isNil } from 'lodash'
-import log from 'common/utils/logger'
+async function getName (level) {
+  return $.db.get('groups', 'name', { level })
+}
 
-const groups = {
-  async getGroupName (level) {
-    return await $.db.get('groups', 'name', { level })
-  },
-  async getGroupLevel (name) {
-    return parseInt(await $.db.get('groups', 'level', { name }))
-  },
-  async getUserGroup (user) {
-    // 'user' parameter should always be an object
-    // minimum requirements:
-    // user = { 'display-name': 'name' }
+async function getLevel (name) {
+  return parseInt(await $.db.get('groups', 'level', { name }))
+}
 
-    const username = user['display-name']
-    const userType = user['user-type']
-    if (!username) return
+async function getUserGroup (user) {
+  const { 'display-name': username, 'user-type': userType } = user
+  if (!username) return
+  
+  let defaultGroupID = 5
+  if (userType === 'mod') defaultGroupID = 1
+  if (await $.user.isAdmin(username)) defaultGroupID = 0
 
-    let defaultGroupID = 5
-
-    if (userType === 'mod') defaultGroupID = 1
-    if (await $.user.isAdmin(username)) defaultGroupID = 0
-
-    const _groupID = await $.db.get('users', 'permission', { name: username })
-    if (!isNil(_groupID) && _groupID >= 0) {
-      return _groupID
-    } else {
-      log.trace(`getUserGroup:: assigning default group to ${username} (level ${defaultGroupID})`)
-      await $.db.set('users', { permission: defaultGroupID }, { name: username })
-      return defaultGroupID
-    }
-  }
+  const _groupID = await $.db.get('users', 'permission', { name: username })
+  if (_groupID >= 0) return _groupID
+  
+  $.log.event(`getUserGroup:: assigning default group to ${username} (level ${defaultGroupID})`)
+  await $.db.set('users', { permission: defaultGroupID }, { name: username })
+  return defaultGroupID
 }
 
 /**
  * Add methods to the global core object
  **/
 export default async function ($) {
-  $.user.getGroup = groups.getUserGroup
+  $.user.getGroup = getUserGroup
   $.groups = {
-    getName: groups.getGroupName,
-    getLevel: groups.getGroupLevel
+    getName,
+    getLevel
   }
 
   await $.db.addTableCustom('groups', [
@@ -50,7 +39,7 @@ export default async function ($) {
   ])
 
   if (await $.db.getComponentConfig('groups', 'state', 'initial') === 'initial') {
-    $.log('notice', 'Initializing default user ranks...')
+    $.log('notice', 'Initializing default user groups...')
 
     try {
       await Promise.all([
@@ -63,7 +52,12 @@ export default async function ($) {
         $.db.setComponentConfig('groups', 'state', 'default')
       ])
     } catch (e) {
+      $.log('notice',
+        'An error occurred while setting default user groups.' +
+        'Check the error log for more info.'
+      )
       $.log.error(`Error setting default user groups :: ${e.message}`)
+      return
     }
 
     $.log('notice', 'Done. Default user ranks initialized.')
