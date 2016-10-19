@@ -180,7 +180,9 @@ async function addTableCustom (name, columns) {
 
 async function getSubcommand (event) {
   const { command, args: [query] } = event
-  if (!query || !await commandExists(command)) return [undefined, {}]
+  if (!query || !await commandExists(command, query)) {
+    return [undefined, {}]
+  }
 
   return [query, {
     subcommand: query,
