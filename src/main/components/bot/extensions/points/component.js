@@ -62,11 +62,81 @@ async function canAffordCommand (user, command, subcommand) {
     getCommandPrice(command, subcommand),
     getUserPoints(user)
   ])
-  
+
   return [points > price, points, price]
 }
 
+async function getPointName (singular = false) {
+  return (singular)
+    ? $.settings.get('pointName', 'point')
+    : $.settings.get('pointNamePlural', 'points')
+}
+
+async function setPointName (name, singular) {
+  return (singular)
+    ? $.settings.set('pointName', name)
+    : $.settings.set('pointNamePlural', name)
+}
+
+async function getPayoutAmount (offline) {
+  return (!offline)
+    ? $.settings.get('pointsPayoutLive', 6)
+    : $.settings.get('pointsPayoutOffline', -1)
+}
+
+async function setPayoutAmount (amount, offline) {
+  const amt = $.to.number(amount)
+  return (!offline)
+    ? $.settings.set('pointsPayoutLive', amt)
+    : $.settings.set('pointsPayoutOffline', amt)
+}
+
+async function getPayoutInterval (offline) {
+  return (!offline)
+    ? $.settings.get('pointsIntervalLive', 5)
+    : $.settings.get('pointsIntervalOffline', -1)
+}
+
+async function setPayoutInterval (time, offline) {
+  const _time = $.to.number(time)
+  return (!offline)
+    ? $.settings.set('pointsIntervalLive', _time)
+    : $.settings.set('pointsIntervalOffline', _time)
+}
+
+async function getRankBonus (rank) {
+  const storedRankBonus = await $.db.get('ranks', 'bonus', { name: rank })
+  return ($.is.number(storedRankBonus)) ? storedRankBonus : 0
+}
+
+async function setRankBonus (rank, bonus) {
+  await $.db.set('ranks', { name: rank, bonus }, { name: rank })
+}
+
+async function getGroupBonus (group) {
+  let storedGroupBonus
+
+  if ($.is.number(group)) {
+    storedGroupBonus = await $.db.get('groups', 'bonus', { level: group })
+  } else if ($.is.string(group)) {
+    storedGroupBonus = await $.db.get('groups', 'bonus', { name: group })
+  } else return 0
+
+  return storedGroupBonus || 0
+}
+
+async function setGroupBonus (group, bonus) {
+  if ($.is.number(group)) {
+    await $.db.set('groups', { level: group, bonus }, { level: group })
+  } else if ($.is.string(group)) {
+    await $.db.set('groups', { name: group, bonus }, { name: group })
+  }
+}
+
 async function run () {
+  const isPointsEnabled = $.db.getExtConfig('points', 'enabled', true)
+  if (!isPointsEnabled) return
+
   let payout = 0
   const now = Date.now()
   const lastPayout = $.cache.get('lastPayout', 0)
@@ -112,73 +182,6 @@ async function run () {
   $.cache.set('lastPayout', now)
 }
 
-async function getPointName (singular = false) {
-  return (singular)
-    ? $.settings.get('pointName', 'point')
-    : $.settings.get('pointNamePlural', 'points')
-}
-
-async function setPointName (name, singular) {
-  return (singular)
-    ? $.settings.set('pointName', name)
-    : $.settings.set('pointNamePlural', name)
-}
-
-async function getPayoutAmount (offline) {
-  return (!offline)
-    ? $.settings.get('pointsPayoutLive', 6)
-    : $.settings.get('pointsPayoutOffline', -1)
-}
-
-async function setPayoutAmount (amount, offline) {
-  const amt = $.to.number(amount)
-  return (!offline)
-    ? $.settings.set('pointsPayoutLive', amt)
-    : $.settings.set('pointsPayoutOffline', amt)
-}
-
-async function getPayoutInterval (offline) {
-  return (!offline)
-    ? $.settings.get('pointsIntervalLive', 5)
-    : $.settings.get('pointsIntervalOffline', -1)
-}
-
-async function setPayoutInterval (time, offline) {
-  const _time = $.to.number(time)
-  return (!offline) {
-    ? $.settings.set('pointsIntervalLive', _time)
-    : $.settings.set('pointsIntervalOffline', _time)
-}
-
-async function getRankBonus (rank) {
-  const storedRankBonus = await $.db.get('ranks', 'bonus', { name: rank })
-  return ($.is.number(storedRankBonus)) ? storedRankBonus : 0
-}
-
-async function setRankBonus (rank, bonus) {
-  await $.db.set('ranks', { name: rank, bonus }, { name: rank })
-}
-
-async function getGroupBonus (group) {
-  let storedGroupBonus
-
-  if ($.is.number(group)) {
-    storedGroupBonus = await $.db.get('groups', 'bonus', { level: group })
-  } else if ($.is.string(group)) {
-    storedGroupBonus = await $.db.get('groups', 'bonus', { name: group })
-  } else return 0
-
-  return _storedGroupBonus || 0
-}
-
-async function setGroupBonus (group, bonus) {
-  if ($.is.number(group)) {
-    await $.db.set('groups', { level: group, bonus }, { level: group })
-  } else if ($.is.string(group)) {
-    await $.db.set('groups', { name: group, bonus }, { name: group })
-  }
-}
-
 /**
  * Add methods to the global core object
  **/
@@ -197,10 +200,10 @@ export default async function ($) {
     getName: getPointName,
     setName: setPointName
   }
-  
+
   $.user.canAffordCommand = canAffordCommand
 
-  await $.sleep(1000)
+  await $.sleep(2500)
   run()
   $.tick.setInterval('pointPayouts', run, 60 * 1000)
 }

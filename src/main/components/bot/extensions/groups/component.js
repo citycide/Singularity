@@ -9,14 +9,14 @@ async function getLevel (name) {
 async function getUserGroup (user) {
   const _user = $.is.object(user) ? user : { 'display-name': user }
   const { 'display-name': username, 'user-type': userType } = _user
-  
+
   let defaultGroupID = 5
   if (userType === 'mod') defaultGroupID = 1
   if (await $.user.isAdmin(username)) defaultGroupID = 0
 
   const _groupID = await $.db.get('users', 'permission', { name: username })
   if (_groupID >= 0) return _groupID
-  
+
   $.log.debug(`getUserGroup:: assigning default group to ${username} (level ${defaultGroupID})`)
   await $.db.set('users', { permission: defaultGroupID }, { name: username })
   return defaultGroupID

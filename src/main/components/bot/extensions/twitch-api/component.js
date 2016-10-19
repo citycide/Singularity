@@ -52,7 +52,7 @@ async function getStreamInfo () {
  **/
 async function getChatUsers () {
   const baseURL = 'https://tmi.twitch.tv/group/user/'
-  const { data } = await api(`${baseURL}${$.channel.name}/chatters?ts=${Date.now()}`)
+  const data = await api(`${baseURL}${$.channel.name}/chatters?ts=${Date.now()}`)
 
   const promises = _.flatMap(data.chatters, (chatters, group) => {
     return _.map(chatters, async chatter => {

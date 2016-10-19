@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-async getCooldown (cmd, sub) {
+async function getCooldown (cmd, sub) {
   if (!sub) {
     return $.db.get('commands', 'cooldown', { name: cmd })
   } else {
@@ -10,7 +10,7 @@ async getCooldown (cmd, sub) {
   }
 }
 
-async setCooldown (cmd, value, sub) {
+async function setCooldown (cmd, value, sub) {
   if (!sub) {
     await $.db.set('commands', { cooldown: value }, { name: cmd })
   } else {

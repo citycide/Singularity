@@ -39,7 +39,7 @@ export default async function ($) {
     getName,
     getLevel
   }
-  
+
   await $.db.addTableCustom('ranks', [
     { name: 'level', type: 'integer', unique: 'inline' },
     'name',
