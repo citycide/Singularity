@@ -140,35 +140,15 @@ async function commandSetPermLevel (cmd, level, sub) {
   return true
 }
 
-async function getModuleConfig (moduleName, key, defaultValue) {
-  return await db.bot.data.get('extension_settings', 'value', {
-    key,
-    extension: moduleName,
-    type: 'module'
+async function getExtConfig (ext, key, defaultValue) {
+  return db.bot.data.get('extension_settings', 'value', {
+    key, extension: ext
   }, defaultValue)
 }
 
-async function setModuleConfig (moduleName, key, value) {
-  return await db.bot.data.set('extension_settings', { value }, {
-    key,
-    extension: moduleName,
-    type: 'module'
-  })
-}
-
-async function getComponentConfig (component, key, defaultValue) {
-  return await db.bot.data.get('extension_settings', 'value', {
-    key,
-    extension: component,
-    type: 'component'
-  }, defaultValue)
-}
-
-async function setComponentConfig (component, key, value) {
-  return await db.bot.data.set('extension_settings', { value }, {
-    key,
-    extension: component,
-    type: 'component'
+async function setExtConfig (ext, key, value) {
+  return db.bot.data.set('extension_settings', { value }, {
+    key, extension: ext
   })
 }
 
@@ -252,10 +232,8 @@ const coreMethods = {
     getRandomRow: db.bot.data.getRandomRow,
     countRows: db.bot.data.countRows,
     exists: dbExists,
-    getModuleConfig,
-    setModuleConfig,
-    getComponentConfig,
-    setComponentConfig,
+    getExtConfig,
+    setExtConfig,
     addTable,
     addTableCustom
   },
@@ -298,12 +276,12 @@ const coreMethods = {
       return
     }
 
-    // Check if the specified (sub)command is on cooldown for this user (or globally depending on settings)
+    // Check if the specified (sub)command is on cooldown
     // const cooldownsEnabled = await this.ext.isEnabled('cooldown')
     const cooldownsEnabled = true
     const cooldownActive = await this.command.isOnCooldown(command, sender, subcommand)
     if (cooldownsEnabled && cooldownActive) {
-      this.log.event(`'${command}' is on cooldown for ${sender} » ${cooldownActive} seconds`)
+      this.log.event(`'${command}' is on cooldown for ${sender} (${cooldownActive} seconds)`)
       say(event.sender, `You need to wait ${cooldownActive} seconds to use !${command} again.`)
       return
     }
@@ -446,8 +424,8 @@ async function loadTables () {
 
   await Promise.all([
     db.addTable('extension_settings', [
-      'extension', 'type', 'key', 'value', 'info'
-    ], true, { compositeKey: ['extension', 'type', 'key'] }),
+      'extension', 'key', 'value', 'info'
+    ], true, { compositeKey: ['extension', 'key'] }),
 
     db.addTable('users', [
       { name: 'name', unique: 'inline' },

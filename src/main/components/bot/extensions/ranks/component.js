@@ -18,8 +18,8 @@ async function getUserRank (user) {
 }
 
 async function getAllowPurchases () {
-  if (await $.db.getComponentConfig('points', 'enabled', true)) {
-    return $.db.getComponentConfig('ranks', 'allowPurchases', true)
+  if (await $.db.getExtConfig('points', 'enabled', true)) {
+    return $.db.getExtConfig('ranks', 'allowPurchases', true)
   } else {
     return false
   }
@@ -27,7 +27,7 @@ async function getAllowPurchases () {
 
 async function setAllowPurchases (bool) {
   if ($.is.boolean(bool)) return
-  return $.db.setComponentConfig('ranks', 'allowPurchases', bool)
+  return $.db.setExtConfig('ranks', 'allowPurchases', bool)
 }
 
 /**
@@ -48,7 +48,7 @@ export default async function ($) {
     { name: 'price', type: 'integer' }
   ])
 
-  if (await $.db.getComponentConfig('ranks', 'state', 'initial') === 'initial') {
+  if (await $.db.getExtConfig('ranks', 'state', 'initial') === 'initial') {
     $.log('notice', 'Initializing default user ranks...')
 
     try {
@@ -63,7 +63,7 @@ export default async function ($) {
         $.db.set('ranks', { name: 'dreamcast', level: 8, bonus: 3, requirement: 30, price: 1800 }),
         $.db.set('ranks', { name: 'xbox', level: 9, bonus: 4, requirement: 50, price: 3000 }),
         $.db.set('ranks', { name: 'ps2', level: 10, bonus: 5, requirement: 100, price: 6000 }),
-        $.db.setComponentConfig('ranks', 'state', 'default')
+        $.db.setExtConfig('ranks', 'state', 'default')
       ])
     } catch (e) {
       $.log('notice',

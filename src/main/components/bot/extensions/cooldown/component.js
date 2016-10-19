@@ -26,7 +26,7 @@ async setCooldown (cmd, value, sub) {
 
 async function startCooldown (cmd, user, sub) {
   const [includeAdmins, isAdmin] = await Promise.all([
-    $.db.getComponentConfig('cooldown', 'includeAdmins', false),
+    $.db.getExtConfig('cooldown', 'includeAdmins', false),
     $.user.isAdmin(user)
   ])
 
@@ -88,7 +88,7 @@ async function isOnCooldown (cmd, user, sub) {
   const timeLeft = active.until - Date.now()
   if (timeLeft > 0) {
     const [includeAdmins, isAdmin] = await Promise.all([
-      $.db.getComponentConfig('cooldown', 'includeAdmins', false),
+      $.db.getExtConfig('cooldown', 'includeAdmins', false),
       $.user.isAdmin(user)
     ])
 

@@ -38,7 +38,7 @@ export default async function ($) {
     { name: 'bonus', type: 'integer' }
   ])
 
-  if (await $.db.getComponentConfig('groups', 'state', 'initial') === 'initial') {
+  if (await $.db.getExtConfig('groups', 'state', 'initial') === 'initial') {
     $.log('notice', 'Initializing default user groups...')
 
     try {
@@ -49,7 +49,7 @@ export default async function ($) {
         $.db.set('groups', { name: 'regular', level: 3, bonus: 5 }),
         $.db.set('groups', { name: 'follower', level: 4, bonus: 2 }),
         $.db.set('groups', { name: 'viewer', level: 5, bonus: 0 }),
-        $.db.setComponentConfig('groups', 'state', 'default')
+        $.db.setExtConfig('groups', 'state', 'default')
       ])
     } catch (e) {
       $.log('notice',
