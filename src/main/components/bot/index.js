@@ -343,7 +343,7 @@ const coreMethods = {
     }
 
     // Fire the command event over the emitter
-    this.emit(`bot:command:${command}${subcommand ? ':' + subcommand : ''}`, event)
+    this.emit(`command:${command}${subcommand ? ':' + subcommand : ''}`, event)
   }
 }
 
