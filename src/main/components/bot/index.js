@@ -49,12 +49,12 @@ const getRunner = cmd => getModule(cmd)[registry[cmd].handler]
 
 async function commandIsEnabled (cmd, sub) {
   if (!sub) {
-    return await db.bot.data.get('commands', 'status', { name: cmd })
+    return db.bot.data.get('commands', 'status', { name: cmd })
   } else {
     const res = await db.bot.data.get('subcommands', 'status', { name: sub, parent: cmd })
 
     if (is(res, 'inherit')) {
-      return await db.bot.data.get('commands', 'status', { name: cmd })
+      return db.bot.data.get('commands', 'status', { name: cmd })
     } else {
       return res
     }
@@ -108,12 +108,12 @@ async function commandIsCustom (cmd) {
 
 async function commandGetPermLevel (cmd, sub) {
   if (!sub) {
-    return await db.bot.data.get('commands', 'permission', { name: cmd })
+    return db.bot.data.get('commands', 'permission', { name: cmd })
   } else {
     const res = await db.bot.data.get('subcommands', 'permission', { name: sub, parent: cmd })
 
     if (is(res, -1)) {
-      return await db.bot.data.get('commands', 'permission', { name: cmd })
+      return db.bot.data.get('commands', 'permission', { name: cmd })
     } else {
       return res
     }
