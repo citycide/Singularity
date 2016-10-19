@@ -19,10 +19,10 @@ async function makeString (amount) {
   }
 }
 
-async function getUserPoints (user, makeString) {
-  return (makeString)
-    ? await makeString(await $.db.get('users', 'points', { name: user }))
-    : await $.db.get('users', 'points', { name: user })
+async function getUserPoints (user, asString) {
+  return (asString)
+    ? makeString(await $.db.get('users', 'points', { name: user }))
+    : $.db.get('users', 'points', { name: user })
 }
 
 async function setUserPoints (user, amount) {
@@ -32,12 +32,12 @@ async function setUserPoints (user, amount) {
 
 async function getCommandPrice (cmd, sub) {
   if (!sub) {
-    return await $.db.get('commands', 'price', { name: cmd })
+    return $.db.get('commands', 'price', { name: cmd })
   } else {
     const res = await $.db.get('subcommands', 'price', { name: cmd })
 
     if (res === -1) {
-      return await $.db.get('commands', 'price', { name: cmd })
+      return $.db.get('commands', 'price', { name: cmd })
     } else {
       return res
     }
@@ -115,40 +115,40 @@ async function run () {
 
 async function getPointName (singular = false) {
   return (singular)
-    ? await $.settings.get('pointName', 'point')
-    : await $.settings.get('pointNamePlural', 'points')
+    ? $.settings.get('pointName', 'point')
+    : $.settings.get('pointNamePlural', 'points')
 }
 
 async function setPointName (name, singular) {
   return (singular)
-    ? await $.settings.set('pointName', name)
-    : await $.settings.set('pointNamePlural', name)
+    ? $.settings.set('pointName', name)
+    : $.settings.set('pointNamePlural', name)
 }
 
 async function getPayoutAmount (offline) {
   return (!offline)
-    ? await $.settings.get('pointsPayoutLive', 6)
-    : await $.settings.get('pointsPayoutOffline', -1)
+    ? $.settings.get('pointsPayoutLive', 6)
+    : $.settings.get('pointsPayoutOffline', -1)
 }
 
 async function setPayoutAmount (amount, offline) {
   const amt = parseInt(amount)
   return (!offline)
-    ? await $.settings.set('pointsPayoutLive', amt)
-    : await $.settings.set('pointsPayoutOffline', amt)
+    ? $.settings.set('pointsPayoutLive', amt)
+    : $.settings.set('pointsPayoutOffline', amt)
 }
 
 async function getPayoutInterval (offline) {
   return (!offline)
-    ? await $.settings.get('pointsIntervalLive', 5)
-    : await $.settings.get('pointsIntervalOffline', -1)
+    ? $.settings.get('pointsIntervalLive', 5)
+    : $.settings.get('pointsIntervalOffline', -1)
 }
 
 async function setPayoutInterval (time, offline) {
   const _time = parseInt(time)
   return (!offline) {
-    ? await $.settings.set('pointsIntervalLive', _time)
-    : await $.settings.set('pointsIntervalOffline', _time)
+    ? $.settings.set('pointsIntervalLive', _time)
+    : $.settings.set('pointsIntervalOffline', _time)
 }
 
 async function getRankBonus (rank) {
