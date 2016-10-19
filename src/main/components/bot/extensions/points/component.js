@@ -1,15 +1,15 @@
 async function add (user, amount) {
-  const inputAmount = parseInt(amount)
+  const inputAmount = $.to.number(amount)
   await $.db.incr('users', 'points', inputAmount, { name: user })
 }
 
 async function sub (user, amount) {
-  const inputAmount = parseInt(amount)
+  const inputAmount = $.to.number(amount)
   await $.db.decr('users', 'points', inputAmount, { name: user })
 }
 
 async function makeString (amount) {
-  const inputAmount = parseInt(amount)
+  const inputAmount = $.to.number(amount)
   if (inputAmount === 1) {
     // singular
     return `${inputAmount} ${await getPointName(true)}`
@@ -26,7 +26,7 @@ async function getUserPoints (user, asString) {
 }
 
 async function setUserPoints (user, amount) {
-  const inputAmount = parseInt(amount)
+  const inputAmount = $.to.number(amount)
   await $.db.set('users', { points: inputAmount }, { name: user })
 }
 
@@ -99,10 +99,9 @@ async function run () {
 
   await Promise.map(userList, async user => {
     if (user === $.channel.botName) return
-    if (!lastUserList.includes(user)) return
+    if (!$.is.oneOf(lastUserList, user)) return
 
     const res = await $.db.getRow('users', { name: user })
-
     if (!res) return
 
     const bonus = await getRankBonus(res.rank) || await getGroupBonus(res.permission)
@@ -132,7 +131,7 @@ async function getPayoutAmount (offline) {
 }
 
 async function setPayoutAmount (amount, offline) {
-  const amt = parseInt(amount)
+  const amt = $.to.number(amount)
   return (!offline)
     ? $.settings.set('pointsPayoutLive', amt)
     : $.settings.set('pointsPayoutOffline', amt)
@@ -145,7 +144,7 @@ async function getPayoutInterval (offline) {
 }
 
 async function setPayoutInterval (time, offline) {
-  const _time = parseInt(time)
+  const _time = $.to.number(time)
   return (!offline) {
     ? $.settings.set('pointsIntervalLive', _time)
     : $.settings.set('pointsIntervalOffline', _time)
