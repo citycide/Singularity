@@ -256,6 +256,12 @@ const coreMethods = {
 
   async runCommand (event) {
     const { command, sender, groupID } = event
+    const [pointsEnabled, cooldownsEnabled] = await Promise.all([
+      getExtConfig('points', 'enabled', true),
+      getExtConfig('cooldown', 'enabled', true)
+    ])
+
+    let charge = 0
 
     // Check if the specified command is registered
     if (!await commandExists(command)) {
@@ -277,13 +283,13 @@ const coreMethods = {
     }
 
     // Check if the specified (sub)command is on cooldown
-    // const cooldownsEnabled = await this.ext.isEnabled('cooldown')
-    const cooldownsEnabled = true
-    const cooldownActive = await this.command.isOnCooldown(command, sender, subcommand)
-    if (cooldownsEnabled && cooldownActive) {
-      this.log.event(`'${command}' is on cooldown for ${sender} (${cooldownActive} seconds)`)
-      say(event.sender, `You need to wait ${cooldownActive} seconds to use !${command} again.`)
-      return
+    if (cooldownsEnabled) {
+      const cooldownActive = await this.command.isOnCooldown(command, sender, subcommand)
+      if (cooldownActive) {
+        this.log.event(`'${command}' is on cooldown for ${sender} (${cooldownActive} seconds)`)
+        say(event.sender, `You need to wait ${cooldownActive} seconds to use !${command} again.`)
+        return
+      }
     }
 
     // Check that the user has sufficient privileges to use the (sub)command
@@ -294,44 +300,41 @@ const coreMethods = {
     }
 
     // Check that the user has enough points to use the (sub)command
-    // TODO: core module state, to enable something like this:
-    // const pointsEnabled = await this.ext.isEnabled('points')
-    const pointsEnabled = true
-    const [canAfford, userPoints, commandPrice] = await this.user.canAffordCommand(
-      sender, command, subcommand
-    )
-
-    if (pointsEnabled && !canAfford) {
-      this.log(`${sender} does not have enough points to use !${command}.`)
-      say(
-        sender,
-        `You don't have enough points to use !${command}. ` +
-        `» costs ${commandPrice}, you have ${userPoints}`
+    if (pointsEnabled) {
+      const [canAfford, userPoints, commandPrice] = await this.user.canAffordCommand(
+        sender, command, subcommand
       )
 
-      return
+      if (!canAfford) {
+        this.log(`${sender} does not have enough points to use !${command}.`)
+        say(
+          sender,
+          `You don't have enough points to use !${command}. ` +
+          `» costs ${commandPrice}, you have ${userPoints}`
+        )
+
+        return
+      }
+
+      charge = commandPrice
     }
 
     // Finally, run the (sub)command
     if (await commandIsCustom(command)) {
-      try {
-        const response = await db.bot.data.get('commands', 'response', {
-          name: command, module: 'custom'
-        })
+      const response = await db.bot.data.get('commands', 'response', {
+        name: command, module: 'custom'
+      })
 
-        say(event.sender, await this.params(event, response))
+      say(event.sender, await this.params(event, response))
 
-        if (cooldownsEnabled) this.command.startCooldown(command, sender)
-        if (pointsEnabled && commandPrice) this.points.sub(sender, commandPrice)
-      } catch (e) {
-        this.log.error(e.message)
-      }
+      if (cooldownsEnabled) this.command.startCooldown(command, sender)
+      if (pointsEnabled && charge) this.points.sub(sender, charge)
     } else {
       try {
         getRunner(command)(event, this)
 
         if (cooldownsEnabled) this.command.startCooldown(command, sender, subcommand)
-        if (pointsEnabled && commandPrice) this.points.sub(sender, commandPrice)
+        if (pointsEnabled && charge) this.points.sub(sender, charge)
       } catch (e) {
         this.log.error(e.message)
       }
