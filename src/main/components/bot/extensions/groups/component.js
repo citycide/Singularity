@@ -17,7 +17,9 @@ async function getUserGroup (user) {
   const _groupID = await $.db.get('users', 'permission', { name: username })
   if (_groupID >= 0) return _groupID
 
-  $.log.debug(`getUserGroup:: assigning default group to ${username} (level ${defaultGroupID})`)
+  $.log.debug('groups',
+    `getUserGroup:: assigning default group to ${username} (level ${defaultGroupID})`
+  )
   await $.db.set('users', { permission: defaultGroupID }, { name: username })
   return defaultGroupID
 }
@@ -56,7 +58,7 @@ export default async function ($) {
         'An error occurred while setting default user groups.' +
         'Check the error log for more info.'
       )
-      $.log.error(`Error setting default user groups :: ${e.message}`)
+      $.log.error('groups', `Error setting default user groups :: ${e.message}`)
       return
     }
 

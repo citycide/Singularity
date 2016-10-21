@@ -12,7 +12,7 @@ async function getUserRank (user) {
   const _rankID = await $.db.get('users', 'rank', { name: username })
   if (_rankID >= 1) return _rankID
 
-  $.log.debug(`getUserRank:: assigning default rank to ${username} (level 1)`)
+  $.log.debug('ranks', `getUserRank:: assigning default rank to ${username} (level 1)`)
   await $.db.set('users', { permission: 1 }, { name: username })
   return 1
 }
@@ -70,7 +70,7 @@ export default async function ($) {
         'An error occurred while setting default user ranks.' +
         'Check the error log for more info.'
       )
-      $.log.error(`Error setting default user ranks :: ${e.message}`)
+      $.log.error('ranks', `Error setting default user ranks :: ${e.message}`)
       return
     }
 

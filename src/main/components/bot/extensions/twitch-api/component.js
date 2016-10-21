@@ -93,8 +93,12 @@ async function api (endpoint, opts) {
       url: endpoint, ...opts
     })).data
   } catch (e) {
-    $.log.error(e.message)
-    return {}
+    const status = _.get(e, 'response.data.status')
+    if (status === 404) return {}
+
+    const msg = _.get(e, 'response.data.message', 'Unknown error')
+    $.log.error('twitch-api', e.message || msg)
+    throw e
   }
 }
 
