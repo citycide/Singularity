@@ -26,20 +26,6 @@ const channel = {
 const getModule = cmd => extensions.loadModule(registry[cmd].module)
 const getRunner = cmd => getModule(cmd)[registry[cmd].handler]
 
-/*
-async function getExtConfig (ext, key, defaultValue) {
-  return db.get('extension_settings', 'value', {
-    key, extension: ext
-  }, defaultValue)
-}
-
-async function setExtConfig (ext, key, value) {
-  return db.set('extension_settings', { value }, {
-    key, extension: ext
-  })
-}
-*/
-
 async function getSubcommand (event) {
   const { command, args: [query] } = event
   if (!query || !await this.command.exists(command, query)) {
