@@ -3,7 +3,7 @@ import axios from 'axios'
 import moment from 'moment'
 import Levers from 'levers'
 import 'moment-duration-format'
-import db from 'common/components/db'
+import { botDB as db } from 'common/components/db'
 
 const settings = new Levers('app')
 const apiOpts = {
@@ -62,7 +62,7 @@ async function getChatUsers () {
       let permission = group === 'moderators' ? 1 : 5
       if (await $.user.isAdmin(chatter)) permission = 0
 
-      db.bot.addUser({
+      db.addUser({
         name: chatter,
         permission,
         mod: permission <= 1,

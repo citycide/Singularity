@@ -1,7 +1,7 @@
 import moment from 'moment'
 import Levers from 'levers'
 import { client as Client } from 'tmi.js'
-import db from 'common/components/db'
+import { botDB as db } from 'common/components/db'
 
 const settings = new Levers('app')
 const channel = new Levers('twitch')
@@ -59,7 +59,7 @@ async function messageHandler (user, message) {
     rank: await $.db.get('users', 'rank', { name: user['display-name'] }) || 1
   }
 
-  db.bot.addUser(_user)
+  db.addUser(_user)
 
   if (await isCommand(message)) commandHandler(_user, message)
 }

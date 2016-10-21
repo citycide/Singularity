@@ -1,4 +1,4 @@
-import db from 'common/components/db'
+import { appDB as db } from 'common/components/db'
 import transit from 'main/components/transit'
 
 transit.on('data:req:recentFollowers', async event => {
