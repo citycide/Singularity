@@ -148,19 +148,17 @@ class Core extends EventEmitter {
       })
 
       this.say(event.sender, await this.params(event, response))
-
-      if (cooldownsEnabled) this.command.startCooldown(command, sender)
-      if (pointsEnabled && charge) this.points.sub(sender, charge)
     } else {
       try {
         getRunner(command)(event, this)
-
-        if (cooldownsEnabled) this.command.startCooldown(command, sender, subcommand)
-        if (pointsEnabled && charge) this.points.sub(sender, charge)
       } catch (e) {
         this.log.error('core', e.message)
+        return
       }
     }
+
+    if (cooldownsEnabled) this.command.startCooldown(command, sender, subcommand)
+    if (pointsEnabled && charge) this.points.sub(sender, charge)
 
     // Fire the command event over the emitter
     this.emit(`command:${command}${subcommand ? ':' + subcommand : ''}`, event)
@@ -215,17 +213,14 @@ export function reconfigure (name, auth) {
 */
 
 async function loadTables () {
-  try {
-    await db.addTable('settings', [
+  await Promise.each([
+    db.addTable('settings', [
       { name: 'key', primary: true },
       'value', 'info'
-    ])
+    ]),
 
-    await db.initSettings()
-  } catch (e) {
-    log.error(e.message)
-    throw e
-  }
+    db.initSettings()
+  ])
 
   await Promise.all([
     db.addTable('extension_settings', [
