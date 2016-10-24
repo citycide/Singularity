@@ -194,7 +194,7 @@ export async function initialize (instant) {
   extensions.registerAll()
 
   log.bot('Bot ready.')
-  core.emit('bot:ready', core)
+  core.emit('ready', core)
 
   loadCustomCommands()
 }

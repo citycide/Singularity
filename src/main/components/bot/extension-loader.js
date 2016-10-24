@@ -147,7 +147,7 @@ function initialize (extPath, manifest) {
   }
 
   if (files.module) {
-    $.once('bot:ready', () => {
+    $.once('ready', () => {
       try {
         require(resolve(extDir, files.module)).default($)
       } catch (e) {
