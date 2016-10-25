@@ -32,10 +32,13 @@ async function getSubcommand (event) {
     return [undefined, {}]
   }
 
+  const subArgs = event.args.slice(1)
+  const subArgString = subArgs.join(' ')
+
   return [query, {
     subcommand: query,
-    subArgs: event.args.slice(1),
-    subArgString: event.subArgs.join(' ')
+    subArgs,
+    subArgString
   }]
 }
 
