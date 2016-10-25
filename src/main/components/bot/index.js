@@ -213,14 +213,12 @@ export function reconfigure (name, auth) {
 */
 
 async function loadTables () {
-  await Promise.each([
-    db.addTable('settings', [
-      { name: 'key', primary: true },
-      'value', 'info'
-    ]),
-
-    db.initSettings()
+  await db.addTable('settings', [
+    { name: 'key', primary: true },
+    'value', 'info'
   ])
+
+  await db.initSettings()
 
   await Promise.all([
     db.addTable('extension_settings', [
