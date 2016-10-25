@@ -40,7 +40,7 @@ async function getSubcommand (event) {
 }
 
 class Core extends EventEmitter {
-  constructor (methods) {
+  constructor () {
     // initialize the emitter
     super({
       wildcard: true,
@@ -49,7 +49,13 @@ class Core extends EventEmitter {
       maxListeners: 30
     })
 
-    Object.assign(this, methods)
+    Object.assign(this, {
+      channel,
+      command: {
+        getModule,
+        getRunner
+      }
+    })
 
     // forward events from the app emitter
     transit.onAny((...args) => this.emit(...args))
@@ -173,14 +179,7 @@ export async function initialize (instant) {
   await sleep(instant ? 1 : 5000)
   log.bot('Initializing bot...')
 
-  const core = new Core({
-    channel,
-    command: {
-      getModule,
-      getRunner
-    }
-  })
-
+  const core = new Core()
   global.$ = core
   bot.connect()
 
