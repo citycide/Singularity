@@ -142,7 +142,7 @@ async function followHandler (data) {
 }
 
 async function hostHandler (data) {
-  const events = $.cache.get('events', , new Set())
+  const events = $.cache.get('events', new Set())
 
   if (await $.settings.get('hostAlerts', true)) {
     if (!events.has(`${data.display_name}:host:${data.viewers}`)) {
