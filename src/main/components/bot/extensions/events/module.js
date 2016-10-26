@@ -1,5 +1,3 @@
-import transit from 'main/components/transit'
-
 export async function alerts (e, $) {
   const param1 = e.args[1]
 
