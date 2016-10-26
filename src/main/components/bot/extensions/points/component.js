@@ -20,9 +20,8 @@ async function makeString (amount) {
 }
 
 async function getUserPoints (user, asString) {
-  return (asString)
-    ? makeString(await $.db.get('users', 'points', { name: user }))
-    : $.db.get('users', 'points', { name: user })
+  const pts = $.to.number(await $.db.get('users', 'points', { name: user })
+  return asString ? makeString(pts) : pts
 }
 
 async function setUserPoints (user, amount) {
@@ -37,22 +36,25 @@ async function getCommandPrice (cmd, sub) {
     const res = await $.db.get('subcommands', 'price', { name: cmd })
 
     if (res === -1) {
-      return $.db.get('commands', 'price', { name: cmd })
+      const val = await $.db.get('commands', 'price', { name: cmd })
+      return $.to.number(val)
     } else {
-      return res
+      return $.to.number(res)
     }
   }
 }
 
 async function setCommandPrice (cmd, price, sub) {
+  const val = $.to.number(price)
   if (!sub) {
-    await $.db.set('commands', { name: cmd, price }, { name: cmd })
+    await $.db.set('commands', { name: cmd, price: val }, { name: cmd })
   } else {
     if (price === -1) {
       const res = await $.db.get('commands', 'price', { name: cmd })
-      await $.db.set('subcommands', { name: cmd, price: res }, { name: cmd })
+      const int = $.to.number(res)
+      await $.db.set('subcommands', { name: cmd, price: int }, { name: cmd })
     } else {
-      await $.db.set('subcommands', { name: cmd, price }, { name: cmd })
+      await $.db.set('subcommands', { name: cmd, price: val }, { name: cmd })
     }
   }
 }
