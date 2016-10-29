@@ -2,7 +2,9 @@ export async function points (e, $) {
   const [action, param1, param2] = e.args
 
   if (!action) {
-    return $.say(e.sender, $.weave('response', e.sender, await $.points.get(e.sender, true)))
+    return $.say(e.sender, $.weave(
+      'response.default', e.sender, await $.points.get(e.sender, true)
+    ))
   }
 
   if ($.is(e.subcommand, 'add')) {
@@ -61,7 +63,7 @@ export async function points (e, $) {
   }
 
   if (await $.user.exists(action)) {
-    return $.say(e.sender, $.weave('response', action, await $.points.get(action, true)))
+    return $.say(e.sender, $.weave('response.default', action, await $.points.get(action, true)))
   } else {
     return $.say(e.sender, $.weave('response.not-found', action))
   }

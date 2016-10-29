@@ -1,5 +1,5 @@
 export default function ($) {
-  $.weave.set('response', '{0} has {1}.')
+  $.weave.set('response.default', '{0} has {1}.')
   $.weave.set('response.not-found', '{0} has not visited the chat yet.')
 
   $.weave.set('add.usage', 'Usage: !points add (username) (amount)')

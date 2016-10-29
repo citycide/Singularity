@@ -20,7 +20,7 @@ async function makeString (amount) {
 }
 
 async function getUserPoints (user, asString) {
-  const pts = $.to.number(await $.db.get('users', 'points', { name: user })
+  const pts = $.to.number(await $.db.get('users', 'points', { name: user }))
   return asString ? makeString(pts) : pts
 }
 
