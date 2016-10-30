@@ -4,7 +4,7 @@ import Levers from 'levers'
 import { client as Client } from 'tmi.js'
 
 import transit from 'main/components/transit'
-import db from 'common/components/db'
+import { appDB as db } from 'common/components/db'
 import log from 'common/utils/logger'
 import Tock from 'common/utils/tock'
 

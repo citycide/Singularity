@@ -65,7 +65,7 @@ export async function cooldown (e, $) {
     }
 
     const bool = $.is(status, 'enabled')
-    $.db.setComponentConfig('cooldown', 'includeAdmins', bool)
+    $.db.setExtConfig('cooldown', 'includeAdmins', bool)
     $.say(e.sender, $.weave('admin.response', bool ? 'enabled' : 'disabled'))
     return
   }

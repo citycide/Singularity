@@ -9,9 +9,9 @@
  */
 
 export async function coin (e, $) {
-  const risk = await $.db.getModuleConfig('coin', 'risk', 1)
-  const reward = await $.db.getModuleConfig('coin', 'reward', 1)
-  const maxBet = await $.db.getModuleConfig('coin', 'maxBet', 50)
+  const risk = await $.db.getExtConfig('coin', 'risk', 1)
+  const reward = await $.db.getExtConfig('coin', 'reward', 1)
+  const maxBet = await $.db.getExtConfig('coin', 'maxBet', 50)
 
   if ($.is.numeric(e.args[0])) {
     const betAmount = $.to.number(e.args[0])
@@ -53,7 +53,7 @@ export async function coin (e, $) {
     }
 
     const newRisk = $.to.number(e.subArgs[0])
-    await $.db.setModuleConfig('coin', 'risk', newRisk)
+    await $.db.setExtConfig('coin', 'risk', newRisk)
 
     $.say(e.sender, $.weave('risk.success', await $.points.str(newRisk)))
 
@@ -67,7 +67,7 @@ export async function coin (e, $) {
     }
 
     const newReward = $.to.number(e.subArgs[0])
-    await $.db.setModuleConfig('coin', 'reward', newReward)
+    await $.db.setExtConfig('coin', 'reward', newReward)
 
     $.say(e.sender, $.weave('reward.success', await $.points.str(newReward)))
 
@@ -81,7 +81,7 @@ export async function coin (e, $) {
     }
 
     const newMax = $.to.number(e.subArgs[0])
-    await $.db.setModuleConfig('coin', 'maxBet', newMax)
+    await $.db.setExtConfig('coin', 'maxBet', newMax)
 
     $.say(e.sender, $.weave('max.success', await $.points.str(newMax)))
     return

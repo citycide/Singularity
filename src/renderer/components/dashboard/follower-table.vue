@@ -13,9 +13,9 @@
   </table>
 </template>
 
-<script type="babel">
+<script>
   import transit from '../js/transit'
-  import db, { initDB } from '../../../common/components/db'
+  import { appDB, initDB } from '../../../common/components/db'
 
   export default {
     data () {
@@ -25,17 +25,13 @@
     },
 
     async init () {
-      await initDB({ DEV: true })
+      await initDB()
+      const data = await appDB.getRecentFollows()
 
-      db.getRecentFollows().then(data => {
-        if (!this.followers.length && Array.isArray(data) && data.length) {
-          for (let item of data) {
-            this.followers.push(item);
-          }
-
-          this.$dispatch('expand')
-        }
-      })
+      if (!this.followers.length && Array.isArray(data) && data.length) {
+        for (let item of data) this.followers.push(item)
+        this.$dispatch('expand')
+      }
 
       transit.fire('data:req:recentFollowers')
     },

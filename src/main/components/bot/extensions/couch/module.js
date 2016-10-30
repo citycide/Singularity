@@ -9,7 +9,7 @@
  */
 
 export async function couch (e, $) {
-  const multi = await $.db.getModuleConfig('couch', 'multiplier', 1)
+  const multi = await $.db.getExtConfig('couch', 'multiplier', 1)
   const num = $.to.random(1000)
   let payout = 0
 
@@ -52,7 +52,7 @@ export async function couch (e, $) {
 
     const newMulti = $.to.number(e.subArgs[0])
 
-    await $.db.setModuleConfig('couch', 'multiplier', newMulti)
+    await $.db.setExtConfig('couch', 'multiplier', newMulti)
     $.say(e.sender, $.weave('multi.success', newMulti))
   }
 }

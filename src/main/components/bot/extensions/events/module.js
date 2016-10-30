@@ -1,5 +1,3 @@
-import transit from 'main/components/transit'
-
 export async function alerts (e, $) {
   const param1 = e.args[1]
 
@@ -119,11 +117,11 @@ function listen ($) {
 }
 
 async function followHandler (data) {
-  const events = $.cache.get('events', [])
+  const events = $.cache.get('events', new Set())
 
   if (await $.settings.get('followAlerts', true)) {
-    if (!events.includes(`${data.display_name}:follow`)) {
-      events.push(`${data.display_name}:follow`)
+    if (!events.has(`${data.display_name}:follow`)) {
+      events.add(`${data.display_name}:follow`)
       const reward = await $.settings.get('followReward', 50)
 
       if (reward > 0) {
@@ -142,12 +140,12 @@ async function followHandler (data) {
 }
 
 async function hostHandler (data) {
-  const events = $.cache.get('events', [])
+  const events = $.cache.get('events', new Set())
 
   if (await $.settings.get('hostAlerts', true)) {
-    if (!events.includes(`${data.display_name}:host`)) {
+    if (!events.has(`${data.display_name}:host:${data.viewers}`)) {
       // Only consider hosts duplicates if the viewer count is the same
-      events.push(`${data.display_name}:host:${data.viewers}`)
+      events.add(`${data.display_name}:host:${data.viewers}`)
       const reward = await $.settings.get('hostReward', 50)
 
       if (reward > 0) {
@@ -167,11 +165,11 @@ async function hostHandler (data) {
 }
 
 async function subHandler (data) {
-  const events = $.cache.get('events', [])
+  const events = $.cache.get('events', new Set())
 
   if (await $.settings.get('subAlerts', false)) {
-    if (!events.includes(`${data.display_name}:sub`)) {
-      events.push(`${data.display_name}:sub`)
+    if (!events.has(`${data.display_name}:sub`)) {
+      events.add(`${data.display_name}:sub`)
       const reward = await $.settings.get('subReward', 50)
       let response = ''
 

@@ -99,12 +99,14 @@ function validate (extPath, manifest) {
     }
   }
 
-  // check that any `files` referenced exist
-  if (!_.every([
+  const file = [
     files.module && fileExists(extDir, files.module),
     files.component && fileExists(extDir, files.component),
     files.interface && fileExists(extDir, files.interface)
-  ].filter(isNilOrEmpty), Boolean)) {
+  ]
+
+  // check that any `files` referenced exist
+  if (!_.every(file.filter(v => !(_.isNil(v) || _.isEmpty(v))), Boolean)) {
     return {
       valid: false,
       reason: `Extension ${name} references files that don't exist. ` +
@@ -147,7 +149,7 @@ function initialize (extPath, manifest) {
   }
 
   if (files.module) {
-    $.once('bot:ready', () => {
+    $.once('ready', () => {
       try {
         require(resolve(extDir, files.module)).default($)
       } catch (e) {
@@ -186,10 +188,6 @@ function getExtensionPath () {
   // ensure it exists
   dir(directory)
   return directory
-}
-
-function isNilOrEmpty (value) {
-  return _.every([value, !_.isEmpty(value), !_.isNil(value)], Boolean)
 }
 
 function fileExists (extDir, element) {
