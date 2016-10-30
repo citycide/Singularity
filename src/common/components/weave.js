@@ -12,6 +12,7 @@ const settings = new Levers('app')
 const EXISTING_FILE = 'Cannot overwrite existing language file.'
 const MISSING_FILE = 'Language file not found.'
 const MISSING_STRING = 'Unknown language string.'
+const INVALID_PATH = 'Invalid language string, confirm language path.'
 
 const directory = {
   'en-029': 'en-US',
@@ -60,6 +61,7 @@ let extLang = {}
 function weave (key, ...replacements) {
   const str = _.get(extLang, getKeyPath(callsites(), key))
   if (!str) return MISSING_STRING
+  if (!_.isString(str)) return INVALID_PATH
   return format(str, ...replacements)
 }
 
@@ -67,6 +69,7 @@ weave.core = function (key, ...replacements) {
   const keyPath = _.toPath(key)
   const str = _.get(coreLang, ['bot', 'core', ...keyPath])
   if (!str) return MISSING_STRING
+  if (!_.isString(str)) return INVALID_PATH
   return format(str, ...replacements)
 }
 

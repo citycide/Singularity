@@ -1,11 +1,11 @@
 import callsites from 'callsites'
-import db from 'common/components/db'
+import { botDB as db } from 'common/components/db'
 import log from 'common/utils/logger'
 
 let modules = []
 let commands = {}
 
-const _registerCommand = async function (cmd, _module, parent = false) {
+async function addCommandOrSub (cmd, _module, parent = false) {
   if (!modules.includes(_module)) modules.push(_module)
 
   const { name, handler, cooldown, permLevel, status, price } = cmd
@@ -17,7 +17,7 @@ const _registerCommand = async function (cmd, _module, parent = false) {
       module: _module,
       subcommands: {}
     }
-    await db.bot.addSubcommand(name, cooldown, permLevel, status, price, _module, parent)
+    await db.addSubcommand(name, cooldown, permLevel, status, price, _module, parent)
   } else {
     if (commands.hasOwnProperty(name)) {
       if (commands[name].module === _module) return
@@ -33,17 +33,17 @@ const _registerCommand = async function (cmd, _module, parent = false) {
       subcommands: {}
     }
 
-    await db.bot.addCommand(name, cooldown, permLevel, status, price, _module)
+    await db.addCommand(name, cooldown, permLevel, status, price, _module)
     log.absurd(`\`- Command loaded:: '${name}' (${_module})`)
   }
 }
 
-const registerCommand = function (name, options) {
+function registerCommand (name, options) {
   if (!name) return
 
   const _module = callsites()[1].getFileName()
 
-  const obj = Object.assign({
+  const obj = Object.assign({}, {
     name: name.toLowerCase(),
     handler: name,
     cooldown: 30,
@@ -52,13 +52,13 @@ const registerCommand = function (name, options) {
     price: 0
   }, options)
 
-  _registerCommand(obj, _module)
+  addCommandOrSub(obj, _module)
 }
 
-const registerSubcommand = function (name, parent, options) {
+function registerSubcommand (name, parent, options) {
   if (!name || !parent || !commands.hasOwnProperty(parent)) return
 
-  const opts = Object.assign({
+  const opts = Object.assign({}, {
     name: name.toLowerCase(),
     parent,
     cooldown: -1,
@@ -69,10 +69,10 @@ const registerSubcommand = function (name, parent, options) {
 
   const parentModule = commands[parent].module
 
-  _registerCommand(opts, parentModule, parent)
+  addCommandOrSub(opts, parentModule, parent)
 }
 
-const addCustomCommand = function (name, response) {
+function addCustomCommand (name, response) {
   if (!name || !response) return false
   const lowerName = name.toLowerCase()
 
@@ -81,21 +81,21 @@ const addCustomCommand = function (name, response) {
     return false
   }
 
-  _registerCustomCommand(lowerName)
-  _dbInsertCustomCommand(lowerName, response)
+  registerCustomCommand(lowerName)
+  dbInsertCustomCommand(lowerName, response)
 
   log.trace(`Added custom command:: '${lowerName}'`)
 
   return true
 }
 
-const deleteCustomCommand = function (name) {
+function deleteCustomCommand (name) {
   if (!name) return
   const lowerName = name.toLowerCase()
 
   if (commands.hasOwnProperty(lowerName) && commands[lowerName].custom) {
-    _unregisterCustomCommand(lowerName)
-    _dbDeleteCustomCommand(lowerName)
+    unregisterCustomCommand(lowerName)
+    dbDeleteCustomCommand(lowerName)
     return true
   } else {
     log.bot(`Could not remove command '${lowerName}'. Doesn't exist or is not custom.`)
@@ -103,51 +103,48 @@ const deleteCustomCommand = function (name) {
   }
 }
 
-const _registerCustomCommand = function (name) {
-  commands[name] = {
-    name,
-    custom: true
-  }
+function registerCustomCommand (name) {
+  commands[name] = { name, custom: true }
   log.absurd(`Loaded custom command '${name}'.`)
 }
 
-const _unregisterCustomCommand = function (name) {
+function unregisterCustomCommand (name) {
   delete commands[name]
 }
 
-const _dbInsertCustomCommand = async function (name, response) {
-  await db.bot.addCommand(name, 30, 5, true, 0, 'custom', response)
+async function dbInsertCustomCommand (name, response) {
+  await db.addCommand(name, 30, 5, true, 0, 'custom', response)
 }
 
-const _dbDeleteCustomCommand = async function (name) {
-  await db.bot.data.del('commands', { name, module: 'custom' })
+async function dbDeleteCustomCommand (name) {
+  await db.del('commands', { name, module: 'custom' })
 }
 
-const _loadCustomCommands = async function () {
-  const arr = await db.bot.data.getRows('commands', { module: 'custom' })
-  arr.map(({ name }) => _registerCustomCommand(name))
+async function loadCustomCommands () {
+  const arr = await db.getRows('commands', { module: 'custom' })
+  arr.map(({ name }) => registerCustomCommand(name))
 }
 
-const _unregister = function (all) {
+function unregister (all) {
   if (all) {
     modules = []
     commands = {}
   }
 }
 
-$.on('bot:ready', () => {
+function extendCore ($) {
   $.addCommand = registerCommand
   $.addSubcommand = registerSubcommand
   $.command.addCustom = addCustomCommand
   $.command.removeCustom = deleteCustomCommand
 
-  log.bot('Listening for commands.')
-})
+  $.log.debug('core', 'Listening for commands.')
+}
+
+export default commands
 
 export {
-  commands as default,
-  addCustomCommand,
-  deleteCustomCommand,
-  _loadCustomCommands as loadCustomCommands,
-  _unregister as unregister
+  extendCore,
+  loadCustomCommands,
+  unregister
 }

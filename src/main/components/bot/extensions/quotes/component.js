@@ -1,67 +1,62 @@
-import _ from 'lodash'
 import moment from 'moment'
 
-const quotes = {
-  async add (quote) {
-    if (!_.isPlainObject(quote) || !quote.hasOwnProperty('message')) return false
+async function add (quote) {
+  if (!$.is.object(quote) || !('message' in quote)) return false
 
-    const obj = Object.assign({}, {
-      credit: $.channel.name,
-      submitter: '',
-      date: moment().format('L'),
-      game: $.stream.game || ''
-    }, quote)
+  const obj = Object.assign({}, {
+    credit: $.channel.name,
+    submitter: '',
+    date: moment().format('L'),
+    game: $.stream.game || ''
+  }, quote)
 
-    await $.db.set('quotes', {
-      message: sanitizeText(obj.message),
-      credit: obj.credit,
-      submitter: obj.submitter,
-      date: obj.date,
-      game: obj.game
-    })
+  await $.db.set('quotes', {
+    message: sanitizeText(obj.message),
+    credit: obj.credit,
+    submitter: obj.submitter,
+    date: obj.date,
+    game: obj.game
+  })
 
-    const result = await $.db.getRow('quotes', obj)
-    return result ? result.id : false
-  },
-  async get (id) {
-    if (!_.isFinite(id)) return false
+  const res = await $.db.getRow('quotes', obj)
+  return res ? res.id : false
+}
 
-    const response = await $.db.getRow('quotes', { id })
-    return _.isPlainObject(response) ? response : null
-  },
-  async remove (id) {
-    if (!_.isFinite(id)) return false
+async function get (id) {
+  if (!$.is.number(id)) return false
 
-    await $.db.del('quotes', { id })
+  const res = await $.db.getRow('quotes', { id })
+  return $.is.object(res) ? res : null
+}
 
-    return !await $.db.exists('quotes', { id })
-  },
-  async modify (id, newData) {
-    if (!_.isFinite(id) || !_.isPlainObject(newData)) return false
+async function remove (id) {
+  if (!$.is.number(id)) return false
 
-    await $.db.set('quotes', newData, { id })
+  await $.db.del('quotes', { id })
+  return !$.db.exists('quotes', { id })
+}
 
-    return await $.db.exists('quotes', { id })
-  }
+async function modify (id, newData) {
+  if (!$.is.number(id) || !$.is.object(newData)) return false
+
+  await $.db.set('quotes', newData, { id })
+  return $.db.exists('quotes', { id })
 }
 
 function sanitizeText (str) {
   // remove surrounding double quotes
   // @DEV: if this pattern has issues try this one:
   // /^"(.+(?="$))"$/g
-  if (str.match(/^"(.*)"$/g)) {
-    str = str.replace(/^"(.*)"$/g, '$1')
-  }
-
-  return str
+  const match = str.match(/^"(.*)"$/g)
+  return match ? str.replace(/^"(.*)"$/g, '$1') : str
 }
 
 export default async function ($) {
   $.quote = {
-    add: quotes.add,
-    get: quotes.get,
-    modify: quotes.modify,
-    remove: quotes.remove
+    add,
+    get,
+    modify,
+    remove
   }
 
   await $.db.addTableCustom('quotes', [

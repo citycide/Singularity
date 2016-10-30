@@ -3,7 +3,6 @@
  *
  * @command quote
  * @usage !quote [subcommands]
- * @param {object} event
  *
  * @source stock module
  * @author citycide

@@ -40,13 +40,15 @@ Object.keys(logTypes).map(type => {
     if (log.getLevel() < logTypes[type]) return
 
     const traced = callsites()[1]
+    const dirName = path.basename(path.dirname(traced.getFileName()))
+    const logName = file || dirName
     const fileName = path.basename(traced.getFileName())
     const lineNum = traced.getLineNumber()
     const colNum = traced.getColumnNumber()
 
-    const outPath = `${type}/${file}`
+    const outPath = `${type}/${logName}`
     const time = moment().format('LTS L')
-    const line = `${time} :: ${fileName} (${lineNum}, ${colNum}) -> ${data}`
+    const line = `${time} :: ${dirName}/${fileName} (${lineNum}, ${colNum}) -> ${data}`
     $.file.write(outPath, line, true)
     appLog.bot(line)
   }

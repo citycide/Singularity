@@ -3,98 +3,102 @@ import axios from 'axios'
 import moment from 'moment'
 import Levers from 'levers'
 import 'moment-duration-format'
-import log from 'common/utils/logger'
-import db from 'common/components/db'
+import { botDB as db } from 'common/components/db'
 
 const settings = new Levers('app')
-const kraken = 'https://api.twitch.tv/kraken/'
-const apiHeaders = {
-  'Accept': 'application/vnd.twitchtv.v3+json',
-  'Authorization': `OAuth ${settings.get('twitch.token')}`,
-  'Client-ID': settings.get('clientID')
+const apiOpts = {
+  baseURL: 'https://api.twitch.tv/kraken/',
+  headers: {
+    'Accept': 'application/vnd.twitchtv.v3+json',
+    'Authorization': `OAuth ${settings.get('twitch.token')}`,
+    'Client-ID': settings.get('clientID')
+  }
 }
 
-const twitchAPI = {
-  async resolveUser (username) {
-    const res = await this.api('users/' + username)
-    return res.display_name || false
-  },
+const instance = axios.create(apiOpts)
 
-  async getStreamInfo () {
-    const res = await this.api(`streams/${$.channel.name}?ts=${Date.now()}`)
+async function resolveUser (username) {
+  const res = await api('users/' + username)
+  return res.display_name || false
+}
 
-    const isLive = !!res.stream
-    const game = _.get(res, 'stream.game')
-    const status = _.get(res, 'stream.channel.status')
-    const createdTime = moment(_.get(res, 'stream.created_at')).valueOf()
-    const timeSince = moment().valueOf() - createdTime
+async function getStreamInfo () {
+  const res = await api(`streams/${$.channel.name}?ts=${Date.now()}`)
 
-    const uptime = moment
-      .duration(timeSince, 'milliseconds')
-      .format('h[h], m[m], s[s]')
+  const isLive = !!res.stream
+  const game = _.get(res, 'stream.game')
+  const status = _.get(res, 'stream.channel.status')
+  const createdTime = moment(_.get(res, 'stream.created_at')).valueOf()
+  const timeSince = Date.now() - createdTime
 
-    $.stream = {
-      isLive,
-      game,
-      status,
-      uptime
-    }
+  const uptime = moment
+    .duration(timeSince, 'milliseconds')
+    .format('h[h], m[m], s[s]')
 
-    $.tick.setTimeout('getStreamInfo', ::this.getStreamInfo, 30 * 1000)
-  },
-  /**
-   * @function getChatUsers()
-   * @description updates the viewer list
-   * @returns {Array}
-   **/
-  async getChatUsers () {
-    const baseURL = 'https://tmi.twitch.tv/group/user/'
-    const { data } = await axios(
-      `${baseURL}${$.channel.name}/chatters?ts=${Date.now()}`, apiHeaders
-    )
+  $.stream = {
+    isLive,
+    game,
+    status,
+    uptime
+  }
 
-    const promises = _.flatMap(data.chatters, (chatters, group) => {
-      return _.map(chatters, async chatter => {
-        if (await $.db.getRow('users', { name: chatter })) return chatter
+  $.tick.setTimeout('getStreamInfo', getStreamInfo, 30 * 1000)
+}
 
-        const following = await $.user.isFollower(chatter)
-        let permission = group === 'moderators' ? 1 : 5
-        if (await $.user.isAdmin(chatter)) permission = 0
+/**
+ * @function getChatUsers()
+ * @description updates the viewer list
+ * @returns {Array}
+ **/
+async function getChatUsers () {
+  const baseURL = 'https://tmi.twitch.tv/group/user/'
+  const data = await api(`${baseURL}${$.channel.name}/chatters?ts=${Date.now()}`)
 
-        db.bot.addUser({
-          name: chatter,
-          permission,
-          mod: permission <= 1,
-          following,
-          seen: moment().valueOf(),
-          points: 0,
-          time: 0,
-          rank: 1
-        })
+  const promises = _.flatMap(data.chatters, (chatters, group) => {
+    return _.map(chatters, async chatter => {
+      if (await $.db.exists('users', { name: chatter })) return chatter
 
-        return chatter
+      const following = await $.user.isFollower(chatter)
+      let permission = group === 'moderators' ? 1 : 5
+      if (await $.user.isAdmin(chatter)) permission = 0
+
+      db.addUser({
+        name: chatter,
+        permission,
+        mod: permission <= 1,
+        following,
+        seen: Date.now(),
+        points: 0,
+        time: 0,
+        rank: 1
       })
+
+      return chatter
     })
+  })
 
-    const users = await Promise.all(promises)
+  const users = await Promise.all(promises)
 
-    $.user.list = users
-    $.user.count = users.length
+  $.user.list = users
+  $.user.count = users.length
 
-    $.tick.setTimeout('getChatUsers', ::this.getChatUsers, 30 * 1000)
+  $.tick.setTimeout('getChatUsers', getChatUsers, 30 * 1000)
 
-    return users
-  },
+  return users
+}
 
-  async api (endpoint) {
-    try {
-      return (await axios(kraken + endpoint, {
-        headers: { 'Client-ID': settings.get('clientID') }
-      })).data
-    } catch (e) {
-      log.error(e.message)
-      return {}
-    }
+async function api (endpoint, opts) {
+  try {
+    return (await instance({
+      url: endpoint, ...opts
+    })).data
+  } catch (e) {
+    const status = _.get(e, 'response.data.status')
+    if (status === 404) return {}
+
+    const msg = _.get(e, 'response.data.message', 'Unknown error')
+    $.log.error('twitch-api', e.message || msg)
+    throw e
   }
 }
 
@@ -102,16 +106,16 @@ export default async function ($) {
   $.user.list = []
   $.user.count = 0
 
-  $.api = twitchAPI.api
-  $.user.resolve = twitchAPI.resolveUser
+  $.api = api
+  $.user.resolve = resolveUser
 
-  $.stream = Object.assign({}, {
+  $.stream = {
     isLive: false,
     game: null,
     status: null,
     uptime: 0
-  })
+  }
 
-  twitchAPI.getStreamInfo()
-  twitchAPI.getChatUsers()
+  getStreamInfo()
+  getChatUsers()
 }

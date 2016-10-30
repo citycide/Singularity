@@ -10,16 +10,20 @@ import { initServices } from './services'
 import defaults from './utils/initial-settings'
 
 const cfg = {
-  DEV: argv.development || argv.dev,
+  DEV: argv.dev,
   devtools: argv.devtools,
   devtron: argv.devtron,
   vue: argv.vue
 }
 
 const windows = new Levers('window')
+// eslint-disable-next-line
 const settings = new Levers('app', { defaults })
 
-if (cfg.DEV) fixAppPaths()
+if (cfg.DEV) {
+  process.env.NODE_ENV = 'dev'
+  fixAppPaths()
+}
 
 let mainWindow
 function createWindow () {
@@ -90,11 +94,7 @@ function createWindow () {
 
   log.info('Starting singularity...')
 
-  await initDB({
-    DEV: cfg.DEV,
-    LOCATION: settings.get('databaseLocation', 'home')
-  })
-
+  await initDB()
   initServices()
 
   app.on('ready', createWindow)
