@@ -33,7 +33,7 @@ async function remove (id) {
   if (!$.is.number(id)) return false
 
   await $.db.del('quotes', { id })
-  return !$.db.exists('quotes', { id })
+  return !await $.db.exists('quotes', { id })
 }
 
 async function modify (id, newData) {
