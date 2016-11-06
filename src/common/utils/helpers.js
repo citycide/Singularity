@@ -54,8 +54,14 @@ function toRandom (value, upper) {
 }
 
 function toBoolean (value) {
+  // takes care of falsy values
+  // false || '' || null || undefined || 0 || NaN
   if (!value) return false
-  if (value === true || value === false) return value
+
+  // returns `value` if it's already a boolean
+  if (value === true) return value
+
+  // handle string cases
   return value === 'true'
 }
 

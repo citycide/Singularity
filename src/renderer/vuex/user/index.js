@@ -1,7 +1,7 @@
 import { remote } from 'electron'
 import Levers from 'levers'
+import axios from 'axios'
 import url from 'url'
-import Vue from 'vue'
 import types from './types'
 
 import log from '../../../common/utils/logger'
@@ -80,7 +80,12 @@ const actions = {
         e.preventDefault()
 
         const token = parsedURL.hash.slice(14, 44)
-        const res = await Vue.http.get(`${api.KRAKEN}?oauth_token=${token}&client_id=${settings.get('clientID')}`)
+        const res = await axios(api.KRAKEN, {
+          params: {
+            oauth_token: token,
+            client_id: settings.get('clientID')
+          }
+        })
 
         authWindow.close()
 
@@ -122,8 +127,8 @@ const actions = {
   async getChannelInfo ({ commit }) {
     if (!state.authorized || !state.channel.name) return
 
-    const res = await Vue.http.get(`${api.KRAKEN}/channels/${state.channel.name}`, {
-      params: { 'client_id': settings.get('clientID') }
+    const res = await axios(`${api.KRAKEN}/channels/${state.channel.name}`, {
+      params: { client_id: settings.get('clientID') }
     })
 
     cache.data = res.data

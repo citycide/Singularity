@@ -1,4 +1,3 @@
-
 export default class Tock {
   /**
    * Create a new `Tock` instance
