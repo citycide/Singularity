@@ -27,7 +27,6 @@ function initServices () {
 
 function initTwitch () {
   const twitch = new Twitch()
-  twitch.initAPI()
 
   return {
     instance: twitch,

@@ -1,418 +1,179 @@
 import jetpack from 'fs-jetpack'
+import _ from 'lodash'
 import moment from 'moment'
 import Levers from 'levers'
-import { client as Client } from 'tmi.js'
+import axios from 'axios'
 
 import transit from 'main/components/transit'
 import { appDB as db } from 'common/components/db'
 import log from 'common/utils/logger'
 import Tock from 'common/utils/tock'
+import Queue from './lib/queue.js'
+import { getChatInstance } from './lib/tmi-instance'
 
 const settings = new Levers('app')
 const channel = new Levers('twitch')
 const tick = new Tock()
+const followers = new Set()
+const alertQueue = new Queue()
+let alertInProgress = false
 
-export default class TwitchClass {
-  constructor () {
-    this.alertInProgress = false
-    this.followers = []
-    this.alertQueue = []
+const OPTIONS = {
+  name: channel.get('name'),
+  id: channel.get('_id'),
+  token: settings.get('twitch.token'),
+  clientID: settings.get('clientID')
+}
 
-    this.CHANNEL = {
-      name: channel.get('name'),
-      id: channel.get('_id'),
-      token: settings.get('twitch.token')
-    }
-    this.CLIENT_ID = settings.get('clientID')
-
-    this.client = null
-
-    this.API = {
-      BASE_URL: 'https://api.twitch.tv/kraken',
-      CHANNEL_EP: `/channels/${this.CHANNEL.name}/`
-    }
+const instance = axios.create({
+  baseURL: 'https://api.twitch.tv/kraken/',
+  headers: {
+    'Accept': 'application/vnd.twitchtv.v3+json',
+    'Authorization': `OAuth ${OPTIONS.token}`,
+    'Client-ID': OPTIONS.clientID
   }
+})
 
-  initAPI (pollInterval = 30 * 1000) {
-    setTimeout(() => {
-      log.info('Initializing Twitch API')
+async function api (endpoint, opts) {
+  try {
+    return (await instance({
+      url: endpoint,
+      params: {
+        ts: Date.now()
+      },
+      ...opts
+    })).data
+  } catch (e) {
+    const status = _.get(e, 'response.data.status')
+    if (status === 404) return {}
 
-      this.chatConnect()
-      this.pollFollowers()
-      tick.setInterval('pollFollowers', ::this.pollFollowers, pollInterval)
-      this.eventHandler()
-    }, 5 * 1000)
-    tick.setTimeout('checkQueue', ::this.checkQueue, 10 * 1000)
+    const msg = _.get(e, 'response.data.message', 'Unknown error')
+    log.error(e.message || msg)
+    throw e
   }
+}
 
-  chatConnect () {
-    if (this.CHANNEL.name && this.CHANNEL.token) {
-      this.client = new Client({
-        options: {
-          debug: false
-        },
-        connection: {
-          reconnect: true,
-          cluster: 'aws'
-        },
-        identity: {
-          username: this.CHANNEL.name,
-          password: this.CHANNEL.token
-        },
-        channels: [this.CHANNEL.name]
-      })
+async function resolveUser (username) {
+  const data = api('/users/' + username)
 
-      this.client.on('connected', (address, port) => {
-        log.info(`Listening for Twitch events at ${address}:${port}`)
-        this.clientHandler()
-      })
-
-      this.client.connect()
+  if (!('display_name' in data)) {
+    return {
+      user: {
+        display_name: username
+      }
     }
   }
 
-  clientHandler () {
-    this.client.on('hosted', (channel, username, viewers) => {
-      let thisHost
-      this.resolveUser(username, userObj => {
-        if (userObj.resolved) {
-          thisHost = {
-            user: {
-              _id: userObj.user._id,
-              display_name: userObj.user.display_name,
-              logo: userObj.user.logo,
-              viewers
-            },
-            type: 'host'
-          }
+  return {
+    user: {
+      _id: data._id,
+      display_name: data.display_name,
+      logo: data.logo
+    },
+    resolved: true
+  }
+}
 
-          db.addHost(
-            thisHost.user._id, thisHost.user.display_name, moment().valueOf(), thisHost.user.viewers
-          )
-        } else {
-          thisHost = {
-            user: {
-              display_name: userObj.user.display_name,
-              viewers
-            },
-            type: 'host'
-          }
+async function pollFollowers () {
+  log.absurd(`Hitting follower endpoint for ${OPTIONS.name}...`)
 
-          db.addHost(null, thisHost.user.display_name, moment().valueOf(), thisHost.user.viewers)
-        }
-
-        this.alertQueue.push(thisHost)
-      })
-    })
-
-    this.client.on('subscription', (channel, username) => {
-      let sub
-      this.resolveUser(username, userObj => {
-        if (userObj.resolved) {
-          sub = {
-            user: {
-              _id: userObj.user._id,
-              display_name: userObj.user.display_name,
-              logo: userObj.user.logo
-            },
-            type: 'subscriber'
-          }
-
-          db.addSubscriber(sub.user._id, sub.user.display_name, moment().valueOf(), null)
-        } else {
-          sub = {
-            user: {
-              display_name: userObj.user.display_name
-            },
-            type: 'subscriber'
-          }
-
-          db.addSubscriber(null, sub.user.display_name, moment().valueOf(), null)
-        }
-
-        this.alertQueue.push(sub)
-      })
-    })
-
-    this.client.on('subanniversary', (channel, username, months) => {
-      let resub
-      this.resolveUser(username, userObj => {
-        if (userObj.resolved) {
-          resub = {
-            user: {
-              _id: userObj.user._id,
-              display_name: userObj.user.display_name,
-              logo: userObj.user.logo,
-              months
-            },
-            type: 'subscriber'
-          }
-
-          db.addSubscriber(
-            resub.user._id, resub.user.display_name, moment().valueOf(), resub.user.months
-          )
-        } else {
-          resub = {
-            user: {
-              display_name: userObj.user.display_name,
-              months
-            },
-            type: 'subscriber'
-          }
-
-          db.addSubscriber(null, resub.user.display_name, moment().valueOf(), resub.user.months)
-        }
-
-        this.alertQueue.push(resub)
-      })
-    })
+  const res = await api(`/channels/${OPTIONS.name}/follows?limit=100`)
+  if (!('follows' in res)) {
+    tick.setTimeout('pollFollowers', pollFollowers, 30 * 1000)
+    return
   }
 
-  eventHandler () {
-    transit.on('alert:follow:test', username => {
-      let thisTest
-      this.resolveUser(username, userObj => {
-        if (userObj.resolved) {
-          thisTest = {
-            user: {
-              _id: userObj.user._id,
-              display_name: userObj.user.display_name,
-              logo: userObj.user.logo
-            },
-            type: 'follower'
-          }
-        } else {
-          thisTest = {
-            user: {
-              display_name: userObj.user.display_name
-            },
-            type: 'follower'
-          }
-        }
+  if (!followers.size) {
+    res.follows.reverse().map(async follower => {
+      followers.add(follower.user.display_name)
 
-        this.alertQueue.push(thisTest)
-        this.checkQueue()
-      })
+      const o = {
+        id: follower.user._id,
+        name: follower.user.display_name,
+        ts: moment(follower.created_at, 'x').valueOf(),
+        ev: 'follower',
+        ntf: follower.notifications
+      }
+
+      await db.addFollower(o.id, o.name, o.ts, o.ntf)
+      writeFollower(o.name)
     })
+  } else {
+    res.follows.reverse().map(async follower => {
+      if (followers.has(follower.user.display_name)) return
 
-    transit.on('alert:host:test', hostObj => {
-      let thisTest
-      this.resolveUser(hostObj.user.display_name, userObj => {
-        if (userObj.resolved) {
-          thisTest = {
-            user: {
-              _id: userObj.user._id,
-              display_name: userObj.user.display_name,
-              logo: userObj.user.logo,
-              viewers: hostObj.viewers
-            },
-            type: 'host'
-          }
-        } else {
-          thisTest = {
-            user: {
-              display_name: userObj.user.display_name
-            },
-            type: 'host'
-          }
-        }
+      followers.add(follower.user.display_name)
 
-        this.alertQueue.push(thisTest)
-        this.checkQueue()
-      })
-    })
-
-    transit.on('alert:tip:test', data => {
-      let thisTest = {
+      const o = {
         user: {
-          name: data.user.name,
-          amount: data.amount,
-          message: data.message
+          _id: follower.user._id,
+          display_name: follower.user.display_name,
+          logo: follower.user.logo,
+          created_at: follower.created_at,
+          notifications: follower.notifications
         },
-        type: 'tip'
+        type: 'follower'
       }
 
-      this.alertQueue.push(thisTest)
-      this.checkQueue()
-    })
+      alertQueue.add(o)
 
-    transit.on('alert:sub:test', data => {
-      let thisTest
-      this.resolveUser(data, userObj => {
-        if (userObj.resolved) {
-          thisTest = {
-            user: {
-              _id: userObj.user._id,
-              display_name: userObj.user.display_name,
-              logo: userObj.user.logo
-            },
-            type: 'subscriber'
-          }
-        } else {
-          thisTest = {
-            user: {
-              display_name: userObj.user.display_name
-            },
-            type: 'subscriber'
-          }
-        }
+      const s = {
+        id: follower.user._id,
+        name: follower.user.display_name,
+        ts: moment(follower.created_at, 'x').valueOf(),
+        ev: 'follower',
+        ntf: follower.notifications
+      }
 
-        this.alertQueue.push(thisTest)
-        this.checkQueue()
-      })
-    })
-
-    transit.on('alert:resub:test', subObj => {
-      let thisTest
-      this.resolveUser(subObj.user.display_name, userObj => {
-        if (userObj.resolved) {
-          thisTest = {
-            user: {
-              _id: userObj.user._id,
-              display_name: userObj.user.display_name,
-              logo: userObj.user.logo,
-              months: subObj.months
-            },
-            type: 'subscriber'
-          }
-        } else {
-          thisTest = {
-            user: {
-              display_name: userObj.user.display_name,
-              months: subObj.months
-            },
-            type: 'subscriber'
-          }
-        }
-
-        this.alertQueue.push(thisTest)
-        this.checkQueue()
-      })
-    })
-
-    transit.on('alert:tip:event', data => {
-      this.alertQueue.push(data)
-    })
-
-    transit.on('alert:complete', () => {
-      this.alertInProgress = false
+      await db.addFollower(s.id, s.name, s.ts, s.ntf)
+      writeFollower(s.name)
     })
   }
+
+  tick.setTimeout('pollFollowers', pollFollowers, 30 * 1000)
 }
 
-TwitchClass.prototype.pollFollowers = function () {
-  log.absurd(`Hitting follower endpoint for ${this.CHANNEL.name}...`)
-  this.client.api({
-    url: `${this.API.BASE_URL}${this.API.CHANNEL_EP}follows?limit=100&ts=${Date.now()}`,
-    method: 'GET',
-    headers: {
-      'Accept': 'application/vnd.twitchtv.v3+json',
-      'Authorization': `OAuth ${this.CHANNEL.token.slice(6)}`,
-      'Client-ID': this.CLIENT_ID
-    }
-  }, (err, res, body = {}) => {
-    if (err) {
-      log.error(err)
-      return
-    }
-
-    if (res.statusCode !== 200) {
-      log.debug(`pollFollowers:: Unknown response code: ${res.statusCode}`)
-      return
-    }
-
-    if (body.follows.length > 0) {
-      if (this.followers.length === 0) {
-        body.follows.reverse().map(follower => {
-          if (!this.followers.includes(follower.user.display_name)) {
-            this.followers.push(follower.user.display_name)
-          }
-
-          let s = {
-            id: follower.user._id,
-            name: follower.user.display_name,
-            ts: moment(follower.created_at, moment.ISO_8601).valueOf(),
-            ev: 'follower',
-            ntf: follower.notifications
-          }
-
-          db.addFollower(s.id, s.name, s.ts, s.ntf.toString())
-        })
-
-        this.writeFollower(this.followers[this.followers.length - 1])
-      } else {
-        body.follows.reverse().map(follower => {
-          if (!this.followers.includes(follower.user.display_name)) {
-            this.followers.push(follower.user.display_name)
-
-            let queueFollower = {
-              user: {
-                _id: follower.user._id,
-                display_name: follower.user.display_name,
-                logo: follower.user.logo,
-                created_at: follower.created_at,
-                notifications: follower.notifications
-              },
-              type: 'follower'
-            }
-
-            this.alertQueue.push(queueFollower)
-
-            let s = {
-              id: follower.user._id,
-              name: follower.user.display_name,
-              ts: moment(follower.created_at, moment.ISO_8601).valueOf(),
-              ev: 'follower',
-              ntf: follower.notifications
-            }
-
-            db.addFollower(s.id, s.name, s.ts, s.ntf.toString())
-            this.writeFollower(s.name)
-          }
-        })
-      }
-    }
-  })
-}
-
-TwitchClass.prototype.writeFollower = function (followerName) {
-  let followerFile = `${settings.get('paths.data')}/text/latestfollower.txt`
+const writeFollower = _.debounce(outputFollower, 250)
+function outputFollower (followerName) {
+  const dataPath = settings.get('paths.data')
+  const followerFile = dataPath + '/text/latest-follower.txt'
   if (jetpack.read(followerFile) !== followerName) {
-    jetpack.file(followerFile, {
-      content: followerName
-    })
+    jetpack.file(followerFile, { content: followerName })
   }
 }
 
-TwitchClass.prototype.checkQueue = function (attempts = 0) {
-  if (this.alertInProgress) {
+function checkQueue (attempts = 0) {
+  if (alertInProgress) {
     if (attempts < 2) {
-      log.absurd(`checkQueue:: An alert is either in progress or no client has responded with 'alert:complete'`)
-      attempts += 1
-      tick.setTimeout('checkQueue', ::this.checkQueue, 5 * 1000, attempts)
+      log.absurd(
+        `checkQueue:: An alert is either in progress ` +
+        `or no client has responded with 'alert:complete'`
+      )
+
+      tick.setTimeout('checkQueue', checkQueue, 5 * 1000, attempts + 1)
     } else {
-      log.absurd(`checkQueue:: Maximum attempts reached. Unblocking the alert queue...`)
-      this.alertInProgress = false
-      this.checkQueue()
+      log.absurd(`checkQueue:: Maximum attempts reached. Unblocking alert queue...`)
+      alertInProgress = false
+      checkQueue()
     }
 
     return
   }
 
-  if (!this.alertQueue.length) {
-    tick.setTimeout('checkQueue', ::this.checkQueue, 5 * 1000)
+  if (!alertQueue.size) {
+    tick.setTimeout('checkQueue', checkQueue, 5 * 1000)
     return
   }
 
-  let queueItem = this.alertQueue.pop()
-  this.actOnQueue(queueItem.user, queueItem.type)
-  tick.setTimeout('checkQueue', ::this.checkQueue, 5 * 1000)
+  const { user, type } = alertQueue.next()
+  actOnQueue(user, type)
+  tick.setTimeout('checkQueue', checkQueue, 5 * 1000)
 }
 
-TwitchClass.prototype.actOnQueue = function (data, type) {
-  log.trace('Pushing queue item...')
+function actOnQueue (data, type) {
+  log.trace('Alert Queue:: Pushing queue item...')
+  alertInProgress = true
 
-  this.alertInProgress = true
   switch (type) {
     case 'follower':
       log.trace('Queue item is a follower event.')
@@ -429,7 +190,7 @@ TwitchClass.prototype.actOnQueue = function (data, type) {
       log.trace('Queue item is a host event.')
       transit.emit('alert:host', data, 'all')
       break
-    case 'subscriber':
+    case 'sub':
       log.trace('Queue item is a subscriber event.')
       transit.emit('alert:subscriber', data, 'all')
       break
@@ -438,45 +199,180 @@ TwitchClass.prototype.actOnQueue = function (data, type) {
       transit.emit('alert:tip', data, 'all')
       break
     default:
-      log.debug(`ERR in actOnQueue:: Queue item is of unknown type '${type}'`)
+      log.debug(
+        `ERR in actOnQueue:: Queue item is of unknown type '${type}'`
+      )
   }
 }
 
-TwitchClass.prototype.resolveUser = function (username, callback) {
-  this.client.api({
-    url: `/users/${username}`,
-    method: 'GET',
-    headers: {
-      Accept: 'application/vnd.twitchtv.v3+json',
-      Authorization: `OAuth ${this.CHANNEL.token.slice(6)}`,
-      'Client-ID': this.CLIENT_ID
-    }
-  }, (err, res, body = {}) => {
-    if (err) {
-      log.error(err)
-      return
-    }
+async function followHandler (username) {
+  const user = await resolveUser(username)
 
-    if (body.error) {
-      const unresolvedUser = {
-        user: {
-          display_name: username
-        }
-      }
-
-      callback(unresolvedUser)
-      return
-    }
-
-    const resolvedUser = {
+  let follower
+  if (user.resolved) {
+    follower = {
       user: {
-        _id: body._id,
-        display_name: body.display_name,
-        logo: body.logo
+        _id: user.user._id,
+        display_name: user.user.display_name,
+        logo: user.user.logo
       },
-      resolved: true
+      type: 'follower'
     }
+  } else {
+    follower = {
+      user: {
+        display_name: user.user.display_name
+      },
+      type: 'follower'
+    }
+  }
 
-    callback(resolvedUser)
-  })
+  alertQueue.add(follower)
+  checkQueue()
+}
+
+async function hostHandler (obj) {
+  const user = await resolveUser(obj.user.display_name)
+
+  let host
+  if (user.resolved) {
+    host = {
+      user: {
+        _id: user.user._id,
+        display_name: user.user.display_name,
+        logo: user.user.logo,
+        viewers: obj.viewers
+      },
+      type: 'host'
+    }
+  } else {
+    host = {
+      user: {
+        display_name: obj.user.display_name
+      },
+      type: 'host'
+    }
+  }
+
+  alertQueue.add(host)
+  checkQueue()
+}
+
+async function subHandler (username) {
+  const user = await resolveUser(username)
+
+  let sub
+  if (user.resolved) {
+    sub = {
+      user: {
+        _id: user.user._id,
+        display_name: user.user.display_name,
+        logo: user.user.logo
+      },
+      type: 'sub'
+    }
+  } else {
+    sub = {
+      user: {
+        display_name: user.user.display_name
+      },
+      type: 'sub'
+    }
+  }
+
+  alertQueue.add(sub)
+  checkQueue()
+}
+
+async function resubHandler (obj) {
+  const user = await resolveUser(obj.user.display_name)
+
+  let resub
+  if (user.resolved) {
+    resub = {
+      user: {
+        _id: user.user._id,
+        display_name: user.user.display_name,
+        logo: user.user.logo,
+        months: obj.months
+      },
+      type: 'subscriber'
+    }
+  } else {
+    resub = {
+      user: {
+        display_name: user.user.display_name,
+        months: obj.months
+      },
+      type: 'subscriber'
+    }
+  }
+
+  alertQueue.add(resub)
+  checkQueue()
+}
+
+async function tipHandler (obj) {
+  const tip = {
+    user: {
+      name: obj.user.name,
+      amount: obj.amount,
+      message: obj.message
+    },
+    type: 'tip'
+  }
+
+  alertQueue.add(tip)
+  checkQueue()
+}
+
+export default class Twitch {
+  constructor (instant) {
+    log.info('Initializing Twitch API...')
+
+    setTimeout(() => {
+      pollFollowers()
+      this.chatListener()
+      this.eventHandlers()
+    }, instant ? 1 : 5000)
+
+    tick.setTimeout('checkQueue', checkQueue, 10 * 1000)
+  }
+
+  chatListener () {
+    if (!OPTIONS.name || !OPTIONS.token) return
+    getChatInstance(OPTIONS).on('connected', (address, port) => {
+      log.info(`Listening for Twitch events at ${address}:${port}`)
+      this.clientHandlers()
+    })
+    getChatInstance(OPTIONS).connect()
+  }
+
+  clientHandlers () {
+    getChatInstance(OPTIONS).on('hosted', hostHandler)
+    getChatInstance(OPTIONS).on('subscription', subHandler)
+    getChatInstance(OPTIONS).on('subanniversary', resubHandler)
+  }
+
+  eventHandlers () {
+    transit.on('alert:follow:test', followHandler)
+    transit.on('alert:host:test', hostHandler)
+    transit.on('alert:tip:test', tipHandler)
+    transit.on('alert:sub:test', subHandler)
+    transit.on('alert:resub:test', resubHandler)
+
+    transit.on('alert:tip:event', data => {
+      alertQueue.add(data)
+      checkQueue()
+    })
+    transit.on('alert:complete', () => {
+      alertInProgress = false
+    })
+  }
+}
+
+export {
+  api,
+  resolveUser,
+  writeFollower
 }
