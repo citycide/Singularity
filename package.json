@@ -63,7 +63,7 @@
     "babel-plugin-transform-es2015-modules-commonjs": "^6.14.0",
     "babel-plugin-transform-promise-to-bluebird": "^1.1.0",
     "babel-preset-electron": "^0.37.8",
-    "babel-preset-modern-async": "C:\\Users\\Bo\\Apps\\Dev\\babel-preset-modern-async",
+    "babel-preset-modern-async": "1.0.0-alpha.3",
     "del": "^2.2.1",
     "electron": "^1.4.1",
     "electron-devtools-installer": "^2.0.1",
