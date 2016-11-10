@@ -42,6 +42,14 @@ async function getSubcommand (event) {
   }]
 }
 
+function createResponder ({ sender, whispered }) {
+  const responder = whispered
+    ? this.whisper.bind(sender)
+    : this.say.bind(sender)
+
+  return message => responder(message)
+}
+
 class Core extends EventEmitter {
   constructor () {
     // initialize the emitter
@@ -79,26 +87,31 @@ class Core extends EventEmitter {
 
   async runCommand (event) {
     const { command, sender, groupID } = event
-    const [pointsEnabled, cooldownsEnabled] = await Promise.all([
+    const [subcommand, subEvent] = await this::getSubcommand(event)
+    if (subcommand) Object.assign(event, subEvent)
+
+    const [
+      pointsEnabled,
+      cooldownsEnabled,
+      commandExists,
+      commandIsEnabled,
+      commandPermission
+    ] = await Promise.all([
       this.db.getExtConfig('points', 'enabled', true),
-      this.db.getExtConfig('cooldown', 'enabled', true)
+      this.db.getExtConfig('cooldown', 'enabled', true),
+      this.command.exists(command),
+      this.command.isEnabled(command, subcommand),
+      this.command.getPermLevel(command, subcommand)
     ])
 
-    let charge = 0
-
     // Check if the specified command is registered
-    if (!await this.command.exists(command)) {
+    if (!commandExists) {
       this.log.event('core', `'${command}' is not a registered command`)
       return
     }
 
-    const [subcommand, subEvent] = await this::getSubcommand(event)
-
-    // add subcommand properties to the event object
-    if (subcommand) Object.assign(event, subEvent)
-
     // Check if the specified (sub)command is enabled
-    if (!await this.command.isEnabled(command, subcommand)) {
+    if (!commandIsEnabled) {
       this.log.event(
         'core',
         `'${command}${subcommand ? ' ' + subcommand : ''}' is installed but is not enabled`
@@ -113,7 +126,7 @@ class Core extends EventEmitter {
         this.log.event('core',
           `'${command}' is on cooldown for ${sender} (${cooldownActive} seconds)`
         )
-        this.say(
+        this.whisper(
           event.sender,
           `You need to wait ${cooldownActive} seconds to use !${command} again.`
         )
@@ -122,14 +135,15 @@ class Core extends EventEmitter {
     }
 
     // Check that the user has sufficient privileges to use the (sub)command
-    if (groupID > await this.command.getPermLevel(command, subcommand)) {
+    if (groupID > commandPermission) {
       this.log.event('core',
         `${sender} does not have sufficient permissions to use !${command}`
       )
-      this.say(sender, `You don't have what it takes to use !${command}.`)
+      this.whisper(sender, `You don't have what it takes to use !${command}.`)
       return
     }
 
+    let charge = 0
     // Check that the user has enough points to use the (sub)command
     if (pointsEnabled) {
       const [canAfford, userPoints, commandPrice] = await this.user.canAffordCommand(
@@ -138,7 +152,7 @@ class Core extends EventEmitter {
 
       if (!canAfford) {
         this.log('core', `${sender} does not have enough points to use !${command}.`)
-        this.say(
+        this.whisper(
           sender,
           `You don't have enough points to use !${command}. ` +
           `» costs ${commandPrice}, you have ${userPoints}`
@@ -149,6 +163,9 @@ class Core extends EventEmitter {
 
       charge = commandPrice
     }
+
+    // Add the `respond` helper function to the event object
+    event.respond = this::createResponder(event)
 
     // Finally, run the (sub)command
     if (await this.command.isCustom(command)) {
