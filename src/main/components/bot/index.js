@@ -28,15 +28,16 @@ const getRunner = cmd => getModule(cmd)[registry[cmd].handler]
 
 async function getSubcommand (event) {
   const { command, args: [query] } = event
-  if (!query || !await this.command.exists(command, query)) {
+  const cased = query.toLowerCase()
+  if (!query || !await this.command.exists(command, cased)) {
     return [undefined, {}]
   }
 
   const subArgs = event.args.slice(1)
   const subArgString = subArgs.join(' ')
 
-  return [query, {
-    subcommand: query,
+  return [cased, {
+    subcommand: cased,
     subArgs,
     subArgString
   }]
