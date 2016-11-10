@@ -1,4 +1,3 @@
-import moment from 'moment'
 import Levers from 'levers'
 import { client as Client } from 'tmi.js'
 import { botDB as db } from 'common/components/db'
@@ -47,26 +46,17 @@ const getCommand = async message => {
 const getCommandArgs = message => message.split(' ').slice(1)
 const getCommandArgString = message => getCommandArgs(message).join(' ')
 
-async function messageHandler (user, message) {
-  const _user = {
-    name: user['display-name'],
-    permission: await $.user.getGroup(user),
-    mod: (user['user-type'] === 'mod'),
-    following: await $.user.isFollower(user['display-name']),
-    seen: moment().valueOf(),
-    points: await $.points.get(user['display-name']) || 0,
-    time: await $.db.get('users', 'time', { name: user['display-name'] }) || 0,
-    rank: await $.db.get('users', 'rank', { name: user['display-name'] }) || 1
+async function dispatcher (source, user, message, self) {
+  if (self) return
+  // TODO: handle '/me' (colored) messages
+  if ($.is(this, 'action')) return
+
+  const _user = await processUser(user)
+  _user.whispered = $.is(this, 'whisper')
+
+  if (await isCommand(message)) {
+    commandHandler(_user, message)
   }
-
-  db.addUser(_user)
-
-  if (await isCommand(message)) commandHandler(_user, message)
-}
-
-function whisperHandler (from, user, message, self) {
-  // @TODO: handle commands in whisper messages, responses should be whispered
-  // if (this.isCommand(message)) this.commandHandler(user, message)
 }
 
 async function commandHandler (user, message) {
@@ -78,27 +68,41 @@ async function commandHandler (user, message) {
     raw: message,
     command: await getCommand(message),
     args: getCommandArgs(message),
-    argString: getCommandArgString(message)
+    argString: getCommandArgString(message),
+    whispered: user.whispered
   })
+}
+
+async function processUser (user) {
+  const obj = Object.assign({}, {
+    name: user['display-name'],
+    mod: $.is(user['user-type'], 'mod'),
+    seen: Date.now(),
+    points: 0,
+    time: 0,
+    rank: 1
+  }, await Promise.props({
+    permission: $.user.getGroup(user),
+    following: $.user.isFollower(user['display-name']),
+    points: $.points.get(user['display-name']),
+    time: $.db.get('users', 'time', { name: user['display-name'] }),
+    rank: $.db.get('users', 'rank', { name: user['display-name'] })
+  }))
+
+  await db.addUser(obj)
+  return obj
 }
 
 /**
  * Event listeners
  */
-bot.on('chat', (channel, user, message, self) => {
-  if (self) return
-  messageHandler(user, message)
-})
-
-bot.on('whisper', whisperHandler)
+bot.on('chat', 'chat'::dispatcher)
+bot.on('whisper', 'whisper'::dispatcher)
+bot.on('action', 'action'::dispatcher)
 
 bot.on('mods', (channel, mods) => {
-  if (channel !== $.channel.name) return
+  if (!$.is(channel, '#' + $.channel.name)) return
   if (mods.length) console.log(mods)
-})
-
-bot.on('action', (channel, user, message, self) => {
-  // @TODO: handle /me (colored) messages
 })
 
 export default bot
