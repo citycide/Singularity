@@ -44,8 +44,8 @@ async function getSubcommand (event) {
 
 function createResponder ({ sender, whispered }) {
   const responder = whispered
-    ? this.whisper.bind(sender)
-    : this.say.bind(sender)
+    ? this.whisper.bind(null, sender)
+    : this.say.bind(null, sender)
 
   return message => responder(message)
 }
