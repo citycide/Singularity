@@ -244,8 +244,8 @@
         this.messages.push({ user, message, channel: str, action, self })
       },
 
-      addWhisper (user, message) {
-        this.messages.push({ user, message, type: 'whisper' })
+      addWhisper (from, user, message, self) {
+        this.messages.push({ user, message, type: 'whisper', self })
       },
 
       addSystemMessage (message) {
@@ -253,12 +253,13 @@
       },
 
       listen () {
+        chat.on('whisper', this.addWhisper)
         chat.on('chat', (channel, user, message, self) => {
           this.addMessage(user, message, channel, false, self)
         })
 
         chat.on('action', (channel, user, message, self) => {
-          this.addMessage(user, message, channel, true)
+          this.addMessage(user, message, channel, true, self)
         })
 
         chat.on('connecting', (address, port) => {
@@ -275,11 +276,10 @@
 
         chat.on('logon', () => {})
 
-        chat.on('timeout', (channel, username) => {
+        chat.on('timeout', (channel, username, reason, duration) => {
           // $(`div[data-channel=${channel}][data-user=${username}]`).remove()
         })
 
-        chat.on('whisper', (user, message) => this.addWhisper(user, message))
         chat.once('emotesets', async sets => {
           // this.messages = testMessages
           // this.emotes.twitch = await getTwitchEmoteList(sets)
