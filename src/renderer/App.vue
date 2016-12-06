@@ -1,6 +1,6 @@
 <style lang="scss">
   @import url(https://fonts.googleapis.com/css?family=Lato:300);
-  @import './components/styles/app.css';
+  @import './components/styles/app.scss';
 
   .app-container {
     position: absolute;
@@ -92,7 +92,7 @@
   </div>
 </template>
 
-<script>
+<script type="text/babel">
   import { mapGetters } from 'vuex'
   import { UiProgressCircular } from 'keen-ui'
 

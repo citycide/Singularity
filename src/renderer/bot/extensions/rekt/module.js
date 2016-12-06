@@ -13,7 +13,7 @@ export async function rekt (e, $) {
     const response = await $.db.getRandomRow('rekt')
 
     if (response) {
-      $.say(e.sender, $.params(e, response.value))
+      $.say(e.sender, await $.params(e, response.value))
     } else {
       $.say(e.sender, $.weave('not-found'))
     }

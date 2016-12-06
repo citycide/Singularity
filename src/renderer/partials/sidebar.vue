@@ -2,7 +2,7 @@
   <aside class="sidebar" :class="{ open: this.sidebarOpen }">
     <div class="sidebar-header is-unselectable">
       <div class="sidebar-brand">
-        <img src="./partials/sidebar/assets/singularity_brand.png" />
+        <img src="./sidebar/assets/singularity_brand.png" />
       </div>
       <span class="sidebar-brand-label">singularity</span>
     </div>

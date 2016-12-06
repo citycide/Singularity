@@ -22,7 +22,7 @@ export async function magicBall (e, $) {
   const response = await $.db.getRandomRow('ball')
 
   if (response) {
-    $.say(e.sender, $.params(e, response.value))
+    $.say(e.sender, await $.params(e, response.value))
   } else {
     $.say(e.sender, `I'm not going to dignify that with a response.`)
   }

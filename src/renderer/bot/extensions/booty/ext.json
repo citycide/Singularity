@@ -1,0 +1,13 @@
+{
+  "name": "booty",
+  "version": "1.0.0",
+  "appEngine": ">=0.1.0",
+  "files": {
+    "module": "./module.js",
+    "component": "",
+    "interface": "",
+    "language": ""
+  },
+  "author": "citycide <thecitycide@gmail.com>",
+  "homepage": "github.com/citycide/singularity"
+}

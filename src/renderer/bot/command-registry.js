@@ -1,6 +1,6 @@
 import callsites from 'callsites'
 import { botDB as db } from 'common/components/db'
-import log from 'common/utils/logger'
+import { log } from './ipc-bridge'
 
 let modules = []
 let commands = {}

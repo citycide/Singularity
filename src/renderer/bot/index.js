@@ -1,10 +1,8 @@
 import EventEmitter from 'eventemitter2'
 import Levers from 'levers'
 
-import transit from '../transit'
-import log from 'common/utils/logger'
+import * as ipc from './ipc-bridge'
 import { initBotDB, botDB as db } from 'common/components/db'
-import { sleep } from 'common/utils/helpers'
 import bindMethods from './lib/bind-methods'
 
 import bot from './bot'
@@ -14,6 +12,9 @@ import registry, {
   unregister,
   extendCore
 } from './command-registry'
+
+ipc.on('initialize', initialize)
+ipc.on('disconnect', disconnect)
 
 const settings = new Levers('app')
 const twitch = new Levers('twitch')
@@ -28,7 +29,7 @@ const getRunner = cmd => getModule(cmd)[registry[cmd].handler]
 
 async function getSubcommand (event) {
   const { command, args: [query] } = event
-  const cased = query.toLowerCase()
+  const cased = query ? query.toLowerCase() : undefined
   if (!query || !await this.command.exists(command, cased)) {
     return [undefined, {}]
   }
@@ -70,7 +71,7 @@ class Core extends EventEmitter {
     })
 
     // forward events from the app emitter
-    transit.onAny((...args) => this.emit(...args))
+    ipc.forward(this)
   }
 
   /**
@@ -192,13 +193,12 @@ class Core extends EventEmitter {
   }
 }
 
-export async function initialize (instant) {
+export async function initialize () {
   if (!settings.get('bot.name') || !settings.get('bot.auth')) {
-    return log.bot('Bot setup is not complete.')
+    return ipc.log.bot('Bot setup is not complete.')
   }
 
-  await sleep(instant ? 1 : 5000)
-  log.bot('Initializing bot...')
+  ipc.log.bot('Initializing bot...')
 
   const core = new Core()
   global.$ = core
@@ -213,17 +213,19 @@ export async function initialize (instant) {
   extendCore(core)
   extensions.registerAll()
 
-  log.bot('Bot ready.')
+  ipc.log.bot('Bot ready.')
   core.emit('ready', core)
+  ipc.emit('bot:loaded')
 
   loadCustomCommands()
 }
 
 export function disconnect () {
-  log.bot('Deactivating bot...')
+  ipc.log.bot('Deactivating bot...')
   bot.disconnect()
   unregister(true)
-  log.bot('Deactivated bot.')
+  ipc.log.bot('Deactivated bot.')
+  ipc.emit('bot:unloaded')
 }
 
 /*

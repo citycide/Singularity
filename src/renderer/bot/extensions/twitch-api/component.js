@@ -93,16 +93,14 @@ async function api (endpoint, opts) {
       url: endpoint, ...opts
     })).data
   } catch (e) {
-    const status = _.get(e, 'response.data.status')
+    const status = _.get(e, 'response.status')
 
     // 404 probably means the endpoint wasn't found
-    if (status === 404) return {}
+    // 503s are fairly common, probably safe to drop it
+    if (status === 404 || status === 503) return {}
 
     const msg = _.get(e, 'response.data.message', 'Unknown error')
     $.log.error('twitch-api', e.message || msg)
-
-    // 503s are fairly common, probably safe to drop it
-    if (status === 503) return {}
     throw e
   }
 }

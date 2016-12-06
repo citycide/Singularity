@@ -1,12 +1,13 @@
 import _ from 'lodash'
 import Levers from 'levers'
-import { find, exists, dir } from 'fs-jetpack'
+import { read, find, exists, dir } from 'fs-jetpack'
 import { valid, satisfies } from 'semver'
 import { resolve, dirname } from 'path'
-import { app } from 'electron'
-import log from 'common/utils/logger'
+import { remote } from 'electron'
+
+import { log } from './ipc-bridge'
 import InterfaceExtender from './interface-extender'
-import '../lib/compile-require'
+import './compile-require'
 
 const settings = new Levers('app')
 const ext = new Levers('ext')
@@ -25,16 +26,12 @@ function registerAll () {
 }
 
 function register (extPath) {
-  let manifest
-
-  try {
-    manifest = require(extPath)
-  } catch (e) {
-    log.error(e.message)
-    return
-  }
-
+  const manifest = read(extPath, 'json') || {}
   const { name, version } = manifest
+
+  if (!name || !version) {
+    log.error(`Extension '${name}' has an invalid manifest.`)
+  }
 
   if (_.has(extRegistry, name)) {
     log.error(`Extension '${name}' already loaded. Reloading.`)
@@ -91,11 +88,12 @@ function validate (extPath, manifest) {
   }
 
   // check that the app & extension have compatible versions
-  if (!satisfies(app.getVersion(), appEngine)) {
+  const appVersion = remote.app.getVersion()
+  if (!satisfies(appVersion, appEngine)) {
     return {
       valid: false,
       reason: `Extension ${name} requires singularity ${appEngine}. ` +
-              `You have v${app.getVersion()}.`
+              `You have v${appVersion}.`
     }
   }
 

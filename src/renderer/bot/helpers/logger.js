@@ -1,7 +1,12 @@
 import path from 'path'
+import strat from 'strat'
 import moment from 'moment'
 import callsites from 'callsites'
-import appLog from 'common/utils/logger'
+import { log as appLog } from '../ipc-bridge'
+
+const logLine = strat(
+  '{time} :: {dirName}/{fileName} ({lineNum}, {colNum}) -> {data}'
+)
 
 const logTypes = {
   error: 0,
@@ -40,17 +45,19 @@ Object.keys(logTypes).map(type => {
     if (log.getLevel() < logTypes[type]) return
 
     const traced = callsites()[1]
-    const dirName = path.basename(path.dirname(traced.getFileName()))
-    const logName = file || dirName
-    const fileName = path.basename(traced.getFileName())
-    const lineNum = traced.getLineNumber()
-    const colNum = traced.getColumnNumber()
 
-    const outPath = `${type}/${logName}`
-    const time = moment().format('LTS L')
-    const line = `${time} :: ${dirName}/${fileName} (${lineNum}, ${colNum}) -> ${data}`
-    $.file.write(outPath, line, true)
-    appLog.bot(line)
+    const meta = {}
+    meta.dirName = path.basename(path.dirname(traced.getFileName()))
+    meta.logName = file || meta.dirName
+    meta.fileName = path.basename(traced.getFileName())
+    meta.lineNum = traced.getLineNumber()
+    meta.colNum = traced.getColumnNumber()
+    meta.time = moment().format('LTS L')
+    meta.data = data
+
+    const outPath = `${type}/${meta.logName}`
+    $.file.write(outPath, logLine(meta), true)
+    appLog.bot(logLine(meta))
   }
 })
 

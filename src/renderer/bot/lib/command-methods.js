@@ -1,6 +1,6 @@
-import log from 'common/utils/logger'
 import { botDB as db } from 'common/components/db'
 import { is } from 'common/utils/helpers'
+import { log } from '../ipc-bridge'
 
 async function isCommandEnabled (cmd, sub) {
   if (!sub) {

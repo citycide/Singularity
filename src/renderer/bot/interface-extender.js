@@ -14,7 +14,7 @@
  * - file location ( browse & select )
  */
 
-class Interface {
+export default class Interface {
   constructor (manifest) {
     this.manifest = manifest
     this.elements = []

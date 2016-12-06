@@ -1,6 +1,6 @@
-import log from 'common/utils/logger'
 import { botDB } from 'common/components/db'
 import { is } from 'common/utils/helpers'
+import { log } from '../ipc-bridge'
 
 async function dbExists (table, where) {
   return is.object(await botDB.getRow(table, where))
