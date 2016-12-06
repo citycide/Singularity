@@ -1,15 +1,19 @@
 {
   "name": "singularity",
   "productName": "singularity",
-  "version": "0.1.0",
   "description": "Twitch overlay, alerts, & bot platform",
+  "version": "0.1.0",
+  "repository": "citycide/singularity",
   "author": "citycide <thecitycide@gmail.com>",
+  "license": "MIT",
   "main": "build/main/electron.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev --vue",
     "build": "concurrently -p \"[{name}]\" -n \"gulp,webpack\" \"gulp build\" \"webpack\"",
     "watch": "concurrently -p \"[{name}]\" -n \"gulp,webpack\" -k \"gulp watch\" \"webpack -w\"",
+    "pack": "build --dir",
+    "dist": "build"
   },
   "dependencies": {
     "axios": "^0.14.0",
@@ -61,10 +65,11 @@
     "babel-loader": "^6.2.7",
     "babel-plugin-lodash": "^3.2.8",
     "babel-plugin-module-resolver": "^2.2.0",
-    "electron": "^1.4.1",
     "concurrently": "^3.1.0",
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.25.0",
+    "electron": "^1.4.10",
+    "electron-builder": "^8.1.0",
     "electron-devtools-installer": "^2.0.1",
     "eslint": "^3.3.1",
     "eslint-config-standard": "^6.0.0",
@@ -85,5 +90,11 @@
     "vue-loader": "^8.5.3",
     "vue-style-loader": "^1.0.0",
     "webpack": "^2.1.0-beta.22"
+  },
+  "build": {
+    "appId": "com.citycide.singularity"
+  },
+  "directories": {
+    "buildResources": "assets"
   }
 }

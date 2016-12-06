@@ -159,7 +159,7 @@
   </div>
 </template>
 
-<script>
+<script type="text/babel">
   import icon from 'vue-awesome'
   import { UiButton } from 'keen-ui'
   import changelog from './changelog'

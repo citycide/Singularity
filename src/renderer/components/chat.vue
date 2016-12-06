@@ -137,7 +137,7 @@
   </div>
 </template>
 
-<script>
+<script type="text/babel">
   import chat from './js/chat'
   import message from './chat/message'
   import { UiButton, UiTextbox } from 'keen-ui'

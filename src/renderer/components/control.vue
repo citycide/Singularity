@@ -138,7 +138,7 @@
   </div>
 </template>
 
-<script>
+<script type="text/babel">
   import { UiButton, UiIconButton, UiCollapsible, UiTextbox } from 'keen-ui'
   import { mapGetters } from 'vuex'
   import icon from 'vue-awesome'

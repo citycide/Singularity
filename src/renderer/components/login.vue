@@ -50,7 +50,7 @@
   </div>
 </template>
 
-<script>
+<script type="text/babel">
   import gsap from 'gsap'
   import { UiButton } from 'keen-ui'
   import { mapGetters, mapActions } from 'vuex'

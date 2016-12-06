@@ -256,7 +256,7 @@
   </div>
 </template>
 
-<script>
+<script type="text/babel">
   import {
     UiButton,
     UiConfirm,

@@ -101,7 +101,7 @@
   </div>
 </template>
 
-<script>
+<script type="text/babel">
   import chat from './chat'
   import statsBar from './dashboard/stats-bar'
   import followerTable from './dashboard/follower-table'
