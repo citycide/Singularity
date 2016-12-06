@@ -1,75 +1,128 @@
-import _ from 'lodash'
+import Levers from 'levers'
+import { join, dirname } from 'path'
+import { BrowserWindow, screen } from 'electron'
 import windowDefaults from './lib/window-defaults'
 
-class WindowManager {
-  constructor () {
-    this.windows = {}
-    this.nameReferences = {}
-    this.IDMap = {}
+const windowStorage = new Levers('window')
 
-    this.focus = [null]
-  }
+let uid = 1
+let windows = new Map()
 
-  get windowDefaults () {
-    return windowDefaults()
-  }
+function obliterate (name) {
+  windows.delete(name)
+}
 
-  add (window, name = null) {
-    const newID = Symbol()
-    this.windows[newID] = window
-    this.IDMap[window.id] = newID
-    window.on('closed', () => {
-      delete this.windows[newID]
-    })
-    window.on('focus', () => {
-      const focusIndex = _.findLastIndex(this.focus, win => {
-        return win !== null
-      })
-      if (focusIndex && focusIndex >= 0 && this.focus[focusIndex].id !== window.id) {
-        this.focus[focusIndex].focus()
-      }
-    })
-    if (name) {
-      this.nameReferences[name] = this.nameReferences[name] || []
-      this.nameReferences[name].push(newID)
-    }
-    return newID
-  }
+function set (window, name) {
+  windows.set(name, { id: window.id, window })
+}
 
-  get (windowID) {
-    return this.windows[windowID] || null
-  }
+export function add (name, options) {
+  if (!name) name = 'window_' + (uid++)
+  while (has(name)) name = name + (uid++)
 
-  getByInternalID (internalID) {
-    if (this.IDMap[internalID]) {
-      return this.windows[this.IDMap[internalID]] || null
-    }
-    return null
-  }
+  let opts = options || Object.assign({}, windowDefaults(), options)
 
-  getAll (name) {
-    const toReturn = []
-    _.forEach(this.nameReferences[name] || [], ID => {
-      if (this.get(ID)) {
-        toReturn.push(this.get(ID))
-      }
-    })
-    return toReturn
-  }
+  let window = new BrowserWindow(opts)
+  window.obliterate = obliterate.bind(window, name)
+  window.managerName = name
 
-  forceFocus (window) {
-    const index = this.focus.length
-    this.focus.push(window)
-    window.on('close', () => {
-      this.focus[index] = null
-    })
-  }
+  window.on('closed', window.obliterate)
 
-  close (windowID) {
-    if (this.windows[windowID]) {
-      this.windows[windowID].close()
-    }
+  set(window, name)
+  return window
+}
+
+export function get (name) {
+  return (windows.get(name) || {}).window
+}
+
+export function getAll () {
+  return [...windows]
+}
+
+export function getByID (target) {
+  for (let [_, { id, window }] of windows) {
+    if (target === id) return window
   }
 }
 
-export default new WindowManager()
+export function has (name) {
+  return windows.has(name)
+}
+
+export function close (name) {
+  if (has(name)) get(name).close()
+}
+
+export function createSplash () {
+  let splash = add('splash', {
+    show: false,
+    width: 500,
+    height: 300,
+    backgroundColor: '#222232',
+    frame: false,
+    skipTaskbar: true,
+    resizable: false,
+    maximizable: false,
+    center: true
+  })
+
+  const dir = dirname(require.main.filename)
+  splash.loadURL(join('file://', dir, '..', 'renderer/splash.html'))
+  splash.on('ready-to-show', () => { splash.show() })
+
+  return splash
+}
+
+export function createBot () {
+  let isDev = process.env.NODE_ENV === 'dev'
+  let bot = add('bot', {
+    show: false,
+    skipTaskbar: !isDev,
+    focusable: isDev
+  })
+
+  const dir = dirname(require.main.filename)
+  bot.loadURL(join('file://', dir, '..', 'renderer/bot/index.html'))
+
+  // if (isDev) bot.webContents.openDevTools('undocked')
+
+  return bot
+}
+
+export function createMain () {
+  let mainWindow = add('main', windowDefaults())
+  global.mainAppWindow = mainWindow
+  global.mainWindowID = mainWindow.id
+
+  let position = windowStorage.get('position')
+  let inBounds = false
+  if (position) {
+    screen.getAllDisplays().map(({ workArea }) => {
+      if (
+        position[0] >= workArea.x &&
+        position[0] <= workArea.x + workArea.width &&
+        position[1] >= workArea.y &&
+        position[1] <= workArea.y + workArea.height
+      ) {
+        inBounds = true
+      }
+    })
+  }
+
+  let size = windowStorage.get('size', [1200, 800])
+
+  mainWindow.setSize(...size)
+  if (position && inBounds) {
+    mainWindow.setPosition(...position)
+  } else {
+    mainWindow.center()
+  }
+
+  if (windowStorage.get('maximized', false)) mainWindow.maximize()
+
+  const dir = dirname(require.main.filename)
+  mainWindow.loadURL(join('file://', dir, '..', 'renderer/index.html'))
+
+  return mainWindow
+}

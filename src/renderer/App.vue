@@ -89,6 +89,7 @@
     <div v-if="authState === 0" class="setup-container is-fluid" >
       <setup></setup>
     </div>
+    <notifications></notifications>
   </div>
 </template>
 
@@ -97,6 +98,7 @@
   import { UiProgressCircular } from 'keen-ui'
 
   import setup from './components/setup'
+  import notifications from './components/notifications'
   import windowFrame from './partials/frame'
   import toolbar from './partials/toolbar'
   import sidebar from './partials/sidebar'
@@ -137,6 +139,7 @@
 
     components: {
       UiProgressCircular,
+      notifications,
       windowFrame,
       aboutModal,
       helpModal,

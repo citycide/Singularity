@@ -4,16 +4,25 @@ import mount from 'koa-mount'
 import socketio from 'socket.io'
 import { createServer } from 'http'
 import { resolve } from 'path'
+import { once } from 'lodash'
 import Levers from 'levers'
 
 const settings = new Levers('app')
 
 const app = new Koa()
 
-app.use(mount('/overlay', serve(resolve(__dirname, './public'))))
-app.use(mount('/user/overlay', serve(settings.get('paths.userServer'))))
+function startServer () {
+  app.use(mount('/overlay', serve(resolve(__dirname, './public'))))
+  app.use(mount('/user/overlay', serve(settings.get('paths.userServer'))))
 
-const server = createServer(app.callback())
-const io = socketio(server)
+  return createServer(app.callback())
+}
 
-export { server, io }
+function startSocket () {
+  return socketio(getServer())
+}
+
+const getSocket = once(startSocket)
+const getServer = once(startServer)
+
+export { startServer, getServer, startSocket, getSocket }

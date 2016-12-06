@@ -4,17 +4,20 @@ import Levers from 'levers'
 import Streamlabs from './lib'
 import { sleep } from 'common/utils/helpers'
 import transit from 'main/components/transit'
+import store from 'main/components/state'
 import log from 'common/utils/logger'
 import Tock from 'common/utils/tock'
 
 const settings = new Levers('app')
 const tick = new Tock()
 
-const isEnabled = () => settings.get('streamlabs.active')
+const isEnabled = () => !!settings.get('streamlabs.active')
 const tips = []
 
 async function start (instant) {
-  if (!isEnabled()) return {}
+  if (!isEnabled()) {
+    return { stop: () => {} }
+  }
 
   log.info('Initializing Streamlabs donations API')
 
@@ -35,6 +38,10 @@ async function start (instant) {
 
 function stop () {
   tick.clearInterval('pollStreamlabs')
+
+  store.modifyState(({ services }) => {
+    services[NAME].active = false
+  })
 }
 
 function listen (instance) {
@@ -109,7 +116,10 @@ function handleResponse (donations) {
   }
 }
 
+const NAME = 'streamlabs'
+
 export {
+  NAME,
   start,
   stop,
   isEnabled,

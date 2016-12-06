@@ -1,6 +1,19 @@
 import { ipcMain } from 'electron'
-import _ from 'lodash'
-import wm from '../components/window-manager'
+import * as wm from '../components/window-manager'
+
+function send (window, event, ...args) {
+  if (window.webContents.isLoading()) {
+    let once = false
+    window.webContents.on('did-stop-loading', () => {
+      if (!once) {
+        once = true
+        send(window, event, ...args)
+      }
+    })
+  } else {
+    window.webContents.send(event, ...args)
+  }
+}
 
 class Emitter {
   on (channel, fn) {
@@ -11,58 +24,25 @@ class Emitter {
     ipcMain.once(channel, fn)
   }
 
-  _send (window, event, details) {
-    if (window.webContents.isLoading()) {
-      let once = false
-      window.webContents.on('did-stop-loading', () => {
-        if (!once) {
-          once = true
-          this._send(window, event, details)
-        }
-      })
-    } else {
-      window.webContents.send(event, details)
-    }
-  }
-
-  sendToWindow (windowID, event, details) {
-    const window = wm.get(windowID)
+  sendToWindow (windowName, event, ...args) {
+    const window = wm.get(windowName)
     if (window) {
-      this._send(window, event, details)
+      send(window, event, ...args)
     }
   }
 
-  sendToWindowsOfName (name, event, details) {
-    const windows = wm.getAll(name)
-    _.forEach(windows, window => {
+  sendToAll (event, ...args) {
+    for (let [_, { window }] of wm.getAll()) {
       if (window) {
-        this._send(window, event, details)
+        send(window, event, ...args)
       }
-    })
+    }
   }
 
-  sendToAll (event, details) {
-    _.forIn(wm.IDMap, (index, ID) => {
-      const window = wm.getByInternalID(ID)
-      if (window) {
-        this._send(window, event, details)
-      }
-    })
-  }
-
-  sendToGooglePlayMusic (event, details) {
-    this.sendToWindowsOfName('main', 'passthrough', {
-      event,
-      details
-    })
-  }
-
-  executeOnWindow (windowID, fn) {
-    let fnString = fn.toString()
-    fnString = `(${fnString}).apply(window, ` +
-      JSON.stringify(Array.prototype.slice.call(arguments, 2)) + ')'
-    this.sendToWindow(windowID, 'execute', {
-      fn: fnString
+  executeOnWindow (windowName, fn, ...args) {
+    let exec = `(${fn.toString()}).apply(window, ${JSON.stringify(args)})`
+    this.sendToWindow(windowName, 'execute', {
+      fn: exec
     })
   }
 }

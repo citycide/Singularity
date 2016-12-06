@@ -3,15 +3,18 @@ import Levers from 'levers'
 
 import TipeeeStream from './lib'
 import transit from 'main/components/transit'
+import store from 'main/components/state'
 import log from 'common/utils/logger'
 
 const settings = new Levers('app')
 const channel = new Levers('twitch')
 
-const isEnabled = () => settings.get('tipeee.active')
+const isEnabled = () => !!settings.get('tipeee.active')
 
 function start (instant) {
-  if (!isEnabled()) return {}
+  if (!isEnabled()) {
+    return { stop: () => {} }
+  }
 
   const instance = new TipeeeStream(
     settings.get('tipeee.token'), channel.get('name')
@@ -30,6 +33,10 @@ function stop (instance) {
   if (!instance) return
   instance.removeAllListeners()
   instance.disconnect()
+
+  store.modifyState(({ services }) => {
+    services[NAME].active = false
+  })
 }
 
 function listen (instance) {
@@ -73,7 +80,10 @@ function deactivate () {
   settings.del('tipeee.token')
 }
 
+const NAME = 'tipeee'
+
 export {
+  NAME,
   start,
   stop,
   isEnabled,

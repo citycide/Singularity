@@ -2,19 +2,35 @@ import { map, set, unset } from 'lodash'
 import { resolve } from 'path'
 import Levers from 'levers'
 
-import { server } from 'main/components/server'
+import { getServer } from 'main/components/server'
+import store from 'main/components/state'
 import log from 'common/utils/logger'
 
 const settings = new Levers('app')
 
+const isEnabled = () => !!settings.get('server.active')
+
 function start () {
+  if (!isEnabled()) {
+    return { stop: () => {} }
+  }
+
+  const instance = listen()
+
+  return {
+    instance,
+    stop: force => stop(instance, force)
+  }
+}
+
+function listen () {
   const PORT = settings.get('server.port', 8608)
 
-  server.listen(PORT, () => {
+  getServer().listen(PORT, () => {
     log.info(`Server listening on port ${PORT}`)
   })
 
-  return destroyable(server)
+  return destroyable(getServer())
 }
 
 function stop (instance, force = false) {
@@ -23,6 +39,10 @@ function stop (instance, force = false) {
   instance[force && instance.destroy ? 'destroy' : 'close'](() => {
     unset(require.cache, resolve('../../main/components/server/index.js'))
     log.info(`Server stopped.`)
+  })
+
+  store.modifyState(({ services }) => {
+    services[NAME].active = false
   })
 }
 
@@ -61,9 +81,13 @@ function deactivate () {
   settings.set('server.active', false)
 }
 
+const NAME = 'server'
+
 export {
+  NAME,
   start,
   stop,
+  isEnabled,
   activate,
   deactivate
 }

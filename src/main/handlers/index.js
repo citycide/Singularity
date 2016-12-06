@@ -1,3 +1,2 @@
-// import './windowControls'
-import './authentication'
-// import './dataResponses'
+import './tray'
+import './window-controls'

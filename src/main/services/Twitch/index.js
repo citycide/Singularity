@@ -44,7 +44,7 @@ async function api (endpoint, opts) {
       ...opts
     })).data
   } catch (e) {
-    const status = _.get(e, 'response.data.status')
+    const status = _.get(e, 'response.status')
     if (status === 404) return {}
 
     const msg = _.get(e, 'response.data.message', 'Unknown error')
@@ -90,7 +90,7 @@ async function pollFollowers () {
       const o = {
         id: follower.user._id,
         name: follower.user.display_name,
-        ts: moment(follower.created_at, 'x').valueOf(),
+        ts: Date.parse(follower.created_at),
         ev: 'follower',
         ntf: follower.notifications
       }
@@ -120,7 +120,7 @@ async function pollFollowers () {
       const s = {
         id: follower.user._id,
         name: follower.user.display_name,
-        ts: moment(follower.created_at, 'x').valueOf(),
+        ts: Date.parse(follower.created_at),
         ev: 'follower',
         ntf: follower.notifications
       }
@@ -181,7 +181,7 @@ function actOnQueue (data, type) {
       transit.emit('alert:follow:event', {
         twitchid: data._id,
         username: data.display_name,
-        timestamp: moment(data.created_at, 'x').fromNow(),
+        timestamp: moment(data.created_at).fromNow(),
         evtype: 'follower',
         notifications: data.notifications
       }, 'all')
@@ -326,7 +326,7 @@ async function tipHandler (obj) {
   checkQueue()
 }
 
-export default class Twitch {
+class Twitch {
   constructor (instant) {
     log.info('Initializing Twitch API...')
 
@@ -365,13 +365,27 @@ export default class Twitch {
       alertQueue.add(data)
       checkQueue()
     })
+
     transit.on('alert:complete', () => {
       alertInProgress = false
     })
   }
 }
 
+function start () {
+  const twitch = new Twitch()
+
+  return {
+    instance: twitch,
+    stop: () => {}
+  }
+}
+
+const NAME = 'twitch'
+
 export {
+  NAME,
+  start,
   api,
   resolveUser,
   writeFollower

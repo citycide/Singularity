@@ -1,12 +1,13 @@
 import _ from 'lodash'
 import path from 'path'
+import format from 'strat'
 import Levers from 'levers'
 import jetpack from 'fs-jetpack'
-import format from 'string-format'
-import { app, remote } from 'electron'
-import log from 'common/utils/logger'
 import callsites from 'callsites'
+import { app, remote } from 'electron'
 import { sync as find } from 'find-up'
+
+import log from 'common/utils/logger'
 
 const settings = new Levers('app')
 const EXISTING_FILE = 'Cannot overwrite existing language file.'
@@ -62,7 +63,7 @@ function weave (key, ...replacements) {
   const str = _.get(extLang, getKeyPath(callsites(), key))
   if (!str) return MISSING_STRING
   if (!_.isString(str)) return INVALID_PATH
-  return format(str, ...replacements)
+  return format(str, replacements)
 }
 
 weave.core = function (key, ...replacements) {
@@ -70,7 +71,7 @@ weave.core = function (key, ...replacements) {
   const str = _.get(coreLang, ['bot', 'core', ...keyPath])
   if (!str) return MISSING_STRING
   if (!_.isString(str)) return INVALID_PATH
-  return format(str, ...replacements)
+  return format(str, replacements)
 }
 
 weave.set = function (key, str) {

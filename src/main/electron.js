@@ -1,13 +1,16 @@
-import { app, BrowserWindow, screen } from 'electron'
+import { app, dialog } from 'electron'
 import { argv } from 'yargs'
 import Levers from 'levers'
 import path from 'path'
 
-import { initDB } from '../common/components/db'
-import wm from './components/window-manager'
+import './components/state'
 import log from '../common/utils/logger'
+import * as wm from './components/window-manager'
+import { initDB } from '../common/components/db'
 import { initServices } from './services'
-import defaults from './utils/initial-settings'
+
+process.on('uncaughtException', errorHandler)
+process.on('unhandledRejection', errorHandler)
 
 const cfg = {
   DEV: argv.dev,
@@ -16,9 +19,9 @@ const cfg = {
   vue: argv.vue
 }
 
-const windows = new Levers('window')
-// eslint-disable-next-line
-const settings = new Levers('app', { defaults })
+Levers.create('app', {
+  defaults: require('./utils/initial-settings').default
+})
 
 if (cfg.DEV) {
   process.env.NODE_ENV = 'dev'
@@ -26,44 +29,22 @@ if (cfg.DEV) {
 }
 
 let mainWindow
-function createWindow () {
-  const obj = Object.assign({}, wm.windowDefaults)
+function createWindows () {
+  let splash = wm.createSplash()
+  mainWindow = wm.createMain()
 
-  mainWindow = new BrowserWindow(obj)
-  global.mainAppWindow = mainWindow
-  global.mainWindowID = wm.add(mainWindow, 'main')
   require('./components/lib/persist-app-state')
-  require('./handlers/window-controls')
+  require('./handlers')
 
-  const position = windows.get('position')
-  let inBounds = false
-  if (position) {
-    screen.getAllDisplays().forEach(display => {
-      if (position[0] >= display.workArea.x &&
-        position[0] <= display.workArea.x + display.workArea.width &&
-        position[1] >= display.workArea.y &&
-        position[1] <= display.workArea.y + display.workArea.height) {
-        inBounds = true
-      }
-    })
+  function start () {
+    splash.destroy()
+    mainWindow.show()
   }
 
-  let size = windows.get('size')
-  size = size || [1200, 800]
-
-  mainWindow.setSize(...size)
-  if (position && inBounds) {
-    mainWindow.setPosition(...position)
-  } else {
-    mainWindow.center()
-  }
-
-  if (windows.get('maximized', false)) {
-    mainWindow.maximize()
-  }
-
-  mainWindow.loadURL(path.join('file://', __dirname, '..', 'renderer/index.html'))
-  mainWindow.once('ready-to-show', () => mainWindow.show())
+  mainWindow.on('ready-to-show', () => {
+    // this is gross, but it prevents seeing a white window
+    setTimeout(start, 1000)
+  })
 
   if (cfg.DEV) {
     const devTools = require('./utils/devtools').default
@@ -72,6 +53,12 @@ function createWindow () {
   }
 
   mainWindow.on('closed', () => {
+    /**
+     * If the 'close to tray' option is enabled,
+     * this event won't fire until the user explicitly
+     * exits the app through the tray icon.
+     */
+    wm.close('bot')
     mainWindow = null
   })
 }
@@ -95,9 +82,11 @@ function createWindow () {
   log.info('Starting singularity...')
 
   await initDB()
-  initServices()
 
-  app.on('ready', createWindow)
+  app.on('ready', () => {
+    initServices()
+    createWindows()
+  })
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -107,11 +96,12 @@ function createWindow () {
 
   app.on('activate', () => {
     if (mainWindow === null) {
-      createWindow()
+      createWindows()
     }
   })
 
   app.on('before-quit', () => {
+    // gracefully close connections & shut down services
     log.info('Collapsing the singularity...')
   })
 }())
@@ -123,4 +113,13 @@ function fixAppPaths () {
   app.setPath('userData', path.join(appData, 'singularity'))
 }
 
-process.on('unhandledRejection', err => console.error(err))
+function errorHandler (e, p) {
+  log.error(p, e)
+
+  dialog.showErrorBox(
+    p ? 'Unhandled Promise Rejection' : 'Uncaught Exception',
+    e.stack
+  )
+
+  app.quit()
+}

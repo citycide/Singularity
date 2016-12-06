@@ -73,8 +73,37 @@ export async function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+/**
+ * Asynchronous version of Array#reduce
+ * @param {Array} arr
+ * @param {Function} reducer
+ * @param {*} acc - initial value
+ * @returns {Promise<*>}
+ */
+export async function reduce (arr, reducer, acc) {
+  for (let i = 0; i < arr.length; i++) {
+    acc = await reducer(acc, arr[i], i, arr)
+  }
+
+  return acc
+}
+
+/**
+ * Convert an array into an object where each
+ * property is set as both the key and its value.
+ * @param {Array} arr
+ * @returns {Object}
+ */
+export function toObject (arr) {
+  return arr.reduce((acc, key) => {
+    return Object.assign(acc, { [key]: key })
+  }, {})
+}
+
 export default {
   is,
   to,
-  sleep
+  sleep,
+  reduce,
+  toObject
 }

@@ -55,7 +55,7 @@
 <template>
   <div class="setup-wrapper">
     <div class="setup-heading singularity-logo has-text-centered">
-      <img src="./components/setup/singularity_lg.png" width="128" height="128">
+      <img src="./setup/singularity_lg.png" width="128" height="128">
     </div>
 
     <div class="setup-content">
@@ -170,7 +170,6 @@
   } from 'gritcode-components/dist/gritcode-components'
 
   import { mapGetters, mapActions } from 'vuex'
-  import transit from './js/transit'
 
   export default {
     data () {

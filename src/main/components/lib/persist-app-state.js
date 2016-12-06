@@ -1,10 +1,9 @@
 import Levers from 'levers'
 import { debounce } from 'lodash'
-import wm from '../window-manager'
+import * as wm from '../window-manager'
 
 const settings = new Levers('window')
-const mainWindows = wm.getAll('main')
-const mainWindow = mainWindows[0]
+const mainWindow = wm.get('main')
 
 const saveTicker = debounce(save, 200, {
   leading: true,

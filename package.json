@@ -18,6 +18,7 @@
     "bulma": "0.1.0",
     "callsites": "^2.0.0",
     "chokidar": "^1.6.0",
+    "cubbie": "^3.1.0",
     "debug-menu": "^0.4.0",
     "electron-contextmenu-middleware": "^1.0.2",
     "electron-input-menu": "^2.0.3",

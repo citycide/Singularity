@@ -22,6 +22,7 @@
 
 <template>
   <div>
+    <bot-settings></bot-settings>
     <ui-tabs type="text" fullwidth>
       <ui-tab header="TipeeeStream">
         <div v-if="!tipeeeEnabled">
@@ -269,6 +270,8 @@
     wizardStep as vsWizardStep
   } from 'gritcode-components/dist/gritcode-components'
 
+  import botSettings from './settings/bot'
+
   import { mapGetters, mapActions } from 'vuex'
   import transit from './js/transit'
 
@@ -340,6 +343,7 @@
     computed: mapGetters(['tipeeeEnabled', 'streamtipEnabled', 'streamlabsEnabled']),
 
     components: {
+      botSettings,
       UiButton,
       UiConfirm,
       UiTabs,

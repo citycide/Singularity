@@ -1,16 +1,19 @@
 import EventEmitter from 'eventemitter2'
-import { io } from './server'
+import { getSocket } from './server'
 import ipcMain from '../utils/ipc-main'
+import * as windowManager from './window-manager'
 
 class Transit extends EventEmitter {
   constructor () {
-    super()
-    Object.assign(this, {
+    super({
       wildcard: true,
       delimiter: ':',
       newListener: false,
       maxListeners: 20
     })
+
+    // forward all events to the bot window
+    this.onAny((event, ...args) => this.forwardToBot(event, ...args))
   }
 
   on (channel, fn, bus) {
@@ -18,13 +21,13 @@ class Transit extends EventEmitter {
       case 'all':
         super.on(channel, fn)
         ipcMain.on(channel, (e, ...a) => fn(...a))
-        io.on('connection', socket => socket.on(channel, fn))
+        getSocket().on('connection', socket => socket.on(channel, fn))
         break
       case 'main':
         super.on(channel, fn)
         break
       case 'io':
-        io.once('connection', socket => socket.on(channel, fn))
+        getSocket().once('connection', socket => socket.on(channel, fn))
         break
       case 'ipc':
       default:
@@ -37,13 +40,13 @@ class Transit extends EventEmitter {
       case 'all':
         super.once(channel, fn)
         ipcMain.once(channel, (e, ...a) => fn(...a))
-        io.once('connection', socket => socket.once(channel, fn))
+        getSocket().once('connection', socket => socket.once(channel, fn))
         break
       case 'main':
         super.once(channel, fn)
         break
       case 'io':
-        io.once('connection', socket => socket.once(channel, fn))
+        getSocket().once('connection', socket => socket.once(channel, fn))
         break
       case 'ipc':
       default:
@@ -56,16 +59,17 @@ class Transit extends EventEmitter {
       case 'all':
         super.emit(channel, data)
         ipcMain.sendToAll(channel, data)
-        io.emit(channel, data)
+        getSocket().emit(channel, data)
         break
       case 'main':
         super.emit(channel, data)
         break
       case 'io':
-        io.emit(channel, data)
+        getSocket().emit(channel, data)
         break
       case 'ipc':
       default:
+        super.emit(channel, data)
         ipcMain.sendToAll(channel, data)
     }
   }
@@ -74,11 +78,38 @@ class Transit extends EventEmitter {
    * Wraps around ipcMain to send data to renderer
    * @param {string} channel
    * @param {*} [data]
-   * @param {boolean} [emit=false] whether to also emit over EventEmitter
+   * @param {Object} [opts]
+   * @param {string} [opts.atWindow] fire at window with a specific name
    */
-  fire (channel, data, emit = false) {
-    ipcMain.sendToAll(channel, data)
-    if (emit) this.emit(channel, data)
+  fire (channel, data, opts = {}) {
+    if (!opts.atWindow) {
+      ipcMain.sendToAll(channel, data)
+    } else {
+      ipcMain.sendToWindow(opts.atWindow, channel, data)
+    }
+
+    super.emit('transit', {
+      name: channel,
+      args: Array.isArray(data) ? data : [data]
+    })
+  }
+
+  sendToBot (channel, ...args) {
+    if (!windowManager.has('bot')) return
+    ipcMain.sendToWindow('bot', channel, ...args)
+  }
+
+  forwardToBot (channel, ...args) {
+    if (!windowManager.has('bot')) return
+
+    if (channel === 'transit') {
+      ipcMain.sendToWindow('bot', channel, ...args)
+    } else {
+      ipcMain.sendToWindow('bot', 'transit', {
+        name: channel,
+        args
+      })
+    }
   }
 
   /**
@@ -90,6 +121,20 @@ class Transit extends EventEmitter {
    */
   subscribe (channel, fn) {
     ipcMain.on(channel, fn)
+  }
+
+  /**
+   * Turns an event into a Promise that can be awaited.
+   * Useful when not concerned about the payload, only
+   * that the event occurred at all.
+   * @param channel
+   * @param bus
+   * @returns {Promise}
+   */
+  trigger (channel, bus) {
+    return new Promise(resolve => {
+      this.once(channel, resolve, bus)
+    })
   }
 }
 

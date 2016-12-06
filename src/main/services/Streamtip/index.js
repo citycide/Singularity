@@ -3,14 +3,17 @@ import Levers from 'levers'
 
 import Streamtip from './lib'
 import transit from 'main/components/transit'
+import store from 'main/components/state'
 import log from 'common/utils/logger'
 
 const settings = new Levers('app')
 
-const isEnabled = () => settings.get('streamtip.active')
+const isEnabled = () => !!settings.get('streamtip.active')
 
 function start (instant) {
-  if (!isEnabled()) return {}
+  if (!isEnabled()) {
+    return { stop: () => {} }
+  }
 
   const instance = new Streamtip(
     settings.get('streamtip.clientID'), settings.get('streamtip.token')
@@ -28,6 +31,10 @@ function start (instant) {
 function stop (instance) {
   instance.removeAllListeners()
   instance.disconnect()
+
+  store.modifyState(({ services }) => {
+    services[NAME].active = false
+  })
 }
 
 function listen (instance) {
@@ -91,7 +98,10 @@ function deactivate () {
   settings.del('streamtip.token')
 }
 
+const NAME = 'streamtip'
+
 export {
+  NAME,
   start,
   stop,
   isEnabled,

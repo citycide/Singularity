@@ -1,71 +1,26 @@
+import LoggerNeue from 'logger-neue'
 import { app, remote } from 'electron'
 import { argv } from 'yargs'
-import winston from 'winston'
-import Levers from 'levers'
-import path from 'path'
+import { resolve } from 'path'
 
-const settings = new Levers('app')
+const isDev = argv.dev
+const level = isDev ? 'trace' : 'error'
 
-function initLogger () {
-  const defaultSettings = {
-    fileLevel: 'info',
-    consoleLevel: argv.dev ? 'trace' : 'error',
-    levels: {
-      error: 0,
-      warn: 1,
-      info: 2,
-      sys: 2,
-      bot: 2,
-      debug: 3,
-      trace: 4,
-      absurd: 5
-    },
-    colors: {
-      error: 'red',
-      warn: 'yellow',
-      info: 'magenta',
-      sys: 'magenta',
-      bot: 'green',
-      debug: 'cyan',
-      trace: 'white',
-      absurd: 'grey'
-    }
+export default LoggerNeue.create({
+  file: {
+    level,
+    path: resolve((app || remote.app).getPath('userData'), 'singularity.log')
+  },
+  console: { level },
+  levels: {
+    /* eslint-disable key-spacing */
+    error:  [0, ['red', 'bold', 'underline']],
+    warn:   [1, 'yellow'],
+    info:   [2, 'magenta'],
+    bot:    [2, 'magenta'],
+    debug:  [3, 'cyan'],
+    trace:  [4],
+    absurd: [5, 'gray']
+    /* eslint-enable key-spacing */
   }
-
-  let logPath
-  if (process.type === 'renderer') {
-    logPath = path.resolve(remote.app.getPath('userData'), 'singularity.log')
-  } else if (process.type === 'browser') {
-    logPath = path.resolve(app.getPath('userData'), 'singularity.log')
-  } else {
-    console.log('Unknown environment, logger will not be available.')
-    return {}
-  }
-
-  const Logger = new (winston.Logger)({
-    transports: [
-      new (winston.transports.File)({
-        filename: logPath,
-        level: defaultSettings.fileLevel,
-        maxsize: 5000000,
-        maxfiles: 2
-      }),
-      new (winston.transports.Console)({
-        level: defaultSettings.consoleLevel,
-        prettyPrint: true,
-        colorize: true
-      })
-    ]
-  })
-
-  Logger.setLevels(defaultSettings.levels)
-  winston.addColors(defaultSettings.colors)
-
-  // Replace the log level with those from settings.
-  Logger.transports.console.level = settings.get('consoleLogLevel', defaultSettings.consoleLevel)
-  Logger.transports.file.level = settings.get('fileLogLevel', defaultSettings.fileLevel)
-
-  return Logger
-}
-
-export default initLogger()
+})

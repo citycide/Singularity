@@ -1,9 +1,10 @@
 import Levers from 'levers'
+import store from '../components/state'
 
 import './events'
-import Twitch from './Twitch'
-import * as streamlabs from './Streamlabs'
+import * as twitch from './Twitch'
 import * as tipeeeStream from './TipeeeStream'
+import * as streamlabs from './Streamlabs'
 import * as streamtip from './Streamtip'
 import * as server from './server'
 import * as bot from './bot'
@@ -14,34 +15,33 @@ const channel = new Levers('twitch')
 const instances = new Map()
 
 function initServices () {
-  if (!channel.get('name') || !settings.get('twitch.token')) return
-
-  instances.set('twitch', initTwitch())
-  instances.set('server', initServer())
-  instances.set('bot', bot.start())
-
-  instances.set('streamlabs', streamlabs.start())
-  instances.set('streamtip', streamtip.start())
-  instances.set('tipeee', tipeeeStream.start())
-}
-
-function initTwitch () {
-  const twitch = new Twitch()
-
-  return {
-    instance: twitch,
-    stop: () => {}
+  if (!channel.get('name') || !settings.get('twitch.token')) {
+    return
   }
-}
 
-function initServer () {
-  if (!settings.get('server.active')) return {}
-  const instance = server.start()
+  let active = []
+  let inactive = []
+  let services = [twitch, tipeeeStream, streamlabs, streamtip, server, bot]
+  services.forEach(service => {
+    instances.set(service.NAME, service.start())
+    if (service.NAME === 'twitch') return
 
-  return {
-    instance,
-    stop: force => server.stop(instance, force)
-  }
+    let isEnabled = service.isEnabled()
+
+    if (isEnabled) {
+      active.push(service)
+    } else {
+      inactive.push(service)
+    }
+
+    store.modifyState(state => {
+      state.services[service.NAME] = {
+        active: isEnabled
+      }
+    })
+  })
+
+  return { active, inactive }
 }
 
 function getInstance (service) {

@@ -1,16 +1,16 @@
 import ipcMain from '../utils/ipc-main'
-import wm from '../components/window-manager'
+import * as wm from '../components/window-manager'
 
 ipcMain.on('window:refresh', (e, windowID) => {
-  wm.getByInternalID(windowID).reload()
+  wm.getByID(windowID).reload()
 })
 
 ipcMain.on('window:minimize', (e, windowID) => {
-  wm.getByInternalID(windowID).minimize()
+  wm.getByID(windowID).minimize()
 })
 
 ipcMain.on('window:maximize', (e, windowID) => {
-  const window = wm.getByInternalID(windowID)
+  const window = wm.getByID(windowID)
 
   if (window.isMaximized()) {
     window.unmaximize()
@@ -20,13 +20,13 @@ ipcMain.on('window:maximize', (e, windowID) => {
 })
 
 ipcMain.on('window:close', (e, windowID) => {
-  const window = wm.getByInternalID(windowID)
+  const window = wm.getByID(windowID)
 
   if (window) window.close()
 })
 
-const mainWindow = wm.getAll('main')[0]
+const mainWindow = wm.get('main')
 
-mainWindow.on('close', e => {
+mainWindow.on('close', _ => {
   // TODO: implement tray + minimize to tray
 })
