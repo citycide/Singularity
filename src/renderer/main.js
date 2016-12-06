@@ -1,3 +1,5 @@
+'use runtime-nodent'
+
 import Vue from 'vue'
 import Electron from 'vue-electron'
 import Resource from 'vue-resource'
@@ -8,6 +10,8 @@ import events from './events'
 import routes from './routes'
 import store from './vuex/store'
 import './components/js/context'
+
+(async () => {})()
 
 Vue.use(events)
 Vue.use(Electron)

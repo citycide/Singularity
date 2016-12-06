@@ -1,3 +1,5 @@
+'use runtime-nodent'
+
 import { app, dialog } from 'electron'
 import { argv } from 'yargs'
 import Levers from 'levers'

@@ -1,10 +1,8 @@
 {
   "presets": [
     ["modern-async", {
-      "fast-async": {
-        "runtimePattern": "(?:electron|main)\\.js"
-      },
-      "electron": true
+      "electron": true,
+      "promise": "bluebird"
     }]
   ],
   "plugins": [

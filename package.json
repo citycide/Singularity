@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "axios": "^0.14.0",
+    "babel-preset-modern-async": "1.0.0-alpha.3",
     "babel-register": "^6.14.0",
     "bluebird": "^3.4.1",
     "bulma": "0.1.0",

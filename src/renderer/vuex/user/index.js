@@ -4,7 +4,6 @@ import axios from 'axios'
 import url from 'url'
 import types from './types'
 
-import log from '../../../common/utils/logger'
 import transit from '../../components/js/transit'
 
 const settings = new Levers('app')
@@ -56,67 +55,93 @@ const actions = {
     authWindow.once('ready-to-show', () => authWindow.show())
     authWindow.once('closed', () => { authWindow = null })
 
-    authWindow.webContents.on('will-navigate', async (e, u) => {
-      const parsedURL = url.parse(u, true)
-      const hn = parsedURL.hostname
+    const hasToken = hash => hash && hash.startsWith('#access_token=')
 
-      if (parsedURL.query && 'error' in parsedURL.query) {
-        if (parsedURL.query.error === 'access_denied') {
-          // user cancelled the login
-          e.preventDefault()
-          authWindow.close()
-        } else {
-          e.preventDefault()
+    authWindow.webContents.on('did-get-redirect-request', (e, from, to) => {
+      const { hash } = url.parse(to)
 
-          // TODO: show an error in the UI
-          log.debug('Error during Twitch login: ', parsedURL.query.error)
-          authWindow.close()
-        }
-      }
-
-      if (hn === 'api.twitch.tv' || hn === 'secure.twitch.tv') return
-
-      if (parsedURL.hash && parsedURL.hash.startsWith('#access_token=')) {
+      if (hasToken(hash)) {
         e.preventDefault()
-
-        const token = parsedURL.hash.slice(14, 44)
-        const res = await axios(api.KRAKEN, {
-          params: {
-            oauth_token: token,
-            client_id: settings.get('clientID')
-          }
-        })
-
-        authWindow.close()
-
-        if (res.data.token.valid) {
-          state.channel.name = res.data.token.user_name
-
-          settings.set('twitch.token', token)
-          transit.fire('services:all:start')
-          log.debug(`User authorized with token: ${token}`)
-          commit(types.AUTHENTICATE, token)
-        } else {
-          // TODO: show an error in the UI
-          log.error(`Invalid Twitch registration`)
-        }
-      } else {
-        e.preventDefault()
-
-        log.trace(`Preventing outside navigation`, e, u)
+        processAuth(hash)
       }
     })
 
+    authWindow.webContents.on('will-navigate', async (e, target) => {
+      const { hash, hostname, query = {} } = url.parse(target, true)
+
+      if (hasToken(hash)) {
+        e.preventDefault()
+        processAuth(hash)
+      }
+
+      if (hostname === 'localhost') {
+        if (query.error === 'access_denied') {
+          // user cancelled the login
+          console.debug('Login cancelled: ', query.error)
+
+          this.$events.emit('notification', {
+            message: 'Login cancelled.'
+          })
+        } else {
+          console.debug('Error during Twitch login: ', query.error)
+
+          this.$events.emit('notification', {
+            message: 'Error during Twitch login. Please try again.'
+          })
+        }
+
+        e.preventDefault()
+        authWindow.close()
+      }
+    })
+
+    async function processAuth (hash) {
+      const token = hash.slice(14, 44)
+      const res = await axios(api.KRAKEN, {
+        params: {
+          oauth_token: token,
+          client_id: settings.get('clientID')
+        }
+      })
+
+      authWindow.close()
+
+      if (res.data.token.valid) {
+        state.channel.name = res.data.token.user_name
+
+        settings.set('twitch.token', token)
+        transit.fire('services:all:start')
+        commit(types.AUTHENTICATE, token)
+      } else {
+        console.error(`Invalid Twitch registration`)
+
+        this.$events.emit('notification', {
+          message: 'Invalid Twitch registration. Please try again.'
+        })
+      }
+    }
+
     const clientID = settings.get('clientID')
     const redirect = 'http://localhost'
-    const scopes = 'user_read+channel_read+channel_editor+channel_subscriptions+chat_login'
+    const scopes = [
+      'user_read',
+      'channel_read',
+      'channel_editor',
+      'channel_subscriptions',
+      'chat_login'
+    ]
 
-    let authURL = 'https://api.twitch.tv/kraken/oauth2/authorize'
-    authURL += `?response_type=token&client_id=${clientID}`
-    authURL += `&redirect_uri=${redirect}&scope=${scopes}&force_verify=true`
+    const queries = [
+      'response_type=token',
+      `client_id=${clientID}`,
+      `redirect_uri=${redirect}`,
+      `scope=${scopes.join('+')}`,
+      'force_verify=true'
+    ]
 
-    authWindow.loadURL(authURL)
+    authWindow.loadURL('https://api.twitch.tv/kraken/oauth2/authorize?' + queries.join('&'))
   },
+
   logout ({ commit }) {
     settings.del('twitch.token')
     transit.fire('services:all:stop')
